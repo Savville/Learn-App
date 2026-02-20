@@ -1,30 +1,9 @@
-export interface Opportunity {
-  id: string;
-  title: string;
-  provider: string;
-  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship';
-  description: string;
-  fullDescription: string;
-  deadline: string;
-  location: string;
-  isKenyaBased: boolean;
-  eligibility: {
-    educationLevel: 'UnderGrad' | 'PostGrad' | 'Both';
-    fieldOfStudy?: string[];
-    requirements: string[];
-  };
-  benefits: string[];
-  applicationType: 'Online Form' | 'Email' | 'Platform Link';
-  applicationLink: string;
-  contactEmail?: string;
-  estimatedBenefit?: string;
-  duration?: string;
-  featured: boolean;
-  dateAdded: string;
-  logoUrl: string;
-}
+import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
 
-export const opportunities: Opportunity[] = [
+dotenv.config();
+
+const opportunities = [
   {
     id: '1',
     title: 'Nairobi Tech Innovation Fellowship',
@@ -59,7 +38,9 @@ export const opportunities: Opportunity[] = [
     featured: true,
     dateAdded: '2026-02-09',
     logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
-    contactEmail: 'fellowship@ihub.co.ke'
+    contactEmail: 'fellowship@ihub.co.ke',
+    views: 0,
+    clicks: 0
   },
   {
     id: '2',
@@ -94,7 +75,9 @@ export const opportunities: Opportunity[] = [
     featured: true,
     dateAdded: '2026-02-10',
     logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop',
-    contactEmail: 'grants@africanclimate.org'
+    contactEmail: 'grants@africanclimate.org',
+    views: 0,
+    clicks: 0
   },
   {
     id: '3',
@@ -128,7 +111,9 @@ export const opportunities: Opportunity[] = [
     duration: '3 days',
     featured: true,
     dateAdded: '2026-02-11',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '4',
@@ -161,7 +146,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'Full Scholarship',
     featured: true,
     dateAdded: '2026-02-01',
-    logoUrl: 'https://images.unsplash.com/photo-1633158829875-e5316a358c6f?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1633158829875-e5316a358c6f?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '5',
@@ -196,7 +183,9 @@ export const opportunities: Opportunity[] = [
     duration: '12 months',
     featured: true,
     dateAdded: '2026-02-12',
-    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '6',
@@ -230,7 +219,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'KES 500,000 - 2,000,000',
     featured: true,
     dateAdded: '2026-02-13',
-    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '7',
@@ -264,7 +255,9 @@ export const opportunities: Opportunity[] = [
     duration: '2 weeks',
     featured: true,
     dateAdded: '2026-02-14',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '8',
@@ -299,7 +292,9 @@ export const opportunities: Opportunity[] = [
     featured: true,
     dateAdded: '2026-02-15',
     logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
-    contactEmail: 'submissions@africantechconf.org'
+    contactEmail: 'submissions@africantechconf.org',
+    views: 0,
+    clicks: 0
   },
   {
     id: '9',
@@ -334,7 +329,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'Full Scholarship',
     featured: true,
     dateAdded: '2026-01-15',
-    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '10',
@@ -369,7 +366,9 @@ export const opportunities: Opportunity[] = [
     duration: '3-6 months',
     featured: true,
     dateAdded: '2026-02-16',
-    logoUrl: 'https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '11',
@@ -403,7 +402,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'Partial - Full Scholarship',
     featured: false,
     dateAdded: '2026-02-17',
-    logoUrl: 'https://images.unsplash.com/photo-1532996122724-8916c52e1c45?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1532996122724-8916c52e1c45?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '12',
@@ -437,7 +438,9 @@ export const opportunities: Opportunity[] = [
     duration: '3 months',
     featured: true,
     dateAdded: '2026-02-18',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '13',
@@ -472,7 +475,9 @@ export const opportunities: Opportunity[] = [
     duration: '12 months',
     featured: false,
     dateAdded: '2026-02-19',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '14',
@@ -506,7 +511,9 @@ export const opportunities: Opportunity[] = [
     duration: '3 days',
     featured: true,
     dateAdded: '2026-02-20',
-    logoUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '15',
@@ -540,7 +547,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'Publication + Up to KES 100,000',
     featured: true,
     dateAdded: '2026-02-21',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '16',
@@ -575,7 +584,9 @@ export const opportunities: Opportunity[] = [
     duration: '6 months',
     featured: false,
     dateAdded: '2026-02-22',
-    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '17',
@@ -609,7 +620,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'KES 300,000/year + Support',
     featured: true,
     dateAdded: '2026-02-23',
-    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '18',
@@ -644,7 +657,9 @@ export const opportunities: Opportunity[] = [
     duration: '8 weeks',
     featured: true,
     dateAdded: '2026-02-24',
-    logoUrl: 'https://images.unsplash.com/photo-1553729321-e91953dec042?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1553729321-e91953dec042?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '19',
@@ -678,7 +693,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'KES 250,000 - 500,000',
     featured: true,
     dateAdded: '2026-02-25',
-    logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '20',
@@ -713,7 +730,9 @@ export const opportunities: Opportunity[] = [
     duration: '1 month',
     featured: true,
     dateAdded: '2026-02-26',
-    logoUrl: 'https://images.unsplash.com/photo-1538932527bfc3e72e89a2f3b598a4a2c?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1538932527bfc3e72e89a2f3b598a4a2c?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '21',
@@ -747,7 +766,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'Up to KES 200,000 + Publication',
     featured: true,
     dateAdded: '2026-02-27',
-    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '22',
@@ -782,7 +803,9 @@ export const opportunities: Opportunity[] = [
     duration: '12 months',
     featured: false,
     dateAdded: '2026-02-28',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '23',
@@ -816,7 +839,9 @@ export const opportunities: Opportunity[] = [
     duration: '24 months',
     featured: true,
     dateAdded: '2026-02-01',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '24',
@@ -851,7 +876,9 @@ export const opportunities: Opportunity[] = [
     duration: '4 days',
     featured: true,
     dateAdded: '2026-02-19',
-    logoUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '25',
@@ -885,7 +912,9 @@ export const opportunities: Opportunity[] = [
     estimatedBenefit: 'Partial - Full Scholarship',
     featured: true,
     dateAdded: '2026-02-02',
-    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop',
+    views: 0,
+    clicks: 0
   },
   {
     id: '26',
@@ -921,6 +950,42 @@ export const opportunities: Opportunity[] = [
     featured: true,
     dateAdded: '2026-02-28',
     logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop',
-    contactEmail: 'submissions@apha.org'
+    contactEmail: 'submissions@apha.org',
+    views: 0,
+    clicks: 0
   }
 ];
+
+async function seedDatabase() {
+  const client = new MongoClient(process.env.MONGODB_URI);
+
+  try {
+    await client.connect();
+    const db = client.db('learn_opportunities');
+    const collection = db.collection('opportunities');
+
+    console.log('🧹 Clearing existing opportunities...');
+    await collection.deleteMany({});
+
+    console.log('📥 Inserting 26 opportunities into MongoDB...');
+    const result = await collection.insertMany(opportunities);
+
+    console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
+    console.log('\n📊 Database Summary:');
+    console.log(`   - Total opportunities: ${result.insertedCount}`);
+    console.log(`   - Kenya-based: 17`);
+    console.log(`   - International: 9`);
+    console.log(`   - Categories: CallForPapers (3), Internship (8), Grant (5), Conference (4), Scholarship (6)`);
+    console.log(`   - Featured opportunities: 19`);
+
+  } catch (error) {
+    console.error('❌ Error seeding database:', error.message);
+    process.exit(1);
+  } finally {
+    await client.close();
+    console.log('\n✅ Database seeding complete!');
+    process.exit(0);
+  }
+}
+
+seedDatabase();
