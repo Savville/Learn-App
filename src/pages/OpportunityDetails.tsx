@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
-import { Calendar, ExternalLink, ArrowLeft, Tag, CheckCircle, Globe } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, Tag } from 'lucide-react';
 import { calculateUrgency } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 
@@ -105,20 +105,6 @@ export function OpportunityDetails() {
                 <Tag className="w-4 h-4" />
                 {opportunity.category}
               </span>
-              <span className={`inline-flex items-center gap-2 px-3 py-2 font-bold text-xs uppercase tracking-wider border ${
-                opportunity.isKenyaBased 
-                  ? 'bg-green-100 text-green-800 border-green-300' 
-                  : 'bg-gray-100 text-gray-800 border-gray-300'
-              }`}>
-                <Globe className="w-4 h-4" />
-                {opportunity.isKenyaBased ? 'Kenya-Based' : 'International'}
-              </span>
-              {urgency && (
-                <span className={`inline-flex items-center gap-2 px-3 py-2 font-bold text-xs uppercase tracking-wider border ${urgency.bgColor} ${urgency.textColor} border-current rounded-sm`}>
-                  <Calendar className="w-4 h-4" />
-                  {urgency.label}
-                </span>
-              )}
             </div>
 
             {/* Title & Provider */}
@@ -127,21 +113,10 @@ export function OpportunityDetails() {
               <p className="text-blue-900 font-bold uppercase tracking-wider text-sm">{opportunity.provider}</p>
             </div>
 
-            {/* Kenya-Specific Features */}
-            {opportunity.isKenyaBased && (
-              <div className="bg-green-50 border border-green-300 p-4 space-y-2 rounded-sm">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-800 flex-shrink-0" />
-                  <div>
-                    <p className="font-bold text-green-900 text-sm uppercase tracking-wider">Local Opportunity</p>
-                    <p className="text-green-800 text-sm mt-1">This opportunity is based in Kenya and particularly relevant for local students.</p>
-                  </div>
-                </div>
-              </div>
-            )}
+
 
             {/* Meta Info Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 py-6 border-t border-b border-gray-300">
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-6 py-6 border-t border-b border-gray-300">
               <div>
                 <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mb-2">Deadline</p>
                 <div className={`${urgency?.bgColor} px-3 py-2 border border-current rounded-sm`}>
@@ -149,18 +124,14 @@ export function OpportunityDetails() {
                   <p className={`text-xs font-bold uppercase tracking-wider ${urgency?.textColor}`}>{urgency?.label}</p>
                 </div>
               </div>
-              <div>
-                <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mb-2">Location</p>
-                <div className="border border-gray-300 px-3 py-2 rounded-sm">
-                  <p className="font-bold text-sm text-gray-900">{opportunity.location}</p>
+              {opportunity.location && (
+                <div>
+                  <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mb-2">Location</p>
+                  <div className="border border-gray-300 px-3 py-2 rounded-sm">
+                    <p className="font-bold text-sm text-gray-900">{opportunity.location}</p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-gray-600 text-xs font-bold uppercase tracking-wider mb-2">Level</p>
-                <div className="border border-gray-300 px-3 py-2 rounded-sm">
-                  <p className="font-bold text-sm text-gray-900">{opportunity.eligibility.educationLevel}</p>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Description */}
@@ -175,6 +146,10 @@ export function OpportunityDetails() {
             <div>
               <h3 className="text-gray-900 mb-4 font-bold uppercase tracking-wider text-lg border-b border-gray-300 pb-3">Eligibility Requirements</h3>
               <ul className="space-y-3">
+                <li className="flex items-start gap-3 text-gray-700">
+                  <span className="w-2 h-2 bg-blue-900 mt-2.5 flex-shrink-0"></span>
+                  <span className="text-base">Education Level: {opportunity.eligibility.educationLevel === 'Both' ? 'Practitioners' : opportunity.eligibility.educationLevel}</span>
+                </li>
                 {opportunity.eligibility.requirements && opportunity.eligibility.requirements.map((req, index) => (
                   <li key={index} className="flex items-start gap-3 text-gray-700">
                     <span className="w-2 h-2 bg-blue-900 mt-2.5 flex-shrink-0"></span>

@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { OpportunityCard } from '../components/OpportunityCard';
+import { Categories } from '../components/Categories';
 import { opportunitiesAPI } from '../services/api';
 import { Search, Filter } from 'lucide-react';
 import type { Opportunity } from '../data/opportunities';
@@ -10,7 +11,6 @@ export function Opportunities() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedType, setSelectedType] = useState(searchParams.get('type') || 'all');
   const [selectedLevel, setSelectedLevel] = useState(searchParams.get('level') || 'all');
-  const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'all');
   const [selectedFunding, setSelectedFunding] = useState(searchParams.get('funding') || 'all');
   const [showFilters, setShowFilters] = useState(false);
   
@@ -26,7 +26,7 @@ export function Opportunities() {
         const response = await opportunitiesAPI.getAll({
           category: selectedType !== 'all' ? selectedType : undefined,
           level: selectedLevel !== 'all' ? selectedLevel : undefined,
-          location: selectedLocation !== 'all' ? (selectedLocation === 'Kenya' ? 'kenya' : 'international') : undefined,
+          fundingType: selectedFunding !== 'all' ? selectedFunding : undefined,
           search: searchQuery || undefined,
         });
         setOpportunities(response.data);
@@ -41,20 +41,9 @@ export function Opportunities() {
     };
 
     fetchOpportunities();
-  }, [searchQuery, selectedType, selectedLevel, selectedLocation]);
+  }, [searchQuery, selectedType, selectedLevel, selectedFunding]);
 
-  const filteredOpportunities = useMemo(() => {
-    return opportunities.filter(opp => {
-      const matchesFunding = selectedFunding === 'all' || opp.estimatedBenefit === selectedFunding;
-      return matchesFunding;
-    });
-  }, [opportunities, selectedFunding]);
-
-  // Get unique funding types from opportunities
-  const fundingTypes = Array.from(new Set(opportunities
-    .map(opp => opp.estimatedBenefit)
-    .filter((ft): ft is string => ft !== undefined)
-  )).sort();
+  const filteredOpportunities = opportunities;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,27 +51,36 @@ export function Opportunities() {
       search: searchQuery, 
       type: selectedType,
       level: selectedLevel,
-      location: selectedLocation,
       funding: selectedFunding
     });
+  };
+
+  const hasActiveFilters = selectedType !== 'all' || selectedLevel !== 'all' || selectedFunding !== 'all' || searchQuery;
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedType('all');
+    setSelectedLevel('all');
+    setSelectedFunding('all');
+    setSearchParams({});
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="bg-white border-b">
+      <div className="bg-gradient-to-br from-blue-600 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">All Opportunities</h1>
+          <h1 className="text-3xl font-bold text-white mb-6">All Opportunities</h1>
           
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="mb-6">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-md border border-gray-200">
-                <Search className="w-5 h-5 text-gray-400" />
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-white/20 rounded-md border border-white/30 backdrop-blur-sm">
+                <Search className="w-5 h-5 text-white/70" />
                 <input
                   type="text"
                   placeholder="Search by title, organization, or keyword..."
-                  className="flex-1 outline-none bg-transparent text-gray-900"
+                  className="flex-1 outline-none bg-transparent text-white placeholder-white/60"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -91,7 +89,7 @@ export function Opportunities() {
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className="md:hidden flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="md:hidden flex items-center gap-2 px-6 py-3 bg-white/20 border border-white/30 rounded-md hover:bg-white/30 transition-colors text-white"
               >
                 <Filter className="w-5 h-5" />
                 <span>Filters</span>
@@ -102,62 +100,50 @@ export function Opportunities() {
           {/* Filters */}
           <div className={`${showFilters ? 'block' : 'hidden'} md:block`}>
             <div className="flex flex-wrap gap-3">
+              {/* Type Filter */}
               <select
-                className="px-4 py-2 rounded-sm border border-gray-200 outline-none cursor-pointer hover:border-blue-500 transition-colors bg-white text-gray-700 font-medium"
+                className="px-4 py-2 rounded-sm border border-white/30 outline-none cursor-pointer bg-white/20 text-white font-medium backdrop-blur-sm hover:bg-white/30 transition-colors"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
-                <option value="all">All Types</option>
-                <option value="CallForPapers">Call for Papers</option>
-                <option value="Internship">Internships</option>
-                <option value="Grant">Grants</option>
-                <option value="Conference">Conferences</option>
-                <option value="Scholarship">Scholarships</option>
+                <option value="all" className="text-gray-900 bg-white">All Types</option>
+                <option value="CallForPapers" className="text-gray-900 bg-white">Call for Papers</option>
+                <option value="Internship" className="text-gray-900 bg-white">Internships</option>
+                <option value="Grant" className="text-gray-900 bg-white">Grants</option>
+                <option value="Conference" className="text-gray-900 bg-white">Conferences</option>
+                <option value="Scholarship" className="text-gray-900 bg-white">Scholarships</option>
               </select>
 
+              {/* Level Filter */}
               <select
-                className="px-4 py-2 rounded-sm border border-gray-200 outline-none cursor-pointer hover:border-blue-500 transition-colors bg-white text-gray-700 font-medium"
+                className="px-4 py-2 rounded-sm border border-white/30 outline-none cursor-pointer bg-white/20 text-white font-medium backdrop-blur-sm hover:bg-white/30 transition-colors"
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
               >
-                <option value="all">All Levels</option>
-                <option value="UnderGrad">Undergraduate</option>
-                <option value="PostGrad">Postgraduate</option>
-                <option value="Both">Both</option>
+                <option value="all" className="text-gray-900 bg-white">All Levels</option>
+                <option value="UnderGrad" className="text-gray-900 bg-white">Undergraduate</option>
+                <option value="PostGrad" className="text-gray-900 bg-white">Postgraduate</option>
+                <option value="Both" className="text-gray-900 bg-white">Practitioners</option>
               </select>
 
+              {/* Funding Type Filter */}
               <select
-                className="px-4 py-2 rounded-sm border border-gray-200 outline-none cursor-pointer hover:border-blue-500 transition-colors bg-white text-gray-700 font-medium"
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-              >
-                <option value="all">All Locations</option>
-                <option value="Kenya">Kenya</option>
-                <option value="International">International</option>
-              </select>
-
-              <select
-                className="px-4 py-2 rounded-sm border border-gray-200 outline-none cursor-pointer hover:border-blue-500 transition-colors bg-white text-gray-700 font-medium"
+                className="px-4 py-2 rounded-sm border border-white/30 outline-none cursor-pointer bg-white/20 text-white font-medium backdrop-blur-sm hover:bg-white/30 transition-colors"
                 value={selectedFunding}
                 onChange={(e) => setSelectedFunding(e.target.value)}
               >
-                <option value="all">All Funding Types</option>
-                {fundingTypes.map(ft => (
-                  <option key={ft} value={ft}>{ft}</option>
-                ))}
+                <option value="all" className="text-gray-900 bg-white">Funding Types</option>
+                <option value="Fully Funded" className="text-gray-900 bg-white">Fully Funded</option>
+                <option value="Partially Funded" className="text-gray-900 bg-white">Partially Funded</option>
+                <option value="Stipend" className="text-gray-900 bg-white">Stipend</option>
+                <option value="Unpaid" className="text-gray-900 bg-white">Unpaid</option>
               </select>
 
-              {(selectedType !== 'all' || selectedLevel !== 'all' || selectedLocation !== 'all' || selectedFunding !== 'all' || searchQuery) && (
+              {/* Clear Filters */}
+              {hasActiveFilters && (
                 <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedType('all');
-                    setSelectedLevel('all');
-                    setSelectedLocation('all');
-                    setSelectedFunding('all');
-                    setSearchParams({});
-                  }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-sm transition-colors font-medium"
+                  onClick={clearFilters}
+                  className="px-4 py-2 text-white/80 hover:text-white hover:bg-white/20 rounded-sm transition-colors font-medium"
                 >
                   Clear Filters
                 </button>
@@ -167,12 +153,15 @@ export function Opportunities() {
 
           {/* Results Count */}
           <div className="mt-6">
-            <p className="text-gray-600">
-              Showing <span className="font-semibold text-gray-900">{filteredOpportunities.length}</span> {filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
+            <p className="text-white">
+              Showing <span className="font-semibold text-white">{filteredOpportunities.length}</span> {filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
             </p>
           </div>
         </div>
       </div>
+
+      {/* Category Filter */}
+      <Categories />
 
       {/* Opportunities Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -213,14 +202,7 @@ export function Opportunities() {
               Try adjusting your filters or search query
             </p>
             <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedType('all');
-                setSelectedLevel('all');
-                setSelectedLocation('all');
-                setSelectedFunding('all');
-                setSearchParams({});
-              }}
+              onClick={clearFilters}
               className="px-6 py-3 bg-blue-900 text-white rounded-sm hover:bg-blue-800 transition-colors font-medium"
             >
               Clear Filters

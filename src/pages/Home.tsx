@@ -1,5 +1,4 @@
 import { Hero } from '../components/Hero';
-import { Categories } from '../components/Categories';
 import { OpportunityCard } from '../components/OpportunityCard';
 import { Newsletter } from '../components/Newsletter';
 import { opportunities } from '../data/opportunities';
@@ -13,7 +12,6 @@ export function Home() {
   return (
     <div>
       <Hero />
-      <Categories />
       
       {/* Featured Opportunities */}
       <section className="py-16 bg-gray-50">

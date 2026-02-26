@@ -13,7 +13,6 @@ const opportunities = [
     fullDescription: 'The iHub Fellowship connects young tech entrepreneurs in Nairobi with experienced mentors, investors, and a vibrant community of innovators. You\'ll work on your startup, attend workshops, and gain access to resources needed to scale your venture.',
     deadline: '2026-03-30',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'Both',
       fieldOfStudy: ['Technology', 'Entrepreneurship', 'Innovation'],
@@ -51,7 +50,6 @@ const opportunities = [
     fullDescription: 'This grant program funds innovative research by African university students addressing climate change, environmental sustainability, and green technology. Projects should have direct relevance to East African countries and propose implementable solutions.',
     deadline: '2026-04-15',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       fieldOfStudy: ['Environmental Science', 'Engineering', 'Climate Studies'],
@@ -88,7 +86,6 @@ const opportunities = [
     fullDescription: 'The East Africa Education Conference features keynote speakers, panel discussions, and networking sessions focused on digital transformation, inclusive education, and career development. Students can present research, attend workshops, and connect with education leaders.',
     deadline: '2026-03-01',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'Both',
       requirements: [
@@ -124,7 +121,6 @@ const opportunities = [
     fullDescription: 'The Mastercard Foundation Scholars Program provides comprehensive support for academic talent from Kenya with demonstrated financial need. Beyond financial assistance, the program offers leadership development, mentorship, internship opportunities, and a commitment to transforming communities.',
     deadline: '2026-01-15',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'Both',
       requirements: [
@@ -159,7 +155,6 @@ const opportunities = [
     fullDescription: 'AfriLabs Tech Fellowship provides practical experience and mentoring for young software developers. Fellows work on real projects, receive hands-on training, and get exposure to the African tech ecosystem. The program culminates in potential job placements.',
     deadline: '2026-02-28',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       fieldOfStudy: ['Computer Science', 'Software Engineering', 'Information Technology'],
@@ -196,7 +191,6 @@ const opportunities = [
     fullDescription: 'KEMRI\'s Health Innovation Challenge funds promising research and solutions that tackle critical health issues in Kenya. Projects ranging from diagnostic tools to treatment innovations are welcome. Successful teams receive funding, lab access, and expert mentorship.',
     deadline: '2026-03-31',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       fieldOfStudy: ['Medicine', 'Biomedical Science', 'Public Health', 'Engineering'],
@@ -232,7 +226,6 @@ const opportunities = [
     fullDescription: 'The ALA Summer Program hosts carefully selected young leaders from across Africa for an intensive experience. Participants engage in keynote sessions with prominent African leaders, attend skill-building workshops, and form lasting networks.',
     deadline: '2026-02-15',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       requirements: [
@@ -268,7 +261,6 @@ const opportunities = [
     fullDescription: 'The African Technology & Innovation Conference seeks original research on how technology solves African challenges. This is a hybrid opportunity: papers are peer-reviewed for publication, and selected presenters receive travel grants and mentorship. Strong papers may lead to partnership opportunities.',
     deadline: '2026-02-28',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       fieldOfStudy: ['Computer Science', 'Engineering', 'Business', 'Development Studies'],
@@ -305,7 +297,6 @@ const opportunities = [
     fullDescription: 'Chevening Scholarships enable outstanding emerging leaders from Kenya to pursue one-year master\'s degrees at top UK universities. The program seeks individuals with leadership potential who can demonstrate how they will contribute to positive change in Kenya and the region.',
     deadline: '2025-11-07',
     location: 'International',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       requirements: [
@@ -342,7 +333,6 @@ const opportunities = [
     fullDescription: 'Join Google\'s Kenya office and work on products impacting millions of users in Africa. Interns collaborate with full-time engineers, attend talks from Google leaders, and contribute to real projects. This is an excellent opportunity to learn from tech leaders while gaining professional experience.',
     deadline: '2026-02-28',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       fieldOfStudy: ['Computer Science', 'Software Engineering', 'Information Technology'],
@@ -379,7 +369,6 @@ const opportunities = [
     fullDescription: 'This scholarship supports African students committed to solving water scarcity and sanitation challenges. Recipients study at partner universities globally and return to implement solutions in their home countries. Strong focus on East African students.',
     deadline: '2026-03-15',
     location: 'International',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'Both',
       fieldOfStudy: ['Civil Engineering', 'Environmental Science', 'Water Resources Management'],
@@ -415,7 +404,6 @@ const opportunities = [
     fullDescription: 'Safaricom\'s Digital Skills Bootcamp provides intensive training in programming, data analysis, and digital marketing. The bootcamp includes classroom learning, hands-on projects, and internship placement. Many graduates secure employment with Safaricom or partner organizations.',
     deadline: '2026-03-10',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       requirements: [
@@ -451,7 +439,6 @@ const opportunities = [
     fullDescription: 'TWAS offers research fellowships enabling African scientists to conduct cutting-edge research at host institutions in developing countries. This program strengthens scientific capacity in Africa and builds research networks.',
     deadline: '2026-04-30',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       fieldOfStudy: ['Physics', 'Chemistry', 'Biology', 'Engineering', 'Mathematics'],
@@ -488,7 +475,6 @@ const opportunities = [
     fullDescription: 'The Youth in Renewable Energy Summit brings together young professionals, entrepreneurs, and students passionate about clean energy. Features panel discussions, start-up pitches, investor meetings, and hands-on workshops on solar, wind, and biomass technologies.',
     deadline: '2026-02-20',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'Both',
       requirements: [
@@ -524,7 +510,6 @@ const opportunities = [
     fullDescription: 'This special issue of the Journal of East African Development focuses on innovative approaches to sustainable development in Kenya and the region. Peer-reviewed papers are published online and in print. Selected authors also receive research grants for future work.',
     deadline: '2026-03-20',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       fieldOfStudy: ['Development Studies', 'Economics', 'Environmental Studies', 'Public Policy'],
@@ -560,7 +545,6 @@ const opportunities = [
     fullDescription: 'Microsoft TEALS pairs Kenyan students with tech professionals for virtual mentoring on coding, career navigation, and industry insights. Weekly sessions build practical skills and professional network while students complete their degrees.',
     deadline: '2026-02-28',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       fieldOfStudy: ['Computer Science', 'IT', 'Engineering'],
@@ -597,7 +581,6 @@ const opportunities = [
     fullDescription: 'AMREF offers scholarships to African health science students with innovative ideas. Recipients develop health solutions while studying, gain mentorship, and access laboratory facilities and funding for prototyping.',
     deadline: '2026-03-31',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       fieldOfStudy: ['Medicine', 'Nursing', 'Public Health', 'Biomedical Science'],
@@ -633,7 +616,6 @@ const opportunities = [
     fullDescription: 'Standard Chartered\'s Summer Internship program places promising students in meaningful roles across finance, risk management, and operations. Interns work on real transactions, attend talks from banking executives, and gain insight into international banking.',
     deadline: '2026-02-15',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       fieldOfStudy: ['Finance', 'Business', 'Economics', 'Engineering'],
@@ -670,7 +652,6 @@ const opportunities = [
     fullDescription: 'This initiative supports innovative student projects contributing to Kenya\'s green economy. Teams receive grants to develop pilots in renewable energy, sustainable waste management, conservation, or eco-tourism. Winners get mentorship and networking opportunities.',
     deadline: '2026-04-20',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'Both',
       fieldOfStudy: ['Environmental Science', 'Engineering', 'Business', 'Conservation'],
@@ -706,7 +687,6 @@ const opportunities = [
     fullDescription: 'Africa Code Week celebrates coding across Africa with workshops, training sessions, and an international competition. Kenyan students learn web and mobile development, compete for prizes, and network with tech companies.',
     deadline: '2026-02-28',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       requirements: [
@@ -743,7 +723,6 @@ const opportunities = [
     fullDescription: 'This international conference highlights women\'s contributions to technology in Africa. Papers explore challenges, innovations, and solutions. Selected female presenters receive travel grants supporting attendance and networking opportunities.',
     deadline: '2026-03-10',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       fieldOfStudy: ['Technology', 'Business', 'Engineering', 'Development'],
@@ -779,7 +758,6 @@ const opportunities = [
     fullDescription: 'University of Nairobi offers post-doctoral fellowships supporting early-career researchers continuing academic work. Fellows conduct research, mentor students, and contribute to academic publications.',
     deadline: '2026-04-30',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       fieldOfStudy: ['Any academic discipline'],
@@ -816,7 +794,6 @@ const opportunities = [
     fullDescription: 'Deloitte\'s Graduate Program rotates recent graduates through different service lines and client engagements. Strong training, mentorship, and clear career progression paths in professional services.',
     deadline: '2026-02-10',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'UnderGrad',
       requirements: [
@@ -852,7 +829,6 @@ const opportunities = [
     fullDescription: 'This summit brings together agricultural researchers, young farmers, entrepreneurs, and policymakers to drive innovation in African agriculture. Keynotes, workshops, and networking sessions focus on tech-enabled solutions to climate and food challenges.',
     deadline: '2026-03-05',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'Both',
       fieldOfStudy: ['Agriculture', 'Environmental Science', 'Technology', 'Economics'],
@@ -889,7 +865,6 @@ const opportunities = [
     fullDescription: 'British Council offers scholarships enabling talented African students to study in UK, Australia, and Canada. First priority given to students from Kenya and East Africa. Recipients join a global network of British Council scholars.',
     deadline: '2026-02-20',
     location: 'International',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'Both',
       requirements: [
@@ -925,7 +900,6 @@ const opportunities = [
     fullDescription: 'This is a unique cross-category opportunity combining academic publication with direct scholarship awards. Submit peer-reviewed public health research addressing African challenges. Top 10 accepted papers authors get travel grants. Additionally, the 5 best papers\' authors receive postgraduate scholarships for further studies.',
     deadline: '2026-03-25',
     location: 'Kenya',
-    isKenyaBased: true,
     eligibility: {
       educationLevel: 'PostGrad',
       fieldOfStudy: ['Public Health', 'Medicine', 'Epidemiology', 'Health Economics'],

@@ -1,55 +1,48 @@
-import { FileText, Briefcase, DollarSign, Calendar, GraduationCap } from 'lucide-react';
+import { FileText, Briefcase, DollarSign, Calendar, GraduationCap, LayoutGrid } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-interface Category {
-  name: string;
-  id: string;
-  icon: any;
-  bgColor: string;
-  textColor: string;
-  description: string;
-}
-
-const categories: Category[] = [
+const categories = [
   {
     name: 'Call for Papers',
     id: 'CallForPapers',
     icon: FileText,
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-900',
-    description: 'Academic conferences & journals'
+    color: 'from-blue-500 to-blue-600',
+    description: 'Academic conferences & journals',
   },
   {
     name: 'Internships',
     id: 'Internship',
     icon: Briefcase,
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-900',
-    description: 'Work experience programs'
+    color: 'from-green-500 to-green-600',
+    description: 'Work experience programs',
   },
   {
     name: 'Grants',
     id: 'Grant',
     icon: DollarSign,
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-900',
-    description: 'Research & project funding'
+    color: 'from-orange-500 to-orange-600',
+    description: 'Research & project funding',
   },
   {
     name: 'Conferences',
     id: 'Conference',
     icon: Calendar,
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-900',
-    description: 'Networking events & workshops'
+    color: 'from-purple-500 to-purple-600',
+    description: 'Networking events & workshops',
   },
   {
     name: 'Scholarships',
     id: 'Scholarship',
     icon: GraduationCap,
-    bgColor: 'bg-blue-50',
-    textColor: 'text-blue-900',
-    description: 'Education & living support'
+    color: 'from-pink-500 to-pink-600',
+    description: 'Education & living support',
+  },
+  {
+    name: 'Others',
+    id: 'Others',
+    icon: LayoutGrid,
+    color: 'from-indigo-500 to-indigo-600',
+    description: 'More opportunities',
   },
 ];
 
@@ -72,27 +65,24 @@ export function Categories() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {categories.map((category) => {
             const Icon = category.icon;
             return (
               <button
                 key={category.id}
                 onClick={() => handleCategoryClick(category.id)}
-                className={`${category.bgColor} p-6 hover:shadow-sm transition-all duration-300 group cursor-pointer border border-blue-200 hover:border-blue-900 hover:bg-blue-100 rounded-sm m-0.5`}
+                className="group p-6 bg-white rounded-2xl border-2 border-gray-100 hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer"
               >
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <Icon className={`${category.textColor} w-8 h-8`} />
-                  <h3 className={`${category.textColor} font-bold text-base uppercase tracking-wider`}>
-                    {category.name}
-                  </h3>
-                  <p className="text-gray-700 text-xs font-medium leading-snug">
-                    {category.description}
-                  </p>
-                  <span className={`${category.textColor} text-xs font-bold uppercase tracking-widest group-hover:gap-2 transition-all inline-flex items-center gap-1`}>
-                    Browse →
-                  </span>
+                <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-br ${category.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <Icon className="w-8 h-8 text-white" />
                 </div>
+                <h3 className="text-gray-900 text-center font-bold text-sm">
+                  {category.name}
+                </h3>
+                <p className="text-gray-500 text-center text-xs mt-1">
+                  {category.description}
+                </p>
               </button>
             );
           })}

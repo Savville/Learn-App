@@ -8,15 +8,12 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const db = getDB();
-    const { category, level, location, search } = req.query;
+    const { category, level, fundingType, search } = req.query;
     
     const filter = {};
     if (category && category !== 'all') filter.category = category;
     if (level && level !== 'all') filter['eligibility.educationLevel'] = level;
-    if (location && location !== 'all') {
-      if (location === 'kenya') filter.isKenyaBased = true;
-      else if (location === 'international') filter.isKenyaBased = false;
-    }
+    if (fundingType && fundingType !== 'all') filter.fundingType = fundingType;
     if (search) {
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },

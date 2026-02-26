@@ -9,10 +9,17 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white">L</span>
-              </div>
-              <span className="text-white">L-earn Organisation</span>
+              <img
+                src="/Opportunities Kenya Logo 2.png"
+                alt="Opportunities Kenya"
+                className="h-10 w-auto"
+              />
+              <span
+                className="text-white font-bold"
+                style={{ fontFamily: "'Inknut Antiqua', serif", fontSize: '1rem' }}
+              >
+                Opportunities Kenya
+              </span>
             </div>
             <p className="text-gray-400 mb-4">
               Empowering students and young professionals across Africa and beyond by giving them equal access to global opportunities.

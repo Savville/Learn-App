@@ -23,7 +23,7 @@ export const opportunitiesAPI = {
   getAll: (filters?: {
     category?: string;
     level?: string;
-    location?: string;
+    fundingType?: string;
     search?: string;
   }) => apiClient.get('/opportunities', { params: filters }),
 

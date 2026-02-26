@@ -4,28 +4,32 @@ import { useNavigate } from 'react-router-dom';
 
 export function Hero() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (searchQuery) params.append('search', searchQuery);
-    if (selectedCategory !== 'all') params.append('type', selectedCategory);
     navigate(`/opportunities?${params.toString()}`);
   };
 
   return (
-    <div className="relative bg-blue-50">
+    <div className="relative bg-gradient-to-br from-blue-600 to-purple-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
         {/* Title */}
         <div className="text-center mb-8">
-          <h1 className="text-blue-1000 mb-6 max-w-4xl mx-auto text-5xl md:text-6xl font-black uppercase tracking-tight leading-tight">
-            Discover Opportunities for Kenya Students
+          <h1
+            className="text-white mb-6 max-w-4xl mx-auto font-black uppercase tracking-tight leading-tight"
+            style={{ fontSize: '3rem' }}
+          >
+            Discover Opportunities, for Kenyan Students and Practitioners
           </h1>
 
           {/* Subtitle */}
-          <p className="text-gray-700 mb-12 max-w-2xl mx-auto text-lg font-medium">
+          <p
+            className="text-blue-200 mb-12 max-w-2xl mx-auto font-bold"
+            style={{ fontSize: '1.5rem' }}
+          >
             Internships, scholarships, grants, conferences & more—updated daily
           </p>
         </div>
@@ -44,26 +48,12 @@ export function Hero() {
               />
             </div>
             
-            <div className="flex gap-2 border-l border-gray-300 pl-2">
-              <select
-                className="px-4 py-3 border border-gray-300 bg-white outline-none cursor-pointer text-gray-900 font-medium rounded-sm"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="all">All Categories</option>
-                <option value="CallForPapers">Call for Papers</option>
-                <option value="Internship">Internships</option>
-                <option value="Grant">Grants</option>
-                <option value="Conference">Conferences</option>
-                <option value="Scholarship">Scholarships</option>
-              </select>
-              <button
-                type="submit"
-                className="px-8 py-3 bg-blue-900 text-white font-bold uppercase tracking-wider text-sm hover:bg-blue-800 transition-all rounded-sm"
-              >
-                Search
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="px-8 py-3 bg-blue-900 text-white font-bold uppercase tracking-wider text-sm hover:bg-blue-800 transition-all rounded-sm"
+            >
+              Search
+            </button>
           </div>
         </form>
       </div>

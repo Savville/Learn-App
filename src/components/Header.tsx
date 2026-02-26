@@ -13,14 +13,20 @@ export function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white">L</span>
-              </div>
-              <span className="text-gray-900">L-earn</span>
-            </div>
-          </Link>
+          <div className="flex items-center gap-2">
+            <img
+              src="/Opportunities Kenya Logo 2.png"
+              alt="Opportunities Kenya"
+              className="h-10 w-auto"
+            />
+            <span
+              className="text-blue-900 font-bold"
+              style={{ fontFamily: "'Book Antiqua', serif", fontSize: '1.5rem' }}
+            >
+              Opportunities Kenya
+            </span>
+          </div>
+    
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
