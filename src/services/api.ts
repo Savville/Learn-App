@@ -1,19 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
-const cors = require('cors');
-const express = require('express');
-const app = express();
 
 const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
-
-// Add CORS configuration
-app.use(cors({
-  origin: [
-    'https://opportunitieskenya.live',
-    'https://learn-app-tamwy.vercel.app',
-    'http://localhost:3000' // for local testing
-  ],
-  credentials: true
-}));
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_URL,
