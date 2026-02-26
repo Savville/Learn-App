@@ -19,6 +19,8 @@ app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
       'https://learn-app-savvilles-projects.vercel.app',
+      'https://opportunitieskenya.live',
+      'https://www.opportunitieskenya.live',
       'http://localhost:3001',
       'http://localhost:5173',
       'http://localhost:5174'
