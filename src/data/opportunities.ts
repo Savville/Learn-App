@@ -55,7 +55,7 @@ export const opportunities: Opportunity[] = [
     duration: '6 months',
     featured: true,
     dateAdded: '2026-02-09',
-    logoUrl: '/images/opportunities/iek.jpg',
+    logoUrl: '/images/opportunities/ihub.jpg',
     contactEmail: 'fellowship@ihub.co.ke'
   },
   {
@@ -88,7 +88,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://africanclimate.org/grants',
     featured: true,
     dateAdded: '2026-02-10',
-    logoUrl: '/images/opportunities/european-union.jpg',
+    logoUrl: '/images/opportunities/grant.avif',
     contactEmail: 'grants@africanclimate.org'
   },
   {
@@ -152,7 +152,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://mastercardfdn.org/scholars',
     featured: true,
     dateAdded: '2026-02-01',
-    logoUrl: '/images/opportunities/mastercard.jpg'
+    logoUrl: '/images/opportunities/mastercard-scholarship.jpg'
   },
   {
     id: '5',
@@ -217,7 +217,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://kemri.go.ke/innovation',
     featured: true,
     dateAdded: '2026-02-13',
-    logoUrl: '/images/opportunities/kemri.jpg'
+    logoUrl: '/images/opportunities/kemri.png'
   },
   {
     id: '7',
@@ -249,7 +249,7 @@ export const opportunities: Opportunity[] = [
     duration: '2 weeks',
     featured: true,
     dateAdded: '2026-02-14',
-    logoUrl: '/images/opportunities/conference.jpg'
+    logoUrl: '/images/opportunities/conference.jpeg'
   },
   {
     id: '8',
@@ -281,7 +281,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://africantechconf.org/cfp',
     featured: true,
     dateAdded: '2026-02-15',
-    logoUrl: '/images/opportunities/call-for-papers.jpg',
+    logoUrl: '/images/opportunities/call-for-papers.png',
     contactEmail: 'submissions@africantechconf.org'
   },
   {
@@ -348,7 +348,7 @@ export const opportunities: Opportunity[] = [
     duration: '3-6 months',
     featured: true,
     dateAdded: '2026-02-16',
-    logoUrl: '/images/opportunities/google.jpg'
+    logoUrl: '/images/opportunities/tech.avif'
   },
   {
     id: '11',
@@ -380,7 +380,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://waterforall.org/scholarships',
     featured: false,
     dateAdded: '2026-02-17',
-    logoUrl: '/images/opportunities/scholarship.jpg'
+    logoUrl: '/images/opportunities/scholarship.jpeg'
   },
   {
     id: '12',
@@ -477,7 +477,7 @@ export const opportunities: Opportunity[] = [
     duration: '3 days',
     featured: true,
     dateAdded: '2026-02-20',
-    logoUrl: '/images/opportunities/conference.jpg'
+    logoUrl: '/images/opportunities/conference.jpeg'
   },
   {
     id: '15',
@@ -509,7 +509,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://jeadev.org/call-for-papers',
     featured: true,
     dateAdded: '2026-02-21',
-    logoUrl: '/images/opportunities/call-for-papers.jpg'
+    logoUrl: '/images/opportunities/call-for-papers.png'
   },
   {
     id: '16',
@@ -542,7 +542,7 @@ export const opportunities: Opportunity[] = [
     duration: '6 months',
     featured: false,
     dateAdded: '2026-02-22',
-    logoUrl: '/images/opportunities/microsoft.jpg'
+    logoUrl: '/images/opportunities/tech.avif'
   },
   {
     id: '17',
@@ -574,7 +574,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://amref.org/kenyascholarship',
     featured: true,
     dateAdded: '2026-02-23',
-    logoUrl: '/images/opportunities/amref.jpg'
+    logoUrl: '/images/opportunities/scholarship.jpeg'
   },
   {
     id: '18',
@@ -607,7 +607,7 @@ export const opportunities: Opportunity[] = [
     duration: '8 weeks',
     featured: true,
     dateAdded: '2026-02-24',
-    logoUrl: '/images/opportunities/standard-chartered.jpg'
+    logoUrl: '/images/opportunities/internship.avif'
   },
   {
     id: '19',
@@ -639,7 +639,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://kenyageo.org/grants',
     featured: true,
     dateAdded: '2026-02-25',
-    logoUrl: '/images/opportunities/kenya-green.jpg'
+    logoUrl: '/images/opportunities/grant.avif'
   },
   {
     id: '20',
@@ -672,7 +672,7 @@ export const opportunities: Opportunity[] = [
     duration: '1 month',
     featured: true,
     dateAdded: '2026-02-26',
-    logoUrl: '/images/opportunities/africa-code.jpg'
+    logoUrl: '/images/opportunities/tech.avif'
   },
   {
     id: '21',
@@ -704,7 +704,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://africawomenintech.org/cfp',
     featured: true,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/tech.avif'
+    logoUrl: '/images/opportunities/call-for-papers.png'
   },
   {
     id: '22',
@@ -769,7 +769,7 @@ export const opportunities: Opportunity[] = [
     duration: '24 months',
     featured: true,
     dateAdded: '2026-02-01',
-    logoUrl: '/images/opportunities/deloitte.jpg'
+    logoUrl: '/images/opportunities/internship.avif'
   },
   {
     id: '24',
@@ -802,7 +802,7 @@ export const opportunities: Opportunity[] = [
     duration: '4 days',
     featured: true,
     dateAdded: '2026-02-19',
-    logoUrl: '/images/opportunities/african-union.jpg'
+    logoUrl: '/images/opportunities/pan-africanism.png'
   },
   {
     id: '25',
@@ -867,7 +867,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://apha.org/cfp-scholarship',
     featured: true,
     dateAdded: '2026-02-28',
-    logoUrl: '/images/opportunities/apha.jpg',
+    logoUrl: '/images/opportunities/call-for-papers.png',
     contactEmail: 'submissions@apha.org'
   }
 ];
