@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { OpportunityCard } from '../components/OpportunityCard';
-import { Categories } from '../components/Categories';
 import { opportunitiesAPI } from '../services/api';
 import { Search, Filter } from 'lucide-react';
 import type { Opportunity } from '../data/opportunities';
@@ -76,6 +75,7 @@ export function Opportunities() {
     fetchOpportunities();
   }, [searchQuery, selectedType, selectedLevel, selectedFunding]);
 
+  const countFor = (type: string) => localOpportunities.filter(o => o.category === type).length;
   const filteredOpportunities = opportunities;
 
   const handleSearch = (e: React.FormEvent) => {
@@ -139,12 +139,16 @@ export function Opportunities() {
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
-                <option value="all" className="text-gray-900 bg-white">All Types</option>
-                <option value="CallForPapers" className="text-gray-900 bg-white">Call for Papers</option>
-                <option value="Internship" className="text-gray-900 bg-white">Internships</option>
-                <option value="Grant" className="text-gray-900 bg-white">Grants</option>
-                <option value="Conference" className="text-gray-900 bg-white">Conferences</option>
-                <option value="Scholarship" className="text-gray-900 bg-white">Scholarships</option>
+                <option value="all" className="text-gray-900 bg-white">All Types ({localOpportunities.length})</option>
+                <option value="CallForPapers" className="text-gray-900 bg-white">Call for Papers ({countFor('CallForPapers')})</option>
+                <option value="Internship" className="text-gray-900 bg-white">Internships ({countFor('Internship')})</option>
+                <option value="Grant" className="text-gray-900 bg-white">Grants ({countFor('Grant')})</option>
+                <option value="Conference" className="text-gray-900 bg-white">Conferences ({countFor('Conference')})</option>
+                <option value="Scholarship" className="text-gray-900 bg-white">Scholarships ({countFor('Scholarship')})</option>
+                <option value="Hackathon" className="text-gray-900 bg-white">Hackathons ({countFor('Hackathon')})</option>
+                <option value="Event" className="text-gray-900 bg-white">Events ({countFor('Event')})</option>
+                <option value="Volunteer" className="text-gray-900 bg-white">Volunteer Programmes ({countFor('Volunteer')})</option>
+                <option value="Other" className="text-gray-900 bg-white">Others ({countFor('Other')})</option>
               </select>
 
               {/* Level Filter */}
@@ -192,9 +196,6 @@ export function Opportunities() {
           </div>
         </div>
       </div>
-
-      {/* Category Filter */}
-      <Categories />
 
       {/* Opportunities Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
