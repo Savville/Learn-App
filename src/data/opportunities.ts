@@ -55,7 +55,7 @@ export const opportunities: Opportunity[] = [
     duration: '6 months',
     featured: true,
     dateAdded: '2026-02-09',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1',
     contactEmail: 'fellowship@ihub.co.ke'
   },
   {
@@ -88,7 +88,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://africanclimate.org/grants',
     featured: true,
     dateAdded: '2026-02-10',
-    logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop',
+    logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1',
     contactEmail: 'grants@africanclimate.org'
   },
   {
@@ -121,7 +121,7 @@ export const opportunities: Opportunity[] = [
     duration: '3 days',
     featured: true,
     dateAdded: '2026-02-11',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '4',
@@ -152,7 +152,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://mastercardfdn.org/scholars',
     featured: true,
     dateAdded: '2026-02-01',
-    logoUrl: 'https://images.unsplash.com/photo-1633158829875-e5316a358c6f?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1633158829875-e5316a358c6f?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '5',
@@ -185,7 +185,7 @@ export const opportunities: Opportunity[] = [
     duration: '12 months',
     featured: true,
     dateAdded: '2026-02-12',
-    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '6',
@@ -217,7 +217,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://kemri.go.ke/innovation',
     featured: true,
     dateAdded: '2026-02-13',
-    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '7',
@@ -249,7 +249,7 @@ export const opportunities: Opportunity[] = [
     duration: '2 weeks',
     featured: true,
     dateAdded: '2026-02-14',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '8',
@@ -281,7 +281,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://africantechconf.org/cfp',
     featured: true,
     dateAdded: '2026-02-15',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1',
     contactEmail: 'submissions@africantechconf.org'
   },
   {
@@ -315,7 +315,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://www.chevening.org/apply',
     featured: true,
     dateAdded: '2026-01-15',
-    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '10',
@@ -348,7 +348,7 @@ export const opportunities: Opportunity[] = [
     duration: '3-6 months',
     featured: true,
     dateAdded: '2026-02-16',
-    logoUrl: 'https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '11',
@@ -380,7 +380,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://waterforall.org/scholarships',
     featured: false,
     dateAdded: '2026-02-17',
-    logoUrl: 'https://images.unsplash.com/photo-1532996122724-8916c52e1c45?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1532996122724-8916c52e1c45?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '12',
@@ -412,7 +412,7 @@ export const opportunities: Opportunity[] = [
     duration: '3 months',
     featured: true,
     dateAdded: '2026-02-18',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '13',
@@ -445,7 +445,7 @@ export const opportunities: Opportunity[] = [
     duration: '12 months',
     featured: false,
     dateAdded: '2026-02-19',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '14',
@@ -477,7 +477,7 @@ export const opportunities: Opportunity[] = [
     duration: '3 days',
     featured: true,
     dateAdded: '2026-02-20',
-    logoUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '15',
@@ -509,7 +509,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://jeadev.org/call-for-papers',
     featured: true,
     dateAdded: '2026-02-21',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '16',
@@ -542,7 +542,7 @@ export const opportunities: Opportunity[] = [
     duration: '6 months',
     featured: false,
     dateAdded: '2026-02-22',
-    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '17',
@@ -574,7 +574,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://amref.org/kenyascholarship',
     featured: true,
     dateAdded: '2026-02-23',
-    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '18',
@@ -607,7 +607,7 @@ export const opportunities: Opportunity[] = [
     duration: '8 weeks',
     featured: true,
     dateAdded: '2026-02-24',
-    logoUrl: 'https://images.unsplash.com/photo-1553729321-e91953dec042?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1553729321-e91953dec042?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '19',
@@ -639,7 +639,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://kenyageo.org/grants',
     featured: true,
     dateAdded: '2026-02-25',
-    logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '20',
@@ -672,7 +672,7 @@ export const opportunities: Opportunity[] = [
     duration: '1 month',
     featured: true,
     dateAdded: '2026-02-26',
-    logoUrl: 'https://images.unsplash.com/photo-1538932527bfc3e72e89a2f3b598a4a2c?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1538932527bfc3e72e89a2f3b598a4a2c?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '21',
@@ -704,7 +704,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://africawomenintech.org/cfp',
     featured: true,
     dateAdded: '2026-02-27',
-    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '22',
@@ -737,7 +737,7 @@ export const opportunities: Opportunity[] = [
     duration: '12 months',
     featured: false,
     dateAdded: '2026-02-28',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '23',
@@ -769,7 +769,7 @@ export const opportunities: Opportunity[] = [
     duration: '24 months',
     featured: true,
     dateAdded: '2026-02-01',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '24',
@@ -802,7 +802,7 @@ export const opportunities: Opportunity[] = [
     duration: '4 days',
     featured: true,
     dateAdded: '2026-02-19',
-    logoUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '25',
@@ -834,7 +834,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://britishcouncil.org/scholarships',
     featured: true,
     dateAdded: '2026-02-02',
-    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop'
+    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1'
   },
   {
     id: '26',
@@ -867,7 +867,7 @@ export const opportunities: Opportunity[] = [
     applicationLink: 'https://apha.org/cfp-scholarship',
     featured: true,
     dateAdded: '2026-02-28',
-    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop',
+    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop&auto=format&auto=compress&q=80&fm=webp&dpr=1',
     contactEmail: 'submissions@apha.org'
   }
 ];
