@@ -5,6 +5,7 @@ import { Categories } from '../components/Categories';
 import { opportunitiesAPI } from '../services/api';
 import { Search, Filter } from 'lucide-react';
 import type { Opportunity } from '../data/opportunities';
+import { opportunities as localOpportunities } from '../data/opportunities';
 
 export function Opportunities() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,12 +30,16 @@ export function Opportunities() {
           fundingType: selectedFunding !== 'all' ? selectedFunding : undefined,
           search: searchQuery || undefined,
         });
-        setOpportunities(response.data);
+        const merged = response.data.map((opp: Opportunity) => {
+          const local = localOpportunities.find(l => l.id === opp.id);
+          return local ? { ...opp, logoUrl: local.logoUrl } : opp;
+        });
+        setOpportunities(merged);
         setError(null);
       } catch (err) {
         console.error('Error fetching opportunities:', err);
-        setError('Failed to load opportunities. Please try again.');
-        setOpportunities([]);
+        setOpportunities(localOpportunities);
+        setError(null);
       } finally {
         setLoading(false);
       }

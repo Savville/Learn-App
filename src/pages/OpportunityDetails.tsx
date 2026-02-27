@@ -4,6 +4,7 @@ import { opportunitiesAPI, analyticsAPI } from '../services/api';
 import { Calendar, ExternalLink, ArrowLeft, Tag } from 'lucide-react';
 import { calculateUrgency } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
+import { opportunities as localOpportunities } from '../data/opportunities';
 
 export function OpportunityDetails() {
   const { id } = useParams();
@@ -20,7 +21,8 @@ export function OpportunityDetails() {
       try {
         setLoading(true);
         const response = await opportunitiesAPI.getOne(id!);
-        setOpportunity(response.data);
+        const local = localOpportunities.find(l => l.id === id);
+        setOpportunity(local ? { ...response.data, logoUrl: local.logoUrl } : response.data);
         setError(null);
 
         // Track the view event
@@ -30,11 +32,24 @@ export function OpportunityDetails() {
 
         // Fetch related opportunities (same category)
         const allOpsResponse = await opportunitiesAPI.getAll({ category: response.data.category });
-        setRelatedOpportunities(allOpsResponse.data.filter((opp: Opportunity) => opp.id !== id).slice(0, 3));
+        const relatedMerged = allOpsResponse.data
+          .filter((opp: Opportunity) => opp.id !== id)
+          .slice(0, 3)
+          .map((opp: Opportunity) => {
+            const l = localOpportunities.find(lo => lo.id === opp.id);
+            return l ? { ...opp, logoUrl: l.logoUrl } : opp;
+          });
+        setRelatedOpportunities(relatedMerged);
       } catch (err) {
         console.error('Error fetching opportunity:', err);
-        setError('Failed to load opportunity details. Please try again.');
-        setOpportunity(null);
+        const local = localOpportunities.find(l => l.id === id);
+        if (local) {
+          setOpportunity(local);
+          setError(null);
+        } else {
+          setError('Failed to load opportunity details. Please try again.');
+          setOpportunity(null);
+        }
       } finally {
         setLoading(false);
       }
