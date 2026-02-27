@@ -80,7 +80,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-400">
-            © 2025 L-earn Organisation. All rights reserved.
+            © 2025 Opportunities Kenya. All rights reserved.
           </p>
         </div>
       </div>

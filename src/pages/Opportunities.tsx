@@ -39,6 +39,14 @@ export function Opportunities() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Sync filter state when URL params change (e.g. clicking a category card)
+  useEffect(() => {
+    setSearchQuery(searchParams.get('search') || '');
+    setSelectedType(searchParams.get('type') || 'all');
+    setSelectedLevel(searchParams.get('level') || 'all');
+    setSelectedFunding(searchParams.get('funding') || 'all');
+  }, [searchParams]);
+
   // Fetch opportunities from backend
   useEffect(() => {
     const fetchOpportunities = async () => {
