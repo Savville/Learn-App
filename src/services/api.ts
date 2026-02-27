@@ -49,9 +49,9 @@ export const opportunitiesAPI = {
 export const subscribersAPI = {
   subscribe: (email: string, preferences?: {
     categories?: string[];
-    interests?: string[];
-    whatsapp?: string;
     allUpdates?: boolean;
+    interests?: { category: string; subfields: string[] }[];
+    whatsapp?: string;
   }) =>
     apiClient.post('/subscribers', {
       email,

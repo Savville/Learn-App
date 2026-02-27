@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const db = getDB();
-    const { email, categories, interests, whatsapp, allUpdates } = req.body;
+    const { email, categories, allUpdates, interests, whatsapp } = req.body;
     
     // Validate email
     if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
@@ -25,9 +25,9 @@ router.post('/', async (req, res) => {
     const subscriber = {
       email,
       categories: categories || [],
+      allUpdates: allUpdates !== false,
       interests: interests || [],
       whatsapp: whatsapp || null,
-      allUpdates: allUpdates !== false,
       subscribedAt: new Date(),
       unsubscribed: false
     };
