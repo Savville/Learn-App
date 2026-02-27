@@ -7,6 +7,26 @@ import { Search, Filter } from 'lucide-react';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 
+const applyFilters = (
+  opps: Opportunity[],
+  searchQuery: string,
+  selectedType: string,
+  selectedLevel: string,
+  selectedFunding: string
+) => {
+  return opps.filter(opp => {
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      opp.title.toLowerCase().includes(q) ||
+      opp.provider.toLowerCase().includes(q) ||
+      opp.description.toLowerCase().includes(q);
+    const matchesType = selectedType === 'all' || opp.category === selectedType;
+    const matchesLevel = selectedLevel === 'all' || opp.eligibility.educationLevel === selectedLevel;
+    const matchesFunding = selectedFunding === 'all' || opp.fundingType === selectedFunding;
+    return matchesSearch && matchesType && matchesLevel && matchesFunding;
+  });
+};
+
 export function Opportunities() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
@@ -34,11 +54,11 @@ export function Opportunities() {
           const local = localOpportunities.find(l => l.id === opp.id);
           return local ? { ...opp, logoUrl: local.logoUrl } : opp;
         });
-        setOpportunities(merged);
+        setOpportunities(applyFilters(merged, searchQuery, selectedType, selectedLevel, selectedFunding));
         setError(null);
       } catch (err) {
         console.error('Error fetching opportunities:', err);
-        setOpportunities(localOpportunities);
+        setOpportunities(applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding));
         setError(null);
       } finally {
         setLoading(false);
@@ -137,7 +157,7 @@ export function Opportunities() {
                 value={selectedFunding}
                 onChange={(e) => setSelectedFunding(e.target.value)}
               >
-                <option value="all" className="text-gray-900 bg-white">Funding Types</option>
+                <option value="all" className="text-gray-900 bg-white">All Funding Types</option>
                 <option value="Fully Funded" className="text-gray-900 bg-white">Fully Funded</option>
                 <option value="Partially Funded" className="text-gray-900 bg-white">Partially Funded</option>
                 <option value="Stipend" className="text-gray-900 bg-white">Stipend</option>
