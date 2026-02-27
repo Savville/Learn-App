@@ -21,6 +21,7 @@ app.use(cors({
       'https://learn-app-savvilles-projects.vercel.app',
       'https://opportunitieskenya.live',
       'https://www.opportunitieskenya.live',
+      'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:3002',
       'http://localhost:5173',

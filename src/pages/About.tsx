@@ -6,7 +6,7 @@ export function About() {
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-          <h1 className="mb-6">About L-earn Organisation</h1>
+          <h1 className="mb-6">About Opportunities Kenya</h1>
           <p className="text-blue-100 max-w-2xl mx-auto">
             Empowering students and young professionals by connecting them with life-changing opportunities from around the world.
           </p>
@@ -21,16 +21,16 @@ export function About() {
             <h2 className="text-gray-900 mb-6">Who We Are</h2>
             <div className="space-y-4 text-gray-700 leading-relaxed">
               <p>
-                L-earn Organisation is a youth-focused initiative dedicated to connecting students and graduates with valuable learning opportunities, grants, internships, fellowships, and career-building programs from around the world.
+                Opportunities Kenya is a youth-focused initiative dedicated to connecting students, graduates and practitioners with valuable learning opportunities, grants, internships, fellowships, and career-building programs from around the world.
               </p>
               <p>
-                We believe that access to the right opportunity can transform a young person's future—and our mission is to make that access simple, clear, and free.
+                We believe that access to the right opportunity can transform a young person's future, and our mission is to make that access simple, clear, and free.
               </p>
               <p>
-                At L-earn, we curate and publish high-quality opportunities daily, ensuring that learners never miss out on programs that can advance their knowledge, skills, or career path. Our goal is to incentivize learning by bringing life-changing opportunities closer to those who need them most.
+                At Opportunities Kenya, we curate and publish high-quality opportunities daily, ensuring that learners never miss out on programs that can advance their knowledge, skills, or career path. Our goal is to incentivize learning by bringing life-changing opportunities closer to those who need them most.
               </p>
               <p>
-                Whether you're looking for a scholarship, a competitive fellowship, a professional internship, or a grant to support your ideas, L-earn serves as your trusted gateway. We simplify the process by researching, verifying, and linking you directly to official application pages—so you can focus on learning, growing, and achieving your goals.
+                Whether you're looking for a scholarship, a competitive fellowship, a professional internship, or a grant to support your ideas, Opportunities Kenya serves as your trusted gateway. We simplify the process by researching, verifying, and linking you directly to official application pages, so you can focus on learning, growing, and achieving your goals.
               </p>
             </div>
           </div>
