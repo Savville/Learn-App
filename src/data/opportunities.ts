@@ -869,5 +869,153 @@ export const opportunities: Opportunity[] = [
     dateAdded: '2026-02-28',
     logoUrl: '/images/opportunities/call-for-papers.png',
     contactEmail: 'submissions@apha.org'
+  },
+  {
+    id: '27',
+    title: 'ADB Internship Program 2026',
+    provider: 'Asian Development Bank',
+    category: 'Internship',
+    description: 'A paid internship at the Asian Development Bank for postgraduate students to work on real-world development projects across 60+ member countries, with a stipend and partial airfare support.',
+    fullDescription: 'The ADB Internship Program offers postgraduate students a unique opportunity to work on project-oriented assignments in economic and social development across 60 ADB member countries. Interns work under the supervision of experienced professionals and receive a stipend for the full duration of the 8–12 week placement. ADB also provides limited financial support for airfare where required. The programme runs twice a year and selects highly talented, motivated individuals who demonstrate strong dedication to development-related fields. Successful interns gain hands-on experience, access to a global professional network, and exposure to ADB\'s operations across Asia and the Pacific.',
+    deadline: '2026-03-16',
+    location: 'International',
+    eligibility: {
+      educationLevel: 'PostGrad',
+      fieldOfStudy: ['Development Economics', 'Finance', 'Engineering', 'Social Sciences', 'Environment'],
+      requirements: [
+        'Enrolled in a master\'s or PhD programme',
+        'Excellent communication skills in English',
+        'Academic study directly related to ADB\'s areas of work',
+        'National of an ADB member country',
+        '2–3 years of relevant professional experience preferred'
+      ]
+    },
+    benefits: [
+      'Stipend paid for the full duration of the internship',
+      'Limited financial support for airfare (where applicable)',
+      'Work under world-class professionals in development',
+      'Collaborate with international peers from 60+ countries',
+      'Hands-on experience on real-world development projects',
+      'Networking with experts and leaders in the development field'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://adb.taleo.net/careersection/2/jobsearch.ftl?lang=en',
+    fundingType: 'Stipend',
+    duration: '8 to 12 weeks',
+    featured: false,
+    dateAdded: '2026-02-27',
+    logoUrl: '/images/opportunities/internship.avif'
+  },
+  {
+    id: '28',
+    title: 'City of Boston Summer Internship Program 2026',
+    provider: 'City of Boston',
+    category: 'Internship',
+    description: 'A paid summer internship with the City of Boston at $20/hr, 35 hours per week, working across city departments on real projects in public service, communications, data, and community engagement.',
+    fullDescription: 'The City of Boston Summer Internship Program offers undergraduate and graduate students a structured, full-time paid internship across a wide range of municipal departments. Interns contribute to real projects including drafting reports, designing social media content, analysing data, supporting community events, and assisting constituents directly. The programme runs at 35 hours per week at $20.00 per hour, providing valuable professional development in public administration and civic leadership. Applicants must demonstrate strong communication skills, an ability to work with diverse teams, and a genuine interest in community service.',
+    deadline: '2026-03-06',
+    location: 'USA',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Public Administration', 'Communications', 'Social Sciences', 'Any Field'],
+      requirements: [
+        'Currently enrolled in an undergraduate or graduate programme, or 2–4 years of post-secondary work experience',
+        'Strong written and verbal communication skills',
+        'Ability to collaborate with people of all backgrounds and cultures',
+        'Effective time management and ability to meet deadlines',
+        'Genuine interest in community service and public sector work'
+      ]
+    },
+    benefits: [
+      'Competitive hourly wage of $20.00 per hour',
+      'Full-time, 35 hours per week in a professional government environment',
+      'Practical skills in research, data analysis, communications, and event support',
+      'Mentorship and constructive feedback throughout the programme',
+      'Tangible impact within Boston\'s neighbourhoods and communities'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://city-boston.icims.com/jobs/31599/2026-summer-intern/job?mode=view',
+    fundingType: 'Stipend',
+    duration: 'Summer 2026 (35 hrs/week)',
+    featured: false,
+    dateAdded: '2026-02-27',
+    logoUrl: '/images/opportunities/internship.avif'
+  },
+  {
+    id: '29',
+    title: 'ESO Science Communication Internship 2026',
+    provider: 'European Southern Observatory',
+    category: 'Internship',
+    description: 'A fully funded science communication internship at ESO headquarters in Germany. Covers monthly living allowance, accommodation, and a return flight from your home country. Open to applicants worldwide.',
+    fullDescription: 'The European Southern Observatory (ESO) Science Communication Internship offers students and recent graduates the chance to work with ESO\'s Department of Communication in Garching, Germany. Interns contribute to news articles, press releases, web content, video scripts, exhibition materials, and other public outreach products for one of the world\'s leading astronomical organisations. The internship runs for 3–6 months on a rolling basis, meaning applications are reviewed every 4–6 months year-round. ESO provides a monthly allowance for living expenses, accommodation, and covers the cost of a return ticket from the intern\'s home country, making it a genuinely fully funded opportunity.',
+    deadline: 'Rolling',
+    location: 'Germany',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Science Communication', 'Science Journalism', 'Natural Sciences', 'Astronomy'],
+      requirements: [
+        'Open to candidates from all countries',
+        'Degree in Science, Science Communication, or Science Journalism preferred',
+        'Proficiency in written and spoken English',
+        'Experience in written science communication or journalism',
+        'Understanding of astronomy and science outreach',
+        'Ability to work independently and in multicultural teams',
+        'Ability to work under time pressure and meet deadlines'
+      ]
+    },
+    benefits: [
+      'Monthly allowance to cover living expenses',
+      'Accommodation provided',
+      'Return flight from/to home country covered',
+      'Work with world-renowned scientists and communicators',
+      'Access to state-of-the-art astronomical facilities',
+      'International and multicultural work environment',
+      'Strong addition to a science communication career'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://recruitment.eso.org/',
+    fundingType: 'Fully Funded',
+    duration: '3 to 6 months',
+    featured: false,
+    dateAdded: '2026-02-27',
+    logoUrl: '/images/opportunities/european-union.jpg'
+  },
+  {
+    id: '30',
+    title: 'WFP Internship Program 2026',
+    provider: 'World Food Programme',
+    category: 'Internship',
+    description: 'A paid internship with the UN World Food Programme open to students in any field. Offers a stipend of up to $1,000/month, medical insurance, and a flexible duration of 2–8 months across global WFP offices.',
+    fullDescription: 'The World Food Programme (WFP) Internship Program is a short-term learning opportunity for outstanding undergraduate and graduate students from across the world. Interns work in WFP offices globally across fields such as logistics, communications, data, nutrition, and more — directly contributing to efforts to achieve zero hunger. The programme runs for 2 to 8 months depending on the position, with different openings having different deadlines. WFP provides a stipend of up to US$1,000 per month based on duty station, medical and accident insurance for interns from developing countries, certified sick leave, and potential visa support. Applicants must be enrolled in a recognised university or have graduated within the last six months.',
+    deadline: 'Rolling',
+    location: 'International',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Any Field'],
+      requirements: [
+        'Currently enrolled in a recognised university (attended classes in last 12 months) or graduated within the last 6 months',
+        'Completed at least two years of an undergraduate degree',
+        'Fluency in English is compulsory',
+        'Knowledge of another UN language is an advantage',
+        'Strong teamwork skills and willingness to take on challenges',
+        'Apply only for positions relevant to your field of study'
+      ]
+    },
+    benefits: [
+      'Stipend of up to $1,000 per month (based on duty station)',
+      'Medical and accident insurance for interns from developing countries',
+      'Certified sick leave',
+      'Visa support may be available',
+      'Training and e-learning resources',
+      'Exposure to international humanitarian work',
+      'Real-world experience contributing to zero hunger goals'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://wd3.myworkdaysite.com/recruiting/wfp/job_openings?workerSubType=59387fe40123101e856f1834e09b0002',
+    fundingType: 'Stipend',
+    duration: '2 to 8 months',
+    featured: false,
+    dateAdded: '2026-02-27',
+    logoUrl: '/images/opportunities/wfp.png'
   }
 ];
