@@ -6,9 +6,9 @@ import { fileURLToPath } from 'url';
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Images live in /public/ at the workspace root (3 levels up from backend/src/services/)
-const BANNER_PATH = path.resolve(__dirname, '../../../public/Email Banner.png');
-const FOOTER_PATH = path.resolve(__dirname, '../../../public/Email Footer.png');
+// Images are bundled inside backend/assets/
+const BANNER_PATH = path.resolve(__dirname, '../../assets/Email Banner.png');
+const FOOTER_PATH = path.resolve(__dirname, '../../assets/Email Footer.png');
 
 // â”€â”€ Gmail Transporter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const transporter = nodemailer.createTransport({
