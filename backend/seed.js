@@ -35,7 +35,7 @@ const opportunities = [
     duration: '6 months',
     featured: true,
     dateAdded: '2026-02-09',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/ihub.jpg',
     contactEmail: 'fellowship@ihub.co.ke',
     views: 0,
     clicks: 0
@@ -70,7 +70,7 @@ const opportunities = [
     applicationLink: 'https://africanclimate.org/grants',
     featured: true,
     dateAdded: '2026-02-10',
-    logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/grant.avif',
     contactEmail: 'grants@africanclimate.org',
     views: 0,
     clicks: 0
@@ -105,7 +105,7 @@ const opportunities = [
     duration: '3 days',
     featured: true,
     dateAdded: '2026-02-11',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/unesco.jpg',
     views: 0,
     clicks: 0
   },
@@ -138,7 +138,7 @@ const opportunities = [
     applicationLink: 'https://mastercardfdn.org/scholars',
     featured: true,
     dateAdded: '2026-02-01',
-    logoUrl: 'https://images.unsplash.com/photo-1633158829875-e5316a358c6f?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/mastercard-scholarship.jpg',
     views: 0,
     clicks: 0
   },
@@ -173,7 +173,7 @@ const opportunities = [
     duration: '12 months',
     featured: true,
     dateAdded: '2026-02-12',
-    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/tech.avif',
     views: 0,
     clicks: 0
   },
@@ -207,7 +207,7 @@ const opportunities = [
     applicationLink: 'https://kemri.go.ke/innovation',
     featured: true,
     dateAdded: '2026-02-13',
-    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/kemri.png',
     views: 0,
     clicks: 0
   },
@@ -241,7 +241,7 @@ const opportunities = [
     duration: '2 weeks',
     featured: true,
     dateAdded: '2026-02-14',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/scholarship.jpeg',
     views: 0,
     clicks: 0
   },
@@ -275,7 +275,7 @@ const opportunities = [
     applicationLink: 'https://africantechconf.org/cfp',
     featured: true,
     dateAdded: '2026-02-15',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/call-for-papers.png',
     contactEmail: 'submissions@africantechconf.org',
     views: 0,
     clicks: 0
@@ -311,7 +311,7 @@ const opportunities = [
     applicationLink: 'https://www.chevening.org/apply',
     featured: true,
     dateAdded: '2026-01-15',
-    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/uk.jpg',
     views: 0,
     clicks: 0
   },
@@ -346,7 +346,7 @@ const opportunities = [
     duration: '3-6 months',
     featured: true,
     dateAdded: '2026-02-16',
-    logoUrl: 'https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/tech.avif',
     views: 0,
     clicks: 0
   },
@@ -380,7 +380,7 @@ const opportunities = [
     applicationLink: 'https://waterforall.org/scholarships',
     featured: false,
     dateAdded: '2026-02-17',
-    logoUrl: 'https://images.unsplash.com/photo-1532996122724-8916c52e1c45?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/scholarship.jpeg',
     views: 0,
     clicks: 0
   },
@@ -414,7 +414,7 @@ const opportunities = [
     duration: '3 months',
     featured: true,
     dateAdded: '2026-02-18',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/tech.avif',
     views: 0,
     clicks: 0
   },
@@ -449,7 +449,7 @@ const opportunities = [
     duration: '12 months',
     featured: false,
     dateAdded: '2026-02-19',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/pan-africanism.png',
     views: 0,
     clicks: 0
   },
@@ -483,7 +483,7 @@ const opportunities = [
     duration: '3 days',
     featured: true,
     dateAdded: '2026-02-20',
-    logoUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/conference.jpeg',
     views: 0,
     clicks: 0
   },
@@ -517,7 +517,7 @@ const opportunities = [
     applicationLink: 'https://jeadev.org/call-for-papers',
     featured: true,
     dateAdded: '2026-02-21',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/call-for-papers.png',
     views: 0,
     clicks: 0
   },
@@ -552,7 +552,7 @@ const opportunities = [
     duration: '6 months',
     featured: false,
     dateAdded: '2026-02-22',
-    logoUrl: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/tech.avif',
     views: 0,
     clicks: 0
   },
@@ -586,7 +586,7 @@ const opportunities = [
     applicationLink: 'https://amref.org/kenyascholarship',
     featured: true,
     dateAdded: '2026-02-23',
-    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/scholarship.jpeg',
     views: 0,
     clicks: 0
   },
@@ -621,7 +621,7 @@ const opportunities = [
     duration: '8 weeks',
     featured: true,
     dateAdded: '2026-02-24',
-    logoUrl: 'https://images.unsplash.com/photo-1553729321-e91953dec042?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/internship.avif',
     views: 0,
     clicks: 0
   },
@@ -655,7 +655,7 @@ const opportunities = [
     applicationLink: 'https://kenyageo.org/grants',
     featured: true,
     dateAdded: '2026-02-25',
-    logoUrl: 'https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/grant.avif',
     views: 0,
     clicks: 0
   },
@@ -690,7 +690,7 @@ const opportunities = [
     duration: '1 month',
     featured: true,
     dateAdded: '2026-02-26',
-    logoUrl: 'https://images.unsplash.com/photo-1538932527bfc3e72e89a2f3b598a4a2c?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/tech.avif',
     views: 0,
     clicks: 0
   },
@@ -724,7 +724,7 @@ const opportunities = [
     applicationLink: 'https://africawomenintech.org/cfp',
     featured: true,
     dateAdded: '2026-02-27',
-    logoUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/call-for-papers.png',
     views: 0,
     clicks: 0
   },
@@ -759,7 +759,7 @@ const opportunities = [
     duration: '12 months',
     featured: false,
     dateAdded: '2026-02-28',
-    logoUrl: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/scholarship.jpeg',
     views: 0,
     clicks: 0
   },
@@ -793,7 +793,7 @@ const opportunities = [
     duration: '24 months',
     featured: true,
     dateAdded: '2026-02-01',
-    logoUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/internship.avif',
     views: 0,
     clicks: 0
   },
@@ -828,7 +828,7 @@ const opportunities = [
     duration: '4 days',
     featured: true,
     dateAdded: '2026-02-19',
-    logoUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/pan-africanism.png',
     views: 0,
     clicks: 0
   },
@@ -862,7 +862,7 @@ const opportunities = [
     applicationLink: 'https://britishcouncil.org/scholarships',
     featured: true,
     dateAdded: '2026-02-02',
-    logoUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/uk.jpg',
     views: 0,
     clicks: 0
   },
@@ -897,8 +897,158 @@ const opportunities = [
     applicationLink: 'https://apha.org/cfp-scholarship',
     featured: true,
     dateAdded: '2026-02-28',
-    logoUrl: 'https://images.unsplash.com/photo-1576091160550-112accb7ced7?w=400&h=400&fit=crop',
+    logoUrl: '/images/opportunities/call-for-papers.png',
     contactEmail: 'submissions@apha.org',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: '27',
+    title: 'ADB Internship Program 2026',
+    provider: 'Asian Development Bank',
+    category: 'Internship',
+    description: 'A paid internship at the Asian Development Bank for postgraduate students to work on real-world development projects across 60+ member countries, with a stipend and partial airfare support.',
+    fullDescription: 'The ADB Internship Program offers postgraduate students a unique opportunity to work on project-oriented assignments in economic and social development across 60 ADB member countries. Interns work under the supervision of experienced professionals and receive a stipend for the full duration of the 8–12 week placement. ADB also provides limited financial support for airfare where required. The programme runs twice a year and selects highly talented, motivated individuals who demonstrate strong dedication to development-related fields.',
+    deadline: '2026-03-16',
+    location: 'International',
+    eligibility: {
+      educationLevel: 'PostGrad',
+      fieldOfStudy: ['Development Economics', 'Finance', 'Engineering', 'Social Sciences', 'Environment'],
+      requirements: [
+        "Enrolled in a master's or PhD programme",
+        'Excellent communication skills in English',
+        "Academic study directly related to ADB's areas of work",
+        'National of an ADB member country',
+        '2–3 years of relevant professional experience preferred'
+      ]
+    },
+    benefits: [
+      'Stipend paid for the full duration of the internship',
+      'Limited financial support for airfare (where applicable)',
+      'Work under world-class professionals in development',
+      'Collaborate with international peers from 60+ countries',
+      'Hands-on experience on real-world development projects',
+      'Networking with experts and leaders in the development field'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://adb.taleo.net/careersection/2/jobsearch.ftl?lang=en',
+    fundingType: 'Stipend',
+    duration: '8 to 12 weeks',
+    featured: false,
+    dateAdded: '2026-02-27',
+    logoUrl: '/images/opportunities/internship.avif',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: '28',
+    title: 'City of Boston Summer Internship Program 2026',
+    provider: 'City of Boston',
+    category: 'Internship',
+    description: 'A paid summer internship with the City of Boston at $20/hr, 35 hours per week, working across city departments on real projects in public service, communications, data, and community engagement.',
+    fullDescription: 'The City of Boston Summer Internship Program offers undergraduate and graduate students a structured, full-time paid internship across a wide range of municipal departments. Interns contribute to real projects including drafting reports, designing social media content, analysing data, supporting community events, and assisting constituents directly. The programme runs at 35 hours per week at $20.00 per hour.',
+    deadline: '2026-03-06',
+    location: 'USA',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Public Administration', 'Communications', 'Social Sciences', 'Any Field'],
+      requirements: [
+        'Currently enrolled in an undergraduate or graduate programme, or 2–4 years of post-secondary work experience',
+        'Strong written and verbal communication skills',
+        'Ability to collaborate with people of all backgrounds and cultures',
+        'Effective time management and ability to meet deadlines',
+        'Genuine interest in community service and public sector work'
+      ]
+    },
+    benefits: [
+      'Competitive hourly wage of $20.00 per hour',
+      'Full-time, 35 hours per week in a professional government environment',
+      'Practical skills in research, data analysis, communications, and event support',
+      'Mentorship and constructive feedback throughout the programme',
+      "Tangible impact within Boston's neighbourhoods and communities"
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://city-boston.icims.com/jobs/31599/2026-summer-intern/job?mode=view',
+    fundingType: 'Stipend',
+    duration: 'Summer 2026 (35 hrs/week)',
+    featured: false,
+    dateAdded: '2026-02-27',
+    logoUrl: '/images/opportunities/internship.avif',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: '29',
+    title: 'ESO Science Communication Internship 2026',
+    provider: 'European Southern Observatory',
+    category: 'Internship',
+    description: 'A fully funded science communication internship at ESO headquarters in Germany. Covers monthly living allowance, accommodation, and a return flight from your home country. Open to applicants worldwide.',
+    fullDescription: 'The European Southern Observatory (ESO) Science Communication Internship offers students and recent graduates the chance to work with ESO\'s Department of Communication in Garching, Germany. Interns contribute to news articles, press releases, web content, video scripts, and exhibition materials. The internship runs for 3–6 months on a rolling basis, with applications reviewed every 4–6 months.',
+    deadline: 'Rolling',
+    location: 'Germany',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Science Communication', 'Science Journalism', 'Natural Sciences', 'Astronomy'],
+      requirements: [
+        'Open to candidates from all countries',
+        'Degree in Science, Science Communication, or Science Journalism preferred',
+        'Proficiency in written and spoken English',
+        'Experience in written science communication or journalism',
+        'Understanding of astronomy and science outreach'
+      ]
+    },
+    benefits: [
+      'Monthly allowance to cover living expenses',
+      'Accommodation provided',
+      'Return flight from/to home country covered',
+      'Work with world-renowned scientists and communicators',
+      'International and multicultural work environment'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://recruitment.eso.org/',
+    fundingType: 'Fully Funded',
+    duration: '3 to 6 months',
+    featured: false,
+    dateAdded: '2026-02-27',
+    logoUrl: '/images/opportunities/european-union.jpg',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: '30',
+    title: 'WFP Internship Program 2026',
+    provider: 'World Food Programme',
+    category: 'Internship',
+    description: 'A paid internship with the UN World Food Programme open to students in any field. Offers a stipend of up to $1,000/month, medical insurance, and a flexible duration of 2–8 months across global WFP offices.',
+    fullDescription: 'The World Food Programme (WFP) Internship Program is a short-term learning opportunity for outstanding students from across the world. Interns work in WFP offices globally across fields such as logistics, communications, data, and nutrition — directly contributing to efforts to achieve zero hunger. WFP provides a stipend of up to US$1,000 per month, medical and accident insurance for interns from developing countries, certified sick leave, and potential visa support.',
+    deadline: 'Rolling',
+    location: 'International',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Any Field'],
+      requirements: [
+        'Currently enrolled in a recognised university (attended classes in last 12 months) or graduated within the last 6 months',
+        'Completed at least two years of an undergraduate degree',
+        'Fluency in English is compulsory',
+        'Knowledge of another UN language is an advantage',
+        'Strong teamwork skills and willingness to take on challenges'
+      ]
+    },
+    benefits: [
+      'Stipend of up to $1,000 per month (based on duty station)',
+      'Medical and accident insurance for interns from developing countries',
+      'Certified sick leave',
+      'Visa support may be available',
+      'Training and e-learning resources',
+      'Real-world experience contributing to zero hunger goals'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://wd3.myworkdaysite.com/recruiting/wfp/job_openings?workerSubType=59387fe40123101e856f1834e09b0002',
+    fundingType: 'Stipend',
+    duration: '2 to 8 months',
+    featured: false,
+    dateAdded: '2026-02-27',
+    logoUrl: '/images/opportunities/wfp.png',
     views: 0,
     clicks: 0
   }
@@ -915,15 +1065,15 @@ async function seedDatabase() {
     console.log('🧹 Clearing existing opportunities...');
     await collection.deleteMany({});
 
-    console.log('📥 Inserting 26 opportunities into MongoDB...');
+    console.log('📥 Inserting 30 opportunities into MongoDB...');
     const result = await collection.insertMany(opportunities);
 
     console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
     console.log('\n📊 Database Summary:');
     console.log(`   - Total opportunities: ${result.insertedCount}`);
     console.log(`   - Kenya-based: 17`);
-    console.log(`   - International: 9`);
-    console.log(`   - Categories: CallForPapers (3), Internship (8), Grant (5), Conference (4), Scholarship (6)`);
+    console.log(`   - International: 13`);
+    console.log(`   - Categories: CallForPapers (4), Internship (12), Grant (5), Conference (4), Scholarship (5)`);
     console.log(`   - Featured opportunities: 19`);
 
   } catch (error) {
