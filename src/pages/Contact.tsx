@@ -147,7 +147,7 @@ export function Contact() {
                 <div>
                   <h3 className="text-gray-900 mb-2">General Inquiries</h3>
                   <p className="text-gray-600">
-                    For general questions about L-earn Organisation, partnership opportunities, or feedback.
+                    For general questions about Opportunities Kenya, partnership opportunities, or feedback.
                   </p>
                 </div>
               </div>
@@ -211,7 +211,7 @@ export function Contact() {
               </p>
             </div>
             <div>
-              <h3 className="text-gray-900 mb-2">Is L-earn free to use?</h3>
+              <h3 className="text-gray-900 mb-2">Is Opportunities Kenya free to use?</h3>
               <p className="text-gray-600">
                 Yes! All our services are completely free. We believe in equal access to opportunities for everyone.
               </p>

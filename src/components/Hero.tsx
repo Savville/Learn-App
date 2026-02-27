@@ -41,7 +41,7 @@ export function Hero() {
               <Search className="w-5 h-5 text-gray-600" />
               <input
                 type="text"
-                placeholder="Search by title, provider, keyword..."
+                placeholder="Search by title, organisation or keyword..."
                 className="flex-1 outline-none bg-transparent text-gray-900 placeholder-gray-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

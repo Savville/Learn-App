@@ -15,6 +15,18 @@ export function About() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+        {/* Logo & Name */}
+        <div className="flex flex-col items-center mb-14">
+          <img
+            src="/Opportunities Kenya Logo 2.png"
+            alt="Opportunities Kenya Logo"
+            className="w-12 h-12 object-contain mb-4 drop-shadow-md"
+          />
+          <h2 className="text-2xl font-bold text-blue-900 tracking-tight text-center">Opportunities Kenya</h2>
+          <p className="text-gray-500 text-sm mt-1 text-center">Your Gateway to Global Opportunities</p>
+        </div>
+
         {/* Who We Are */}
         <section className="mb-16">
           <div className="bg-white rounded-2xl p-8 shadow-sm">
@@ -83,7 +95,7 @@ export function About() {
             <div>
               <h2 className="text-gray-900 mb-4">Why We Exist</h2>
               <p className="text-gray-700 leading-relaxed">
-                Many young people miss out on life-changing opportunities simply because they never hear about them. L-earn Organisation exists to solve that problem—by making sure you stay informed, inspired, and connected to the opportunities that can shape your future.
+                Many young Kenyans miss out on life-changing opportunities simply because they never hear about them. Opportunities Kenya exists to solve that problem—by making sure you stay informed, inspired, and connected to the opportunities that can shape your future.
               </p>
             </div>
           </div>
