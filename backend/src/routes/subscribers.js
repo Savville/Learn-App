@@ -38,8 +38,8 @@ router.post('/', async (req, res) => {
       { upsert: true }
     );
     
-    // Send welcome email
-    await sendWelcomeEmail(email);
+    // Send welcome email in background — don't block the response
+    sendWelcomeEmail(email).catch(err => console.error('Welcome email error:', err.message));
     
     res.status(201).json({ message: 'Successfully subscribed!' });
   } catch (error) {
