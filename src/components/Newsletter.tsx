@@ -129,7 +129,7 @@ export function Newsletter() {
           >
             Stay Updated
           </h2>
-          <p className="text-blue-100" style={{ fontSize: '2.0rem', fontWeight: 600 }}>
+          <p className="text-blue-100" style={{ fontSize: '1.5rem', fontWeight: 600 }}>
             Pick your areas of interest, then subscribe for curated opportunities delivered to you
           </p>
         </div>
@@ -248,7 +248,7 @@ export function Newsletter() {
               <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto mt-2 transition-all duration-300">
                 {/* WhatsApp field */}
                 <div className="flex-1 text-left">
-                  <label className="block text-white/80 text-xs font-semibold mb-1 pl-1">WhatsApp Number (optional)</label>
+                  <label className="block text-white text-xs font-semibold mb-1 pl-1">WhatsApp Number (optional)</label>
                   <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/30 bg-white/10 focus-within:bg-white/20 transition-colors">
                     <Phone className="w-4 h-4 text-gray-300 shrink-0" />
                     <div className="flex items-center flex-1">
@@ -272,7 +272,7 @@ export function Newsletter() {
                 </div>
                 {/* Email field */}
                 <div className="flex-1 text-left">
-                  <label className="block text-white/80 text-xs font-semibold mb-1 pl-1">Email Address *</label>
+                  <label className="block text-white text-xs font-semibold mb-1 pl-1">Email Address *</label>
                   <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/30 bg-white/10 focus-within:bg-white/20 transition-colors">
                     <Mail className="w-4 h-4 text-gray-300 shrink-0" />
                     <input
