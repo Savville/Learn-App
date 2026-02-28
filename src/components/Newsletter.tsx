@@ -129,7 +129,7 @@ export function Newsletter() {
           >
             Stay Updated
           </h2>
-          <p className="text-blue-100" style={{ fontSize: '1.0rem' }}>
+          <p className="text-blue-100" style={{ fontSize: '2.0rem', fontWeight: 600 }}>
             Pick your areas of interest, then subscribe for curated opportunities delivered to you
           </p>
         </div>
@@ -246,41 +246,44 @@ export function Newsletter() {
             {/* ── Contact Inputs ── */}
             {totalInterests > 0 ? (
               <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto mt-2 transition-all duration-300">
-                <div className="flex items-center gap-3 flex-1 px-5 py-4 rounded-xl border border-white/30 bg-white/10 focus-within:bg-white/20 transition-colors">
-                  <Phone className="w-5 h-5 text-gray-300 shrink-0" />
-                  <div className="flex items-center flex-1">
-                    <span className="text-gray-400 font-medium text-sm select-none pointer-events-none">+254 </span>
-                    <input
-                      type="tel"
-                      placeholder={"XXX" + " " + "XXX" + " " + "XXX"}
-                      className="flex-1 bg-transparent text-white placeholder-blue-200 outline-none text-sm pl-2"
-                      value={whatsapp}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, ''); // Only digits
-                        if (value.length <= 9) {
-                          setWhatsapp(value);
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        // Prevent backspace from affecting the prefix
-                        if (e.key === 'Backspace' && whatsapp.length === 0) {
-                          e.preventDefault();
-                        }
-                      }}
-                      maxLength={9}
-                    />
+                {/* WhatsApp field */}
+                <div className="flex-1 text-left">
+                  <label className="block text-white/80 text-xs font-semibold mb-1 pl-1">WhatsApp Number (optional)</label>
+                  <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/30 bg-white/10 focus-within:bg-white/20 transition-colors">
+                    <Phone className="w-4 h-4 text-gray-300 shrink-0" />
+                    <div className="flex items-center flex-1">
+                      <span className="text-gray-400 font-medium text-sm select-none pointer-events-none">+254 </span>
+                      <input
+                        type="tel"
+                        placeholder="XXX XXX XXX"
+                        className="flex-1 bg-transparent text-white placeholder-blue-200 outline-none text-sm pl-2"
+                        value={whatsapp}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          if (value.length <= 9) setWhatsapp(value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Backspace' && whatsapp.length === 0) e.preventDefault();
+                        }}
+                        maxLength={9}
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 flex-1 px-5 py-4 rounded-xl border border-white/30 bg-white/10 focus-within:bg-white/20 transition-colors">
-                  <Mail className="w-5 h-5 text-gray-300 shrink-0" />
-                  <input
-                    type="email"
-                    placeholder="Email address *"
-                    className="flex-1 bg-transparent text-white placeholder-blue-200 outline-none text-sm"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                {/* Email field */}
+                <div className="flex-1 text-left">
+                  <label className="block text-white/80 text-xs font-semibold mb-1 pl-1">Email Address *</label>
+                  <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/30 bg-white/10 focus-within:bg-white/20 transition-colors">
+                    <Mail className="w-4 h-4 text-gray-300 shrink-0" />
+                    <input
+                      type="email"
+                      placeholder="you@example.com"
+                      className="flex-1 bg-transparent text-white placeholder-blue-200 outline-none text-sm"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
