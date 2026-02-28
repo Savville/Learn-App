@@ -70,21 +70,31 @@ export function Opportunities() {
     const fetchOpportunities = async () => {
       try {
         setLoading(true);
+        setError(null);
+
+        // Show local data immediately so there's never a white page
+        const localFiltered = applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding);
+        setOpportunities(localFiltered);
+        setHasMore(false);
+        setLoading(false); // stop spinner — cards visible now, API upgrades silently
+
         const response = await opportunitiesAPI.getAll(buildParams(1));
         const result = response.data;
         // Support both paginated { data, pages } and plain array (fallback)
         const items: Opportunity[] = Array.isArray(result) ? result : result.data;
         const pages: number = result.pages ?? 1;
-        setOpportunities(mergeLogos(items));
-        setHasMore(1 < pages);
+
+        if (items && items.length > 0) {
+          setOpportunities(mergeLogos(items));
+          setHasMore(1 < pages);
+        }
         setPage(1);
-        setError(null);
       } catch (err) {
+        // API failed (Render cold start etc.) — local data already visible, just stop loading
         console.error('Error fetching opportunities:', err);
-        setOpportunities(applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding));
+        const localFiltered = applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding);
+        setOpportunities(localFiltered);
         setHasMore(false);
-        setError(null);
-      } finally {
         setLoading(false);
       }
     };
