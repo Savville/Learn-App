@@ -192,6 +192,26 @@ export async function sendDigestEmail(emails, opportunities) {
   return results;
 }
 
+export async function sendPersonalizedDigestEmail(email, opportunities, isPersonalized = true) {
+  try {
+    const subject = isPersonalized
+      ? `🎯 ${opportunities.length} Opportunit${opportunities.length === 1 ? 'y' : 'ies'} Matching Your Interests`
+      : `🌟 ${opportunities.length} New Opportunities on Opportunities Kenya`;
+    await transporter.sendMail({
+      from: FROM,
+      to: email,
+      replyTo: 'lead@opportunitieskenya.live',
+      subject,
+      html: digestTemplate(opportunities),
+      attachments: emailAttachments,
+    });
+    return true;
+  } catch (error) {
+    console.error(`❌ Personalized digest failed for ${email}:`, error.message);
+    return false;
+  }
+}
+
 export async function sendDeadlineReminder(email, opportunity, daysLeft) {
   try {
     await transporter.sendMail({
