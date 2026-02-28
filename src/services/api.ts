@@ -18,6 +18,17 @@ apiClient.interceptors.response.use(
   }
 );
 
+// ===== Simple in-memory cache (cleared on page refresh) =====
+const cache = new Map<string, { data: any; ts: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCached(key: string) {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL) { cache.delete(key); return null; }
+  return entry.data;
+}
+
 // ===== Opportunities =====
 export const opportunitiesAPI = {
   getAll: (filters?: {
@@ -25,9 +36,27 @@ export const opportunitiesAPI = {
     level?: string;
     fundingType?: string;
     search?: string;
-  }) => apiClient.get('/opportunities', { params: filters }),
+    page?: number;
+    limit?: number;
+  }) => {
+    const key = JSON.stringify(filters || {});
+    const cached = getCached(key);
+    if (cached) return Promise.resolve({ data: cached });
+    return apiClient.get('/opportunities', { params: filters }).then(res => {
+      cache.set(key, { data: res.data, ts: Date.now() });
+      return res;
+    });
+  },
 
-  getOne: (id: string) => apiClient.get(`/opportunities/${id}`),
+  getOne: (id: string) => {
+    const key = `one:${id}`;
+    const cached = getCached(key);
+    if (cached) return Promise.resolve({ data: cached });
+    return apiClient.get(`/opportunities/${id}`).then(res => {
+      cache.set(key, { data: res.data, ts: Date.now() });
+      return res;
+    });
+  },
 
   create: (data: any, apiKey: string) =>
     apiClient.post('/opportunities', data, {

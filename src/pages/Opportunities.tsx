@@ -36,6 +36,9 @@ export function Opportunities() {
   
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
   // Sync filter state when URL params change (e.g. clicking a category card)
@@ -44,36 +47,67 @@ export function Opportunities() {
     setSelectedType(searchParams.get('type') || 'all');
     setSelectedLevel(searchParams.get('level') || 'all');
     setSelectedFunding(searchParams.get('funding') || 'all');
+    setPage(1);
   }, [searchParams]);
 
-  // Fetch opportunities from backend
+  const buildParams = (pageNum: number) => ({
+    category: selectedType !== 'all' ? selectedType : undefined,
+    level: selectedLevel !== 'all' ? selectedLevel : undefined,
+    fundingType: selectedFunding !== 'all' ? selectedFunding : undefined,
+    search: searchQuery || undefined,
+    page: pageNum,
+    limit: 12,
+  });
+
+  const mergeLogos = (opps: Opportunity[]) =>
+    opps.map((opp: Opportunity) => {
+      const local = localOpportunities.find(l => l.id === opp.id);
+      return local ? { ...opp, logoUrl: local.logoUrl } : opp;
+    });
+
+  // Fetch page 1 when filters change
   useEffect(() => {
     const fetchOpportunities = async () => {
       try {
         setLoading(true);
-        const response = await opportunitiesAPI.getAll({
-          category: selectedType !== 'all' ? selectedType : undefined,
-          level: selectedLevel !== 'all' ? selectedLevel : undefined,
-          fundingType: selectedFunding !== 'all' ? selectedFunding : undefined,
-          search: searchQuery || undefined,
-        });
-        const merged = response.data.map((opp: Opportunity) => {
-          const local = localOpportunities.find(l => l.id === opp.id);
-          return local ? { ...opp, logoUrl: local.logoUrl } : opp;
-        });
-        setOpportunities(applyFilters(merged, searchQuery, selectedType, selectedLevel, selectedFunding));
+        const response = await opportunitiesAPI.getAll(buildParams(1));
+        const result = response.data;
+        // Support both paginated { data, pages } and plain array (fallback)
+        const items: Opportunity[] = Array.isArray(result) ? result : result.data;
+        const pages: number = result.pages ?? 1;
+        setOpportunities(mergeLogos(items));
+        setHasMore(1 < pages);
+        setPage(1);
         setError(null);
       } catch (err) {
         console.error('Error fetching opportunities:', err);
         setOpportunities(applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding));
+        setHasMore(false);
         setError(null);
       } finally {
         setLoading(false);
       }
     };
-
     fetchOpportunities();
   }, [searchQuery, selectedType, selectedLevel, selectedFunding]);
+
+  const loadMore = async () => {
+    try {
+      setLoadingMore(true);
+      const nextPage = page + 1;
+      const response = await opportunitiesAPI.getAll(buildParams(nextPage));
+      const result = response.data;
+      const items: Opportunity[] = Array.isArray(result) ? result : result.data;
+      const pages: number = result.pages ?? 1;
+      setOpportunities(prev => [...prev, ...mergeLogos(items)]);
+      setHasMore(nextPage < pages);
+      setPage(nextPage);
+    } catch (err) {
+      console.error('Load more failed:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const countFor = (type: string) => localOpportunities.filter(o => o.category === type).length;
   const filteredOpportunities = opportunities;
@@ -218,11 +252,29 @@ export function Opportunities() {
             </button>
           </div>
         ) : filteredOpportunities.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredOpportunities.map(opportunity => (
-              <OpportunityCard key={opportunity.id} opportunity={opportunity} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredOpportunities.map(opportunity => (
+                <OpportunityCard key={opportunity.id} opportunity={opportunity} />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center mt-12">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="px-10 py-3 bg-blue-900 text-white rounded-sm font-semibold hover:bg-blue-800 transition-colors disabled:opacity-60 flex items-center gap-3"
+                >
+                  {loadingMore ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      Loading...
+                    </>
+                  ) : 'Load More'}
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-16">
             <div className="text-gray-400 mb-4">

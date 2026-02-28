@@ -4,12 +4,15 @@ import { verifyAdminKey } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET all opportunities with filters
+// GET all opportunities with filters + pagination
 router.get('/', async (req, res) => {
   try {
     const db = getDB();
     const { category, level, fundingType, search } = req.query;
-    
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 12));
+    const skip  = (page - 1) * limit;
+
     const filter = {};
     if (category && category !== 'all') filter.category = category;
     if (level && level !== 'all') filter['eligibility.educationLevel'] = level;
@@ -21,13 +24,13 @@ router.get('/', async (req, res) => {
         { provider: { $regex: search, $options: 'i' } }
       ];
     }
-    
-    const opportunities = await db.collection('opportunities')
-      .find(filter)
-      .sort({ dateAdded: -1 })
-      .toArray();
-    
-    res.json(opportunities);
+
+    const [data, total] = await Promise.all([
+      db.collection('opportunities').find(filter).sort({ dateAdded: -1 }).skip(skip).limit(limit).toArray(),
+      db.collection('opportunities').countDocuments(filter),
+    ]);
+
+    res.json({ data, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
