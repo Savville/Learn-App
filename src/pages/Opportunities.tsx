@@ -200,11 +200,8 @@ export function Opportunities() {
       {/* Opportunities Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
-          <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <div className="w-16 h-16 mx-auto border-4 border-gray-200 border-t-blue-900 rounded-full animate-spin"></div>
-            </div>
-            <p className="text-gray-600">Loading opportunities...</p>
+          <div className="fixed inset-0 flex items-center justify-center">
+            <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-900 rounded-full animate-spin"></div>
           </div>
         ) : error ? (
           <div className="text-center py-16">
