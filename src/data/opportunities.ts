@@ -1062,8 +1062,8 @@ export const opportunities: Opportunity[] = [
     title: 'IEEE Africa Entrepreneurship Summit Hackathon 2026',
     provider: 'IEEE Africa & IEEE YESIST12',
     category: 'Hackathon',
-    description: 'A collaborative Hackathon empowering teams to develop scalable, technology-driven solutions addressing Africa\'s most pressing challenges. Top teams win fully funded travel to present at IEEE YESIST12 2026 in Indonesia.',
-    fullDescription: 'This Hackathon is organized as a collaboration between the IEEE Africa Entrepreneurship Summit and IEEE YESIST12, aligned with YESIST12\'s Innovation and Sustainable Impact tracks. It aims to empower participants to develop scalable, technology-driven solutions addressing Africa\'s most pressing social, economic, and environmental challenges. Selected top teams will receive fully funded travel grants — covering transport, accommodation, and all costs — to represent their solutions at IEEE YESIST12 2026 in Indonesia. There will be a virtual info session on March 10, 2026 for further details. Thematic areas: Climate & Sustainable Agriculture, Clean Energy & Sustainable Infrastructure, HealthTech & Well-being, Education & Digital Inclusion, and Economic Empowerment & Smart Communities.',
+    description: 'A collaborative Hackathon empowering students and young innovators to develop scalable, technology-driven solutions addressing Africa\'s most pressing challenges. Top teams win fully funded travel to present at IEEE YESIST12 2026 in Indonesia.',
+    fullDescription: 'This Hackathon is organized as a collaboration between the IEEE Africa Entrepreneurship Summit and IEEE YESIST12, aligned with YESIST12\'s Innovation and Sustainable Impact tracks. It empowers students and young innovators to develop scalable, technology-driven solutions addressing Africa\'s most pressing social, economic, and environmental challenges. Selected top teams will receive fully funded travel grants — covering transport, accommodation, and all costs — to represent their solutions at IEEE YESIST12 2026 in Indonesia.\n\nThematic Areas:\n• Climate & Sustainable Agriculture\n• Clean Energy & Sustainable Infrastructure\n• HealthTech & Well-being\n• Education & Digital Inclusion\n• Economic Empowerment & Smart Communities',
     deadline: '2026-03-10',
     location: 'Indonesia',
     eligibility: {
@@ -1071,9 +1071,8 @@ export const opportunities: Opportunity[] = [
       fieldOfStudy: ['Technology', 'Engineering', 'Business', 'Health Sciences', 'Environmental Science', 'Education'],
       requirements: [
         'Teams of 3 to 5 members',
-        'Open to innovators and entrepreneurs across Africa',
+        'Open to students and young innovators across Africa',
         'Solution must address one of the 5 thematic areas',
-        'Attend virtual info session on March 10, 2026 for higher chances of success',
         'All submitted details must be accurate and truthful'
       ]
     },
@@ -1082,8 +1081,7 @@ export const opportunities: Opportunity[] = [
       'Fully covered accommodation in Indonesia',
       'All costs covered for finals presentation at IEEE YESIST12 2026',
       'Present at IEEE YESIST12 2026 in Indonesia',
-      'Exposure to the global IEEE innovation network',
-      'Recognition across Africa and Asia-Pacific'
+      'Exposure to the global IEEE innovation network'
     ],
     applicationType: 'Online Form',
     applicationLink: 'https://bit.ly/AfricaEntHack',

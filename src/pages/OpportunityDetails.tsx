@@ -151,7 +151,7 @@ export function OpportunityDetails() {
             {/* Description */}
             <div className="mb-8">
               <h2 className="text-gray-900 mb-4 text-xl font-bold">About This Opportunity</h2>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                 {opportunity.fullDescription || opportunity.description}
               </p>
             </div>
