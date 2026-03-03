@@ -213,7 +213,8 @@ export function OpportunityDetails() {
                     href={opportunity.contactLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                    className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-8 py-4 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                    style={{ background: 'linear-gradient(to right, #ef4444, #dc2626)' }}
                   >
                     <span>Contact for Help</span>
                     <ExternalLink className="w-5 h-5" />
