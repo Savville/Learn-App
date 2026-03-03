@@ -1,3 +1,4 @@
+import React from 'react';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
@@ -8,8 +9,23 @@ interface OpportunityCardProps {
   opportunity: Opportunity;
 }
 
+const CATEGORY_FALLBACKS: Record<string, string> = {
+  Scholarship: '/images/opportunities/internship.avif',
+  Internship: '/images/opportunities/internship.avif',
+  Grant: '/images/opportunities/grant.avif',
+  Conference: '/images/opportunities/tech.avif',
+  CallForPapers: '/images/opportunities/tech.avif',
+};
+
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const urgency = calculateUrgency(opportunity.deadline);
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const fallback = CATEGORY_FALLBACKS[opportunity.category] ?? '/images/opportunities/internship.avif';
+    if (e.currentTarget.src !== window.location.origin + fallback) {
+      e.currentTarget.src = fallback;
+    }
+  };
 
   const handleCardClick = async () => {
     try {
@@ -32,6 +48,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
         <img
           src={opportunity.logoUrl}
           alt={opportunity.provider}
+          onError={handleImageError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute top-4 right-4">
