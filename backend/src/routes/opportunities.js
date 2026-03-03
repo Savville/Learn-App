@@ -1,11 +1,14 @@
 import express from 'express';
 import { getDB } from '../config/database.js';
 import { verifyAdminKey } from '../middleware/auth.js';
+import { cacheMiddleware, cacheGet, cacheSet, cacheInvalidatePrefix } from '../config/cache.js';
 
 const router = express.Router();
 
-// GET all opportunities with filters + pagination
-router.get('/', async (req, res) => {
+const CACHE_PREFIX = '/api/opportunities';
+
+// GET all opportunities with filters + pagination (cached 5 min)
+router.get('/', cacheMiddleware(300), async (req, res) => {
   try {
     const db = getDB();
     const { category, level, fundingType, search } = req.query;
@@ -36,23 +39,33 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET single opportunity
+// GET single opportunity (cached 10 min; view count still increments)
 router.get('/:id', async (req, res) => {
   try {
+    const cacheKey = `${CACHE_PREFIX}/${req.params.id}`;
+    const cached = cacheGet(cacheKey);
+
+    // Always increment view count in the background
+    getDB().collection('opportunities').updateOne(
+      { id: req.params.id },
+      { $inc: { views: 1 } }
+    ).catch(() => {});
+
+    if (cached) {
+      res.setHeader('X-Cache', 'HIT');
+      return res.json(cached);
+    }
+
     const db = getDB();
     const opportunity = await db.collection('opportunities')
       .findOne({ id: req.params.id });
-    
+
     if (!opportunity) {
       return res.status(404).json({ error: 'Opportunity not found' });
     }
-    
-    // Increment view count
-    await db.collection('opportunities').updateOne(
-      { id: req.params.id },
-      { $inc: { views: 1 } }
-    );
-    
+
+    cacheSet(cacheKey, opportunity, 600); // 10 minutes
+    res.setHeader('X-Cache', 'MISS');
     res.json(opportunity);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -69,8 +82,8 @@ router.post('/', verifyAdminKey, async (req, res) => {
       views: 0,
       clicks: 0
     };
-    
     const result = await db.collection('opportunities').insertOne(opportunity);
+    cacheInvalidatePrefix(CACHE_PREFIX);
     res.status(201).json({ id: result.insertedId, ...opportunity });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -85,11 +98,10 @@ router.put('/:id', verifyAdminKey, async (req, res) => {
       { id: req.params.id },
       { $set: req.body }
     );
-    
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: 'Opportunity not found' });
     }
-    
+    cacheInvalidatePrefix(CACHE_PREFIX);
     res.json({ message: 'Opportunity updated successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -101,11 +113,10 @@ router.delete('/:id', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     const result = await db.collection('opportunities').deleteOne({ id: req.params.id });
-    
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: 'Opportunity not found' });
     }
-    
+    cacheInvalidatePrefix(CACHE_PREFIX);
     res.json({ message: 'Opportunity deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });

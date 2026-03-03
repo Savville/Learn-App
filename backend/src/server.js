@@ -51,7 +51,12 @@ app.use('/api/admin', adminRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'Backend is running', timestamp: new Date() });
+  res.json({
+    status: 'Backend is running',
+    timestamp: new Date(),
+    uptime: Math.floor(process.uptime()) + 's',
+    cache: 'in-memory (5min list, 10min single)'
+  });
 });
 
 // Error Handler
