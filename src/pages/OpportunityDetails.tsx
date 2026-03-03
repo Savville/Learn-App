@@ -2,12 +2,14 @@ import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
 import { Calendar, ExternalLink, ArrowLeft, Tag } from 'lucide-react';
-import { calculateUrgency } from '../utils/dateUtils';
+import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 
 export function OpportunityDetails() {
-  const { id } = useParams();
+  const { slug } = useParams();
+  const localMatch = localOpportunities.find(l => toSlug(l.title) === slug);
+  const id = localMatch?.id;
   const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export function OpportunityDetails() {
     if (id) {
       fetchOpportunity();
     }
-  }, [id]);
+  }, [slug]);
 
   if (loading) {
     return (
@@ -236,7 +238,7 @@ export function OpportunityDetails() {
                 return (
                   <Link
                     key={opp.id}
-                    to={`/opportunity/${opp.id}`}
+                    to={`/opportunity/${toSlug(opp.title)}`}
                     className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all"
                   >
                     <h3 className="text-gray-900 mb-2 line-clamp-2 font-semibold">{opp.title}</h3>

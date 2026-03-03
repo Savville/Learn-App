@@ -3,7 +3,7 @@ import { ArrowRight, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
 import type { Opportunity } from '../data/opportunities';
-import { calculateUrgency } from '../utils/dateUtils';
+import { calculateUrgency, toSlug } from '../utils/dateUtils';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -41,7 +41,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
 
   return (
     <Link
-      to={`/opportunity/${opportunity.id}`}
+      to={`/opportunity/${toSlug(opportunity.title)}`}
       onClick={handleCardClick}
       className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
     >

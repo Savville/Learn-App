@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const toSlug = (title) => title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+
 // Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -89,7 +91,7 @@ const opportunityCard = (opp) => `
     <p style="color:#475569;font-size:13px;line-height:1.6;margin:0 0 14px;font-family:Arial,sans-serif;">
       ${opp.description ? opp.description.substring(0, 140).trim() + '...' : ''}
     </p>
-    <a href="${FRONTEND_URL}/opportunity/${opp.id}" style="color:#1a4a7a;font-size:13px;font-weight:700;text-decoration:none;font-family:Arial,sans-serif;">
+    <a href="${FRONTEND_URL}/opportunity/${toSlug(opp.title)}" style="color:#1a4a7a;font-size:13px;font-weight:700;text-decoration:none;font-family:Arial,sans-serif;">
       View Details & Apply
     </a>
   </div>`;
@@ -112,7 +114,7 @@ const deadlineReminderTemplate = (opportunity, daysLeft) => wrapEmail(`
       </p>
     </div>
     ${opportunityCard(opportunity)}
-    ${ctaButton('Apply Now', `${FRONTEND_URL}/opportunity/${opportunity.id}`)}
+    ${ctaButton('Apply Now', `${FRONTEND_URL}/opportunity/${toSlug(opportunity.title)}`)}
   </div>`);
 
 // Send helpers
