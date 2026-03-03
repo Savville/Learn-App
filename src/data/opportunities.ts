@@ -1065,7 +1065,7 @@ export const opportunities: Opportunity[] = [
     description: 'A collaborative Hackathon empowering teams to develop scalable, technology-driven solutions addressing Africa\'s most pressing challenges. Top teams win fully funded travel to present at IEEE YESIST12 2026 in Indonesia.',
     fullDescription: 'This Hackathon is organized as a collaboration between the IEEE Africa Entrepreneurship Summit and IEEE YESIST12, aligned with YESIST12\'s Innovation and Sustainable Impact tracks. It aims to empower participants to develop scalable, technology-driven solutions addressing Africa\'s most pressing social, economic, and environmental challenges. Selected top teams will receive fully funded travel grants — covering transport, accommodation, and all costs — to represent their solutions at IEEE YESIST12 2026 in Indonesia. There will be a virtual info session on March 10, 2026 for further details. Thematic areas: Climate & Sustainable Agriculture, Clean Energy & Sustainable Infrastructure, HealthTech & Well-being, Education & Digital Inclusion, and Economic Empowerment & Smart Communities.',
     deadline: '2026-03-10',
-    location: 'Africa (Virtual) → Indonesia (Finals)',
+    location: 'Indonesia',
     eligibility: {
       educationLevel: 'Both',
       fieldOfStudy: ['Technology', 'Engineering', 'Business', 'Health Sciences', 'Environmental Science', 'Education'],
