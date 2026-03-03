@@ -1051,6 +1051,46 @@ const opportunities = [
     logoUrl: '/images/opportunities/wfp.png',
     views: 0,
     clicks: 0
+  },
+  {
+    id: '31',
+    title: 'AFRIKA KOMMT! Fellowship Programme 2026/2028',
+    provider: 'AFRIKA KOMMT!',
+    category: 'Scholarship',
+    description: 'A prestigious fellowship connecting young African professionals with leading German companies for 12 months of hands-on work experience in Germany.',
+    fullDescription: 'AFRIKA KOMMT! is a unique initiative by leading German companies offering young professionals from sub-Saharan Africa the opportunity to gain valuable work experience in Germany. Fellows are embedded in partner companies including BioNTech, B.Braun, Boehringer Ingelheim, Merck KGaA, ODDO BHF, Robert Bosch, and SAP SE, working on real projects for 12 months and gaining international exposure, mentorship, and professional development.',
+    deadline: '2026-03-22',
+    location: 'Germany',
+    eligibility: {
+      educationLevel: 'Graduate',
+      fieldOfStudy: ['Business', 'Engineering', 'Technology', 'Sciences', 'Finance'],
+      requirements: [
+        'Citizen of a sub-Saharan African country',
+        'University degree (Bachelor\'s or Master\'s)',
+        'Minimum 2 years of professional work experience',
+        'Strong command of English (German is a plus)',
+        'Between 28 and 35 years old at the start of the programme',
+        'Must return to home country after completion',
+        'Not currently living in Germany or enrolled in a German academic programme'
+      ]
+    },
+    benefits: [
+      'Paid 12-month fellowship at a top German company',
+      'Partner companies: BioNTech, B.Braun, Boehringer Ingelheim, Merck KGaA, ODDO BHF, Robert Bosch, SAP SE',
+      'Monthly stipend and accommodation support',
+      'Intercultural training and German language course',
+      'Networking events and alumni community',
+      'Mentorship from senior company professionals',
+      'Return flight and visa support'
+    ],
+    applicationType: 'Online Application',
+    applicationLink: 'https://afrika-kommt.de/15th-apply/',
+    duration: '1 year',
+    featured: true,
+    dateAdded: '2026-03-03',
+    logoUrl: '/images/opportunities/afrika_kommt.png',
+    views: 0,
+    clicks: 0
   }
 ];
 
@@ -1065,16 +1105,16 @@ async function seedDatabase() {
     console.log('🧹 Clearing existing opportunities...');
     await collection.deleteMany({});
 
-    console.log('📥 Inserting 30 opportunities into MongoDB...');
+    console.log('📥 Inserting 31 opportunities into MongoDB...');
     const result = await collection.insertMany(opportunities);
 
     console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
     console.log('\n📊 Database Summary:');
     console.log(`   - Total opportunities: ${result.insertedCount}`);
     console.log(`   - Kenya-based: 17`);
-    console.log(`   - International: 13`);
-    console.log(`   - Categories: CallForPapers (4), Internship (12), Grant (5), Conference (4), Scholarship (5)`);
-    console.log(`   - Featured opportunities: 19`);
+    console.log(`   - International: 14`);
+    console.log(`   - Categories: CallForPapers (4), Internship (12), Grant (5), Conference (4), Scholarship (6)`);
+    console.log(`   - Featured opportunities: 20`);
 
   } catch (error) {
     console.error('❌ Error seeding database:', error.message);
