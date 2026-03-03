@@ -2,7 +2,7 @@ export interface Opportunity {
   id: string;
   title: string;
   provider: string;
-  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Hackathon' | 'Event' | 'Volunteer' | 'Other';
+  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Other';
   description: string;
   fullDescription: string;
   deadline: string;
@@ -1022,7 +1022,7 @@ export const opportunities: Opportunity[] = [
     id: '31',
     title: 'AFRIKA KOMMT! Fellowship Programme 2026/2028',
     provider: 'AFRIKA KOMMT!',
-    category: 'Scholarship',
+    category: 'Fellowship',
     description: 'One-year career and life transformational fellowship placing visionary young African professionals at leading German companies including SAP, Bosch, Merck, BioNTech and more.',
     fullDescription: 'AFRIKA KOMMT! brings together the most visionary young leaders from Africa and leading German companies. The African fellows dive deep into German corporate culture, business spirit, and gain an unparalleled one-year career experience. Companies benefit from the expertise, local network and unique African perspective of the young professionals. Available positions span AI, engineering, business, HR, finance, sustainability, and more across 7 top German companies: BioNTech SE, B. Braun SE, Boehringer Ingelheim, Merck KGaA, ODDO BHF, Robert Bosch GmbH, and SAP SE.',
     deadline: '2026-03-22',
@@ -1054,6 +1054,6 @@ export const opportunities: Opportunity[] = [
     duration: '1 year',
     featured: true,
     dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/afrika_kommt.png'
+    logoUrl: '/images/opportunities/fellowship.avif'
   }
 ];

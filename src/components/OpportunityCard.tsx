@@ -11,6 +11,8 @@ interface OpportunityCardProps {
 
 const CATEGORY_FALLBACKS: Record<string, string> = {
   Scholarship: '/images/opportunities/internship.avif',
+  Fellowship: '/images/opportunities/fellowship.avif',
+  Attachment: '/images/opportunities/attachment.jpeg',
   Internship: '/images/opportunities/internship.avif',
   Grant: '/images/opportunities/grant.avif',
   Conference: '/images/opportunities/tech.avif',

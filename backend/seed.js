@@ -1056,7 +1056,7 @@ const opportunities = [
     id: '31',
     title: 'AFRIKA KOMMT! Fellowship Programme 2026/2028',
     provider: 'AFRIKA KOMMT!',
-    category: 'Scholarship',
+    category: 'Fellowship',
     description: 'A prestigious fellowship connecting young African professionals with leading German companies for 12 months of hands-on work experience in Germany.',
     fullDescription: 'AFRIKA KOMMT! is a unique initiative by leading German companies offering young professionals from sub-Saharan Africa the opportunity to gain valuable work experience in Germany. Fellows are embedded in partner companies including BioNTech, B.Braun, Boehringer Ingelheim, Merck KGaA, ODDO BHF, Robert Bosch, and SAP SE, working on real projects for 12 months and gaining international exposure, mentorship, and professional development.',
     deadline: '2026-03-22',
@@ -1088,7 +1088,7 @@ const opportunities = [
     duration: '1 year',
     featured: true,
     dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/afrika_kommt.png',
+    logoUrl: '/images/opportunities/fellowship.avif',
     views: 0,
     clicks: 0
   }
