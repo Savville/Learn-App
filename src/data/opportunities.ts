@@ -1017,5 +1017,43 @@ export const opportunities: Opportunity[] = [
     featured: false,
     dateAdded: '2026-02-27',
     logoUrl: '/images/opportunities/wfp.png'
+  },
+  {
+    id: '31',
+    title: 'AFRIKA KOMMT! Fellowship Programme 2026/2028',
+    provider: 'AFRIKA KOMMT!',
+    category: 'Scholarship',
+    description: 'One-year career and life transformational fellowship placing visionary young African professionals at leading German companies including SAP, Bosch, Merck, BioNTech and more.',
+    fullDescription: 'AFRIKA KOMMT! brings together the most visionary young leaders from Africa and leading German companies. The African fellows dive deep into German corporate culture, business spirit, and gain an unparalleled one-year career experience. Companies benefit from the expertise, local network and unique African perspective of the young professionals. Available positions span AI, engineering, business, HR, finance, sustainability, and more across 7 top German companies: BioNTech SE, B. Braun SE, Boehringer Ingelheim, Merck KGaA, ODDO BHF, Robert Bosch GmbH, and SAP SE.',
+    deadline: '2026-03-22',
+    location: 'Germany',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Business', 'Engineering', 'Technology', 'Finance', 'Human Resources', 'Science', 'Management'],
+      requirements: [
+        'Citizen of any African country',
+        'University degree in a relevant subject',
+        'Postgraduate degree (e.g. MBA) is an advantage',
+        '2 to 5 years of work experience',
+        'Excellent English language skills',
+        'Basic knowledge of German is an advantage',
+        'Not older than 35 years at time of application'
+      ]
+    },
+    benefits: [
+      'One year career experience at a leading German company',
+      'Leadership and management competency development',
+      'Access to networks and career acceleration opportunities',
+      'Intercultural competence and global perspective',
+      'Positions available at SAP, Bosch, Merck, BioNTech, Boehringer Ingelheim, B. Braun and ODDO BHF',
+      'Exposure to German corporate culture and innovation',
+      'Personal and professional growth'
+    ],
+    applicationType: 'Online Form',
+    applicationLink: 'https://afrika-kommt.de/15th-apply/',
+    duration: '1 year',
+    featured: true,
+    dateAdded: '2026-03-03',
+    logoUrl: '/images/opportunities/afrika_kommt.png'
   }
 ];
