@@ -1,11 +1,62 @@
 import { useParams, Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
 import { Calendar, ExternalLink, ArrowLeft, Tag } from 'lucide-react';
 import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 import { useSEO } from '../hooks/useSEO';
+
+function renderDescription(text: string): JSX.Element {
+  const lines = text.split('\n');
+  const elements: JSX.Element[] = [];
+  let key = 0;
+
+  for (const raw of lines) {
+    const line = raw.trim();
+
+    // Skip separator lines
+    if (!line || /^[─\-\u2014]{3,}$/.test(line)) continue;
+
+    // ALL-CAPS heading (min 4 chars, has letters)
+    const isHeading = line === line.toUpperCase() && line.length > 4 && /[A-Z]/.test(line);
+
+    // Emoji-led line — bold label
+    const isEmojiLabel = /^[\u{1F300}-\u{1FFFF}\u{2600}-\u{27FF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FEFF}]/u.test(line);
+
+    // Bullet point
+    const isBullet = /^[•\-\*]/.test(line);
+
+    if (isHeading) {
+      elements.push(
+        <h3 key={key++} className="text-base font-bold text-gray-900 mt-6 mb-2 pb-1 border-b border-blue-100">
+          {line}
+        </h3>
+      );
+    } else if (isEmojiLabel) {
+      elements.push(
+        <p key={key++} className="font-semibold text-gray-800 mt-4 mb-1">
+          {line}
+        </p>
+      );
+    } else if (isBullet) {
+      elements.push(
+        <li key={key++} className="flex gap-2 text-gray-700 list-none">
+          <span className="text-blue-500 mt-1 flex-shrink-0">•</span>
+          <span>{line.replace(/^[•\-\*]\s*/, '')}</span>
+        </li>
+      );
+    } else {
+      elements.push(
+        <p key={key++} className="text-gray-700 leading-relaxed">
+          {line}
+        </p>
+      );
+    }
+  }
+
+  return <div className="space-y-2">{elements}</div>;
+}
 
 export function OpportunityDetails() {
   const { slug } = useParams();
@@ -166,9 +217,7 @@ export function OpportunityDetails() {
             {/* Description */}
             <div className="mb-8">
               <h2 className="text-gray-900 mb-4 text-xl font-bold">About This Opportunity</h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {opportunity.fullDescription || opportunity.description}
-              </p>
+              {renderDescription(opportunity.fullDescription || opportunity.description)}
             </div>
 
             {/* Thematic Areas — 3-column grid */}
