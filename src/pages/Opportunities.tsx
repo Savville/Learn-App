@@ -5,6 +5,7 @@ import { opportunitiesAPI } from '../services/api';
 import { Search, Filter } from 'lucide-react';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
+import { useSEO } from '../hooks/useSEO';
 
 const applyFilters = (
   opps: Opportunity[],
@@ -33,7 +34,13 @@ export function Opportunities() {
   const [selectedLevel, setSelectedLevel] = useState(searchParams.get('level') || 'all');
   const [selectedFunding, setSelectedFunding] = useState(searchParams.get('funding') || 'all');
   const [showFilters, setShowFilters] = useState(false);
-  
+
+  useSEO({
+    title: 'All Opportunities',
+    description: 'Browse scholarships, fellowships, internships, grants, conferences and more curated for African students and young professionals.',
+    url: '/opportunities'
+  });
+
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);

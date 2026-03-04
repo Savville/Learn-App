@@ -1,5 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
@@ -13,6 +16,21 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Security headers
+app.use(helmet());
+
+// Gzip compression
+app.use(compression());
+
+// Rate limiting — 100 requests per IP per 15 min
+app.use('/api/', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please slow down.' }
+}));
 
 // Middleware
 app.use(cors({

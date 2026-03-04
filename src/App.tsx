@@ -8,6 +8,7 @@ import { OpportunityDetails } from './pages/OpportunityDetails';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { PageLoader } from './components/PageLoader';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function AppContent() {
   const location = useLocation();
@@ -41,8 +42,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }

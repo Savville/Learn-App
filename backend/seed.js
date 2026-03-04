@@ -1128,6 +1128,120 @@ const opportunities = [
     logoUrl: '/images/opportunities/ieee_yesist.jpeg',
     views: 0,
     clicks: 0
+  },
+  {
+    id: '33',
+    title: '2026 IEEE PES/IAS PowerAfrica Conference — Call for Papers',
+    provider: 'IEEE Power & Energy Society (PES) / Industry Applications Society (IAS)',
+    category: 'CallForPapers',
+    description: 'Submit a peer-reviewed paper to the premier IEEE energy conference happening in Nairobi, Kenya. Get published on IEEE Xplore, access travel grants, and network with global energy leaders — with a massive local cost advantage for Kenyan authors.',
+    fullDescription: `The 2026 IEEE PES/IAS PowerAfrica Conference is the premier international forum for researchers, engineers, and practitioners working at the frontier of energy systems and industrial decarbonization. Held under the theme "Accelerating Resilient Energy Systems & Industrial Decarbonization through Innovation," the conference convenes academia, government, industry, electric utilities, telecom, manufacturing, and tech firms.
+
+The conference takes place in Nairobi, Kenya, 21–25 September 2026 — meaning Kenyan authors enjoy the full prestige of an international IEEE publication without the burden of expensive intercontinental travel.
+
+────────────────────────────────────
+ WHY PUBLISHING AN IEEE PAPER MATTERS
+────────────────────────────────────
+
+📖 Global Visibility via IEEE Xplore
+Accepted papers are permanently published on IEEE Xplore — the world's leading engineering database, accessed by millions of researchers and companies globally. Your work becomes fully searchable, citable, and part of the permanent tech record.
+
+🎓 Academic & Career Prestige
+IEEE is the gold standard in engineering and technology. A peer-reviewed IEEE paper on your CV dramatically improves your chances of MS/PhD admission, scholarship awards, and hiring at top-tier tech or energy firms worldwide.
+
+🤝 Elite Networking
+PowerAfrica convenes decision-makers from academia, government energy regulators, utilities (like KenGen, KPLC), telecom, and global manufacturing firms. Presenting a paper gives you a direct line to collaborate with future employers, supervisors, and funders.
+
+✅ Proof of Skill
+Surviving the rigorous IEEE double-blind peer-review process validates your ability to conduct original research, handle complex data, and communicate technical ideas to an expert international audience.
+
+────────────────────────────────────
+ FUNDING & FINANCIAL SUPPORT
+────────────────────────────────────
+
+💰 Student Travel Grants (STGs)
+Both IEEE PES and IAS offer competitive travel grants typically ranging from $500–$1,500 USD to help student authors cover flights, visas, and accommodation. Grants are competitive and require an accepted paper.
+
+🏨 Student Housing Support
+IEEE PES runs housing support programs providing complimentary hotel accommodation (usually up to 4 nights) for student members presenting papers or posters.
+
+🎟️ Steep Registration Discounts
+Professional registration costs $600–$800 USD. IEEE Student Members pay heavily subsidised rates — often 50% or more off the standard price.
+
+🏆 Awards & Cash Prizes
+The conference features Best Paper Awards, Outstanding Student Scholarships, and Student Poster Contests with significant cash prizes, plaques, and elevated professional recognition.
+
+⚠️ THE REIMBURSEMENT REALITY
+IEEE travel grants are almost entirely reimbursement-based. You must front the money for flights and accommodation, attend the conference, submit receipts, and receive payment back within ~45 days post-conference. You need upfront funding from your university department or personal savings before you go.
+
+────────────────────────────────────
+ IEEE MEMBERSHIP — WHAT YOU NEED
+────────────────────────────────────
+
+To access the cheapest registration rates or be eligible for travel grants, you must be an active IEEE Student Member AND a member of the sponsoring society (PES or IAS) at the time of application. Student membership costs approximately $32 USD/year globally, which is a worthwhile investment given the discounts and grant access it unlocks.
+
+Join at: ieee.org/membership
+
+────────────────────────────────────
+ THE NAIROBI LOCAL ADVANTAGE
+────────────────────────────────────
+
+Because this year's conference is in Nairobi, Kenyan authors have a rare and massive financial advantage. You can earn the full international prestige of an IEEE PowerAfrica publication — without expensive intercontinental flights, heavy hotel costs, or visa bureaucracy. This is a once-in-a-career opportunity for local students and engineers to step onto the global stage in their own city.
+
+────────────────────────────────────
+ SUBMISSION REQUIREMENTS
+────────────────────────────────────
+
+• Use the official IEEE double-column paper template (A4 or US Letter)
+• Papers will be desk-rejected for poor English, lack of novel contribution, or incorrect formatting
+• IEEE uses aggressive plagiarism detection — self-plagiarism also results in an immediate ban
+• Peer review is double-blind and rigorous — this is not pay-to-play
+
+📅 Paper Submission Deadline: 05 April 2026
+📅 Acceptance Notification: 22 May 2026`,
+    deadline: '2026-04-05',
+    location: 'Nairobi, Kenya',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Electrical Engineering', 'Power Systems', 'Renewable Energy', 'Computer Science', 'AI & Machine Learning', 'Telecommunications', 'Environmental Engineering', 'Industrial Engineering'],
+      requirements: [
+        'Open to undergraduate students, postgraduate researchers, academics, and industry professionals',
+        'Must submit an original, unpublished paper using the IEEE double-column template',
+        'IEEE Student Membership required to access travel grants and discounted registration',
+        'Paper must make a novel technical contribution — no plagiarism or self-plagiarism',
+        'All co-authors must be listed accurately at the time of submission',
+        'At least one author must register for the conference if the paper is accepted'
+      ]
+    },
+    benefits: [
+      'Paper permanently published on IEEE Xplore — globally searchable and citable',
+      'IEEE PES/IAS Student Travel Grants: $500–$1,500 USD (reimbursement-based)',
+      'Complimentary hotel accommodation for student presenters (up to 4 nights)',
+      'Heavily discounted conference registration for IEEE Student Members (50%+ off)',
+      'Best Paper Awards, Outstanding Student Scholarships, and cash prizes',
+      'Direct networking with global energy researchers, regulators, and industry leaders',
+      'Massive cost advantage for Kenyan authors — no international flights needed',
+      'Peer-reviewed credential that significantly boosts CV for MS/PhD admissions and top-tier jobs'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://ieee-powerafrica.org/call-for-papers/',
+    fundingType: 'Partially Funded',
+    duration: '21–25 September 2026',
+    featured: true,
+    dateAdded: '2026-03-04',
+    logoUrl: '/images/opportunities/ieee_pac.jpeg',
+    thematicAreas: [
+      { heading: 'Renewable Energy & Low-Carbon Technologies', topics: ['Renewable generation modeling & forecasting', 'Inverter-based and grid-forming technologies', 'Hybrid and low-carbon power systems', 'Power electronics for renewable integration'] },
+      { heading: 'Power System Resilience & Infrastructure', topics: ['Power system planning and optimization', 'Grid resilience and climate adaptation', 'Protection, stability, and control', 'Transmission and distribution infrastructure'] },
+      { heading: 'Digitalization, AI & Cyber-Physical Systems', topics: ['AI and machine learning in power systems', 'Digital twins and advanced analytics', 'Smart grids and automation', 'Cybersecurity and cyber-physical resilience'] },
+      { heading: 'Power Systems & Energy Storage', topics: ['Power generation, transmission & distribution', 'Power system stability & failure analysis', 'Security in smart grid networks', 'Energy storage for renewables integration'] },
+      { heading: 'Distributed Energy & Microgrids', topics: ['EV systems, battery tech & management', 'Grid-to-Vehicle (G2V) and Vehicle-to-Grid (V2G)', 'V2I, IoT and communication technologies', 'Control systems, drives & charging stations'] },
+      { heading: 'Industrial Electrification & Decarbonization', topics: ['Industrial electrification pathways', 'Electric mobility and EV socio-economic impacts', 'Sustainable transport safety', 'Decarbonization business models & policy'] },
+      { heading: 'Energy Markets, Policy & Regulation', topics: ['Energy market design and regulation', 'Cross-sector integration frameworks', 'Policy for resilient low-carbon systems', 'Africa-specific energy transition strategies'] },
+      { heading: 'Short Papers & Emerging Ideas', topics: ['Emerging ideas and early-stage research', 'Case studies from African energy projects', 'Work-in-progress and pilot studies', 'Student and early-career researcher papers'] }
+    ],
+    views: 0,
+    clicks: 0
   }
 ];
 
@@ -1142,16 +1256,16 @@ async function seedDatabase() {
     console.log('🧹 Clearing existing opportunities...');
     await collection.deleteMany({});
 
-    console.log('📥 Inserting 32 opportunities into MongoDB...');
+    console.log('📥 Inserting 33 opportunities into MongoDB...');
     const result = await collection.insertMany(opportunities);
 
     console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
     console.log('\n📊 Database Summary:');
     console.log(`   - Total opportunities: ${result.insertedCount}`);
-    console.log(`   - Kenya-based: 17`);
-    console.log(`   - International: 14`);
-    console.log(`   - Categories: CallForPapers (4), Internship (12), Grant (5), Conference (4), Scholarship (6)`);
-    console.log(`   - Featured opportunities: 20`);
+    console.log(`   - Kenya-based: 18`);
+    console.log(`   - International: 15`);
+    console.log(`   - Categories: CallForPapers (5), Internship (12), Grant (5), Conference (4), Scholarship (6)`);
+    console.log(`   - Featured opportunities: 21`);
 
   } catch (error) {
     console.error('❌ Error seeding database:', error.message);

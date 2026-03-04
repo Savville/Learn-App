@@ -5,6 +5,7 @@ import { Calendar, ExternalLink, ArrowLeft, Tag } from 'lucide-react';
 import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
+import { useSEO } from '../hooks/useSEO';
 
 export function OpportunityDetails() {
   const { slug } = useParams();
@@ -16,6 +17,18 @@ export function OpportunityDetails() {
   const [relatedOpportunities, setRelatedOpportunities] = useState<Opportunity[]>([]);
 
   const urgency = opportunity ? calculateUrgency(opportunity.deadline) : null;
+
+  useSEO({
+    title: opportunity?.title,
+    description: opportunity
+      ? `${opportunity.description} — Deadline: ${opportunity.deadline}. Provider: ${opportunity.provider}.`
+      : undefined,
+    image: opportunity?.logoUrl?.startsWith('/')
+      ? `https://opportunitieskenya.live${opportunity.logoUrl}`
+      : opportunity?.logoUrl,
+    url: slug ? `/opportunity/${slug}` : undefined,
+    type: 'article'
+  });
 
   // Fetch the opportunity details
   useEffect(() => {
@@ -157,6 +170,28 @@ export function OpportunityDetails() {
                 {opportunity.fullDescription || opportunity.description}
               </p>
             </div>
+
+            {/* Thematic Areas — 3-column grid */}
+            {opportunity.thematicAreas && opportunity.thematicAreas.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-gray-900 mb-4 text-xl font-bold">Thematic Areas</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {opportunity.thematicAreas.map((area, i) => (
+                    <div key={i} className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                      <h4 className="text-blue-800 font-semibold text-sm mb-2">{area.heading}</h4>
+                      <ul className="space-y-1">
+                        {area.topics.map((topic, j) => (
+                          <li key={j} className="flex items-start gap-2 text-gray-700 text-sm">
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></span>
+                            {topic}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Eligibility Requirements */}
             <div className="mb-8">

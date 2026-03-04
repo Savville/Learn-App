@@ -1,6 +1,12 @@
 import { Target, Eye, Heart, Users } from 'lucide-react';
+import { useSEO } from '../hooks/useSEO';
 
 export function About() {
+  useSEO({
+    title: 'About Us',
+    description: 'Learn about Opportunities Kenya — empowering African students and young professionals by connecting them with life-changing opportunities worldwide.',
+    url: '/about'
+  });
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -24,7 +30,7 @@ export function About() {
             className="w-12 h-12 object-contain mb-4 drop-shadow-md"
           />
           <h2 className="text-2xl font-bold text-blue-900 tracking-tight text-center">Opportunities Kenya</h2>
-          <p className="text-gray-500 text-sm mt-1 text-center">Your Gateway to Global Opportunities</p>
+          <p className="text-gray-500 text-sm mt-1 text-center">Your Gateway to Scholarly Excellence</p>
         </div>
 
         {/* Who We Are */}

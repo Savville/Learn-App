@@ -1,7 +1,13 @@
 import { Mail, MessageSquare, Instagram, Linkedin, MessageCircle, Send } from 'lucide-react';
 import { useState } from 'react';
+import { useSEO } from '../hooks/useSEO';
 
 export function Contact() {
+  useSEO({
+    title: 'Contact Us',
+    description: 'Get in touch with Opportunities Kenya. Have questions, suggestions, or want to partner with us?',
+    url: '/contact'
+  });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
