@@ -314,7 +314,7 @@ export function OpportunityDetails() {
             <div className="mt-4 text-center">
               <Link
                 to="/#newsletter"
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-gray-200 text-sm font-semibold text-gray-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-blue-200 text-sm font-semibold text-blue-600 hover:text-blue-800 hover:border-blue-400 hover:bg-blue-50 transition-all"
               >
                 <Bell className="w-4 h-4" />
                 Subscribe for more opportunities like this
