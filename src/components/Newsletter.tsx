@@ -301,7 +301,7 @@ export function Newsletter() {
                 disabled={loading || totalInterests === 0 || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
                 className={`px-8 py-3 rounded-xl transition-all font-bold tracking-wide text-lg border-2 border-white ${
                   totalInterests === 0 || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-60'
+                    ? 'bg-white/40 text-blue-700 cursor-not-allowed opacity-70'
                     : 'bg-white text-blue-700 shadow-md hover:bg-gray-100 hover:shadow-xl hover:text-blue-800'
                 } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
               >

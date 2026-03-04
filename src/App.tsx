@@ -22,6 +22,22 @@ function AppContent() {
     }
   }, [location.pathname]);
 
+  // Scroll to hash after navigation (e.g. /#newsletter)
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const scrollToEl = () => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+      // Small delay to let the page render before scrolling
+      const timer = setTimeout(scrollToEl, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname, location.hash]);
+
   return (
     <div className="min-h-screen flex flex-col">
       {loading && <PageLoader />}
