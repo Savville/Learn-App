@@ -454,40 +454,6 @@ const opportunities = [
     clicks: 0
   },
   {
-    id: '14',
-    title: 'Youth in Renewable Energy Summit',
-    provider: 'African Renewable Energy Alliance',
-    category: 'Conference',
-    description: 'Three-day summit connecting young clean energy professionals and entrepreneurs in Nairobi.',
-    fullDescription: 'The Youth in Renewable Energy Summit brings together young professionals, entrepreneurs, and students passionate about clean energy. Features panel discussions, start-up pitches, investor meetings, and hands-on workshops on solar, wind, and biomass technologies.',
-    deadline: '2026-02-20',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'Both',
-      requirements: [
-        'Age 18-35 years',
-        'Interest in renewable energy sector',
-        'Student or early-career professional',
-        'Application with motivation statement'
-      ]
-    },
-    benefits: [
-      'Discounted conference fee (KES 3,000 for students)',
-      'Meals and refreshments provided',
-      'Networking with energy leaders',
-      'Access to investor panel',
-      'Certificate of attendance'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://area.co.ke/youth-summit',
-    duration: '3 days',
-    featured: true,
-    dateAdded: '2026-02-20',
-    logoUrl: '/images/opportunities/conference.jpeg',
-    views: 0,
-    clicks: 0
-  },
-  {
     id: '15',
     title: 'Call for Papers: Sustainable Development in East Africa',
     provider: 'Journal of East African Development',
@@ -518,110 +484,6 @@ const opportunities = [
     featured: true,
     dateAdded: '2026-02-21',
     logoUrl: '/images/opportunities/call-for-papers.png',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '16',
-    title: 'Microsoft TEALS Mentorship Program',
-    provider: 'Microsoft Kenya',
-    category: 'Internship',
-    description: 'Virtual mentorship in tech skills and professional development for Kenyan university students.',
-    fullDescription: 'Microsoft TEALS pairs Kenyan students with tech professionals for virtual mentoring on coding, career navigation, and industry insights. Weekly sessions build practical skills and professional network while students complete their degrees.',
-    deadline: '2026-02-28',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'UnderGrad',
-      fieldOfStudy: ['Computer Science', 'IT', 'Engineering'],
-      requirements: [
-        'Currently enrolled in Kenyan university',
-        'First or second year student',
-        'Basic programming knowledge',
-        'Commitment to weekly mentorship sessions'
-      ]
-    },
-    benefits: [
-      'Free mentorship from Microsoft professionals',
-      'Tech skills training',
-      'Career guidance',
-      'Networking opportunities',
-      'Certificate of participation'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://microsoft.com/teals/apply',
-    duration: '6 months',
-    featured: false,
-    dateAdded: '2026-02-22',
-    logoUrl: '/images/opportunities/tech.avif',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '17',
-    title: 'African Innovation Scholarship - AMREF Foundation',
-    provider: 'AMREF Health Foundation',
-    category: 'Scholarship',
-    description: 'Scholarships for health science students innovating solutions to African healthcare challenges.',
-    fullDescription: 'AMREF offers scholarships to African health science students with innovative ideas. Recipients develop health solutions while studying, gain mentorship, and access laboratory facilities and funding for prototyping.',
-    deadline: '2026-03-31',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'UnderGrad',
-      fieldOfStudy: ['Medicine', 'Nursing', 'Public Health', 'Biomedical Science'],
-      requirements: [
-        'Enrolled in Kenyan university health program',
-        'Innovative health solution idea',
-        'Strong academic performance',
-        'Commitment to serve in Africa'
-      ]
-    },
-    benefits: [
-      'Annual scholarship (KES 300,000)',
-      'Prototype development funding',
-      'Mentorship from health leaders',
-      'Laboratory access',
-      'Conference travel grant'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://amref.org/kenyascholarship',
-    featured: true,
-    dateAdded: '2026-02-23',
-    logoUrl: '/images/opportunities/scholarship.jpeg',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '18',
-    title: 'African Business Excellence Internship',
-    provider: 'Standard Chartered Bank Kenya',
-    category: 'Internship',
-    description: 'Eight-week summer internship in finance, risk, or operations at Standard Chartered Kenya offices.',
-    fullDescription: 'Standard Chartered\'s Summer Internship program places promising students in meaningful roles across finance, risk management, and operations. Interns work on real transactions, attend talks from banking executives, and gain insight into international banking.',
-    deadline: '2026-02-15',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'UnderGrad',
-      fieldOfStudy: ['Finance', 'Business', 'Economics', 'Engineering'],
-      requirements: [
-        'Second or third-year student',
-        'Strong academic performance (GPA 3.5+)',
-        'Interest in financial services',
-        'Excellent communication skills'
-      ]
-    },
-    benefits: [
-      'Competitive monthly stipend (KES 150,000)',
-      'Professional development workshops',
-      'Mentorship from bank managers',
-      'Networking opportunities',
-      'Potential permanent role offer'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://standardchartered.co.ke/careers',
-    duration: '8 weeks',
-    featured: true,
-    dateAdded: '2026-02-24',
-    logoUrl: '/images/opportunities/internship.avif',
     views: 0,
     clicks: 0
   },
@@ -1079,7 +941,7 @@ async function seedDatabase() {
     console.log('🧹 Clearing existing opportunities...');
     await collection.deleteMany({});
 
-    console.log('📥 Inserting 28 opportunities into MongoDB...');
+    console.log('📥 Inserting 24 opportunities into MongoDB...');
     const result = await collection.insertMany(opportunities);
 
     console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
