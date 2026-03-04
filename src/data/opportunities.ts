@@ -677,38 +677,6 @@ export const opportunities: Opportunity[] = [
     logoUrl: '/images/opportunities/tech.avif'
   },
   {
-    id: '21',
-    title: 'Call for Papers: Women in Tech & Innovation Africa',
-    provider: 'African Women in Technology Forum',
-    category: 'CallForPapers',
-    description: 'Conference seeking papers on women\'s roles in technology innovation. Includes travel grant and mentorship for presenters.',
-    fullDescription: 'This international conference highlights women\'s contributions to technology in Africa. Papers explore challenges, innovations, and solutions. Selected female presenters receive travel grants supporting attendance and networking opportunities.',
-    deadline: '2026-03-10',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'PostGrad',
-      fieldOfStudy: ['Technology', 'Business', 'Engineering', 'Development'],
-      requirements: [
-        'Female student or researcher',
-        'Master\'s or PhD level',
-        'Original research on women in tech',
-        'Paper 4,000-6,000 words'
-      ]
-    },
-    benefits: [
-      'Peer review and publication',
-      'Travel grant for presenters (KES 200,000)',
-      'Conference accommodation covered',
-      'Mentorship from senior women leaders',
-      'Media exposure and networking'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://africawomenintech.org/cfp',
-    featured: true,
-    dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/call-for-papers.png'
-  },
-  {
     id: '22',
     title: 'Post-Doctoral Research Fellowship - University of Nairobi',
     provider: 'University of Nairobi Research Office',
@@ -837,76 +805,6 @@ export const opportunities: Opportunity[] = [
     featured: true,
     dateAdded: '2026-02-02',
     logoUrl: '/images/opportunities/uk.jpg'
-  },
-  {
-    id: '26',
-    title: 'Call for Papers + Scholarship: African Public Health Research',
-    provider: 'African Public Health Association',
-    category: 'CallForPapers',
-    description: 'Submit public health research papers. Top 10 authors receive conference travel grants AND selected winners get postgraduate scholarships up to KES 500,000.',
-    fullDescription: 'This is a unique cross-category opportunity combining academic publication with direct scholarship awards. Submit peer-reviewed public health research addressing African challenges. Top 10 accepted papers authors get travel grants. Additionally, the 5 best papers\' authors receive postgraduate scholarships for further studies.',
-    deadline: '2026-03-25',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'PostGrad',
-      fieldOfStudy: ['Public Health', 'Medicine', 'Epidemiology', 'Health Economics'],
-      requirements: [
-        'Master\'s or PhD student/researcher',
-        'Original research on African public health',
-        'Paper 5,000-7,000 words',
-        'Recent publication or presentation experience'
-      ]
-    },
-    benefits: [
-      'Peer review and publication',
-      'Travel grant (KES 200,000 for top 10)',
-      'Conference accommodation',
-      'Postgraduate scholarship (KES 500,000 for top 5)',
-      'International visibility',
-      'Mentorship from health leaders'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://apha.org/cfp-scholarship',
-    featured: true,
-    dateAdded: '2026-02-28',
-    logoUrl: '/images/opportunities/call-for-papers.png',
-    contactEmail: 'submissions@apha.org'
-  },
-  {
-    id: '27',
-    title: 'ADB Internship Program 2026',
-    provider: 'Asian Development Bank',
-    category: 'Internship',
-    description: 'A paid internship at the Asian Development Bank for postgraduate students to work on real-world development projects across 60+ member countries, with a stipend and partial airfare support.',
-    fullDescription: 'The ADB Internship Program offers postgraduate students a unique opportunity to work on project-oriented assignments in economic and social development across 60 ADB member countries. Interns work under the supervision of experienced professionals and receive a stipend for the full duration of the 8–12 week placement. ADB also provides limited financial support for airfare where required. The programme runs twice a year and selects highly talented, motivated individuals who demonstrate strong dedication to development-related fields. Successful interns gain hands-on experience, access to a global professional network, and exposure to ADB\'s operations across Asia and the Pacific.',
-    deadline: '2026-03-16',
-    location: 'International',
-    eligibility: {
-      educationLevel: 'PostGrad',
-      fieldOfStudy: ['Development Economics', 'Finance', 'Engineering', 'Social Sciences', 'Environment'],
-      requirements: [
-        'Enrolled in a master\'s or PhD programme',
-        'Excellent communication skills in English',
-        'Academic study directly related to ADB\'s areas of work',
-        'National of an ADB member country',
-        '2–3 years of relevant professional experience preferred'
-      ]
-    },
-    benefits: [
-      'Stipend paid for the full duration of the internship',
-      'Limited financial support for airfare (where applicable)',
-      'Work under world-class professionals in development',
-      'Collaborate with international peers from 60+ countries',
-      'Hands-on experience on real-world development projects',
-      'Networking with experts and leaders in the development field'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://adb.taleo.net/careersection/2/jobsearch.ftl?lang=en',
-    fundingType: 'Stipend',
-    duration: '8 to 12 weeks',
-    featured: false,
-    dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/internship.avif'
   },
   {
     id: '28',
