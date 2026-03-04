@@ -626,75 +626,6 @@ const opportunities = [
     clicks: 0
   },
   {
-    id: '19',
-    title: 'Green Economy Grant Initiative',
-    provider: 'Kenya Green Economy Trust',
-    category: 'Grant',
-    description: 'Grants for student-led projects in clean energy, waste management, or eco-tourism in Kenya.',
-    fullDescription: 'This initiative supports innovative student projects contributing to Kenya\'s green economy. Teams receive grants to develop pilots in renewable energy, sustainable waste management, conservation, or eco-tourism. Winners get mentorship and networking opportunities.',
-    deadline: '2026-04-20',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Environmental Science', 'Engineering', 'Business', 'Conservation'],
-      requirements: [
-        'University of Nairobi, Kenyatta, or Moi student',
-        'Team of 3-5 students',
-        'Project proposal (2,000 words)',
-        'Feasibility study included'
-      ]
-    },
-    benefits: [
-      'Project grant up to KES 500,000',
-      'Technical mentorship',
-      'Business support services',
-      'Market linkages',
-      'Potential for expansion funding'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://kenyageo.org/grants',
-    featured: true,
-    dateAdded: '2026-02-25',
-    logoUrl: '/images/opportunities/grant.avif',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '20',
-    title: 'Africa Code Week - Student Competition',
-    provider: 'Pearson & Coursera',
-    category: 'Conference',
-    description: 'Annual coding competition and learning event for African students with workshops and prizes.',
-    fullDescription: 'Africa Code Week celebrates coding across Africa with workshops, training sessions, and an international competition. Kenyan students learn web and mobile development, compete for prizes, and network with tech companies.',
-    deadline: '2026-02-28',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'UnderGrad',
-      requirements: [
-        'Age 18-25 years',
-        'Basic programming knowledge',
-        'Individual or team participation',
-        'Registration on platform'
-      ]
-    },
-    benefits: [
-      'Free workshop attendance',
-      'Training in latest tech stacks',
-      'International competition opportunity',
-      'Prize pool (KES 1,000,000+)',
-      'Networking with tech companies',
-      'Certificate of participation'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://africacode.week/register',
-    duration: '1 month',
-    featured: true,
-    dateAdded: '2026-02-26',
-    logoUrl: '/images/opportunities/tech.avif',
-    views: 0,
-    clicks: 0
-  },
-  {
     id: '22',
     title: 'Post-Doctoral Research Fellowship - University of Nairobi',
     provider: 'University of Nairobi Research Office',
@@ -1148,7 +1079,7 @@ async function seedDatabase() {
     console.log('🧹 Clearing existing opportunities...');
     await collection.deleteMany({});
 
-    console.log('📥 Inserting 30 opportunities into MongoDB...');
+    console.log('📥 Inserting 28 opportunities into MongoDB...');
     const result = await collection.insertMany(opportunities);
 
     console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
