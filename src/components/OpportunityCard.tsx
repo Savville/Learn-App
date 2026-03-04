@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Calendar } from 'lucide-react';
+import { ArrowRight, Calendar, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
 import type { Opportunity } from '../data/opportunities';
@@ -40,10 +40,11 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   };
 
   return (
+    <div className="flex flex-col">
     <Link
       to={`/opportunity/${toSlug(opportunity.title)}`}
       onClick={handleCardClick}
-      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex-1"
     >
       {/* Header Image */}
       <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
@@ -83,5 +84,16 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
         </div>
       </div>
     </Link>
+
+    {/* Subscribe for more — below card */}
+    <a
+      href="/#newsletter"
+      onClick={(e) => { e.stopPropagation(); }}
+      className="flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-gray-400 hover:text-blue-600 transition-colors border-t border-gray-100 bg-white rounded-b-2xl hover:bg-blue-50"
+    >
+      <Bell className="w-3 h-3" />
+      <span>Subscribe for more</span>
+    </a>
+    </div>
   );
 }

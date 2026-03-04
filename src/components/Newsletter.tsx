@@ -116,7 +116,7 @@ export function Newsletter() {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-br from-blue-600 to-purple-600">
+    <section id="newsletter" className="py-16 bg-gradient-to-br from-blue-600 to-purple-600">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Header */}
         <div className="mb-8">
@@ -287,32 +287,30 @@ export function Newsletter() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-6">
+              <div className="text-center py-2">
                 <p className="text-blue-100 text-sm opacity-70">
-                  👆 Please select at least one area of interest to continue
+                  👆 Select areas of interest above to activate your subscription
                 </p>
               </div>
             )}
 
-            {/* ── Subscribe Button ── */}
-            {totalInterests > 0 && (
-              <div className="flex flex-col items-center gap-3 mt-6">
-                <button
-                  type="submit"
-                  disabled={loading || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
-                  className={`px-8 py-3 rounded-xl transition-all font-bold tracking-wide text-lg border-2 border-white ${
-                    !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-blue-700 shadow-md hover:bg-gray-100 hover:shadow-xl hover:text-blue-800'
-                  } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
-                >
-                  {loading ? 'Subscribing...' : 'Subscribe'}
-                </button>
-                {email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (
-                  <p className="text-blue-200 text-sm">Please enter a valid email address</p>
-                )}
-              </div>
-            )}
+            {/* ── Subscribe Button — always visible, inactive until interests + email filled ── */}
+            <div className="flex flex-col items-center gap-3 mt-6">
+              <button
+                type="submit"
+                disabled={loading || totalInterests === 0 || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
+                className={`px-8 py-3 rounded-xl transition-all font-bold tracking-wide text-lg border-2 border-white ${
+                  totalInterests === 0 || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-60'
+                    : 'bg-white text-blue-700 shadow-md hover:bg-gray-100 hover:shadow-xl hover:text-blue-800'
+                } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+              >
+                {loading ? 'Subscribing...' : 'Subscribe'}
+              </button>
+              {totalInterests > 0 && email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (
+                <p className="text-blue-200 text-sm">Please enter a valid email address</p>
+              )}
+            </div>
           </form>
         )}
       </div>

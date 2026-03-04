@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState, type JSX } from 'react';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
-import { Calendar, ExternalLink, ArrowLeft, Tag } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, Tag, Bell } from 'lucide-react';
 import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
@@ -308,6 +308,17 @@ export function OpportunityDetails() {
                 )}
               </div>
               <p className="text-gray-600 mt-4 text-sm">You'll be redirected to the official application page</p>
+            </div>
+
+            {/* Subscribe for more */}
+            <div className="mt-4 text-center">
+              <a
+                href="/#newsletter"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-gray-200 text-sm font-semibold text-gray-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all"
+              >
+                <Bell className="w-4 h-4" />
+                Subscribe for more opportunities like this
+              </a>
             </div>
           </div>
         </div>
