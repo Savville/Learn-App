@@ -971,5 +971,110 @@ Because this year's conference is in Nairobi, Kenyan authors have a rare and mas
         ]
       }
     ]
+  },
+  {
+    id: '34',
+    title: 'Canadian Government Study in Canada Scholarships 2026\u20132027',
+    provider: 'Global Affairs Canada (EduCanada)',
+    category: 'Scholarship',
+    description: 'Fully funded short-term exchange scholarships for international students from 20 eligible countries \u2014 including Kenya \u2014 to study or research at Canadian universities. Worth up to $14,000 USD. Applied through your home institution, not directly.',
+    fullDescription: `The Study in Canada Scholarships (SICS) are funded by Global Affairs Canada through the Academic Relations program. They offer students from 20 eligible countries a short-term exchange at a Canadian post-secondary institution for study or research. Kenya is on the eligible countries list.
+
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+HOW IT WORKS \u2014 CRITICAL TO UNDERSTAND
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+You cannot apply directly as a student. Only Canadian post-secondary institutions submit applications on students\u2019 behalf. The process works like this:
+
+\u2022 Your home university must have an existing exchange agreement with a Canadian Designated Learning Institution (DLI)
+\u2022 The Canadian institution identifies and selects you
+\u2022 They submit your Privacy Notice Statement (PNS) \u2014 signed and dated within the last 6 months \u2014 through the My EduCanada portal
+\u2022 They email a Management and Accountability Framework (MAF) to Scholarships-Info-Bourses@international.gc.ca
+\u2022 If selected, the Canadian institution receives the funds and disburses them directly to you
+
+\ud83d\udccc Your first step: Contact your university\u2019s international office and ask if they have an active exchange partnership with a Canadian DLI.
+
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+SCHOLARSHIP VALUE & DURATION
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+\ud83d\udcb0 $10,200 USD \u2014 College or Undergraduate level, 4 months (one academic term)
+\ud83d\udcb0 $10,200 USD \u2014 Graduate (Masters/PhD), 4 months of study or research
+\ud83d\udcb0 $14,000 USD \u2014 Graduate (Masters/PhD), 5 to 6 months of study or research
+\ud83d\udcb0 $500 USD \u2014 Additional per scholarship paid to the Canadian institution for administrative costs
+
+Tuition is fully waived by the Canadian host institution. Scholarship funds cover:
+\u2022 Airfare (most economical route)
+\u2022 Health insurance
+\u2022 Accommodation and food
+\u2022 Books and other research requirements
+
+Note: Computers and equipment are NOT covered.
+
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+ELIGIBLE COUNTRIES
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+\ud83c\udf0f Asia: Bangladesh, Nepal, Taiwan
+\ud83c\udf0d Europe: T\u00fcrkiye, Ukraine
+\ud83c\udf0d Middle East & North Africa: Algeria, Egypt, Jordan, Morocco, Tunisia
+\ud83c\udf0d Sub-Saharan Africa: Burkina Faso, Ethiopia, Ghana, Ivory Coast, Kenya \u2705, Nigeria, Rwanda, Senegal, Tanzania, Uganda
+
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+KEY RESTRICTIONS
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+\u2022 No clinical training or direct patient care allowed
+\u2022 Cannot hold Canadian citizenship or permanent residency (or have a pending application)
+\u2022 Cannot already be enrolled in a degree program at a Canadian institution
+\u2022 Cannot hold another Global Affairs Canada (GAC/DFATD) grant simultaneously \u2014 all sources must be declared
+\u2022 Must return to your home institution after completing the scholarship
+\u2022 All project activities must be completed by September 30, 2027
+
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+KEY DATES
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+\ud83d\udcc5 Application deadline (Canadian institutions): March 31, 2026 at 11:59 PM EDT
+\ud83d\udcc5 Notification of results to institutions: May 2026
+\ud83d\udcc5 All activities must be completed by: September 30, 2027`,
+    deadline: '2026-03-31',
+    location: 'Canada',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['All Academic Fields'],
+      requirements: [
+        'Citizen of one of the 20 eligible countries \u2014 Kenya is eligible',
+        'Enrolled full-time at a post-secondary institution in your home country',
+        'Currently paying tuition fees to your home institution',
+        'Your home institution must have an exchange agreement with a Canadian DLI',
+        'Must complete all program activities by September 30, 2027',
+        'No Canadian citizenship, permanent residency, or pending application',
+        'Not already enrolled in a degree program at a Canadian institution',
+        'No other active Global Affairs Canada (GAC/DFATD) funding \u2014 all sources must be declared',
+        'Must return to home institution after the exchange',
+        'No clinical training or direct patient care involvement'
+      ]
+    },
+    benefits: [
+      '$10,200 USD for 4-month undergraduate or graduate exchange',
+      '$14,000 USD for 5\u20136 month graduate (Masters/PhD) exchange',
+      'Full tuition waiver at the Canadian host institution',
+      'Airfare covered (most economical route)',
+      'Health insurance fully covered',
+      'Living costs covered \u2014 accommodation, food, books',
+      'Research materials and requirements covered',
+      'Exposure to Canadian academic and research environment',
+      'Strengthens international academic linkages and CV'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.educanada.ca/scholarships-bourses/can/institutions/study-in-canada-sep-etudes-au-canada-pct.aspx?lang=eng',
+    contactEmail: 'Scholarships-Info-Bourses@international.gc.ca',
+    contactLink: 'mailto:Scholarships-Info-Bourses@international.gc.ca',
+    fundingType: 'Fully Funded',
+    duration: '4 to 6 months',
+    featured: true,
+    dateAdded: '2026-03-04',
+    logoUrl: '/images/opportunities/canada.jpg'
   }
 ];
