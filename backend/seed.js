@@ -515,6 +515,47 @@ KEY DATES
     logoUrl: '/images/opportunities/canada.jpg',
     views: 0,
     clicks: 0
+  },
+  {
+    id: '35',
+    title: 'EEML Summer School 2026',
+    provider: 'Eastern European Machine Learning (EEML)',
+    category: 'Conference',
+    description: 'A fully funded 6-day intensive summer school in Cetinje, Montenegro covering Artificial Intelligence and Machine Learning — including Deep Learning and Reinforcement Learning. Open to all countries, all academic levels, ages 18+.',
+    fullDescription: 'The Eastern European Machine Learning (EEML) Summer School 2026 is a fully funded intensive programme held in Cetinje, Montenegro from 27 July to 1 August 2026. The school focuses on high-level training in Artificial Intelligence and Machine Learning, with sessions covering fundamental and advanced topics including Deep Learning and Reinforcement Learning.',
+    deadline: '2026-03-31',
+    location: 'Montenegro',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Computer Science', 'Artificial Intelligence', 'Machine Learning', 'Data Science', 'Mathematics', 'Engineering', 'Any Field'],
+      requirements: [
+        'Open to applicants from all countries worldwide',
+        'Must be 18 years or older at the time of application',
+        'Any academic level: high school, undergraduate, master\'s, PhD, or postdoctoral',
+        'Interest in Machine Learning and Artificial Intelligence',
+        'No prior ML expertise required — all levels welcome'
+      ]
+    },
+    benefits: [
+      'Fully funded — travel costs covered for selected participants',
+      'Accommodation provided for the full duration',
+      'Registration fees fully waived',
+      'Meals included during the programme',
+      'Certificate of participation',
+      'Lectures on Deep Learning and Reinforcement Learning',
+      'Poster sessions and networking with international AI/ML researchers',
+      'Social events and intercultural exchange'
+    ],
+    applicationType: 'Online Form',
+    applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLSe0t-ZqFnKIF6KsEBMAC7UZg51kbItfuYfmrg9EqPZgcXDFKQ/viewform',
+    contactLink: 'https://www.eeml.eu/',
+    fundingType: 'Fully Funded',
+    duration: '27 July – 1 August 2026 (6 days)',
+    featured: true,
+    dateAdded: '2026-03-04',
+    logoUrl: '/images/opportunities/montenegro.jpg',
+    views: 0,
+    clicks: 0
   }
 ];
 
