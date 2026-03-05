@@ -667,5 +667,104 @@ For full programme details visit: https://www.eeml.eu/`,
     featured: true,
     dateAdded: '2026-03-04',
     logoUrl: '/images/opportunities/montenegro.jpg'
+  },
+  {
+    id: '36',
+    title: 'Australia Awards Scholarships 2027',
+    provider: 'Australian Government (DFAT)',
+    category: 'Scholarship',
+    description: 'Fully funded Australian government scholarship for Kenyan students to pursue Bachelor, Masters, or PhD studies at top Australian universities.',
+    fullDescription: `The Australia Awards Scholarships 2027 is a prestigious fully funded scholarship program offered by the Australian Government, aimed at students from developing countries — including Kenya — to study at leading Australian universities.
+
+────────────────────────────────────
+ OVERVIEW
+────────────────────────────────────
+
+The program promotes leadership, academic excellence, and people-to-people ties between Australia and its partner countries. Recipients gain access to world-class education while developing the skills needed to drive positive change in their home countries.
+
+Open to all academic fields (except aviation, nuclear technology, and military training).
+
+────────────────────────────────────
+ DURATION
+────────────────────────────────────
+
+🎓 Bachelor's Degree: 4 years
+🎓 Master's Degree: 2–3 years
+🎓 PhD: 4–5 years
+
+────────────────────────────────────
+ WHAT IS COVERED (FULLY FUNDED)
+────────────────────────────────────
+
+✅ Full tuition fees
+✈️ Return economy-class airfare to and from Australia
+🏠 One-time establishment grant (accommodation, textbooks, study materials)
+💰 Fortnightly living allowance
+🩺 Overseas Student Health Cover (OSHC) for the full award period
+📚 Introductory Academic Program before formal studies begin
+🌐 Pre-Course English (PCE) fees if required
+📖 Supplemental academic support
+🔬 Fieldwork support for eligible research students
+
+────────────────────────────────────
+ REQUIRED DOCUMENTS
+────────────────────────────────────
+
+📄 CV / Resume
+🎓 Degree certificate
+🪪 Proof of citizenship
+📊 Academic transcripts
+📝 Referee report
+📬 Unconditional letter of offer from an Australian university
+🗣️ English proficiency test score
+
+────────────────────────────────────
+ HOW TO APPLY
+────────────────────────────────────
+
+Apply online through the official Australia Awards portal. Ensure all documents are uploaded accurately — incomplete applications will not be considered.
+
+For full details visit: https://www.dfat.gov.au/people-to-people/australia-awards`,
+    deadline: '2026-04-30',
+    location: 'Australia',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['All Fields'],
+      requirements: [
+        'Kenyan citizens are eligible to apply',
+        'Must be residing in Kenya and applying from Kenya',
+        'Must not be an Australian citizen or permanent resident',
+        'Must not be married or engaged to an Australian or New Zealand citizen/permanent resident',
+        'Must not be currently serving military personnel',
+        'Must meet the admission requirements of the chosen Australian university',
+        'Previous long-term Australian Award recipients must have resided outside Australia for twice the duration of their previous award before reapplying',
+        'Must be able to meet Australian visa requirements'
+      ]
+    },
+    benefits: [
+      'Full tuition fees covered',
+      'Return economy-class airfare to and from Australia',
+      'One-time establishment grant for accommodation, textbooks, and study materials',
+      'Fortnightly living allowance',
+      'Overseas Student Health Cover (OSHC) for the full award duration',
+      'Introductory Academic Program prior to studies',
+      'Pre-Course English (PCE) fees if required',
+      'Supplemental academic support throughout the program',
+      'Fieldwork support for eligible research students'
+    ],
+    applicationType: 'Online Form',
+    applicationLink: 'https://www.dfat.gov.au/people-to-people/australia-awards/how-to-apply-for-an-australia-awards-scholarship',
+    contactLink: 'https://www.dfat.gov.au/contact-us',
+    fundingType: 'Fully Funded',
+    duration: 'Bachelor: 4 years | Masters: 2–3 years | PhD: 4–5 years',
+    featured: true,
+    dateAdded: '2026-03-05',
+    logoUrl: '/images/opportunities/australia.jpg',
+    thematicAreas: [
+      {
+        heading: 'General',
+        topics: ['All academic fields (excluding aviation, nuclear technology, and military training)']
+      }
+    ]
   }
 ];
