@@ -661,7 +661,7 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
   {
     id: '37',
     title: 'Non-Revenue Water Crisis — Can You Help Nairobi Fix It?',
-    provider: 'LearnOpportunities Kenya',
+    provider: 'Opportunities Kenya',
     category: 'Challenge',
     description: 'Nairobi City Water & Sewerage Company loses 44–48% of all treated water to leaks, illegal connections, and billing failures. An open industry challenge brief for students to explore, research, and build solutions.',
     fullDescription: `The Nairobi City Water and Sewerage Company (NCWSC) is the sole provider of water and sewerage services for over 4 million Nairobi residents. Like many urban utilities across sub-Saharan Africa, NCWSC faces a severe operational crisis rooted in Non-Revenue Water (NRW) — treated, pressurised water that is produced and distributed but never billed or paid for.
@@ -750,7 +750,7 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
     contactLink: 'https://nairobiwater.co.ke',
     featured: true,
     dateAdded: '2026-03-06',
-    logoUrl: '/images/opportunities/tech.avif',
+    logoUrl: '/images/opportunities/nairobi_water.png',
     thematicAreas: [
       {
         heading: 'Leak Detection',
