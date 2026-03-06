@@ -197,6 +197,7 @@ export function Opportunities() {
                 <option value="Conference" className="text-gray-900 bg-white">Conferences ({countFor('Conference')})</option>
                 <option value="Scholarship" className="text-gray-900 bg-white">Scholarships ({countFor('Scholarship')})</option>
                 <option value="Hackathon" className="text-gray-900 bg-white">Hackathons ({countFor('Hackathon')})</option>
+                <option value="Challenge" className="text-gray-900 bg-white">Industry Challenges ({countFor('Challenge')})</option>
                 <option value="Event" className="text-gray-900 bg-white">Events ({countFor('Event')})</option>
                 <option value="Volunteer" className="text-gray-900 bg-white">Volunteer Programmes ({countFor('Volunteer')})</option>
                 <option value="Other" className="text-gray-900 bg-white">Others ({countFor('Other')})</option>

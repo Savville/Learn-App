@@ -17,6 +17,7 @@ const CATEGORY_FALLBACKS: Record<string, string> = {
   Grant: '/images/opportunities/grant.avif',
   Conference: '/images/opportunities/tech.avif',
   CallForPapers: '/images/opportunities/tech.avif',
+  Challenge: '/images/opportunities/tech.avif',
 };
 
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {

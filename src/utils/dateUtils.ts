@@ -6,7 +6,17 @@ export interface UrgencyLevel {
   label: string;
 }
 
-export function calculateUrgency(deadline: string): UrgencyLevel {
+export function calculateUrgency(deadline?: string): UrgencyLevel {
+  if (!deadline) {
+    return {
+      status: 'available',
+      daysLeft: 9999,
+      bgColor: 'bg-blue-100',
+      textColor: 'text-blue-700',
+      label: 'Open / Ongoing'
+    };
+  }
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   

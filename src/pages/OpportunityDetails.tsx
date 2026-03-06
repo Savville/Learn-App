@@ -72,7 +72,7 @@ export function OpportunityDetails() {
   useSEO({
     title: opportunity?.title,
     description: opportunity
-      ? `${opportunity.description} — Deadline: ${opportunity.deadline}. Provider: ${opportunity.provider}.`
+      ? `${opportunity.description} — Deadline: ${opportunity.deadline ?? 'Open'}. Provider: ${opportunity.provider}.`
       : undefined,
     image: opportunity?.logoUrl?.startsWith('/')
       ? `https://opportunitieskenya.live${opportunity.logoUrl}`
@@ -198,7 +198,9 @@ export function OpportunityDetails() {
                 <div>
                   <p className="text-gray-500 text-sm">Deadline</p>
                   <p className={`font-semibold ${urgency?.textColor}`}>
-                    {new Date(opportunity.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {opportunity.deadline
+                      ? new Date(opportunity.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                      : 'Open / Ongoing'}
                   </p>
                   <p className={`text-xs ${urgency?.textColor}`}>{urgency?.label}</p>
                 </div>
@@ -281,33 +283,53 @@ export function OpportunityDetails() {
             )}
 
             
-            {/* Apply Button */}
+            {/* Apply Button / Challenge CTA */}
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 text-center">
-              <h3 className="text-gray-900 mb-6 text-xl font-bold">Ready to Apply?</h3>
-              <div className="flex gap-4 justify-center">
-                <a
-                  href={opportunity.applicationLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
-                >
-                  <span>Apply Now</span>
-                  <ExternalLink className="w-5 h-5" />
-                </a>
-                {opportunity.contactLink && (
-                  <a
-                    href={opportunity.contactLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-8 py-4 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
-                    style={{ background: 'linear-gradient(to right, #ef4444, #dc2626)' }}
-                  >
-                    <span>Contact for Help</span>
-                    <ExternalLink className="w-5 h-5" />
-                  </a>
-                )}
-              </div>
-              <p className="text-gray-600 mt-4 text-sm">You'll be redirected to the official application page</p>
+              {opportunity.applicationLink ? (
+                <>
+                  <h3 className="text-gray-900 mb-6 text-xl font-bold">Ready to Apply?</h3>
+                  <div className="flex gap-4 justify-center">
+                    <a
+                      href={opportunity.applicationLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                    >
+                      <span>Apply Now</span>
+                      <ExternalLink className="w-5 h-5" />
+                    </a>
+                    {opportunity.contactLink && (
+                      <a
+                        href={opportunity.contactLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-8 py-4 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                        style={{ background: 'linear-gradient(to right, #ef4444, #dc2626)' }}
+                      >
+                        <span>Contact for Help</span>
+                        <ExternalLink className="w-5 h-5" />
+                      </a>
+                    )}
+                  </div>
+                  <p className="text-gray-600 mt-4 text-sm">You'll be redirected to the official application page</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-gray-900 mb-3 text-xl font-bold">Make This Your Project</h3>
+                  <p className="text-gray-600 mb-6 text-sm max-w-md mx-auto">This is an open industry challenge — no formal application needed. Use it as inspiration for your capstone, thesis, class project, or research paper.</p>
+                  {opportunity.contactLink && (
+                    <a
+                      href={opportunity.contactLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                    >
+                      <span>Explore Further</span>
+                      <ExternalLink className="w-5 h-5" />
+                    </a>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Subscribe for more */}
