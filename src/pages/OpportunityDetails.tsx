@@ -98,7 +98,10 @@ export function OpportunityDetails() {
 
         // Fetch related opportunities (same category)
         const allOpsResponse = await opportunitiesAPI.getAll({ category: response.data.category });
-        const relatedMerged = allOpsResponse.data
+        const opsList: Opportunity[] = Array.isArray(allOpsResponse.data)
+          ? allOpsResponse.data
+          : allOpsResponse.data?.data ?? [];
+        const relatedMerged = opsList
           .filter((opp: Opportunity) => opp.id !== id)
           .slice(0, 3)
           .map((opp: Opportunity) => {
