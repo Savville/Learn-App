@@ -244,7 +244,7 @@ export const opportunities: Opportunity[] = [
     deadline: '2026-03-22',
     location: 'Germany',
     eligibility: {
-      educationLevel: 'Both',
+      educationLevel: 'PostGrad',
       fieldOfStudy: ['Business', 'Engineering', 'Technology', 'Finance', 'Human Resources', 'Science', 'Management'],
       requirements: [
         'Citizen of any African country',

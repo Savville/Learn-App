@@ -228,7 +228,7 @@ const opportunities = [
     deadline: '2026-03-22',
     location: 'Germany',
     eligibility: {
-      educationLevel: 'Graduate',
+      educationLevel: 'PostGrad',
       fieldOfStudy: ['Business', 'Engineering', 'Technology', 'Sciences', 'Finance'],
       requirements: [
         'Citizen of a sub-Saharan African country',

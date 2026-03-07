@@ -253,7 +253,16 @@ export function OpportunityDetails() {
               <ul className="space-y-2">
                 <li className="flex items-start gap-3">
                   <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
-                  <span className="text-gray-700">Education Level: {opportunity.eligibility.educationLevel === 'Both' ? 'Practitioners' : opportunity.eligibility.educationLevel}</span>
+                  <span className="text-gray-700">Education Level: {(() => {
+                    const level = opportunity.eligibility.educationLevel;
+                    if (level === 'UnderGrad') return 'Undergraduate Students';
+                    if (level === 'PostGrad') return 'Postgraduate Students';
+                    if (level === 'Both') {
+                      const cat = opportunity.category;
+                      return (cat === 'Challenge' || cat === 'Grant') ? 'Students & Practitioners' : 'Undergraduate & Postgraduate Students';
+                    }
+                    return level;
+                  })()}</span>
                 </li>
                 {opportunity.eligibility.requirements && opportunity.eligibility.requirements.map((req, index) => (
                   <li key={index} className="flex items-start gap-3">
