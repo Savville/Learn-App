@@ -167,7 +167,7 @@ export function Contact() {
               </p>
               <div className="flex gap-4">
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/opportunitieskenyalive/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 p-4 bg-white rounded-xl hover:shadow-lg transition-all"
@@ -176,7 +176,7 @@ export function Contact() {
                   <span className="text-gray-700">Instagram</span>
                 </a>
                 <a
-                  href="https://linkedin.com"
+                  href="https://www.linkedin.com/newsletters/7436330536400343040/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 p-4 bg-white rounded-xl hover:shadow-lg transition-all"
@@ -186,13 +186,13 @@ export function Contact() {
                 </a>
               </div>
               <a
-                href="https://wa.me/"
+                href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 flex items-center justify-center gap-2 p-4 bg-white rounded-xl hover:shadow-lg transition-all"
               >
                 <MessageCircle className="w-5 h-5 text-green-600" />
-                <span className="text-gray-700">WhatsApp</span>
+                <span className="text-gray-700">WhatsApp Channel</span>
               </a>
             </div>
 

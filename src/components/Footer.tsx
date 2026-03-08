@@ -53,12 +53,12 @@ export function Footer() {
                 href="https://www.instagram.com/opportunitieskenyalive/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors"
+                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-pink-600 transition-colors"
               >
                 <Instagram className="w-5 h-5" />
               </a>
               <a
-                href="https://www.linkedin.com/in/opportunities-kenya-b7598a3b4/"
+                href="https://www.linkedin.com/newsletters/7436330536400343040/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors"
