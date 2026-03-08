@@ -132,14 +132,30 @@ export function OpportunityDetails() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative w-16 h-16">
-            {/* Outer ring */}
-            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-            {/* Spinning arc */}
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 border-r-blue-400 animate-spin"></div>
+        <div className="flex flex-col items-center gap-5">
+          {/* Segmented pill-style spinner — 12 dashes, brand blue */}
+          <div className="relative w-14 h-14">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <span
+                key={i}
+                style={{
+                  position: 'absolute',
+                  top: '2px',
+                  left: '50%',
+                  width: '5px',
+                  height: '14px',
+                  marginLeft: '-2.5px',
+                  borderRadius: '3px',
+                  backgroundColor: '#1d4ed8',
+                  transformOrigin: '2.5px 26px',
+                  transform: `rotate(${i * 30}deg)`,
+                  animation: 'spinner-fade 1s linear infinite',
+                  animationDelay: `${-i / 12}s`,
+                }}
+              />
+            ))}
           </div>
-          <p className="text-gray-400 text-sm tracking-wide">Loading opportunity...</p>
+          <p className="text-gray-400 text-sm tracking-widest uppercase font-medium">Loading...</p>
         </div>
       </div>
     );
