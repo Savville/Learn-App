@@ -1,7 +1,7 @@
 import express from 'express';
 import { getDB } from '../config/database.js';
 import { verifyAdminKey } from '../middleware/auth.js';
-import { sendDigestEmail, sendPersonalizedDigestEmail } from '../services/emailService.js';
+import { sendDigestEmail, sendPersonalizedDigestEmail, sendBroadcastEmail, seangapoTemplate } from '../services/emailService.js';
 
 // ── Interest-matching helper ────────────────────────────────────────────────
 // Returns true when any subscriber interest keyword (category name or subfield)
@@ -181,6 +181,50 @@ router.post('/send-personalized-digest', verifyAdminKey, async (req, res) => {
     });
   } catch (error) {
     console.error('❌ send-personalized-digest error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const SEANGAPO_SUBJECT = 'From Seangapo Floods to Real Solutions – Nairobi\'s Solvable Water Crisis';
+
+// POST /api/admin/send-seangapo-test
+// Sends the Seangapo broadcast to a single test address only.
+router.post('/send-seangapo-test', verifyAdminKey, async (req, res) => {
+  try {
+    const testEmail = req.body?.to || 'ochiwilliamotieno@gmail.com';
+    const result = await sendBroadcastEmail([testEmail], SEANGAPO_SUBJECT, seangapoTemplate());
+    res.json({ message: `Test email sent to ${testEmail}`, ...result });
+  } catch (error) {
+    console.error('❌ send-seangapo-test error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/send-seangapo-broadcast
+// Sends the Seangapo broadcast to ALL active subscribers.
+router.post('/send-seangapo-broadcast', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const subscribers = await db
+      .collection('subscribers')
+      .find({ unsubscribed: { $ne: true } })
+      .project({ email: 1 })
+      .toArray();
+
+    if (subscribers.length === 0) {
+      return res.status(400).json({ error: 'No active subscribers found.' });
+    }
+
+    const emails = subscribers.map(s => s.email);
+    const results = await sendBroadcastEmail(emails, SEANGAPO_SUBJECT, seangapoTemplate());
+
+    res.json({
+      message: 'Seangapo broadcast complete.',
+      totalSubscribers: emails.length,
+      ...results,
+    });
+  } catch (error) {
+    console.error('❌ send-seangapo-broadcast error:', error);
     res.status(500).json({ error: error.message });
   }
 });

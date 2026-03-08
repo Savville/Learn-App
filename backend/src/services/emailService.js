@@ -199,3 +199,133 @@ export async function sendDeadlineReminder(email, opportunity, daysLeft) {
     console.error(`Deadline reminder failed for ${email}:`, error.message);
   }
 }
+
+// ── Seangapo Broadcast ──────────────────────────────────────────────────────
+
+const seangapoTemplate = () => wrapEmail(`
+  <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+
+    <!-- Meme hook -->
+    <div style="background:#fef3c7;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
+      <p style="color:#92400e;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">You've seen the memes. 😅</p>
+      <p style="color:#78350f;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
+        <strong>Seangapo. Sinkapo. Singapool. Sea-ngapo. Sinkapore...</strong><br/>
+        The dream of turning Nairobi into the &ldquo;Singapore of Africa&rdquo; has, thanks to yet another round
+        of heavy rains and catastrophic flooding, become a tragic joke. Streets turned into rivers,
+        cars swept away, lives lost, properties destroyed.
+      </p>
+    </div>
+
+    <!-- Accountability -->
+    <p style="color:#1e293b;font-size:15px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+      We can&rsquo;t keep watching our capital drown while leaders promise miracles but deliver excuses.
+      The recent floods aren&rsquo;t just &ldquo;bad weather&rdquo; &mdash; they&rsquo;re the direct result of
+      <strong>blocked drains, unmaintained infrastructure, and zero accountability.</strong>
+      Enough is enough.
+    </p>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
+      But here&rsquo;s the thing: while we can&rsquo;t single-handedly fix the entire city&rsquo;s drainage overnight,
+      there <em>are</em> solvable water problems we <strong>CAN</strong> tackle right now &mdash; problems that are
+      technical, fixable with innovation and skills, and don&rsquo;t require waiting for political will.
+    </p>
+
+    <!-- NRW stats box -->
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:20px 22px;margin-bottom:28px;">
+      <h3 style="color:#1e40af;font-size:15px;margin:0 0 14px;font-family:Arial,sans-serif;">
+        💧 One massive, solvable crisis: <strong>Non-Revenue Water (NRW) at NCWSC</strong>
+      </h3>
+      <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">🔴&nbsp; Nairobi loses nearly <strong>half (44–54%)</strong> of all treated water before it reaches a single tap</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">🔴&nbsp; Estimated <strong>Ksh 11–12 billion</strong> lost every year through leaks, theft, broken meters &amp; billing failures</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">🔴&nbsp; Over <strong>10,000+ illegal connections</strong> in informal settlements</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;font-family:Arial,sans-serif;">🔴&nbsp; Hundreds of millions billed &mdash; <strong>zero collected.</strong> No enforcement. No disconnections.</td></tr>
+      </table>
+      <p style="color:#1d4ed8;font-size:13px;font-weight:700;margin:14px 0 0;font-family:Arial,sans-serif;">
+        This isn&rsquo;t fate. It&rsquo;s a solvable engineering, tech, and management problem.
+      </p>
+    </div>
+
+    <!-- Challenge brief -->
+    <h2 style="color:#0f2744;font-size:18px;margin:0 0 8px;font-family:Arial,sans-serif;">🏗️ Industry Challenge Brief &mdash; Nairobi Water Crisis</h2>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 4px;font-family:Arial,sans-serif;">
+      The Nairobi City Water &amp; Sewerage Company (NCWSC) is battling a 44–54% Non-Revenue Water crisis.<br/>
+      <strong>Can you help fix it?</strong>
+    </p>
+    <table cellpadding="0" cellspacing="0" style="width:100%;margin:12px 0 20px;">
+      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">✅&nbsp; Use it as your <strong>final year project</strong> or capstone</td></tr>
+      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">✅&nbsp; Build it into your <strong>research paper</strong> or thesis</td></tr>
+      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">✅&nbsp; Prototype a solution for your <strong>capstone or hackathon</strong></td></tr>
+    </table>
+    <p style="color:#475569;font-size:13px;margin:0 0 6px;font-family:Arial,sans-serif;"><strong>No application needed.</strong> Just your skills and curiosity.</p>
+
+    <p style="color:#0f2744;font-size:13px;font-weight:700;margin:16px 0 10px;font-family:Arial,sans-serif;">Explore 6 key problem areas:</p>
+    <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
+      <tr>
+        <td style="width:50%;padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">🔧 Leak detection technologies</td>
+        <td style="width:50%;padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">📡 Smart metering systems</td>
+      </tr>
+      <tr>
+        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">🗺️ GIS mapping for infrastructure</td>
+        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">🤖 AI analytics for loss prediction</td>
+      </tr>
+      <tr>
+        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">⚡ Illegal connection monitoring</td>
+        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">♻️ Wastewater reuse systems</td>
+      </tr>
+    </table>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:32px;">
+      ${ctaButton('👉 Read the Full Challenge Brief', `${FRONTEND_URL}/opportunity/non-revenue-water-crisis-can-you-help-nairobi-fix-it`)}
+    </div>
+
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;"/>
+
+    <!-- Closing -->
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+      Forward this to students, engineers, techies, researchers, startups &mdash; anyone who can turn
+      frustration into innovation. Let&rsquo;s channel the energy from these <em>Seangapo memes</em> into
+      real action on what we <strong>CAN</strong> solve.
+    </p>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
+      While the government must be held accountable for the floods and infrastructure failures,
+      we don&rsquo;t have to wait passively.
+      <strong>We can start fixing the fixable today.</strong>
+    </p>
+
+    <!-- View all -->
+    <p style="color:#475569;font-size:13px;margin:0 0 24px;font-family:Arial,sans-serif;">
+      🌐 View all opportunities at:
+      <a href="${FRONTEND_URL}" style="color:#1a4a7a;font-weight:700;text-decoration:none;">${FRONTEND_URL}</a>
+    </p>
+
+    <!-- Socials + contact -->
+    <div style="background:#f8fafc;border-radius:8px;padding:16px 20px;">
+      <p style="color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 10px;font-family:Arial,sans-serif;">Connect With Us</p>
+      <p style="margin:0;font-size:13px;color:#475569;line-height:2.4;font-family:Arial,sans-serif;">
+        📸 <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
+        💬 <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
+        📞 <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
+        &nbsp;&nbsp;✉️ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+      </p>
+    </div>
+
+  </div>`);
+
+export async function sendBroadcastEmail(emails, subject, html) {
+  const results = { success: 0, failed: 0 };
+  for (const email of emails) {
+    try {
+      await sendEmail({ to: email, subject, html });
+      results.success++;
+      await new Promise(r => setTimeout(r, 200));
+    } catch (error) {
+      console.error(`Broadcast failed for ${email}:`, error.message);
+      results.failed++;
+    }
+  }
+  console.log(`Broadcast: ${results.success} sent, ${results.failed} failed`);
+  return results;
+}
+
+export { seangapoTemplate };
