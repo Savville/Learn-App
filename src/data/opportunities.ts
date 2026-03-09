@@ -1034,7 +1034,7 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     duration: '2 days (June 11–12, 2026)',
     featured: true,
     dateAdded: '2026-03-09',
-    logoUrl: '/images/opportunities/world_bank.jpg',
+    logoUrl: '/images/opportunities/world_bank.png',
     thematicAreas: [
       {
         heading: 'Education & Digital Skills',
