@@ -779,6 +779,120 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
     ],
     views: 0,
     clicks: 0
+  },
+  {
+    id: '38',
+    title: "HENNGE's Global Internship Program 2026",
+    provider: 'HENNGE',
+    category: 'Internship',
+    description: 'Fully funded 4–6 week tech internship at HENNGE headquarters in Tokyo, Japan. Open to international students in Front-End or Full-Stack Software Engineering. No Japanese required.',
+    fullDescription: `HENNGE's Global Internship Program (GIP) 2026 is a fully funded international tech internship based at HENNGE's Shibuya headquarters in Tokyo, Japan. The program is open to international students and recent graduates worldwide pursuing a degree in Computer Science or a related field.\n\nTHE OPPORTUNITY\nGIP offers two distinct engineering tracks:\n• Full Stack Software Engineering — Python or Go, AWS, Terraform, server-side development\n• Front-End Software Engineering — React or Vue in TypeScript, UI/UX, modern web interfaces\n\nThe program runs for 4–6 weeks and is conducted entirely in English — no Japanese language skills required.\n\nPATHWAY DATES\n• Batch 4: 3 August – 11 September 2026 (Full-Stack Pathway)\n• Batch 5: 16 November – 18 December 2026 (Front-End Pathway)\n\nPositions are filled on a first-come, first-serve basis — apply early to secure your slot.\n\nELIGIBILITY\n• Currently pursuing a Bachelor's (3rd year or above), Master's, or Doctoral degree — OR a recent graduate\n• Degree or equivalent experience in Computer Science or a related technical field\n• Fluent in English\n• Knowledge of Linux, MacOS, or Unix-like systems\n• Interested in open source and tech community activities\n• For Full-Stack: experience in Python or Go\n• For Front-End: experience in React or Vue with TypeScript\n• Familiarity with AWS and Terraform is a plus\n• Basic understanding of server-side programming (for Front-End applicants)\n\nAPPLICATION PROCESS\n1. Visit the official website and select your internship track\n2. Register and complete the online coding challenge\n3. Submit your CV, cover letter, and completed challenge\n4. Shortlisted applicants will be contacted for phone screening and online interview`,
+    location: 'Tokyo, Japan',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Computer Science', 'Software Engineering', 'Information Technology', 'Related Technical Field'],
+      requirements: [
+        "Pursuing a Bachelor's degree (3rd year+), Master's, or Doctoral degree — or recent graduate",
+        'Degree or equivalent experience in Computer Science or related technical field',
+        'Fluent in English (Japanese not required)',
+        'Knowledge of Linux, MacOS, or Unix-like systems',
+        'Full-Stack track: experience with Python or Go',
+        'Front-End track: experience with React or Vue in TypeScript',
+        'Basic understanding of server-side programming (Front-End applicants)',
+        'Familiarity with AWS and Terraform tools',
+        'Interested in building a career in Japan'
+      ]
+    },
+    benefits: [
+      'Monthly subsidy (living stipend)',
+      'Round-trip airfare covered',
+      'Medical insurance for non-Japan residents',
+      'Japanese mobile phone with data',
+      'Pre-arrival support and passport/visa guidance',
+      'Access to networking luncheons and monthly technical sessions',
+      'Office facilities, refreshments, and staff parties',
+      'Access to Japanese cultural events',
+      'Potential full-time job offer for outstanding interns'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://recruit.hennge.com/en/gip/',
+    fundingType: 'Fully Funded',
+    duration: '4–6 weeks',
+    featured: false,
+    dateAdded: '2026-03-09',
+    logoUrl: '/images/opportunities/japan.jpg',
+    thematicAreas: [
+      {
+        heading: 'Full-Stack Software Engineering',
+        topics: ['Python & Go backend development', 'Amazon Web Services (AWS)', 'Terraform infrastructure as code', 'Server-side application architecture']
+      },
+      {
+        heading: 'Front-End Software Engineering',
+        topics: ['React & Vue in TypeScript', 'Modern UI/UX development', 'Component-driven architecture', 'Web performance optimisation']
+      }
+    ],
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: '39',
+    title: 'World Bank Group Youth Summit 2026',
+    provider: 'World Bank Group',
+    category: 'Conference',
+    description: 'Fully funded global youth summit in Washington D.C. for young innovators aged 18–35. Theme: "Future Works: Designing Jobs for the Digital Age." Includes delegate and pitch competition tracks.',
+    fullDescription: `The World Bank Group Youth Summit 2026 is one of the largest annual international youth gatherings organised by the World Bank Group. The summit will take place on June 11–12, 2026 in Washington, D.C., USA, in a hybrid format — participants may attend in person or virtually from anywhere in the world.\n\nTHEME: FUTURE WORKS — DESIGNING JOBS FOR THE DIGITAL AGE\nThe summit will bring together young innovators, leaders, and changemakers from around the world to discuss development challenges and explore innovative solutions for the future workforce. Focus areas include:\n• Education and skills for the digital economy\n• Entrepreneurship and job creation\n• Agriculture and food systems innovation\n\nTWO PARTICIPATION TRACKS\n\nDelegate Track\nParticipate in keynote speeches, panel discussions, workshops, and networking sessions with global experts, policymakers, and world leaders. Join the Young Changemaker Network and build lasting international connections.\n\nPitch Competition Track\nPresent a creative idea to solve pressing global challenges. Submit a project idea, pitch deck, and video pitch. Finalists present live at the summit and receive expert feedback, mentorship, and global exposure.\n\nELIGIBILITY\n• Open to citizens of World Bank Group member countries\n• Aged 18–35 at the time of the event\n• Any academic or professional background welcome\n• No GPA requirement\n• Demonstrated interest in technology, development policy, entrepreneurship, or economic growth\n• Proficiency in English required\n\nAPPLICATION DEADLINE: 11 March 2026\n\nApply via the official Google Form. Select your track (Delegate or Pitch Competition) and submit all required materials before the deadline.`,
+    deadline: '2026-03-11',
+    location: 'Washington D.C., USA',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: [],
+      requirements: [
+        'Citizen of a World Bank Group member country',
+        'Aged 18–35 at the time of the event (June 2026)',
+        'Any academic or professional background accepted',
+        'Demonstrated interest in technology, development policy, entrepreneurship, or economic growth',
+        'Proficiency in English (all activities conducted in English)',
+        'Pitch Competition applicants must submit a project idea, pitch deck, and video pitch'
+      ]
+    },
+    benefits: [
+      'Round-trip airfare support for selected in-person participants',
+      'Accommodation in Washington D.C. during the summit',
+      'Stipend to cover living expenses',
+      'Access to keynote sessions and panel discussions with global experts and policymakers',
+      'Interactive workshops and hands-on learning sessions',
+      'Live Q&A with speakers and finalists',
+      'Networking with young leaders and global professionals',
+      'Membership in the Young Changemaker Network',
+      'Expert feedback and mentorship for Pitch Competition finalists'
+    ],
+    applicationType: 'Online Form',
+    applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLScPHBBaYX8plrcX3pjR-BiLdmJt8OO8U5x1VQj511Tqs9_Jxw/viewform',
+    fundingType: 'Fully Funded',
+    duration: '2 days (June 11–12, 2026)',
+    featured: true,
+    dateAdded: '2026-03-09',
+    logoUrl: '/images/opportunities/world_bank.jpg',
+    thematicAreas: [
+      {
+        heading: 'Education & Digital Skills',
+        topics: ['Reskilling for the digital economy', 'Access to quality education', 'Youth employability programmes']
+      },
+      {
+        heading: 'Entrepreneurship & Jobs',
+        topics: ['Youth-led job creation', 'Inclusive economic growth', 'Startup ecosystems in emerging markets']
+      },
+      {
+        heading: 'Agriculture & Food Systems',
+        topics: ['Agri-tech innovation', 'Climate-resilient farming', 'Food security and supply chains']
+      },
+      {
+        heading: 'Pitch Competition',
+        topics: ['Innovative solutions to global challenges', 'Live pitching to global experts', 'Mentorship and expert feedback']
+      }
+    ],
+    views: 0,
+    clicks: 0
   }
 ];
 

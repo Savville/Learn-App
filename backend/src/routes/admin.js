@@ -229,4 +229,26 @@ router.post('/send-seangapo-broadcast', verifyAdminKey, async (req, res) => {
   }
 });
 
+// POST /api/admin/upsert-opportunities
+// Accepts an array of opportunity objects and upserts each by id.
+router.post('/upsert-opportunities', verifyAdminKey, async (req, res) => {
+  try {
+    const opportunities = req.body;
+    if (!Array.isArray(opportunities) || opportunities.length === 0) {
+      return res.status(400).json({ error: 'Body must be a non-empty array of opportunities.' });
+    }
+    const db = getDB();
+    const col = db.collection('opportunities');
+    const results = [];
+    for (const opp of opportunities) {
+      await col.replaceOne({ id: opp.id }, opp, { upsert: true });
+      results.push(opp.id);
+    }
+    res.json({ message: 'Upserted successfully.', ids: results });
+  } catch (error) {
+    console.error('❌ upsert-opportunities error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
