@@ -200,6 +200,118 @@ export async function sendDeadlineReminder(email, opportunity, daysLeft) {
   }
 }
 
+// ── YESIST Hackathon Broadcast ───────────────────────────────────────────────
+
+const yesistTemplate = () => wrapEmail(`
+  <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+
+    <!-- Hook box -->
+    <div style="background:#fef3c7;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
+      <p style="color:#92400e;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">This hackathon was built for IEEE members.</p>
+      <p style="color:#78350f;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
+        The <strong>IEEE Africa Entrepreneurship Summit Hackathon 2026</strong> was co-organised by IEEE Africa
+        and IEEE YESIST12 specifically for students and young innovators across Africa.
+        As a KU IEEE member, you are the exact target participant.
+        The deadline is <strong>tomorrow &mdash; 10 March 2026.</strong>
+      </p>
+    </div>
+
+    <!-- Body -->
+    <p style="color:#1e293b;font-size:15px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+      This is not a general open call. The hackathon was co-organised by IEEE Africa and IEEE YESIST12 &mdash;
+      two of the most prominent IEEE bodies on the continent &mdash; with the explicit purpose of mobilising
+      IEEE student members to develop scalable, technology-driven solutions for Africa&rsquo;s most pressing challenges.
+    </p>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
+      Top teams will receive <strong>fully funded travel grants</strong> covering transport, accommodation,
+      and all related costs to present their solutions at <strong>IEEE YESIST12 2026 in Indonesia.</strong>
+      This is a rare opportunity to represent your university and your country on a global IEEE stage.
+    </p>
+
+    <!-- Stats box — no emojis -->
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:20px 22px;margin-bottom:28px;">
+      <h3 style="color:#1e40af;font-size:15px;margin:0 0 14px;font-family:Arial,sans-serif;">Key Details</h3>
+      <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="padding:8px 12px 8px 0;color:#64748b;font-size:13px;font-weight:700;width:150px;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">Deadline</td>
+          <td style="padding:8px 0;color:#1e293b;font-size:13px;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;"><strong>10 March 2026 &mdash; Tomorrow</strong></td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px 8px 0;color:#64748b;font-size:13px;font-weight:700;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">Team Size</td>
+          <td style="padding:8px 0;color:#1e293b;font-size:13px;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">3 to 5 members</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px 8px 0;color:#64748b;font-size:13px;font-weight:700;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">Funding</td>
+          <td style="padding:8px 0;color:#1e293b;font-size:13px;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;"><strong>Fully funded</strong> &mdash; travel and accommodation to Indonesia for top teams</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px 8px 0;color:#64748b;font-size:13px;font-weight:700;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">Finals Venue</td>
+          <td style="padding:8px 0;color:#1e293b;font-size:13px;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">IEEE YESIST12 2026, Indonesia</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px 8px 0;color:#64748b;font-size:13px;font-weight:700;font-family:Arial,sans-serif;">Organiser Contact</td>
+          <td style="padding:8px 0;color:#1e293b;font-size:13px;font-family:Arial,sans-serif;">
+            <a href="mailto:kipngeno.koech@ieee.org" style="color:#1a4a7a;text-decoration:none;">kipngeno.koech@ieee.org</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Thematic areas — 1 emoji each -->
+    <h2 style="color:#0f2744;font-size:17px;margin:0 0 8px;font-family:Arial,sans-serif;">Five Thematic Areas</h2>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 16px;font-family:Arial,sans-serif;">
+      Your solution must address one of the following five thematic areas:
+    </p>
+    <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
+      <tr>
+        <td style="width:50%;padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">🌿 Climate &amp; Sustainable Agriculture</td>
+        <td style="width:50%;padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">⚡ Clean Energy &amp; Sustainable Infrastructure</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">🏥 HealthTech &amp; Well-being</td>
+        <td style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">🎓 Education &amp; Digital Inclusion</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">💼 Economic Empowerment &amp; Smart Communities</td>
+      </tr>
+    </table>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:32px;">
+      ${ctaButton('Apply Now', 'https://opportunitieskenya.live/opportunity/ieee-africa-entrepreneurship-summit-hackathon-2026')}
+    </div>
+
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;"/>
+
+    <!-- Urgency close -->
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+      You have until midnight tomorrow. Form a team today &mdash; reach out to your fellow IEEE KU members,
+      lab partners, and classmates. A team of three with a well-defined idea is all it takes to enter.
+    </p>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
+      For queries, contact the organiser directly at
+      <a href="mailto:kipngeno.koech@ieee.org" style="color:#1a4a7a;font-weight:700;text-decoration:none;">kipngeno.koech@ieee.org</a>.
+    </p>
+
+    <!-- View all -->
+    <p style="color:#475569;font-size:13px;margin:0 0 24px;font-family:Arial,sans-serif;">
+      View all opportunities at:
+      <a href="${FRONTEND_URL}" style="color:#1a4a7a;font-weight:700;text-decoration:none;">${FRONTEND_URL}</a>
+    </p>
+
+    <!-- Socials + contact -->
+    <div style="background:#f8fafc;border-radius:8px;padding:16px 20px;">
+      <p style="color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 10px;font-family:Arial,sans-serif;">Connect With Us</p>
+      <p style="margin:0;font-size:13px;color:#475569;line-height:2.4;font-family:Arial,sans-serif;">
+        📸 <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
+        💬 <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
+        📞 <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
+        &nbsp;&nbsp;✉️ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+      </p>
+    </div>
+
+  </div>`);
+
 // ── Seangapo Broadcast ──────────────────────────────────────────────────────
 
 const seangapoTemplate = () => wrapEmail(`
@@ -328,4 +440,4 @@ export async function sendBroadcastEmail(emails, subject, html) {
   return results;
 }
 
-export { seangapoTemplate };
+export { seangapoTemplate, yesistTemplate };

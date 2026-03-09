@@ -1,7 +1,7 @@
 import express from 'express';
 import { getDB } from '../config/database.js';
 import { verifyAdminKey } from '../middleware/auth.js';
-import { sendDigestEmail, sendPersonalizedDigestEmail, sendBroadcastEmail, seangapoTemplate } from '../services/emailService.js';
+import { sendDigestEmail, sendPersonalizedDigestEmail, sendBroadcastEmail, seangapoTemplate, yesistTemplate } from '../services/emailService.js';
 
 // ── Interest-matching helper ────────────────────────────────────────────────
 // Returns true when any subscriber interest keyword (category name or subfield)
@@ -225,6 +225,29 @@ router.post('/send-seangapo-broadcast', verifyAdminKey, async (req, res) => {
     });
   } catch (error) {
     console.error('❌ send-seangapo-broadcast error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const YESIST_SUBJECT = '24 Hours Remaining — IEEE Africa Entrepreneurship Summit Hackathon 2026';
+
+// POST /api/admin/send-yesist-broadcast
+// Accepts { emails: [...] } and sends the YESIST hackathon broadcast to that list.
+router.post('/send-yesist-broadcast', verifyAdminKey, async (req, res) => {
+  try {
+    const { emails } = req.body;
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+      return res.status(400).json({ error: 'emails array is required' });
+    }
+    const results = await sendBroadcastEmail(emails, YESIST_SUBJECT, yesistTemplate());
+    return res.json({
+      message: 'YESIST broadcast complete.',
+      totalRecipients: emails.length,
+      success: results.success,
+      failed: results.failed,
+    });
+  } catch (error) {
+    console.error('❌ send-yesist-broadcast error:', error);
     res.status(500).json({ error: error.message });
   }
 });
