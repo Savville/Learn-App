@@ -155,7 +155,7 @@ export const opportunities: Opportunity[] = [
     duration: 'Summer 2026 (35 hrs/week)',
     featured: false,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/internship.avif'
+    logoUrl: '/images/opportunities/boston.jpg'
   },
   {
     id: '29',
@@ -305,7 +305,7 @@ export const opportunities: Opportunity[] = [
     fundingType: 'Fully Funded',
     featured: true,
     dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/ieee_ies_summit.jpeg'
+    logoUrl: '/images/opportunities/ieee_yesist.jpeg'
   },
   {
     id: '33',

@@ -291,7 +291,7 @@ const opportunities = [
     fundingType: 'Fully Funded',
     featured: true,
     dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/ieee_ies_summit.jpeg',
+    logoUrl: '/images/opportunities/ieee_yesist.jpeg',
     views: 0,
     clicks: 0
   },
