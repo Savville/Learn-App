@@ -139,7 +139,7 @@ const opportunities = [
     duration: 'Summer 2026 (35 hrs/week)',
     featured: false,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/internship.avif',
+    logoUrl: '/images/opportunities/boston.jpg',
     views: 0,
     clicks: 0
   },
@@ -254,7 +254,7 @@ const opportunities = [
     duration: '1 year',
     featured: true,
     dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/fellowship.avif',
+    logoUrl: '/images/opportunities/afrika_kommt.png',
     views: 0,
     clicks: 0
   },
@@ -291,7 +291,7 @@ const opportunities = [
     fundingType: 'Fully Funded',
     featured: true,
     dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/ieee_yesist.jpeg',
+    logoUrl: '/images/opportunities/ieee_ies_summit.jpeg',
     views: 0,
     clicks: 0
   },
@@ -648,7 +648,7 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
     duration: 'Bachelor: 4 years | Masters: 2–3 years | PhD: 4–5 years',
     featured: true,
     dateAdded: '2026-03-05',
-    logoUrl: '/images/opportunities/australia.jpg',
+    logoUrl: '/images/opportunities/australia2.jpg',
     thematicAreas: [
       {
         heading: 'General',

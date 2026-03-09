@@ -270,7 +270,7 @@ export const opportunities: Opportunity[] = [
     duration: '1 year',
     featured: true,
     dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/fellowship.avif'
+    logoUrl: '/images/opportunities/afrika_kommt.png'
   },
   {
     id: '32',
@@ -305,7 +305,7 @@ export const opportunities: Opportunity[] = [
     fundingType: 'Fully Funded',
     featured: true,
     dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/ieee_yesist.jpeg'
+    logoUrl: '/images/opportunities/ieee_ies_summit.jpeg'
   },
   {
     id: '33',
@@ -759,7 +759,7 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
     duration: 'Bachelor: 4 years | Masters: 2–3 years | PhD: 4–5 years',
     featured: true,
     dateAdded: '2026-03-05',
-    logoUrl: '/images/opportunities/australia.jpg',
+    logoUrl: '/images/opportunities/australia2.jpg',
     thematicAreas: [
       {
         heading: 'General',
