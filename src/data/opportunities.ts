@@ -1052,5 +1052,44 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
         heading: 'Pitch Competition',
         topics: ['Innovative solutions to global challenges', 'Live pitching to global experts', 'Mentorship and expert feedback']
       }
-    ]  }
+    ]  },
+  {
+    id: '40',
+    title: 'DAAD MIDE Scholarship 2026 in Germany',
+    provider: 'German Academic Exchange Service (DAAD)',
+    category: 'Scholarship',
+    description: 'Fully funded master\'s scholarship at HTW Berlin for international students from developing countries to pursue the Master of International and Development Economics (MIDE).',
+    fullDescription: 'The DAAD MIDE Scholarship 2026 at HTW Berlin University of Applied Sciences is a life-changing opportunity for international students to study a master\'s degree in international and development economics. MIDE stands for the Master of International and Development Economics, and it gives students the tools they need to address global economic issues and support sustainable development, with a particular emphasis on economic development and policy analysis.\n\nHTW Berlin University of Applied Sciences is renowned for its excellent academic standards and practical approach. The university offers a thorough educational experience thanks to its dynamic campus culture, cutting-edge facilities, and knowledgeable faculty. Furthermore, HTW Berlin has a vibrant culture that provides students with a wealth of networking and internship opportunities. This scholarship will help with both education and professional careers; it will improve chances of landing a job in the international market in the field of economics.\n\nThe DAAD MIDE Scholarship is fully funded. The master\'s scholarship will cover the service fees for the program (€2,500), living expenses, study and research subsidy, travel expenses, health insurance, and other related expenses. For students from developing and newly industrialized nations, the German Academic Exchange Service provides a limited number of scholarships. This is a competitive scholarship program. Scholars will get an opportunity to join a diverse group of students from all over the world, where they will gain valuable insights and perspectives that will enhance their academic and professional development.',
+    deadline: '2026-08-31',
+    location: 'Germany',
+    eligibility: {
+      educationLevel: 'PostGrad',
+      fieldOfStudy: ['Economics', 'International Development', 'Development Studies'],
+      requirements: [
+        'Applicants must come from a developing or newly industrialized country',
+        'Must have at least two years of professional experience after graduation at the time of application',
+        'Must have completed their previous degree within the last six years',
+        'Must meet all MIDE program admission requirements',
+        'Must hold a recognized undergraduate degree with 180 ECTS (or equivalent)',
+        'Must have completed at least 15 ECTS in Economics',
+        'Must meet the English language proficiency requirements'
+      ]
+    },
+    benefits: [
+      'Full service fee coverage for the MIDE program (€2,500)',
+      'Monthly stipend of €934 for living expenses',
+      'Study and research subsidies throughout the academic period',
+      'Travel allowance to Germany and return home after completing the program',
+      'Health, accident, and personal liability insurance coverage',
+      'Monthly rent subsidy and family allowance under certain circumstances',
+      'Preparatory German Language Course (February/March)',
+      'Excellent opportunity to study a master\'s in Europe for free'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://mide.htw-berlin.de/applying/#c17445',
+    fundingType: 'Fully Funded',
+    featured: true,
+    dateAdded: '2026-03-13',
+    logoUrl: '/images/opportunities/german.jpg'
+  }
 ];
