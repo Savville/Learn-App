@@ -17,7 +17,7 @@ export interface Opportunity {
   applicationLink?: string;
   contactEmail?: string;
   contactLink?: string;
-  fundingType?: 'Fully Funded' | 'Partially Funded' | 'Stipend' | 'Unpaid';
+  fundingType?: 'Fully Funded' | 'Partially Funded' | 'Paid Internship' | 'Unpaid Internship';
   duration?: string;
   featured: boolean;
   dateAdded: string;
@@ -53,6 +53,7 @@ export const opportunities: Opportunity[] = [
     ],
     applicationType: 'Online Form',
     applicationLink: 'https://mastercardfdn.org/scholars',
+    fundingType: 'Fully Funded',
     featured: true,
     dateAdded: '2026-02-01',
     logoUrl: '/images/opportunities/mastercard-scholarship.jpg'
@@ -86,6 +87,7 @@ export const opportunities: Opportunity[] = [
     ],
     applicationType: 'Online Form',
     applicationLink: 'https://www.chevening.org/apply',
+    fundingType: 'Fully Funded',
     featured: true,
     dateAdded: '2026-01-15',
     logoUrl: '/images/opportunities/uk.jpg'
@@ -151,7 +153,7 @@ export const opportunities: Opportunity[] = [
     ],
     applicationType: 'Platform Link',
     applicationLink: 'https://city-boston.icims.com/jobs/31599/2026-summer-intern/job?mode=view',
-    fundingType: 'Stipend',
+    fundingType: 'Paid Internship',
     duration: 'Summer 2026 (35 hrs/week)',
     featured: false,
     dateAdded: '2026-02-27',
@@ -190,7 +192,7 @@ export const opportunities: Opportunity[] = [
     ],
     applicationType: 'Platform Link',
     applicationLink: 'https://recruitment.eso.org/',
-    fundingType: 'Fully Funded',
+    fundingType: 'Paid Internship',
     duration: '3 to 6 months',
     featured: false,
     dateAdded: '2026-02-27',
@@ -228,7 +230,7 @@ export const opportunities: Opportunity[] = [
     ],
     applicationType: 'Platform Link',
     applicationLink: 'https://wd3.myworkdaysite.com/recruiting/wfp/job_openings?workerSubType=59387fe40123101e856f1834e09b0002',
-    fundingType: 'Stipend',
+    fundingType: 'Paid Internship',
     duration: '2 to 8 months',
     featured: false,
     dateAdded: '2026-02-27',
@@ -954,7 +956,7 @@ No Japanese language skills required. All interns with outstanding performance m
     ],
     applicationType: 'Platform Link',
     applicationLink: 'https://recruit.hennge.com/en/gip/',
-    fundingType: 'Fully Funded',
+    fundingType: 'Paid Internship',
     duration: '4–6 weeks',
     featured: false,
     dateAdded: '2026-03-09',
@@ -1124,6 +1126,39 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     featured: true,
     dateAdded: '2026-03-15',
     logoUrl: '/images/opportunities/EEP.png'
+  },
+  {
+    id: 'kpa-internship-2026',
+    title: 'Kenya Ports Authority (KPA) Internship Program 2026',
+    provider: 'Kenya Ports Authority (KPA)',
+    category: 'Internship',
+    description: '194 paid internship and apprenticeship vacancies across various departments for a one-year program designed to provide young professionals with hands-on experience in a leading maritime organization.',
+    fullDescription: 'The Kenya Ports Authority (KPA) invites applications for 194 paid internship/apprenticeship roles for a one-year period starting April 2026. This program aims to provide young adults with hands-on experience and exposure to the real workplace environment within one of the region\'s leading maritime organizations, which is responsible for managing all scheduled seaports and inland waterways in Kenya.',
+    deadline: '2026-03-27',
+    location: 'Various locations including Mombasa, Lamu, Kisumu, Nairobi, and Naivasha',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Maritime Studies', 'Engineering (Electrical, Mechanical, Civil, Marine)', 'IT & Technology', 'Health & Safety', 'Supply Chain & Logistics', 'Human Resources', 'Finance & Risk Management', 'Communications & Marketing', 'Security', 'Legal', 'Administration'],
+      requirements: [
+        'Must be a Kenyan citizen, not more than 27 years old',
+        'Must have graduated with a Degree, Diploma, or Certificate between Jan 2023 and Dec 2025',
+        'Must not have undertaken a prior internship',
+        'Not a retiree or having exited formal employment'
+      ]
+    },
+    benefits: [
+      'Gain hands-on experience in a leading maritime organization',
+      'Exposure to the real workplace environment',
+      'Work across various departments including operations, engineering, ICT, and administration',
+      'Receive a monthly stipend (amount not specified)'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.kpa.co.ke/Vacancies/Details/13',
+    fundingType: 'Paid Internship',
+    duration: '12 months',
+    featured: true,
+    dateAdded: '2026-03-15',
+    logoUrl: '/images/opportunities/KPA.png'
   }
 ];
 
