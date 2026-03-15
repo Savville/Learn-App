@@ -213,7 +213,10 @@ export function Opportunities() {
                 <option value="UnderGrad" className="text-gray-900 bg-white">Undergraduate</option>
                 <option value="PostGrad" className="text-gray-900 bg-white">Postgraduate</option>
                 <option value="Both" className="text-gray-900 bg-white">Practitioners</option>
-                  <option value="All" className="text-gray-900 bg-white">All (Everyone)</option>
+                <option value="All" className="text-gray-900 bg-white">All (Everyone)</option>
+              </select>
+
+              {/* Funding Type Filter */}
               <select
                 className="px-4 py-2 rounded-sm border border-white/30 outline-none cursor-pointer bg-white/20 text-white font-medium backdrop-blur-sm hover:bg-white/30 transition-colors"
                 value={selectedFunding}
