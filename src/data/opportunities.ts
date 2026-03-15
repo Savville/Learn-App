@@ -1091,5 +1091,38 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     featured: true,
     dateAdded: '2026-03-13',
     logoUrl: '/images/opportunities/german.jpg'
+  },
+  {
+    id: '41',
+    title: 'EEP Africa Call for Proposals 2026',
+    provider: 'EEP Africa',
+    category: 'Grant',
+    description: 'Grant and repayable grant financing from EUR 200,000–500,000 to support early-stage, innovative clean energy projects in sub-Saharan Africa.',
+    fullDescription: 'EEP Africa invites private companies, start-ups, and social enterprises from around the world to submit early-stage, innovative clean energy projects in partner countries across sub-Saharan Africa. The programme provides grant and repayable grant financing from EUR 200,000–500,000 to support feasibility studies, pilot projects, and scale-up initiatives.\n\nFunding ranges from EUR 200,000–500,000 with a co-financing requirement of 10%–50% depending on the project type and company maturity. The application process involves a 2-stage mechanism, beginning with an Expression of Interest and then moving to a Full Proposal for shortlisted candidates.\n\nProject Phases Supported include Feasibility Studies, Pilot Projects by Early-Stage Companies, and Scale-up & Replication Projects. Focus technologies include Residential Electricity Access, Productive Uses of Energy, Mini Grids, Power Generation, Clean Cooking, Electric Mobility, and Energy Efficiency. \n\nKey Dates:\n- Call Opens: 16 February 2026\n- EoI Deadline: 16 March 2026 (2 PM EAT)\n- Longlist Pitch Interviews: May 2026\n- Full Proposal Deadline: 27 July 2026 (2 PM EAT)\n- Final Decision: End of September 2026 (Final Investment Committee decision ends the evaluation process)\n- Deployment: October 2026 onwards.',
+    deadline: '2026-03-16',
+    location: 'Sub-Saharan and Southern Africa',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Clean Energy', 'Renewable Energy', 'Entrepreneurship'],
+      requirements: [
+        'Must be a private company, start-up, or social enterprise with commercial revenue model',
+        'Registered as a legal entity for at least 6 months prior to EoI deadline',
+        'Must have strong local presence in target country, be locally led, or have strong local partnerships',
+        'NGOs, charities, research institutions, and government bodies can only serve as partners'
+      ]
+    },
+    benefits: [
+      'EUR 200,000–500,000 in grant or repayable grant financing',
+      'Supports feasibility studies and pre-development (30% co-financing)',
+      'Supports pilot and demonstration activities (10% cash + 20% in-kind co-financing for early stage)',
+      'Supports scale-up equipment and installation (30%–50% co-financing for mature companies)',
+      'Access to EEP Africa network and support'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://eepafrica.org/financing/2026-call-for-proposals',
+    fundingType: 'Partially Funded',
+    featured: true,
+    dateAdded: '2026-03-15',
+    logoUrl: 'C:\\Users\\User\\Downloads\\PortableGit\\Learn Opportunities\\public\\images\\opportunities\\EEP.png'
   }
 ];
