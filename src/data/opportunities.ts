@@ -8,7 +8,7 @@ export interface Opportunity {
   deadline?: string;
   location?: string;
   eligibility: {
-    educationLevel: 'UnderGrad' | 'PostGrad' | 'Both';
+    educationLevel: 'UnderGrad' | 'PostGrad' | 'Both' | 'All';
     fieldOfStudy?: string[];
     requirements: string[];
   };
@@ -1102,7 +1102,7 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     deadline: '2026-03-16',
     location: 'Sub-Saharan and Southern Africa',
     eligibility: {
-      educationLevel: 'Both',
+      educationLevel: 'All',
       fieldOfStudy: ['Clean Energy', 'Renewable Energy', 'Entrepreneurship'],
       requirements: [
         'Must be a private company, start-up, or social enterprise with commercial revenue model',
@@ -1123,6 +1123,7 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     fundingType: 'Partially Funded',
     featured: true,
     dateAdded: '2026-03-15',
-    logoUrl: 'C:\\Users\\User\\Downloads\\PortableGit\\Learn Opportunities\\public\\images\\opportunities\\EEP.png'
+    logoUrl: '/images/opportunities/EEP.png'
   }
 ];
+
