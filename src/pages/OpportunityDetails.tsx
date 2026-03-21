@@ -89,14 +89,14 @@ export function OpportunityDetails() {
         // Only show a blocking spinner if there is NO local data at all
         if (!localMatch) setLoading(true);
 
-        const response = await opportunitiesAPI.getOne(id!);
+        const response = await opportunitiesAPI.getOne(id || slug!);
         const local = localOpportunities.find(l => l.id === id);
         // Merge: keep local logoUrl (served from Vercel), upgrade everything else from DB
         setOpportunity(local ? { ...response.data, logoUrl: local.logoUrl } : response.data);
         setError(null);
 
         // Track the view event (fire-and-forget)
-        analyticsAPI.track(id!, 'view').catch(err => {
+        analyticsAPI.track(response.data.id, 'view').catch(err => {
           console.error('Analytics tracking error:', err);
         });
 
@@ -126,13 +126,13 @@ export function OpportunityDetails() {
       }
     };
 
-    if (id) {
+    if (id || slug) {
       fetchOpportunity();
-    } else if (slug && !localMatch) {
+    } else {
       setLoading(false);
       setError('Opportunity not found.');
     }
-  }, [slug]);
+  }, [slug, id]); // Re-run when slug or id changes
 
   if (loading) {
     return (

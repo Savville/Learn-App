@@ -58,7 +58,7 @@ router.get('/:id', async (req, res) => {
 
     const db = getDB();
     const opportunity = await db.collection('opportunities')
-      .findOne({ id: req.params.id });
+      .findOne({ $or: [{ id: req.params.id }, { slug: req.params.id }] });
 
     if (!opportunity) {
       return res.status(404).json({ error: 'Opportunity not found' });

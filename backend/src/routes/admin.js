@@ -477,6 +477,10 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     // Ensure it has an ID and correctly formatted fields:
     if (!oppToPublish.id) oppToPublish.id = `pub-${Date.now()}`;
     if (!oppToPublish.dateAdded) oppToPublish.dateAdded = new Date().toISOString().split('T')[0];
+    
+    // Generate slug for clean URLs
+    const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+    oppToPublish.slug = slugify(oppToPublish.title || '');
 
     await db.collection('opportunities').replaceOne({ id: oppToPublish.id }, oppToPublish, { upsert: true });
 
