@@ -63,7 +63,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 import path from 'path';
 import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 app.use('/images', express.static(path.join(PROJECT_ROOT, 'public', 'images')));
 
 // Connect to Database
