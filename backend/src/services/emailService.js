@@ -200,6 +200,41 @@ export async function sendPosterApprovalEmail(posterEmail, opportunity) {
   }
 }
 
+export async function sendPosterAcknowledgementEmail(posterEmail, posterName, opportunityTitle) {
+  try {
+    const html = wrapEmail(`
+      <div style="padding:32px 28px;">
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">We've Received Your Submission!</h2>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Hello ${posterName},
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Thank you for sharing your opportunity: <strong>${opportunityTitle}</strong>. 
+          We have indeed received it and our team is already working on verifying the details.
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Once it is approved and published on <strong>Opportunities Kenya</strong>, we will send you another notification with the live link.
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Thank you for contributing to Kenya's leading student opportunities platform.
+        </p>
+        <div style="text-align:center; margin-top:20px;">
+          <a href="${FRONTEND_URL}/opportunities" style="color:#1a4a7a;font-weight:700;text-decoration:none;">Browse Other Opportunities</a>
+        </div>
+      </div>
+    `);
+
+    await sendEmail({
+      to: posterEmail,
+      subject: `We've got your submission: ${opportunityTitle}`,
+      html: html
+    });
+    console.log(`Acknowledgement email sent to ${posterEmail}`);
+  } catch (error) {
+    console.error(`Acknowledgement email failed for ${posterEmail}:`, error.message);
+  }
+}
+
 export async function sendNewOpportunityEmail(subscribers, opportunity) {
   try {
     const bcc = subscribers.map(s => s.email);
