@@ -5,7 +5,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { verifyAdminKey } from '../middleware/auth.js';
-import { sendDigestEmail, sendPersonalizedDigestEmail, sendBroadcastEmail, sendNewOpportunityEmail, seangapoTemplate, yesistTemplate } from '../services/emailService.js';
+import { sendDigestEmail, sendPersonalizedDigestEmail, sendBroadcastEmail, sendNewOpportunityEmail, sendPosterApprovalEmail, seangapoTemplate, yesistTemplate } from '../services/emailService.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Resolve the project root (3 levels up from backend/src/routes/)
@@ -493,6 +493,13 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     if (subscribers.length > 0) {
       // Non-blocking: send the email in the background so the admin UI responds instantly
       sendNewOpportunityEmail(subscribers, oppToPublish).catch(err => console.error("Failed to send alert:", err));
+    }
+
+    // NEW: Notify the original poster that their opportunity is now live
+    if (pendingDoc.reporter?.email) {
+      sendPosterApprovalEmail(pendingDoc.reporter.email, oppToPublish).catch(err => {
+          console.error('Approval notification to poster failed:', err.message);
+      });
     }
 
     res.json({ message: 'Opportunity approved and published. Email alert triggered!', url: `/opportunity/${oppToPublish.id}` });

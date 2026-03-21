@@ -171,6 +171,35 @@ export async function sendAdminSubmissionNotification(reporter, opportunity) {
   }
 }
 
+export async function sendPosterApprovalEmail(posterEmail, opportunity) {
+  try {
+    const html = wrapEmail(`
+      <div style="padding:32px 28px;">
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">Congratulations! Your Opportunity is Live</h2>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Great news! The opportunity you shared, <strong>${opportunity.title}</strong>, has been reviewed and is now live on 
+          <strong>Opportunities Kenya</strong>.
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          It is now visible to thousands of students and change-makers across the platform. Thank you for contributing to our community.
+        </p>
+        <div style="text-align:center; margin-top:20px;">
+          ${ctaButton('View Your Live Post', `${FRONTEND_URL}/opportunity/${toSlug(opportunity.title)}`)}
+        </div>
+      </div>
+    `);
+
+    await sendEmail({
+      to: posterEmail,
+      subject: `Your opportunity "${opportunity.title}" is now published!`,
+      html: html
+    });
+    console.log(`Approval notification sent to poster: ${posterEmail}`);
+  } catch (error) {
+    console.error(`Poster approval email failed for ${posterEmail}:`, error.message);
+  }
+}
+
 export async function sendNewOpportunityEmail(subscribers, opportunity) {
   try {
     const bcc = subscribers.map(s => s.email);
