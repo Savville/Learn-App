@@ -481,6 +481,9 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     // Generate slug for clean URLs
     const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
     oppToPublish.slug = slugify(oppToPublish.title || '');
+    
+    // Add attribution
+    oppToPublish.postedBy = pendingDoc.reporter?.name || 'Opportunities Kenya Admin';
 
     await db.collection('opportunities').replaceOne({ id: oppToPublish.id }, oppToPublish, { upsert: true });
 

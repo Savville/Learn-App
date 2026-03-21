@@ -78,6 +78,7 @@ router.post('/', verifyAdminKey, async (req, res) => {
     const db = getDB();
     const opportunity = {
       ...req.body,
+      postedBy: req.body.postedBy || 'Opportunities Kenya Admin',
       dateAdded: new Date(),
       views: 0,
       clicks: 0
