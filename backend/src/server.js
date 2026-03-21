@@ -6,11 +6,13 @@ import compression from 'compression';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
+import { generateAdminToken } from './middleware/auth.js';
 import opportunitiesRoutes from './routes/opportunities.js';
 import subscriberRoutes from './routes/subscribers.js';
 import analyticsRoutes from './routes/analytics.js';
 import adsRoutes from './routes/ads.js';
 import adminRoutes from './routes/admin.js';
+import publicRoutes from './routes/public.js';
 
 dotenv.config();
 
@@ -60,12 +62,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Connect to Database
 connectDB();
 
+// ── Admin Login ─────────────────────────────────────────────────────────────
+// POST /api/admin/login  { password: "..." }
+// Returns a signed JWT on success — no raw API key ever leaves the server.
+app.post('/api/admin/login', (req, res) => {
+  const { password } = req.body;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    return res.status(500).json({ error: 'Server misconfiguration: ADMIN_PASSWORD not set.' });
+  }
+  if (!password || password !== adminPassword) {
+    return res.status(401).json({ error: 'Invalid password.' });
+  }
+
+  const token = generateAdminToken();
+  res.json({ token, expiresIn: '8h' });
+});
+
 // Routes
 app.use('/api/opportunities', opportunitiesRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ads', adsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/public', publicRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

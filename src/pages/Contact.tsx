@@ -1,5 +1,6 @@
 import { Mail, MessageSquare, Instagram, Linkedin, MessageCircle, Send } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
 
 export function Contact() {
@@ -196,12 +197,20 @@ export function Contact() {
               </a>
             </div>
 
-            {/* Quick Response */}
+            {/* Post With Us CTA */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border-l-4 border-blue-600">
-              <h3 className="text-gray-900 mb-2">Quick Response Time</h3>
-              <p className="text-gray-600">
-                We typically respond to all inquiries within 24-48 hours during business days.
+              <h3 className="text-gray-900 mb-2 font-bold text-lg">Post With Us</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Do you know of an opportunity? Share it with thousands of students and change-makers across Kenya. Help us democratize access to life-changing opportunities by submitting an announcement to our platform.
               </p>
+              <Link
+                to="/post-with-us"
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 text-white rounded-xl transition-all font-semibold shadow-md hover:shadow-lg"
+                style={{ backgroundColor: '#0933ed' }}
+              >
+                <Send className="w-5 h-5" />
+                <span>Post With Us</span>
+              </Link>
             </div>
           </div>
         </div>

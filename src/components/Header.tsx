@@ -56,11 +56,21 @@ export function Header() {
             </Link>
             <Link
               to="/contact"
-              className={`transition-colors ${
+              className={`transition-colors flex items-center h-full ${
                 isActive('/contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
               }`}
             >
               Contact
+            </Link>
+            <Link
+              to="/post-with-us"
+              className={`transition-all px-4 py-2 rounded-xl font-medium ${
+                isActive('/post-with-us') 
+                  ? 'bg-blue-600 text-white shadow-md' 
+                  : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white hover:shadow-md'
+              }`}
+            >
+              Post With Us
             </Link>
           </div>
 
@@ -112,6 +122,15 @@ export function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
+              </Link>
+              <Link
+                to="/post-with-us"
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isActive('/post-with-us') ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Post With Us
               </Link>
             </div>
           </div>

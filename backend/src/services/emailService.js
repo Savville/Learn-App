@@ -200,6 +200,37 @@ export async function sendDeadlineReminder(email, opportunity, daysLeft) {
   }
 }
 
+export async function sendEepEmail(subscribers) {
+  try {
+    const subject = 'CORRECTION: Got an idea? The EEP fund is looking for you.';
+    console.log(`Starting EEP broadcast to ${subscribers.length} subscribers.`);
+    await sendPersonalizedBroadcastEmail(subscribers, subject, eepTemplate);
+    console.log('✅ EEP broadcast successfully completed.');
+    return { success: true };
+  } catch (error) {
+    console.error('❌ EEP broadcast email failed:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function sendPersonalizedBroadcastEmail(subscribers, subject, htmlGenerator) {
+  const results = { success: 0, failed: 0 };
+  for (const subscriber of subscribers) {
+    try {
+      const html = htmlGenerator(subscriber.name);
+      await sendEmail({ to: subscriber.email, subject, html });
+      results.success++;
+      // Added a small delay to avoid rate limiting
+      await new Promise(r => setTimeout(r, 200));
+    } catch (error) {
+      console.error(`Personalized broadcast failed for ${subscriber.email}:`, error.message);
+      results.failed++;
+    }
+  }
+  console.log(`Personalized Broadcast: ${results.success} sent, ${results.failed} failed`);
+  return results;
+}
+
 // ── YESIST Hackathon Broadcast ───────────────────────────────────────────────
 
 const yesistTemplate = () => wrapEmail(`
@@ -440,4 +471,82 @@ export async function sendBroadcastEmail(emails, subject, html) {
   return results;
 }
 
-export { seangapoTemplate, yesistTemplate };
+// ── EEP Broadcast ────────────────────────────────────────────────────────────
+
+const eepTemplate = (name = 'Innovator') => wrapEmail(`
+  <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+
+    <!-- Story Hook -->
+    <div style="background:#f0fdf4;border-left:4px solid #22c55e;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
+      <p style="color:#15803d;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">Tired of seeing the same problems with no solutions?</p>
+      <p style="color:#166534;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
+        Mambo ${name}, we all have that one friend in the village, maybe in shagz, who has a brilliant idea but lacks the cash to make it happen. Ama it's you? You see a problem in your community—maybe it's access to clean water, maybe it's farm produce going to waste—and you know a tech solution could fix it. But pesa nani atatoa?
+      </p>
+    </div>
+
+    <!-- The 'Why' -->
+    <p style="color:#1e293b;font-size:15px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+     This is your chance to stop complaining and start building. The <strong>EEP (Empowering Engineers Program)</strong> isn't just another fund. It’s a challenge to you to look around your community, pinpoint a real-world problem, and propose a solution that works.
+    </p>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
+      Think about it. That project you discussed with your friends after class, the one that could help farmers in Makueni get weather alerts, or a simple system to manage waste collection in your estate in Nairobi. That’s what EEP is for. They provide the funding and support; you bring the idea, the passion, and the technical skills.
+    </p>
+
+    <!-- EEP Image -->
+    <div style="margin-bottom:28px;text-align:center;">
+        <img src="${FRONTEND_URL}/images/opportunities/EEP.png" alt="EEP Opportunity" style="max-width:100%;height:auto;border-radius:12px;" />
+    </div>
+
+    <!-- The 'How' -->
+    <h2 style="color:#0f2744;font-size:18px;margin:0 0 8px;font-family:Arial,sans-serif;">Here's a Story for You...</h2>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 16px;font-family:Arial,sans-serif;">
+     Last year, a group of students from a university not so different from yours noticed that local clinics were struggling to keep vaccines at the right temperature during power outages. Instead of just talking about it, they designed a low-cost, solar-powered refrigeration unit. They documented their idea, outlined the community impact, and applied for EEP funding. Today, their solution is being piloted in three clinics, saving lives.
+    </p>
+    <p style="color:#1e293b;font-size:15px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
+        <strong>What problem will you solve?</strong>
+    </p>
+
+    <!-- Key Details -->
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:20px 22px;margin-bottom:28px;">
+      <h3 style="color:#1e40af;font-size:15px;margin:0 0 14px;font-family:Arial,sans-serif;">Key Focus Areas</h3>
+       <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">🌱&nbsp; Agri-Tech &amp; Food Security</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">💧&nbsp; Water, Sanitation &amp; Hygiene (WASH)</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">⚡&nbsp; Renewable Energy &amp; Smart Grids</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;font-family:Arial,sans-serif;">🏥&nbsp; Health-Tech &amp; Telemedicine</td></tr>
+      </table>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:32px;">
+      ${ctaButton('Learn More & Apply for EEP', 'https://opportunitieskenya.live/opportunity/eep-africa-call-for-proposals-2026')}
+    </div>
+
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;"/>
+
+    <!-- Closing -->
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+      This is a direct call to you, the innovators, the problem-solvers, the ones who can. Don't let your ideas gather dust.
+    </p>
+    
+    <!-- View all -->
+    <p style="color:#475569;font-size:13px;margin:0 0 24px;font-family:Arial,sans-serif;">
+      🌐 View all opportunities at:
+      <a href="${FRONTEND_URL}" style="color:#1a4a7a;font-weight:700;text-decoration:none;">${FRONTEND_URL}</a>
+    </p>
+
+    <!-- Socials + contact -->
+    <div style="background:#f8fafc;border-radius:8px;padding:16px 20px;">
+      <p style="color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 10px;font-family:Arial,sans-serif;">Connect With Us</p>
+      <p style="margin:0;font-size:13px;color:#475569;line-height:2.4;font-family:Arial,sans-serif;">
+        📸 <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
+        💬 <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
+        📞 <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
+        &nbsp;&nbsp;✉️ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+      </p>
+    </div>
+
+  </div>`);
+
+
+export { seangapoTemplate, yesistTemplate, eepTemplate };

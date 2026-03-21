@@ -62,8 +62,9 @@ export function OpportunityDetails() {
   const { slug } = useParams();
   const localMatch = localOpportunities.find(l => toSlug(l.title) === slug);
   const id = localMatch?.id;
-  const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Pre-populate with local data instantly — no spinner for known opportunities
+  const [opportunity, setOpportunity] = useState<Opportunity | null>(localMatch ?? null);
+  const [loading, setLoading] = useState(!localMatch); // only show spinner if no local fallback
   const [error, setError] = useState<string | null>(null);
   const [relatedOpportunities, setRelatedOpportunities] = useState<Opportunity[]>([]);
 
@@ -81,17 +82,20 @@ export function OpportunityDetails() {
     type: 'article'
   });
 
-  // Fetch the opportunity details
+  // Silently fetch DB version to upgrade local data — user already sees the page
   useEffect(() => {
     const fetchOpportunity = async () => {
       try {
-        setLoading(true);
+        // Only show a blocking spinner if there is NO local data at all
+        if (!localMatch) setLoading(true);
+
         const response = await opportunitiesAPI.getOne(id!);
         const local = localOpportunities.find(l => l.id === id);
+        // Merge: keep local logoUrl (served from Vercel), upgrade everything else from DB
         setOpportunity(local ? { ...response.data, logoUrl: local.logoUrl } : response.data);
         setError(null);
 
-        // Track the view event
+        // Track the view event (fire-and-forget)
         analyticsAPI.track(id!, 'view').catch(err => {
           console.error('Analytics tracking error:', err);
         });
@@ -110,15 +114,13 @@ export function OpportunityDetails() {
           });
         setRelatedOpportunities(relatedMerged);
       } catch (err) {
+        // API cold-start / offline — local data is already showing, stay there silently
         console.error('Error fetching opportunity:', err);
-        const local = localOpportunities.find(l => l.id === id);
-        if (local) {
-          setOpportunity(local);
-          setError(null);
-        } else {
+        if (!localMatch) {
           setError('Failed to load opportunity details. Please try again.');
           setOpportunity(null);
         }
+        // If localMatch exists the user is already seeing content — do nothing on API error
       } finally {
         setLoading(false);
       }
@@ -126,6 +128,9 @@ export function OpportunityDetails() {
 
     if (id) {
       fetchOpportunity();
+    } else if (slug && !localMatch) {
+      setLoading(false);
+      setError('Opportunity not found.');
     }
   }, [slug]);
 

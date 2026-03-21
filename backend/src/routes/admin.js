@@ -1,7 +1,44 @@
 import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { verifyAdminKey } from '../middleware/auth.js';
-import { sendDigestEmail, sendPersonalizedDigestEmail, sendBroadcastEmail, seangapoTemplate, yesistTemplate } from '../services/emailService.js';
+import { sendDigestEmail, sendPersonalizedDigestEmail, sendBroadcastEmail, sendNewOpportunityEmail, seangapoTemplate, yesistTemplate } from '../services/emailService.js';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// Resolve the project root (3 levels up from backend/src/routes/)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
+
+// ── Multer Configuration for Image Uploads ──────────────────────────────────
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dest = path.join(PROJECT_ROOT, 'public', 'images', 'opportunities');
+    fs.mkdirSync(dest, { recursive: true });
+    cb(null, dest);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: function (req, file, cb) {
+    const filetypes = /jpeg|jpg|png|gif|avif|webp/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Error: File upload only supports the following filetypes - ' + filetypes));
+  }
+});
 
 // ── Interest-matching helper ────────────────────────────────────────────────
 // Returns true when any subscriber interest keyword (category name or subfield)
@@ -24,6 +61,17 @@ function interestMatchesOpportunity(opp, interests) {
 }
 
 const router = express.Router();
+
+// POST /api/admin/upload-image
+router.post('/upload-image', verifyAdminKey, upload.single('coverImage'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded.' });
+  }
+
+  // Construct the public URL path
+  const imageUrl = `/images/opportunities/${req.file.filename}`;
+  res.json({ imageUrl });
+});
 
 // GET admin dashboard stats
 router.get('/stats', verifyAdminKey, async (req, res) => {
@@ -270,6 +318,203 @@ router.post('/upsert-opportunities', verifyAdminKey, async (req, res) => {
     res.json({ message: 'Upserted successfully.', ids: results });
   } catch (error) {
     console.error('❌ upsert-opportunities error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/list-gemini-models — returns models your API key can use (for debugging)
+router.get('/list-gemini-models', verifyAdminKey, async (req, res) => {
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'GEMINI_API_KEY is not configured.' });
+    }
+    const apiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`
+    );
+    const data = await apiRes.json();
+    if (!apiRes.ok) {
+      return res.status(apiRes.status).json(data);
+    }
+    const models = (data.models || []).map((m) => ({ name: m.name, displayName: m.displayName }));
+    res.json({ models });
+  } catch (err) {
+    console.error('list-gemini-models error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/admin/parse-opportunity
+router.post('/parse-opportunity', verifyAdminKey, async (req, res) => {
+  try {
+    const { rawText } = req.body;
+
+    if (!rawText) {
+      return res.status(400).json({ error: 'rawText is required in the request body.' });
+    }
+    
+    // IMPORTANT: Make sure to set the GEMINI_API_KEY in your backend's .env file
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    // Use versioned model ID; set GEMINI_MODEL in .env to override. List via GET /api/admin/list-gemini-models
+    const modelId = process.env.GEMINI_MODEL || "gemini-1.5-flash-002";
+    const model = genAI.getGenerativeModel({ model: modelId });
+
+    const prompt = `
+      You are an expert data extractor for a student and professional opportunities portal.
+      Analyze the following raw text and extract key data points to create an opportunity listing.
+      
+      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'Other'.
+      
+      For missing information like deadlines, if the text says something generic like "End of September", extract that. If the application link is missing, return an empty string "".
+      
+      Special Rules for Categories:
+      - If the category is 'Event', you MUST extract 'Date' and 'Time' as specific features in the extractedFeatures array.
+      - If the category is 'Project', you MUST extract 'Timeline' as a feature in the extractedFeatures array. Any other complex project requirements (like daily availability duration) should just be merged nicely into the description.
+      - Extract 'Venue' or 'Location' as the 'Location' feature.
+
+      Respond ONLY with a valid JSON object using the following structure. Do not include markdown formatting like \`\`\`json.
+      
+      {
+        "basicInfo": {
+          "title": "...",
+          "provider": "...",
+          "category": "...",
+          "description": "A 2-3 sentence summary highlighting the most important info for the applicant.",
+          "fundingType": "Fully Funded | Partially Funded | Paid Internship | Unpaid Internship | N/A"
+        },
+        "extractedFeatures": [
+          {
+            "feature": "Application Link",
+            "value": "URL or empty",
+            "importance": "High",
+            "notes": "Critical for applying"
+          },
+          {
+            "feature": "Deadline",
+            "value": "Date or extracted vague string",
+            "importance": "High",
+            "notes": ""
+          },
+          {
+            "feature": "Location",
+            "value": "...",
+            "importance": "Medium",
+            "notes": ""
+          },
+          {
+            "feature": "Eligibility",
+            "value": "...",
+            "importance": "High",
+            "notes": "Brief summary of who can apply"
+          }
+        ]
+      }
+
+      Raw Text to analyze:
+      """
+      ${rawText}
+      """
+    `;
+
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+
+    console.log('Raw Gemini response for parse-opportunity:', responseText);
+    
+    // Safely parse the JSON (stripping potential markdown blocks and extra text)
+    const cleaned = responseText
+      // Remove fenced code blocks like ```json ... ``` or ``` ... ```
+      .replace(/```[\s\S]*?```/g, '')
+      // Also remove leading/trailing backticks/newlines/spaces
+      .trim();
+
+    let parsedData;
+    try {
+      parsedData = JSON.parse(cleaned);
+    } catch (jsonError) {
+      console.error('JSON parse failed for Gemini response:', jsonError, 'Cleaned text was:', cleaned);
+      return res.status(500).json({ error: 'Model returned invalid JSON.' });
+    }
+
+    res.json(parsedData);
+  } catch (error) {
+    console.error("Extraction error:", error);
+    const message = error?.message || error?.toString?.() || "Failed to parse text";
+    res.status(500).json({ error: "Failed to parse text", details: message });
+  }
+});
+
+// ── Pending Opportunities (Inbox) ──────────────────────────────────────────
+
+// GET /api/admin/pending
+router.get('/pending', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const pending = await db.collection('pending_opportunities').find({ status: 'pending' }).sort({ submittedAt: -1 }).toArray();
+    res.json(pending);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/approve/:id
+router.post('/approve/:id', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    
+    const { ObjectId } = await import('mongodb');
+    
+    // Find the pending document
+    const pendingDoc = await db.collection('pending_opportunities').findOne({ _id: new ObjectId(id) });
+    if (!pendingDoc) return res.status(404).json({ error: 'Pending opportunity not found.' });
+
+    // Move to opportunities collection
+    const oppToPublish = { ...pendingDoc.opportunity };
+    // Ensure it has an ID and correctly formatted fields:
+    if (!oppToPublish.id) oppToPublish.id = `pub-${Date.now()}`;
+    if (!oppToPublish.dateAdded) oppToPublish.dateAdded = new Date().toISOString().split('T')[0];
+
+    await db.collection('opportunities').replaceOne({ id: oppToPublish.id }, oppToPublish, { upsert: true });
+
+    // Update pending status
+    await db.collection('pending_opportunities').updateOne({ _id: pendingDoc._id }, { $set: { status: 'approved', approvedAt: new Date() } });
+
+    // Fetch active subscribers to send the new opportunity alert
+    const subscribers = await db
+      .collection('subscribers')
+      .find({ unsubscribed: { $ne: true } })
+      .project({ email: 1 })
+      .toArray();
+
+    if (subscribers.length > 0) {
+      // Non-blocking: send the email in the background so the admin UI responds instantly
+      sendNewOpportunityEmail(subscribers, oppToPublish).catch(err => console.error("Failed to send alert:", err));
+    }
+
+    res.json({ message: 'Opportunity approved and published. Email alert triggered!', url: `/opportunity/${oppToPublish.id}` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/reject/:id
+router.post('/reject/:id', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    
+    const { ObjectId } = await import('mongodb');
+    
+    await db.collection('pending_opportunities').updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { status: 'rejected', rejectedAt: new Date() } }
+    );
+    res.json({ message: 'Opportunity rejected.' });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });

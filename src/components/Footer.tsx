@@ -42,6 +42,12 @@ export function Footer() {
               <Link to="/contact" className="hover:text-white transition-colors">
                 Contact
               </Link>
+              <Link
+                to="/post-with-us"
+                className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+              >
+                ✦ Post With Us
+              </Link>
             </div>
           </div>
 
