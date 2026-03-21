@@ -22,6 +22,7 @@ export interface Opportunity {
   featured: boolean;
   dateAdded: string;
   logoUrl: string;
+  postedBy?: string;
   thematicAreas?: { heading: string; topics: string[] }[];
 }
 

@@ -67,7 +67,14 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
           {opportunity.title}
         </h3>
 
-        <p className="text-blue-600 text-sm mb-3 font-semibold">{opportunity.provider}</p>
+        <div className="flex flex-col mb-3">
+          {opportunity.postedBy && (
+            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">
+              Posted by {opportunity.postedBy}
+            </span>
+          )}
+          <p className="text-blue-600 text-sm font-semibold">{opportunity.provider}</p>
+        </div>
 
         <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">{opportunity.description}</p>
 

@@ -39,7 +39,7 @@ export function About() {
             <h2 className="text-gray-900 mb-6">Who We Are</h2>
             <div className="space-y-4 text-gray-700 leading-relaxed">
               <p>
-                Opportunities Kenya is a youth-focused initiative dedicated to connecting students, graduates and practitioners with valuable learning opportunities, grants, internships, fellowships, and career-building programs from around the world.
+                Opportunities Kenya is a youth-focused initiative dedicated to connecting students, graduates and practitioners with problem solving challenges and valuable learning opportunities, grants, internships, fellowships, and career-building programs from around the world.
               </p>
               <p>
                 We believe that access to the right opportunity can transform a young person's future, and our mission is to make that access simple, clear, and free.

@@ -220,7 +220,14 @@ export function OpportunityDetails() {
             {/* Title & Provider */}
             <div className="mb-6">
               <h1 className="text-gray-900 mb-2 text-3xl font-bold">{opportunity.title}</h1>
-              <p className="text-gray-600">{opportunity.provider}</p>
+              <div className="flex flex-col">
+                {opportunity.postedBy && (
+                  <span className="text-xs uppercase tracking-widest text-gray-400 font-bold mb-0.5">
+                    Posted by {opportunity.postedBy}
+                  </span>
+                )}
+                <p className="text-gray-600 text-lg">{opportunity.provider}</p>
+              </div>
             </div>
 
             {/* Meta Info */}
