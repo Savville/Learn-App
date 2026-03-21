@@ -131,14 +131,23 @@ router.post('/submit-opportunity', async (req, res) => {
     }
     const db = getDB();
     
-    const doc = {
-        opportunity, // holds title, provider, extractedFeatures, etc
-        status: 'pending',
-        reporter,
-        submittedAt: new Date().toISOString(),
-    };
+    // Check if reporter is a verified organization
+    const org = await db.collection('organizations').findOne({ 
+      email: reporter.email.toLowerCase() 
+    });
     
-    await db.collection('pending_opportunities').insertOne(doc);
+    const isOrganizationPost = !!org;
+    const orgName = org ? org.orgName : null;
+
+    // Save with status pending
+    await db.collection('pending_opportunities').insertOne({
+      reporter,
+      opportunity,
+      isOrganizationPost,
+      orgName,
+      status: 'pending',
+      submittedAt: new Date()
+    });
     
     // Notify admin in the background
     sendAdminSubmissionNotification(reporter, opportunity).catch(err => {
@@ -151,6 +160,30 @@ router.post('/submit-opportunity', async (req, res) => {
     });
 
     res.json({ message: 'Submitted successfully for verification.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/organizations/request
+router.post('/organizations/request', async (req, res) => {
+  try {
+    const { name, organization, email, telephone, description } = req.body;
+    
+    if (!name || !organization || !email) {
+      return res.status(400).json({ error: 'Name, Organization, and Email are required.' });
+    }
+
+    // In a real app, we would send an email to the admin here.
+    // For now, we'll log it and let the admin know.
+    console.log('🏢 ORGANIZATION VERIFICATION REQUEST:', {
+      name, organization, email, telephone, description
+    });
+
+    // Optional: send notification via emailService if implemented
+    // await sendEmail({ ... }); 
+
+    res.json({ message: 'Request sent successfully. We will contact you soon.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

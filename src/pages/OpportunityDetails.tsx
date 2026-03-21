@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState, type JSX } from 'react';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
-import { Calendar, ExternalLink, ArrowLeft, Tag, Bell } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle } from 'lucide-react';
 import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
@@ -222,9 +222,14 @@ export function OpportunityDetails() {
               <h1 className="text-gray-900 mb-2 text-3xl font-bold">{opportunity.title}</h1>
               <div className="flex flex-col">
                 {opportunity.postedBy && (
-                  <span className="text-xs uppercase tracking-widest text-gray-400 font-bold mb-0.5">
-                    Posted by {opportunity.postedBy}
-                  </span>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xs uppercase tracking-widest text-gray-400 font-bold">
+                      Posted by {opportunity.postedBy}
+                    </span>
+                    {opportunity.isVerified && (
+                      <CheckCircle className="w-4 h-4 text-blue-500" />
+                    )}
+                  </div>
                 )}
                 <p className="text-gray-600 text-lg">{opportunity.provider}</p>
               </div>

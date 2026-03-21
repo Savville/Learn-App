@@ -28,6 +28,10 @@ export async function connectDB() {
       { title: 'text', description: 'text', provider: 'text' },
       { weights: { title: 10, provider: 5, description: 1 } }
     );
+    // Organizations collection for verified posters
+    const orgs = db.collection('organizations');
+    await orgs.createIndex({ email: 1 }, { unique: true });
+
     console.log('✅ Indexes ensured');
 
     return db;

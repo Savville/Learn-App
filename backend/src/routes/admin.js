@@ -483,7 +483,12 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     oppToPublish.slug = slugify(oppToPublish.title || '');
     
     // Add attribution
-    oppToPublish.postedBy = pendingDoc.reporter?.name || 'Opportunities Kenya Admin';
+    if (pendingDoc.isOrganizationPost && pendingDoc.orgName) {
+      oppToPublish.postedBy = pendingDoc.orgName;
+      oppToPublish.isVerified = true; // Add a verification flag for the UI
+    } else {
+      oppToPublish.postedBy = pendingDoc.reporter?.name || 'Opportunities Kenya Admin';
+    }
 
     await db.collection('opportunities').replaceOne({ id: oppToPublish.id }, oppToPublish, { upsert: true });
 
@@ -528,6 +533,65 @@ router.post('/reject/:id', verifyAdminKey, async (req, res) => {
         { $set: { status: 'rejected', rejectedAt: new Date() } }
     );
     res.json({ message: 'Opportunity rejected.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ── Organization Management ────────────────────────────────────────────────
+
+// GET /api/admin/organizations
+router.get('/organizations', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const orgs = await db.collection('organizations').find().sort({ orgName: 1 }).toArray();
+    res.json(orgs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/organizations
+router.post('/organizations', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { email, orgName, contactPerson, telephone } = req.body;
+    
+    if (!email || !orgName) {
+      return res.status(400).json({ error: 'Email and Organization Name are required.' });
+    }
+
+    await db.collection('organizations').updateOne(
+      { email: email.toLowerCase() },
+      { 
+        $set: { 
+          orgName, 
+          contactPerson, 
+          telephone,
+          verifiedAt: new Date() 
+        } 
+      },
+      { upsert: true }
+    );
+
+    res.json({ message: `Organization ${orgName} verified successfully.` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/admin/organizations/:id
+router.delete('/organizations/:email', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { email } = req.params;
+    const result = await db.collection('organizations').deleteOne({ email: email.toLowerCase() });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Organization not found.' });
+    }
+    
+    res.json({ message: 'Organization removed.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

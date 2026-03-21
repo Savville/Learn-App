@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Calendar } from 'lucide-react';
+import { ArrowRight, Calendar, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
 import type { Opportunity } from '../data/opportunities';
@@ -69,9 +69,14 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
 
         <div className="flex flex-col mb-3">
           {opportunity.postedBy && (
-            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">
-              Posted by {opportunity.postedBy}
-            </span>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-xs uppercase tracking-widest text-gray-400 font-bold">
+                Posted by {opportunity.postedBy}
+              </span>
+              {opportunity.isVerified && (
+                <CheckCircle className="w-4 h-4 text-blue-500" />
+              )}
+            </div>
           )}
           <p className="text-blue-600 text-sm font-semibold">{opportunity.provider}</p>
         </div>

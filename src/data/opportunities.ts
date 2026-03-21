@@ -23,6 +23,7 @@ export interface Opportunity {
   dateAdded: string;
   logoUrl: string;
   postedBy?: string;
+  isVerified?: boolean;
   thematicAreas?: { heading: string; topics: string[] }[];
 }
 

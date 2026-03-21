@@ -39,6 +39,9 @@ export function PostWithUs() {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [publishedSlug, setPublishedSlug] = useState<string | null>(null);
+  const [showOrgRequest, setShowOrgRequest] = useState(false);
+  const [orgRequest, setOrgRequest] = useState({ name: '', organization: '', email: '', telephone: '', description: '' });
+  const [requestStatus, setRequestStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
   const handleParse = async () => {
     if (!reporter.name || !reporter.email) {
@@ -90,6 +93,26 @@ export function PostWithUs() {
 
   const applyTemplate = (index: number, template: string) => {
     handleFeatureEdit(index, 'value', template);
+  };
+
+  const handleOrgRequestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRequestStatus('sending');
+    try {
+      const response = await fetch(`${API_BASE}/public/organizations/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orgRequest),
+      });
+      if (!response.ok) throw new Error('Failed to send request');
+      setRequestStatus('success');
+      setTimeout(() => {
+        setShowOrgRequest(false);
+        setRequestStatus('idle');
+      }, 3000);
+    } catch (err) {
+      setRequestStatus('error');
+    }
   };
 
   const handlePublish = async () => {
@@ -208,25 +231,100 @@ export function PostWithUs() {
               </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-4 cursor-pointer">
-                <div>
-                  <label className="text-xs font-medium uppercase tracking-wide text-slate-500">Your Name</label>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Your Name</label>
                   <Input 
-                    value={reporter.name} 
-                    onChange={e => setReporter({...reporter, name: e.target.value})} 
-                    placeholder="John Doe" 
+                    placeholder="e.g. John Doe" 
+                    value={reporter.name}
+                    onChange={(e) => setReporter({...reporter, name: e.target.value})}
                   />
                 </div>
-                <div>
-                  <label className="text-xs font-medium uppercase tracking-wide text-slate-500">Your Email</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Your Email</label>
                   <Input 
-                    value={reporter.email} 
-                    onChange={e => setReporter({...reporter, email: e.target.value})} 
-                    placeholder="john@example.com" 
-                    type="email"
+                    type="email" 
+                    placeholder="e.g. john@example.com" 
+                    value={reporter.email}
+                    onChange={(e) => setReporter({...reporter, email: e.target.value})}
                   />
+                  <p className="text-[10px] text-gray-500 italic">
+                    Verified organizations: use your registered email for "Official" attribution.
+                  </p>
                 </div>
               </div>
+
+              <div className="pt-2 border-t mt-4">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                  onClick={() => setShowOrgRequest(!showOrgRequest)}
+                >
+                  Post as an Organization?
+                </Button>
+
+                {showOrgRequest && (
+                  <Card className="mt-4 border-blue-100 bg-blue-50/30">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Request Official Organization Status</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {requestStatus === 'success' ? (
+                        <div className="text-green-600 font-medium py-4 text-center">
+                          Request sent! We will verify and contact you shortly.
+                        </div>
+                      ) : (
+                        <form onSubmit={handleOrgRequestSubmit} className="space-y-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input 
+                              placeholder="Contact Name" 
+                              required
+                              value={orgRequest.name}
+                              onChange={(e) => setOrgRequest({...orgRequest, name: e.target.value})}
+                            />
+                            <Input 
+                              placeholder="Organization Name (e.g. IEEE Kenya)" 
+                              required
+                              value={orgRequest.organization}
+                              onChange={(e) => setOrgRequest({...orgRequest, organization: e.target.value})}
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input 
+                              type="email" 
+                              placeholder="Official Email" 
+                              required
+                              value={orgRequest.email}
+                              onChange={(e) => setOrgRequest({...orgRequest, email: e.target.value})}
+                            />
+                            <Input 
+                              placeholder="Phone Number" 
+                              value={orgRequest.telephone}
+                              onChange={(e) => setOrgRequest({...orgRequest, telephone: e.target.value})}
+                            />
+                          </div>
+                          <Textarea 
+                            placeholder="Briefly describe your organization..." 
+                            className="h-20"
+                            value={orgRequest.description}
+                            onChange={(e) => setOrgRequest({...orgRequest, description: e.target.value})}
+                          />
+                          <Button 
+                            type="submit" 
+                            className="w-full bg-blue-600 hover:bg-blue-700"
+                            disabled={requestStatus === 'sending'}
+                          >
+                            {requestStatus === 'sending' ? 'Sending Request...' : 'Send Verification Request'}
+                          </Button>
+                        </form>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                 <div className="md:col-span-3">
                   <Textarea
