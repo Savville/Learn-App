@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Sparkles, AlertCircle, Info, CheckCircle2, Building2, User, Camera } from 'lucide-react';
 
 // Type definition for the data returned by the AI parser
 interface ParsedOpportunityData {
@@ -155,6 +156,14 @@ export function PostWithUs() {
         const deadline = parsedData.extractedFeatures.find(f => f.feature === 'Deadline')?.value || '';
         const applicationLink = parsedData.extractedFeatures.find(f => f.feature === 'Application Link')?.value || '';
         const location = parsedData.extractedFeatures.find(f => f.feature === 'Location')?.value || '';
+
+        // Validation: Application Link is MANDATORY for most categories
+        const category = parsedData.basicInfo.category;
+        const isDemoLink = applicationLink.toLowerCase().includes('demo') || applicationLink.includes('example.com');
+        
+        if (category !== 'Open Challenge' && (!applicationLink || applicationLink.trim().length < 8 || isDemoLink)) {
+          throw new Error(`For ${category}, a valid application link is required. Please edit the "Application Link" field in the extraction table below before submitting.`);
+        }
 
         const slug = parsedData.basicInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
@@ -538,17 +547,22 @@ export function PostWithUs() {
                                 )}
                               </td>
                               <td className="border-b border-slate-100 px-3 py-2 align-top">
-                                <Badge
-                                  variant={
-                                    feat.importance === 'High'
-                                      ? 'destructive'
-                                      : feat.importance === 'Medium'
-                                      ? 'secondary'
-                                      : 'default'
-                                  }
-                                >
-                                  {feat.importance}
-                                </Badge>
+                                  <Badge
+                                    variant={
+                                      feat.importance === 'High'
+                                        ? 'destructive'
+                                        : 'secondary'
+                                    }
+                                    className={`flex items-center gap-1 font-bold ${feat.importance === 'High' ? 'bg-red-600 text-white hover:bg-red-700 animate-pulse' : feat.importance === 'Medium' ? 'bg-amber-400 text-slate-900 hover:bg-amber-500' : ''}`}
+                                  >
+                                    {feat.importance === 'High' && (
+                                      <AlertCircle className="h-3 w-3" />
+                                    )}
+                                    {feat.importance === 'Medium' && (
+                                      <Info className="h-3 w-3" />
+                                    )}
+                                    {feat.importance}
+                                  </Badge>
                               </td>
                               <td className="border-b border-slate-100 px-3 py-2 align-top">
                                 <div className="flex flex-wrap gap-2">

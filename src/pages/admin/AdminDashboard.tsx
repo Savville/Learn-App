@@ -179,7 +179,9 @@ export default function AdminDashboard() {
                           {/* Optional Image Thumbnail */}
                           <div className="relative w-full aspect-video rounded-md overflow-hidden border border-slate-200 bg-white">
                             <img 
-                              src={item.opportunity.logoUrl || "/Opportunities Kenya Logo 2.png"} 
+                              src={item.opportunity.logoUrl?.startsWith('/images/') 
+                                ? `${API_BASE.replace('/api', '')}${item.opportunity.logoUrl}` 
+                                : item.opportunity.logoUrl || "/Opportunities Kenya Logo 2.png"} 
                               alt="Poster Preview" 
                               className="absolute inset-0 w-full h-full object-contain p-2"
                             />
@@ -213,9 +215,9 @@ export default function AdminDashboard() {
                              <h3 className="text-xl font-bold text-slate-900">{item.opportunity.title}</h3>
                              <p className="text-sm font-medium text-slate-700">{item.opportunity.provider}</p>
                           </div>
-                          {item.opportunity.applicationLink && (
-                             <a href={item.opportunity.applicationLink} target="_blank" rel="noreferrer" className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
-                                Link <ExternalLink className="ml-1 w-3 h-3" />
+                          {item.opportunity.applicationLink && item.opportunity.applicationLink.length > 5 && item.opportunity.applicationLink.startsWith('http') && (
+                             <a href={item.opportunity.applicationLink} target="_blank" rel="noreferrer" className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                                View Apply Link <ExternalLink className="ml-1 w-3 h-3" />
                              </a>
                           )}
                        </div>
