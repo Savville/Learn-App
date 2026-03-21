@@ -319,6 +319,57 @@ export function PostWithUs() {
                   </div>
                 </div>
 
+                {/* Intelligent Discretized Zones added here */}
+                <div className="grid grid-cols-1 gap-4 rounded-md bg-slate-50 p-4 mt-4">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      About This Opportunity (Full Description)
+                    </span>
+                    <Textarea
+                      value={parsedData.basicInfo.fullDescription || ''}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleBasicInfoEdit('fullDescription', e.target.value)}
+                      className="min-h-[120px]"
+                      placeholder="The comprehensive detail of the opportunity..."
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        Benefits (One per line)
+                      </span>
+                      <Textarea
+                        value={(parsedData.benefits || []).join('\n')}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => 
+                          setParsedData({
+                            ...parsedData,
+                            benefits: e.target.value.split('\n').filter(Boolean)
+                          })
+                        }
+                        className="min-h-[80px]"
+                        placeholder="e.g. Fully funded travel\nMonthly stipend..."
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        Eligibility Requirements (One per line)
+                      </span>
+                      <Textarea
+                        value={(parsedData.eligibilityRequirements || []).join('\n')}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => 
+                          setParsedData({
+                            ...parsedData,
+                            eligibilityRequirements: e.target.value.split('\n').filter(Boolean)
+                          })
+                        }
+                        className="min-h-[80px]"
+                        placeholder="e.g. Undergraduates only\nMust be Kenyan citizen..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-slate-900">
@@ -357,15 +408,36 @@ export function PostWithUs() {
                                 <span className="font-medium">{feat.feature}</span>
                               </td>
                               <td className="border-b border-slate-100 px-3 py-2 align-top">
-                                <Input
-                                  type="text"
-                                  className="w-full text-sm"
-                                  value={feat.value}
-                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                    handleFeatureEdit(idx, 'value', e.target.value)
-                                  }
-                                  placeholder="Leave blank or edit…"
-                                />
+                                {feat.feature === 'Deadline' ? (
+                                  <div className="flex flex-col gap-2 sm:flex-row">
+                                    <Input
+                                      type="date"
+                                      className="w-full sm:w-40 text-sm"
+                                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        handleFeatureEdit(idx, 'value', e.target.value)
+                                      }
+                                    />
+                                    <Input
+                                      type="text"
+                                      className="w-full text-sm"
+                                      value={feat.value}
+                                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        handleFeatureEdit(idx, 'value', e.target.value)
+                                      }
+                                      placeholder="Or type e.g. 'Rolling'"
+                                    />
+                                  </div>
+                                ) : (
+                                  <Input
+                                    type="text"
+                                    className="w-full text-sm"
+                                    value={feat.value}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                      handleFeatureEdit(idx, 'value', e.target.value)
+                                    }
+                                    placeholder="Leave blank or edit…"
+                                  />
+                                )}
                               </td>
                               <td className="border-b border-slate-100 px-3 py-2 align-top">
                                 <Badge
