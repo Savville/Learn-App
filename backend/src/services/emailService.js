@@ -646,5 +646,102 @@ const eepTemplate = (name = 'Innovator') => wrapEmail(`
 
   </div>`);
 
+export async function sendOrganizationVerificationRequest(request) {
+  const adminEmails = ['lead@opportunitieskenya.live', 'opportunitieskenyalive@gmail.com'];
+  try {
+    const html = wrapEmail(`
+      <div style="padding:32px 28px;">
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">🏢 Organization Verification Request</h2>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          A new request has been received from an organization wishing to post officially on Opportunities Kenya.
+        </p>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;">
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Contact Person:</strong> ${request.name}</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Organization:</strong> ${request.organization}</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Email:</strong> ${request.email}</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Phone:</strong> ${request.telephone || 'Not provided'}</p>
+          <p style="margin:0; font-size:14px;"><strong>Description:</strong> ${request.description || 'No description provided'}</p>
+        </div>
+        <p style="color:#475569;font-size:14px;">
+          Once verified, you can add this email to the verified organizations list in the database to enable official attribution.
+        </p>
+      </div>
+    `);
+
+    for (const email of adminEmails) {
+      await sendEmail({
+        to: email,
+        subject: `[Org Request] ${request.organization}`,
+        html: html
+      });
+    }
+    console.log(`Admin notified of Org request from: ${request.organization}`);
+  } catch (error) {
+    console.error('Error sending org request notification:', error);
+  }
+}
+
+export async function sendOrganizationRequestAcknowledgement(request) {
+  try {
+    const html = wrapEmail(`
+      <div style="padding:32px 28px;">
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">Request Received</h2>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Hello ${request.name},
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Thank you for your interest in posting as an organization on <strong>Opportunities Kenya</strong>. We have received your request for <strong>${request.organization}</strong>.
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Our team is currently reviewing your details. You will receive a follow-up email shortly with the verification procedure and next steps.
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Best regards,<br/>
+          Opportunities Kenya Team
+        </p>
+      </div>
+    `);
+
+    await sendEmail({
+      to: request.email,
+      subject: `Verification Request Received: ${request.organization}`,
+      html: html
+    });
+    console.log(`Acknowledgement sent to: ${request.email}`);
+  } catch (error) {
+    console.error('Error sending org request acknowledgement:', error);
+  }
+}
+
+export async function sendOrganizationApprovalEmail(request) {
+  try {
+    const html = wrapEmail(`
+      <div style="padding:32px 28px;">
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">✅ Verification Confirmed</h2>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Hello ${request.name},
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          Great news! <strong>${request.organization}</strong> is now verified as an official organization on <strong>Opportunities Kenya</strong>.
+        </p>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          From now on, whenever you submit an opportunity using <strong>${request.email}</strong>, it will be automatically attributed to your organization with an <strong>Official Verified Badge</strong>.
+        </p>
+        <div style="text-align:center; margin-top:30px;">
+          ${ctaButton('Start Posting Officially', `${FRONTEND_URL}/post-with-us`)}
+        </div>
+      </div>
+    `);
+
+    await sendEmail({
+      to: request.email,
+      subject: `Your Organization is Now Verified!`,
+      html: html
+    });
+    console.log(`Approval email sent to: ${request.email}`);
+  } catch (error) {
+    console.error('Error sending org approval email:', error);
+  }
+}
 
 export { seangapoTemplate, yesistTemplate, eepTemplate };

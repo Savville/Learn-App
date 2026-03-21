@@ -5,7 +5,12 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { sendAdminSubmissionNotification, sendPosterAcknowledgementEmail } from '../services/emailService.js';
+import { 
+  sendAdminSubmissionNotification, 
+  sendPosterAcknowledgementEmail,
+  sendOrganizationVerificationRequest,
+  sendOrganizationRequestAcknowledgement
+} from '../services/emailService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
@@ -174,14 +179,18 @@ router.post('/organizations/request', async (req, res) => {
       return res.status(400).json({ error: 'Name, Organization, and Email are required.' });
     }
 
-    // In a real app, we would send an email to the admin here.
-    // For now, we'll log it and let the admin know.
-    console.log('🏢 ORGANIZATION VERIFICATION REQUEST:', {
-      name, organization, email, telephone, description
+    const db = getDB();
+
+    // Save the request for Admin UI management
+    await db.collection('organization_requests').insertOne({
+      ...req.body,
+      status: 'pending',
+      requestedAt: new Date()
     });
 
-    // Optional: send notification via emailService if implemented
-    // await sendEmail({ ... }); 
+    // Notify admin & requester
+    sendOrganizationVerificationRequest(req.body).catch(err => console.error('Admin org notification failed:', err));
+    sendOrganizationRequestAcknowledgement(req.body).catch(err => console.error('Requester org acknowledgement failed:', err));
 
     res.json({ message: 'Request sent successfully. We will contact you soon.' });
   } catch (error) {

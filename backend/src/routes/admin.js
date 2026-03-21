@@ -5,7 +5,16 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { verifyAdminKey } from '../middleware/auth.js';
-import { sendDigestEmail, sendPersonalizedDigestEmail, sendBroadcastEmail, sendNewOpportunityEmail, sendPosterApprovalEmail, seangapoTemplate, yesistTemplate } from '../services/emailService.js';
+import { 
+  sendDigestEmail, 
+  sendPersonalizedDigestEmail, 
+  sendBroadcastEmail, 
+  sendNewOpportunityEmail, 
+  sendPosterApprovalEmail,
+  sendOrganizationApprovalEmail,
+  seangapoTemplate, 
+  yesistTemplate 
+} from '../services/emailService.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Resolve the project root (3 levels up from backend/src/routes/)
@@ -592,6 +601,76 @@ router.delete('/organizations/:email', verifyAdminKey, async (req, res) => {
     }
     
     res.json({ message: 'Organization removed.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/organization-requests
+router.get('/organization-requests', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const requests = await db.collection('organization_requests')
+      .find({ status: 'pending' })
+      .sort({ requestedAt: -1 })
+      .toArray();
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/organization-requests/approve/:id
+router.post('/organization-requests/approve/:id', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const { ObjectId } = await import('mongodb');
+    
+    const request = await db.collection('organization_requests').findOne({ _id: new ObjectId(id) });
+    if (!request) return res.status(404).json({ error: 'Request not found.' });
+
+    // 1. Add to verified organizations
+    await db.collection('organizations').updateOne(
+      { email: request.email.toLowerCase() },
+      { 
+        $set: { 
+          email: request.email.toLowerCase(),
+          orgName: request.organization,
+          contactPerson: request.name,
+          telephone: request.telephone,
+          verifiedAt: new Date()
+        } 
+      },
+      { upsert: true }
+    );
+
+    // 2. Update request status
+    await db.collection('organization_requests').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status: 'approved', approvedAt: new Date() } }
+    );
+
+    // 3. Send approval email
+    sendOrganizationApprovalEmail(request).catch(err => console.error('Org approval email failed:', err));
+
+    res.json({ message: 'Organization approved and notified.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/organization-requests/reject/:id
+router.post('/organization-requests/reject/:id', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const { ObjectId } = await import('mongodb');
+    await db.collection('organization_requests').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status: 'rejected', rejectedAt: new Date() } }
+    );
+    res.json({ message: 'Request rejected.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
