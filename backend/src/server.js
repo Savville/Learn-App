@@ -110,6 +110,6 @@ app.use((err, req, res, next) => {
 // Start Server
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
-  console.log(`📧 Email Service: ${process.env.GMAIL_USER || 'Not configured'}`);
+  console.log(`📧 Email Service: ${process.env.RESEND_API_KEY ? 'Resend configured' : 'Not configured'}`);
   console.log(`🗄️  Database: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
 });

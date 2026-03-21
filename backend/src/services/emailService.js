@@ -1,4 +1,4 @@
-﻿import { Resend } from 'resend';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -134,6 +134,40 @@ export async function sendWelcomeEmail(email) {
     console.log(`Welcome email sent to ${email}`);
   } catch (error) {
     console.error(`Welcome email failed for ${email}:`, error.message);
+  }
+}
+
+export async function sendAdminSubmissionNotification(reporter, opportunity) {
+  const adminEmails = ['lead@opportunitieskenya.live', 'opportunitieskenyalive@gmail.com'];
+  try {
+    const html = wrapEmail(`
+      <div style="padding:32px 28px;">
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">New Opportunity Submission</h2>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          A new opportunity has been submitted via the <strong>Post With Us</strong> page and is waiting for your verification.
+        </p>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;">
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Submitted By:</strong> ${reporter.name} (${reporter.email})</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Title:</strong> ${opportunity.title}</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Provider:</strong> ${opportunity.provider}</p>
+          <p style="margin:0; font-size:14px;"><strong>Category:</strong> ${opportunity.category}</p>
+        </div>
+        <div style="text-align:center; margin-top:20px;">
+          ${ctaButton('Go to Verification Inbox', `${FRONTEND_URL}/admin/dashboard`)}
+        </div>
+      </div>
+    `);
+
+    for (const email of adminEmails) {
+      await sendEmail({
+        to: email,
+        subject: `[New Submission] ${opportunity.title}`,
+        html: html
+      });
+    }
+    console.log(`Admin notification sent for submission: ${opportunity.title}`);
+  } catch (error) {
+    console.error(`Admin submission notification failed:`, error.message);
   }
 }
 

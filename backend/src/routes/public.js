@@ -5,6 +5,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { sendAdminSubmissionNotification } from '../services/emailService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
@@ -138,6 +139,12 @@ router.post('/submit-opportunity', async (req, res) => {
     };
     
     await db.collection('pending_opportunities').insertOne(doc);
+    
+    // Notify admin in the background
+    sendAdminSubmissionNotification(reporter, opportunity).catch(err => {
+        console.error('Submission notification failed:', err.message);
+    });
+
     res.json({ message: 'Submitted successfully for verification.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
