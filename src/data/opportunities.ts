@@ -1199,6 +1199,51 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     featured: true,
     dateAdded: '2026-03-15',
     logoUrl: '/images/opportunities/KPA.png'
+  },
+  {
+    id: 'google-student-researcher-internship-2026',
+    title: 'Google Student Researcher Internship 2026',
+    provider: 'Google',
+    category: 'Internship',
+    description: 'Paid student researcher position for B.S. and M.S. students to work on research projects across Google Teams including DeepMind, Research, and Cloud.',
+    fullDescription: 'The Student Researcher Program fosters academic collaborations by hiring students onto research projects aligned to company priorities in scientific advancement. Researchers across Google are working to advance the state of the art in computing and build the next generation of intelligent systems for all Google products.\n\nCOMPENSATION:\nThe US base salary range for this full-time position is $98,000-$131,000. Within the range, individual pay is determined by role, level, and location.\n\nFLEXIBILITY:\nStudent Researcher opportunities are flexible in time commitment, length of opportunity, and onsite/remote nature, depending on the specific project and host needs.',
+    deadline: '2026-07-17',
+    location: 'Various Locations, USA',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Computer Science', 'Linguistics', 'Statistics', 'Biostatistics', 'Applied Math', 'Economics', 'Natural Sciences'],
+      requirements: [
+        'Currently enrolled in a Bachelor\'s or Master’s degree program',
+        'Experience in one area of computer science (AI, ML, HCI, etc.)',
+        'Returning to the program after completion of internship',
+        'English proficiency is a requirement',
+        'Must be located in the United States for the duration'
+      ]
+    },
+    benefits: [
+      'Base salary range $98,000-$131,000 equivalent',
+      'Potential housing stipend and relocation bonus',
+      'Work with Google DeepMind and Google Research scientists',
+      'Flexible onshore/remote options based on project'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.google.com/about/careers/applications/jobs/results/140245524367188678-student-researcher-bsms-wintersummer-2026?target_level=INTERN_AND_APPRENTICE',
+    fundingType: 'Paid Internship',
+    compensationType: 'Paid',
+    upfrontCost: 'Has Upfront Cost',
+    featured: true,
+    dateAdded: '2026-03-22',
+    logoUrl: '/images/opportunities/google.jpg',
+    thematicAreas: [
+      {
+        heading: 'AI & Research',
+        topics: ['Deep Learning', 'Natural Language Understanding', 'Quantum Information Science']
+      },
+      {
+        heading: 'Software Engineering',
+        topics: ['Algorithmic Foundations', 'Infrastructure Engineering', 'Performance Optimization']
+      }
+    ]
   }
 ];
 
