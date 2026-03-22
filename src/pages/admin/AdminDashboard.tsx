@@ -268,20 +268,18 @@ export default function AdminDashboard() {
                           )}
                           <p className="text-xs text-slate-400 mt-2 mb-4">{new Date(item.submittedAt).toLocaleDateString()}</p>
                           
-                          {/* Optional Image Thumbnail */}
-                          <div className="mt-4 flex justify-center">
-                            <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-slate-200 bg-white shadow-sm group">
-                              <img 
-                                src={item.opportunity.logoUrl?.startsWith('/images/') 
-                                  ? (API_BASE.replace('/api', '') + item.opportunity.logoUrl) 
-                                  : (item.opportunity.logoUrl || "/Opportunities Kenya Logo 2.png")} 
-                                alt="Poster Preview" 
-                                className="absolute inset-0 w-full h-full object-contain p-2 hover:scale-110 transition-transform duration-300"
-                                onError={(e: any) => {
-                                  e.target.src = "/Opportunities Kenya Logo 2.png";
-                                }}
-                              />
-                            </div>
+                          {/* Uploaded Image Thumbnail (Large & Prominent) */}
+                          <div className="mt-6 w-full aspect-square max-w-[220px] mx-auto overflow-hidden border-4 border-dashed border-slate-300 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                            <img 
+                              src={item.opportunity.logoUrl?.startsWith('/images/') 
+                                ? (API_BASE.replace('/api', '') + item.opportunity.logoUrl) 
+                                : (item.opportunity.logoUrl || "/Opportunities Kenya Logo 2.png")} 
+                              alt="Poster Preview" 
+                              className="w-full h-full object-contain p-2"
+                              onError={(e: any) => {
+                                e.target.src = "/Opportunities Kenya Logo 2.png";
+                              }}
+                            />
                           </div>
                        </div>
                        <div className="mt-6 flex flex-col gap-2">
