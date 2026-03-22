@@ -78,9 +78,11 @@ router.post('/parse-opportunity', async (req, res) => {
           "title": "...",
           "provider": "...",
           "category": "...",
-          "description": "A 2-3 sentence summary highlighting the most important info for the applicant.",
-          "fullDescription": "A comprehensive, detailed description of the entire opportunity. If the category is Project/Challenge, explain the open-ended nature. Do NOT put benefits or eligibility here.",
-          "fundingType": "Fully Funded | Partially Funded | Paid Internship | Unpaid Internship | N/A"
+          "description": "...",
+          "fullDescription": "...",
+          "fundingType": "Fully Funded | Partially Funded | Paid Internship | Unpaid Internship | N/A",
+          "compensationType": "Paid | Stipend | Unpaid | N/A",
+          "upfrontCost": "No Upfront Cost | Has Upfront Cost"
         },
         "extractedFeatures": [
           {
@@ -111,6 +113,11 @@ router.post('/parse-opportunity', async (req, res) => {
           }
         ]
       }
+      
+      Intelligence Rules for New Fields:
+      - compensationType: Use 'Paid' if a salary is mentioned, 'Stipend' for fixed pocket money/allowance, 'Unpaid' if zero payment, and 'N/A' for conferences/events.
+      - upfrontCost: Set to 'No Upfront Cost' ONLY if the text explicitly says travel/visa are covered, if it's remote, or if it is local to Kenya with zero fees. 
+      - If the opportunity is international and doesn't mention airfare/visa coverage, set upfrontCost to 'Has Upfront Cost'.
 
       Raw Text to analyze:
       """

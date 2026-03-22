@@ -17,7 +17,9 @@ export interface Opportunity {
   applicationLink?: string;
   contactEmail?: string;
   contactLink?: string;
-  fundingType?: 'Fully Funded' | 'Partially Funded' | 'Paid Internship' | 'Unpaid Internship';
+  fundingType?: 'Fully Funded' | 'Partially Funded' | 'Paid Internship' | 'Unpaid Internship' | 'N/A';
+  compensationType: 'Paid' | 'Stipend' | 'Unpaid' | 'N/A';
+  upfrontCost: 'No Upfront Cost' | 'Has Upfront Cost';
   duration?: string;
   featured: boolean;
   dateAdded: string;
@@ -56,6 +58,8 @@ export const opportunities: Opportunity[] = [
     applicationType: 'Online Form',
     applicationLink: 'https://mastercardfdn.org/scholars',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-02-01',
     logoUrl: '/images/opportunities/mastercard-scholarship.jpg'
@@ -90,6 +94,8 @@ export const opportunities: Opportunity[] = [
     applicationType: 'Online Form',
     applicationLink: 'https://www.chevening.org/apply',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-01-15',
     logoUrl: '/images/opportunities/uk.jpg'
@@ -122,6 +128,8 @@ export const opportunities: Opportunity[] = [
     applicationType: 'Online Form',
     applicationLink: 'https://deloitte.co.ke/careers',
     duration: '24 months',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-02-01',
     logoUrl: '/images/opportunities/internship.avif'
@@ -156,6 +164,8 @@ export const opportunities: Opportunity[] = [
     applicationType: 'Platform Link',
     applicationLink: 'https://city-boston.icims.com/jobs/31599/2026-summer-intern/job?mode=view',
     fundingType: 'Paid Internship',
+    compensationType: 'Paid',
+    upfrontCost: 'Has Upfront Cost',
     duration: 'Summer 2026 (35 hrs/week)',
     featured: false,
     dateAdded: '2026-02-27',
@@ -195,6 +205,8 @@ export const opportunities: Opportunity[] = [
     applicationType: 'Platform Link',
     applicationLink: 'https://recruitment.eso.org/',
     fundingType: 'Paid Internship',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
     duration: '3 to 6 months',
     featured: false,
     dateAdded: '2026-02-27',
@@ -233,6 +245,8 @@ export const opportunities: Opportunity[] = [
     applicationType: 'Platform Link',
     applicationLink: 'https://wd3.myworkdaysite.com/recruiting/wfp/job_openings?workerSubType=59387fe40123101e856f1834e09b0002',
     fundingType: 'Paid Internship',
+    compensationType: 'Stipend',
+    upfrontCost: 'Has Upfront Cost',
     duration: '2 to 8 months',
     featured: false,
     dateAdded: '2026-02-27',
@@ -272,6 +286,8 @@ export const opportunities: Opportunity[] = [
     applicationType: 'Online Form',
     applicationLink: 'https://afrika-kommt.de/15th-apply/',
     duration: '1 year',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-03',
     logoUrl: '/images/opportunities/afrika_kommt.png'
@@ -307,6 +323,8 @@ export const opportunities: Opportunity[] = [
     contactEmail: 'kipngeno.koech@ieee.org',
     contactLink: 'mailto:kipngeno.koech@ieee.org',
     fundingType: 'Fully Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-03',
     logoUrl: '/images/opportunities/ieee_yesist.jpeg'
@@ -408,6 +426,8 @@ Because this year's conference is in Nairobi, Kenyan authors have a rare and mas
     applicationType: 'Platform Link',
     applicationLink: 'https://ieee-powerafrica.org/call-for-papers/',
     fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'Has Upfront Cost',
     duration: '21–25 September 2026',
     featured: true,
     dateAdded: '2026-03-04',
@@ -587,6 +607,8 @@ KEY DATES
     contactEmail: 'Scholarships-Info-Bourses@international.gc.ca',
     contactLink: 'mailto:Scholarships-Info-Bourses@international.gc.ca',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     duration: '4 to 6 months',
     featured: true,
     dateAdded: '2026-03-04',
@@ -667,6 +689,8 @@ For full programme details visit: https://www.eeml.eu/`,
     applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLSe0t-ZqFnKIF6KsEBMAC7UZg51kbItfuYfmrg9EqPZgcXDFKQ/viewform',
     contactLink: 'https://www.eeml.eu/',
     fundingType: 'Fully Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
     duration: '27 July – 1 August 2026 (6 days)',
     featured: true,
     dateAdded: '2026-03-04',
@@ -760,6 +784,8 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
     applicationLink: 'https://www.dfat.gov.au/people-to-people/australia-awards/how-to-apply-for-an-australia-awards-scholarship',
     contactLink: 'https://www.dfat.gov.au/contact-us',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     duration: 'Bachelor: 4 years | Masters: 2–3 years | PhD: 4–5 years',
     featured: true,
     dateAdded: '2026-03-05',
@@ -862,6 +888,8 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
     ],
     contactLink: 'https://nairobiwater.co.ke',
     featured: true,
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
     dateAdded: '2026-03-06',
     logoUrl: '/images/opportunities/nairobi_water.png',
     thematicAreas: [
@@ -959,6 +987,8 @@ No Japanese language skills required. All interns with outstanding performance m
     applicationType: 'Platform Link',
     applicationLink: 'https://recruit.hennge.com/en/gip/',
     fundingType: 'Paid Internship',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     duration: '4–6 weeks',
     featured: false,
     dateAdded: '2026-03-09',
@@ -1035,6 +1065,8 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     applicationType: 'Online Form',
     applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLScPHBBaYX8plrcX3pjR-BiLdmJt8OO8U5x1VQj511Tqs9_Jxw/viewform',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     duration: '2 days (June 11–12, 2026)',
     featured: true,
     dateAdded: '2026-03-09',
@@ -1092,6 +1124,8 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     applicationType: 'Platform Link',
     applicationLink: 'https://mide.htw-berlin.de/applying/#c17445',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-13',
     logoUrl: '/images/opportunities/german.jpg'
@@ -1125,6 +1159,8 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     applicationType: 'Platform Link',
     applicationLink: 'https://eepafrica.org/financing/2026-call-for-proposals',
     fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-15',
     logoUrl: '/images/opportunities/EEP.png'
@@ -1157,6 +1193,8 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     applicationType: 'Platform Link',
     applicationLink: 'https://www.kpa.co.ke/Vacancies/Details/13',
     fundingType: 'Paid Internship',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     duration: '12 months',
     featured: true,
     dateAdded: '2026-03-15',

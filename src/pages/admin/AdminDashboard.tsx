@@ -320,12 +320,13 @@ export default function AdminDashboard() {
                        <p className="text-sm text-slate-600 mb-4 italic">
                          "{item.opportunity.description}"
                        </p>
-
-                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-md border border-slate-100 mb-4">
-                          <div><p className="text-xs text-slate-500 uppercase">Funding</p><p className="text-sm font-medium">{item.opportunity.fundingType || 'N/A'}</p></div>
-                          <div><p className="text-xs text-slate-500 uppercase">Deadline</p><p className="text-sm font-medium truncate">{item.opportunity.deadline || 'N/A'}</p></div>
-                          <div><p className="text-xs text-slate-500 uppercase">Location</p><p className="text-sm font-medium truncate">{item.opportunity.location || 'N/A'}</p></div>
-                       </div>
+                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 bg-slate-50 p-4 rounded-md border border-slate-100 mb-4">
+                           <div><p className="text-xs text-slate-500 uppercase">Funding</p><p className="text-sm font-medium">{item.opportunity.fundingType || 'N/A'}</p></div>
+                           <div><p className="text-xs text-slate-500 uppercase">Comp</p><p className="text-sm font-medium">{item.opportunity.compensationType || 'N/A'}</p></div>
+                           <div><p className="text-xs text-slate-500 uppercase">Upfront</p><Badge className={`text-[10px] font-bold ${item.opportunity.upfrontCost === 'Has Upfront Cost' ? 'text-amber-600' : 'text-green-600'}`}>{item.opportunity.upfrontCost || 'No'}</Badge></div>
+                           <div><p className="text-xs text-slate-500 uppercase">Deadline</p><p className="text-sm font-medium truncate">{item.opportunity.deadline || 'N/A'}</p></div>
+                           <div><p className="text-xs text-slate-500 uppercase">Location</p><p className="text-sm font-medium truncate">{item.opportunity.location || 'N/A'}</p></div>
+                        </div>
 
                        {/* Intelligent Auto-Expanding Section */}
                        <details className="mt-auto text-sm text-slate-700 bg-white border border-slate-200 rounded-md overflow-hidden group">
@@ -489,7 +490,7 @@ export default function AdminDashboard() {
                     onChange={e => setEditForm({...editForm, title: e.target.value})} 
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-semibold mb-1 block">Provider</label>
                     <Input 
@@ -505,13 +506,44 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div>
+                    <label className="text-sm font-semibold mb-1 block">Funding Type</label>
+                    <Input 
+                      value={editForm.fundingType || ''} 
+                      onChange={e => setEditForm({...editForm, fundingType: e.target.value})} 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Compensation</label>
+                    <select 
+                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      value={editForm.compensationType || 'N/A'}
+                      onChange={e => setEditForm({...editForm, compensationType: e.target.value})} 
+                    >
+                      <option value="Paid">Paid</option>
+                      <option value="Stipend">Stipend</option>
+                      <option value="Unpaid">Unpaid</option>
+                      <option value="N/A">N/A</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Upfront Cost</label>
+                    <select 
+                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      value={editForm.upfrontCost || 'No Upfront Cost'}
+                      onChange={e => setEditForm({...editForm, upfrontCost: e.target.value})} 
+                    >
+                      <option value="No Upfront Cost">No Upfront Cost</option>
+                      <option value="Has Upfront Cost">Has Upfront Cost</option>
+                    </select>
+                  </div>
+                  <div>
                     <label className="text-sm font-semibold mb-1 block">Deadline</label>
                     <Input 
                       value={editForm.deadline || ''} 
                       onChange={e => setEditForm({...editForm, deadline: e.target.value})} 
                     />
                   </div>
-                  <div>
+                  <div className="lg:col-span-3">
                     <label className="text-sm font-semibold mb-1 block">Location</label>
                     <Input 
                       value={editForm.location || ''} 
@@ -594,10 +626,14 @@ export default function AdminDashboard() {
                           onError={(e: any) => { e.target.src = "/Opportunities Kenya Logo 2.png"; }}
                        />
                     </div>
-                    <div className="flex-1 min-w-0">
-                       <h4 className="text-lg font-semibold text-slate-900 truncate">{opp.title}</h4>
-                       <p className="text-sm text-slate-600 truncate">{opp.provider} · {opp.category}</p>
-                    </div>
+                     <div className="flex-1 min-w-0">
+                        <h4 className="text-lg font-semibold text-slate-900 truncate">{opp.title}</h4>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <p className="text-sm text-slate-600 truncate">{opp.provider} · {opp.category}</p>
+                          <Badge variant="outline" className="text-[10px] h-5 bg-blue-50 text-blue-700 border-blue-100">{opp.compensationType || 'N/A'}</Badge>
+                          <Badge variant="outline" className={`text-[10px] h-5 ${opp.upfrontCost === 'Has Upfront Cost' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>{opp.upfrontCost || 'No Upfront Cost'}</Badge>
+                        </div>
+                     </div>
                     <div className="flex gap-2 shrink-0">
                        <Button variant="outline" size="sm" onClick={() => handleEditClick(opp)}>
                          <Pencil className="w-4 h-4 mr-2" /> Edit

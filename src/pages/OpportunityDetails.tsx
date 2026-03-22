@@ -260,6 +260,49 @@ export function OpportunityDetails() {
               )}
             </div>
 
+            {/* Financial Summary - New Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              <div className={`p-4 rounded-xl border flex flex-col justify-center ${
+                opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend'
+                  ? 'bg-blue-50 border-blue-100'
+                  : 'bg-slate-50 border-slate-200'
+              }`}>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Compensation</p>
+                <p className={`text-lg font-bold ${
+                  opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend'
+                    ? 'text-blue-700'
+                    : 'text-slate-700'
+                }`}>
+                  {opportunity.compensationType}
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-xl border flex flex-col justify-center ${
+                opportunity.upfrontCost === 'Has Upfront Cost'
+                  ? 'bg-amber-50 border-amber-100'
+                  : 'bg-green-50 border-green-100'
+              }`}>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Application Cost</p>
+                <div className="flex items-center gap-2">
+                  <p className={`text-lg font-bold ${
+                    opportunity.upfrontCost === 'Has Upfront Cost'
+                      ? 'text-amber-700'
+                      : 'text-green-700'
+                  }`}>
+                    {opportunity.upfrontCost}
+                  </p>
+                  {opportunity.upfrontCost === 'Has Upfront Cost' && (
+                    <span className="text-[10px] bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase">Alert</span>
+                  )}
+                </div>
+                {opportunity.upfrontCost === 'Has Upfront Cost' && (
+                  <p className="text-[10px] text-amber-600 mt-1 italic leading-tight">
+                    This opportunity may require you to pay for visa, travel, or flights out-of-pocket initially.
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Description */}
             <div className="mb-8">
               <h2 className="text-gray-900 mb-4 text-xl font-bold">About This Opportunity</h2>

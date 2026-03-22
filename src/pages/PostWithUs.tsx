@@ -16,6 +16,8 @@ interface ParsedOpportunityData {
     description: string;
     fullDescription: string;
     fundingType: string;
+    compensationType?: string;
+    upfrontCost?: string;
   };
   extractedFeatures: {
     feature: string;
@@ -175,6 +177,8 @@ export function PostWithUs() {
           description: parsedData.basicInfo.description,
           fullDescription: parsedData.basicInfo.fullDescription || parsedData.basicInfo.description,
           fundingType: parsedData.basicInfo.fundingType,
+          compensationType: parsedData.basicInfo.compensationType || 'N/A',
+          upfrontCost: parsedData.basicInfo.upfrontCost || 'No Upfront Cost',
           deadline: deadline || 'Rolling',
           location,
           applicationLink,
@@ -413,6 +417,34 @@ export function PostWithUs() {
                       value={parsedData.basicInfo.fundingType}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBasicInfoEdit('fundingType', e.target.value)}
                     />
+                  </div>
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Compensation
+                    </span>
+                    <select 
+                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      value={parsedData.basicInfo.compensationType || 'N/A'}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('compensationType', e.target.value)}
+                    >
+                      <option value="Paid">Paid (Salary/Wage)</option>
+                      <option value="Stipend">Stipend / Allowance</option>
+                      <option value="Unpaid">Unpaid</option>
+                      <option value="N/A">Not Applicable</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Upfront Cost
+                    </span>
+                    <select 
+                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      value={parsedData.basicInfo.upfrontCost || 'No Upfront Cost'}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('upfrontCost', e.target.value)}
+                    >
+                      <option value="No Upfront Cost">No Upfront Cost</option>
+                      <option value="Has Upfront Cost">Has Upfront Cost</option>
+                    </select>
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
                     <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
