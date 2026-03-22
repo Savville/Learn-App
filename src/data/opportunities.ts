@@ -31,6 +31,127 @@ export interface Opportunity {
 
 export const opportunities: Opportunity[] = [
   {
+    id: '37',
+    title: 'Non-Revenue Water Crisis — Can You Help Nairobi Fix It?',
+    provider: 'Opportunities Kenya',
+    category: 'Challenge',
+    description: 'Nairobi City Water & Sewerage Company loses 44–48% of all treated water to leaks, illegal connections, and billing failures. An open industry challenge brief for students to explore, research, and build solutions.',
+    fullDescription: `The Nairobi City Water and Sewerage Company (NCWSC) is the sole provider of water and sewerage services for over 4 million Nairobi residents. Like many urban utilities across sub-Saharan Africa, NCWSC faces a severe operational crisis rooted in Non-Revenue Water (NRW) — treated, pressurised water that is produced and distributed but never billed or paid for.
+
+This is not a formal call for applications. This is a curated industry challenge brief from LearnOpportunities Kenya — highlighting a real national problem where student talent, research, and innovation can make a meaningful difference.
+
+────────────────────────────────────
+ THE CORE PROBLEM
+────────────────────────────────────
+
+NCWSC currently loses approximately 44–48% of all treated water to NRW. That means nearly half of every litre pumped, treated, and pressurised never reaches a paying customer.
+
+💧 At the national level, Kenya loses an estimated Ksh 11.9 billion annually — equivalent to 203 million cubic metres of treated water disappearing from the system every year.
+
+The problem has three interconnected roots:
+
+🔴 Physical Losses — An ageing distribution network with pipes dating back decades. Hidden underground leaks that go undetected for months. Pipe bursts from pressure fluctuations and poor maintenance.
+
+🔴 Commercial Losses — Widespread illegal water connections in informal settlements including Kibagare, Kitusuru, and Mathare. Meter tampering, bypassing, and diversion of water. Over 8,000 broken meters recording zero consumption.
+
+🔴 Revenue Collection Failures — Ksh 344 million billed in 2024 to 23,384 accounts with zero payments and no disconnections enforced, according to a Senate Public Investments Committee audit.
+
+────────────────────────────────────
+ IMPACT ON NAIROBI RESIDENTS
+────────────────────────────────────
+
+• Only about 40% of connected households receive water continuously — the rest rely on rationing schedules
+• Residents of informal settlements pay up to 10× more per litre from water vendors than connected households
+• Low-pressure pipes and broken mains allow contamination ingress, increasing waterborne disease risk
+• Excessive abstraction from Thika Dam and Sasumua Dam to compensate for losses accelerates resource depletion
+────────────────────────────────────
+ WHAT NCWSC IS CURRENTLY DOING
+────────────────────────────────────
+
+NCWSC has deployed acoustic leak detection vans, launched a Rapid Results Initiative (RRI) targeting a 7.8% NRW reduction and Ksh 105.7 million/month increase in collections, and is conducting GIS mapping to grow its customer base by 37,000 accounts.
+
+Their technology roadmap includes:
+📡 Smart meters
+📡 Real-time monitoring of leaks and sewer flows
+🤖 AI-assisted asset management
+♻️ Potential reuse of treated wastewater
+🔬 Advanced water treatment technology
+
+Yet these initiatives remain under-resourced, manually intensive, and largely reactive rather than preventive.
+
+────────────────────────────────────
+ THE POTENTIAL IMPACT OF YOUR SOLUTION
+────────────────────────────────────
+
+A solution that reduces NCWSC's NRW by just 10 percentage points (from 48% to 38%) could:
+
+• Recover an estimated Ksh 1+ billion in annual revenue
+• Extend water access to an additional 300,000+ Nairobi residents
+• Reduce daily water abstraction load, easing pressure on Thika and Sasumua Dams
+• Serve as a replicable model for water utilities across sub-Saharan Africa
+
+────────────────────────────────────
+ HOW TO USE THIS
+────────────────────────────────────
+
+Use this challenge as inspiration for your:
+🎓 Final year project or capstone
+📚 Research paper or thesis
+💻 Class assignment or design sprint
+🌱 Community innovation initiative
+
+No formal application is needed — explore NCWSC's website, dig into the data, and start building.`,
+    location: 'Nairobi, Kenya',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Engineering', 'Computer Science', 'Data Science', 'Environmental Science', 'Urban Planning', 'Business', 'Design', 'Any Field'],
+      requirements: [
+        'Open to undergraduate and postgraduate students',
+        'Multidisciplinary teams strongly encouraged',
+        'Students based in Kenya or with knowledge of Nairobi\'s urban water context preferred',
+        'No formal application — use this as inspiration for academic projects, capstone work, or research'
+      ]
+    },
+    benefits: [
+      'Real-world problem context for capstone, thesis, or final year project',
+      'Deep insight into Kenya\'s water infrastructure and governance challenges',
+      'Application domains: IoT sensors, GIS mapping, AI anomaly detection, predictive analytics',
+      'Portfolio-worthy project aligned with NCWSC\'s active technology roadmap',
+      'Potential for real-world impact affecting 4+ million Nairobi residents'
+    ],
+    contactLink: 'https://nairobiwater.co.ke',
+    featured: true,
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
+    dateAdded: '2026-03-06',
+    logoUrl: '/images/opportunities/nairobi_water.png',
+    thematicAreas: [
+      {
+        heading: 'Leak Detection',
+        topics: ['Low-cost acoustic or pressure sensors', 'Community-based leak reporting systems', 'Underground pipe network monitoring']
+      },
+      {
+        heading: 'Illegal Connection Mapping',
+        topics: ['GIS-based network analysis', 'AI anomaly detection in consumption data', 'Satellite or drone imagery analysis']
+      },
+      {
+        heading: 'Smart Metering',
+        topics: ['Affordable IoT meter design', 'Prepaid water systems for informal settlements', 'Remote meter reading infrastructure']
+      },
+      {
+        heading: 'Billing & Collections',
+        topics: ['Predictive default modelling', 'Behavioural nudge interventions', 'Mobile payment integration (M-Pesa)']
+      },
+      {
+        heading: 'Water Quality Monitoring',
+        topics: ['Real-time contamination sensors', 'Low-pressure zone risk mapping', 'Waterborne disease early warning systems']
+      },
+      {
+        heading: 'Wastewater Reuse',
+        topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
+      }
+    ]  },
+  {
     id: '29',
     title: 'ESO Science Communication Internship 2026',
     provider: 'European Southern Observatory',
@@ -110,83 +231,6 @@ export const opportunities: Opportunity[] = [
     featured: false,
     dateAdded: '2026-02-27',
     logoUrl: '/images/opportunities/wfp.png'
-  },
-  {
-    id: '31',
-    title: 'AFRIKA KOMMT! Fellowship Programme 2026/2028',
-    provider: 'AFRIKA KOMMT!',
-    category: 'Fellowship',
-    description: 'One-year career and life transformational fellowship placing visionary young African professionals at leading German companies including SAP, Bosch, Merck, BioNTech and more.',
-    fullDescription: 'AFRIKA KOMMT! brings together the most visionary young leaders from Africa and leading German companies. The African fellows dive deep into German corporate culture, business spirit, and gain an unparalleled one-year career experience. Companies benefit from the expertise, local network and unique African perspective of the young professionals. Available positions span AI, engineering, business, HR, finance, sustainability, and more across 7 top German companies: BioNTech SE, B. Braun SE, Boehringer Ingelheim, Merck KGaA, ODDO BHF, Robert Bosch GmbH, and SAP SE.',
-    deadline: '2026-03-22',
-    location: 'Germany',
-    eligibility: {
-      educationLevel: 'PostGrad',
-      fieldOfStudy: ['Business', 'Engineering', 'Technology', 'Finance', 'Human Resources', 'Science', 'Management'],
-      requirements: [
-        'Citizen of any African country',
-        'University degree in a relevant subject',
-        'Postgraduate degree (e.g. MBA) is an advantage',
-        '2 to 5 years of work experience',
-        'Excellent English language skills',
-        'Basic knowledge of German is an advantage',
-        'Not older than 35 years at time of application'
-      ]
-    },
-    benefits: [
-      'One year career experience at a leading German company',
-      'Leadership and management competency development',
-      'Access to networks and career acceleration opportunities',
-      'Intercultural competence and global perspective',
-      'Positions available at SAP, Bosch, Merck, BioNTech, Boehringer Ingelheim, B. Braun and ODDO BHF',
-      'Exposure to German corporate culture and innovation',
-      'Personal and professional growth'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://afrika-kommt.de/15th-apply/',
-    duration: '1 year',
-    compensationType: 'Stipend',
-    upfrontCost: 'No Upfront Cost',
-    featured: true,
-    dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/afrika_kommt.png'
-  },
-  {
-    id: '32',
-    title: 'IEEE Africa Entrepreneurship Summit Hackathon 2026',
-    provider: 'IEEE Africa & IEEE YESIST12',
-    category: 'Hackathon',
-    description: 'A collaborative Hackathon empowering students and young innovators to develop scalable, technology-driven solutions addressing Africa\'s most pressing challenges. Top teams win fully funded travel to present at IEEE YESIST12 2026 in Indonesia.',
-    fullDescription: 'This Hackathon is organized as a collaboration between the IEEE Africa Entrepreneurship Summit and IEEE YESIST12, aligned with YESIST12\'s Innovation and Sustainable Impact tracks. It empowers students and young innovators to develop scalable, technology-driven solutions addressing Africa\'s most pressing social, economic, and environmental challenges. Selected top teams will receive fully funded travel grants — covering transport, accommodation, and all costs — to represent their solutions at IEEE YESIST12 2026 in Indonesia.\n\nThematic Areas:\n• Climate & Sustainable Agriculture\n• Clean Energy & Sustainable Infrastructure\n• HealthTech & Well-being\n• Education & Digital Inclusion\n• Economic Empowerment & Smart Communities',
-    deadline: '2026-03-10',
-    location: 'Indonesia',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Technology', 'Engineering', 'Business', 'Health Sciences', 'Environmental Science', 'Education'],
-      requirements: [
-        'Teams of 3 to 5 members',
-        'Open to students and young innovators across Africa',
-        'Solution must address one of the 5 thematic areas',
-        'All submitted details must be accurate and truthful'
-      ]
-    },
-    benefits: [
-      'Fully funded transport to Indonesia for top teams',
-      'Fully covered accommodation in Indonesia',
-      'All costs covered for finals presentation at IEEE YESIST12 2026',
-      'Present at IEEE YESIST12 2026 in Indonesia',
-      'Exposure to the global IEEE innovation network'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://bit.ly/AfricaEntHack',
-    contactEmail: 'kipngeno.koech@ieee.org',
-    contactLink: 'mailto:kipngeno.koech@ieee.org',
-    fundingType: 'Fully Funded',
-    compensationType: 'N/A',
-    upfrontCost: 'No Upfront Cost',
-    featured: true,
-    dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/ieee_yesist.jpeg'
   },
   {
     id: '33',
@@ -656,127 +700,6 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
       }
     ]
   },
-  {
-    id: '37',
-    title: 'Non-Revenue Water Crisis — Can You Help Nairobi Fix It?',
-    provider: 'Opportunities Kenya',
-    category: 'Challenge',
-    description: 'Nairobi City Water & Sewerage Company loses 44–48% of all treated water to leaks, illegal connections, and billing failures. An open industry challenge brief for students to explore, research, and build solutions.',
-    fullDescription: `The Nairobi City Water and Sewerage Company (NCWSC) is the sole provider of water and sewerage services for over 4 million Nairobi residents. Like many urban utilities across sub-Saharan Africa, NCWSC faces a severe operational crisis rooted in Non-Revenue Water (NRW) — treated, pressurised water that is produced and distributed but never billed or paid for.
-
-This is not a formal call for applications. This is a curated industry challenge brief from LearnOpportunities Kenya — highlighting a real national problem where student talent, research, and innovation can make a meaningful difference.
-
-────────────────────────────────────
- THE CORE PROBLEM
-────────────────────────────────────
-
-NCWSC currently loses approximately 44–48% of all treated water to NRW. That means nearly half of every litre pumped, treated, and pressurised never reaches a paying customer.
-
-💧 At the national level, Kenya loses an estimated Ksh 11.9 billion annually — equivalent to 203 million cubic metres of treated water disappearing from the system every year.
-
-The problem has three interconnected roots:
-
-🔴 Physical Losses — An ageing distribution network with pipes dating back decades. Hidden underground leaks that go undetected for months. Pipe bursts from pressure fluctuations and poor maintenance.
-
-🔴 Commercial Losses — Widespread illegal water connections in informal settlements including Kibagare, Kitusuru, and Mathare. Meter tampering, bypassing, and diversion of water. Over 8,000 broken meters recording zero consumption.
-
-🔴 Revenue Collection Failures — Ksh 344 million billed in 2024 to 23,384 accounts with zero payments and no disconnections enforced, according to a Senate Public Investments Committee audit.
-
-────────────────────────────────────
- IMPACT ON NAIROBI RESIDENTS
-────────────────────────────────────
-
-• Only about 40% of connected households receive water continuously — the rest rely on rationing schedules
-• Residents of informal settlements pay up to 10× more per litre from water vendors than connected households
-• Low-pressure pipes and broken mains allow contamination ingress, increasing waterborne disease risk
-• Excessive abstraction from Thika Dam and Sasumua Dam to compensate for losses accelerates resource depletion
-────────────────────────────────────
- WHAT NCWSC IS CURRENTLY DOING
-────────────────────────────────────
-
-NCWSC has deployed acoustic leak detection vans, launched a Rapid Results Initiative (RRI) targeting a 7.8% NRW reduction and Ksh 105.7 million/month increase in collections, and is conducting GIS mapping to grow its customer base by 37,000 accounts.
-
-Their technology roadmap includes:
-📡 Smart meters
-📡 Real-time monitoring of leaks and sewer flows
-🤖 AI-assisted asset management
-♻️ Potential reuse of treated wastewater
-🔬 Advanced water treatment technology
-
-Yet these initiatives remain under-resourced, manually intensive, and largely reactive rather than preventive.
-
-────────────────────────────────────
- THE POTENTIAL IMPACT OF YOUR SOLUTION
-────────────────────────────────────
-
-A solution that reduces NCWSC's NRW by just 10 percentage points (from 48% to 38%) could:
-
-• Recover an estimated Ksh 1+ billion in annual revenue
-• Extend water access to an additional 300,000+ Nairobi residents
-• Reduce daily water abstraction load, easing pressure on Thika and Sasumua Dams
-• Serve as a replicable model for water utilities across sub-Saharan Africa
-
-────────────────────────────────────
- HOW TO USE THIS
-────────────────────────────────────
-
-Use this challenge as inspiration for your:
-🎓 Final year project or capstone
-📚 Research paper or thesis
-💻 Class assignment or design sprint
-🌱 Community innovation initiative
-
-No formal application is needed — explore NCWSC's website, dig into the data, and start building.`,
-    location: 'Nairobi, Kenya',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Engineering', 'Computer Science', 'Data Science', 'Environmental Science', 'Urban Planning', 'Business', 'Design', 'Any Field'],
-      requirements: [
-        'Open to undergraduate and postgraduate students',
-        'Multidisciplinary teams strongly encouraged',
-        'Students based in Kenya or with knowledge of Nairobi\'s urban water context preferred',
-        'No formal application — use this as inspiration for academic projects, capstone work, or research'
-      ]
-    },
-    benefits: [
-      'Real-world problem context for capstone, thesis, or final year project',
-      'Deep insight into Kenya\'s water infrastructure and governance challenges',
-      'Application domains: IoT sensors, GIS mapping, AI anomaly detection, predictive analytics',
-      'Portfolio-worthy project aligned with NCWSC\'s active technology roadmap',
-      'Potential for real-world impact affecting 4+ million Nairobi residents'
-    ],
-    contactLink: 'https://nairobiwater.co.ke',
-    featured: true,
-    compensationType: 'N/A',
-    upfrontCost: 'No Upfront Cost',
-    dateAdded: '2026-03-06',
-    logoUrl: '/images/opportunities/nairobi_water.png',
-    thematicAreas: [
-      {
-        heading: 'Leak Detection',
-        topics: ['Low-cost acoustic or pressure sensors', 'Community-based leak reporting systems', 'Underground pipe network monitoring']
-      },
-      {
-        heading: 'Illegal Connection Mapping',
-        topics: ['GIS-based network analysis', 'AI anomaly detection in consumption data', 'Satellite or drone imagery analysis']
-      },
-      {
-        heading: 'Smart Metering',
-        topics: ['Affordable IoT meter design', 'Prepaid water systems for informal settlements', 'Remote meter reading infrastructure']
-      },
-      {
-        heading: 'Billing & Collections',
-        topics: ['Predictive default modelling', 'Behavioural nudge interventions', 'Mobile payment integration (M-Pesa)']
-      },
-      {
-        heading: 'Water Quality Monitoring',
-        topics: ['Real-time contamination sensors', 'Low-pressure zone risk mapping', 'Waterborne disease early warning systems']
-      },
-      {
-        heading: 'Wastewater Reuse',
-        topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
-      }
-    ]  },
   {
     id: '38',
     title: "HENNGE's Global Internship Program 2026",
