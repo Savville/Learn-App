@@ -48,7 +48,10 @@ app.use(cors({
       'http://localhost:5174'
     ];
     
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow dynamic Vercel preview deployments
+    const isVercelPreview = origin && origin.endsWith('.vercel.app');
+
+    if (!origin || allowedOrigins.includes(origin) || isVercelPreview) {
       callback(null, true);
     } else {
       callback(new Error(`CORS blocked: ${origin}`));
