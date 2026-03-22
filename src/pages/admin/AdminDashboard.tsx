@@ -3,34 +3,119 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminDashboard() {
   const [pending, setPending] = useState<any[]>([]);
   const [orgRequests, setOrgRequests] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'opps' | 'orgs'>('opps');
+  const [allOpps, setAllOpps] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'opps' | 'orgs' | 'manage'>('opps');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  // Edit State
+  const [editingOpp, setEditingOpp] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState<any>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
 
   const fetchPending = async () => {
     try {
       const token = sessionStorage.getItem('adminToken');
       if (!token) return;
       
-      const [oppsRes, orgsRes] = await Promise.all([
+      const [oppsRes, orgsRes, allOppsRes] = await Promise.all([
         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } })
+        fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/opportunities`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
       if (oppsRes.ok) setPending(await oppsRes.json());
       if (orgsRes.ok) setOrgRequests(await orgsRes.json());
+      if (allOppsRes.ok) setAllOpps(await allOppsRes.json());
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditClick = (opp: any) => {
+    setEditingOpp(opp);
+    setEditForm({ ...opp });
+    setImageFile(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingOpp) return;
+    setActionLoading('saving');
+    try {
+      const token = sessionStorage.getItem('adminToken');
+      let finalLogoUrl = editForm.logoUrl;
+
+      // Upload new image if selected
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('coverImage', imageFile);
+        const uploadRes = await fetch(`${API_BASE}/admin/upload-image`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        if (uploadRes.ok) {
+          const ud = await uploadRes.json();
+          finalLogoUrl = ud.imageUrl;
+        }
+      }
+
+      const updatedData = { ...editForm, logoUrl: finalLogoUrl };
+
+      const res = await fetch(`${API_BASE}/admin/opportunities/${editingOpp.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (res.ok) {
+        setAllOpps(prev => prev.map(o => o.id === editingOpp.id ? updatedData : o));
+        setEditingOpp(null);
+        alert('Opportunity updated successfully');
+      } else {
+        const errorData = await res.json();
+        alert('Error updating: ' + errorData.error);
+      }
+    } catch (error: any) {
+      alert('Error updating: ' + error.message);
+    }
+    setActionLoading(null);
+  };
+
+  const handleDeleteOpp = async (id: string, title: string) => {
+    if (!window.confirm(`Are you sure you want to completely delete "${title}"?`)) return;
+    setActionLoading(`delete_${id}`);
+    try {
+      const token = sessionStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/opportunities/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setAllOpps(prev => prev.filter(o => o.id !== id));
+      } else {
+        const errorData = await res.json();
+        alert('Error deleting: ' + errorData.error);
+      }
+    } catch (error: any) {
+      alert('Error deleting: ' + error.message);
+    }
+    setActionLoading(null);
   };
 
   useEffect(() => {
@@ -126,7 +211,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="rounded-full bg-primary/5 px-4 py-1 text-xs font-medium text-primary">
-            Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : 'Organization Management'}
+            Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'manage' ? 'Manage Content' : 'Organization Management'}
           </div>
         </header>
 
@@ -145,6 +230,13 @@ export default function AdminDashboard() {
           >
             <Building2 className="w-4 h-4" />
             Organization Requests ({orgRequests.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab('manage')}
+            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'manage' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <Settings className="w-4 h-4" />
+            Manage Content ({allOpps.length})
           </button>
         </div>
 
@@ -314,7 +406,7 @@ export default function AdminDashboard() {
                ))}
             </div>
           )
-        ) : (
+        ) : activeTab === 'orgs' ? (
           /* Organization Requests Tab */
           orgRequests.length === 0 ? (
             <Card className="border-slate-200 shadow-sm">
@@ -369,6 +461,159 @@ export default function AdminDashboard() {
                         </Button>
                       </div>
                     </CardContent>
+                 </Card>
+               ))}
+            </div>
+          )
+        ) : (
+          /* Manage Content Tab */
+          allOpps.length === 0 ? (
+            <Card className="border-slate-200 shadow-sm">
+               <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                  <Settings className="h-12 w-12 text-slate-300 mb-4" />
+                  <h3 className="text-lg font-medium text-slate-900">No content available</h3>
+                  <p className="text-sm text-slate-500 max-w-sm mt-1">There are no published opportunities to manage yet.</p>
+               </CardContent>
+            </Card>
+          ) : editingOpp ? (
+            <Card className="border-slate-200 shadow-sm p-6 max-w-3xl mx-auto w-full">
+              <div className="flex justify-between items-center mb-6 border-b pb-4">
+                 <h3 className="text-xl font-bold">Edit Opportunity</h3>
+                 <Button variant="ghost" className="text-slate-500" onClick={() => setEditingOpp(null)}>
+                   Cancel
+                 </Button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-semibold mb-1 block">Title</label>
+                  <Input 
+                    value={editForm.title || ''} 
+                    onChange={e => setEditForm({...editForm, title: e.target.value})} 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Provider</label>
+                    <Input 
+                      value={editForm.provider || ''} 
+                      onChange={e => setEditForm({...editForm, provider: e.target.value})} 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Category</label>
+                    <Input 
+                      value={editForm.category || ''} 
+                      onChange={e => setEditForm({...editForm, category: e.target.value})} 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Deadline</label>
+                    <Input 
+                      value={editForm.deadline || ''} 
+                      onChange={e => setEditForm({...editForm, deadline: e.target.value})} 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Location</label>
+                    <Input 
+                      value={editForm.location || ''} 
+                      onChange={e => setEditForm({...editForm, location: e.target.value})} 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-semibold mb-1 block">Application Link</label>
+                  <Input 
+                    value={editForm.applicationLink || ''} 
+                    onChange={e => setEditForm({...editForm, applicationLink: e.target.value})} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold mb-1 block">Short Description</label>
+                  <Textarea 
+                    rows={3}
+                    value={editForm.description || ''} 
+                    onChange={e => setEditForm({...editForm, description: e.target.value})} 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold mb-1 block">Full Description</label>
+                  <Textarea 
+                    rows={6}
+                    value={editForm.fullDescription || ''} 
+                    onChange={e => setEditForm({...editForm, fullDescription: e.target.value})} 
+                  />
+                </div>
+                <div className="bg-slate-50 p-4 border rounded-md">
+                  <label className="text-sm font-semibold mb-2 block">Update Logo (Optional)</label>
+                  <Input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={e => setImageFile(e.target.files?.[0] || null)}
+                    className="mb-2 bg-white"
+                  />
+                  {editForm.logoUrl && !imageFile && (
+                    <div className="flex items-center gap-3 mt-2">
+                       <img 
+                          src={editForm.logoUrl?.startsWith('/images/') ? (API_BASE.replace('/api', '') + editForm.logoUrl) : editForm.logoUrl} 
+                          alt="Current Logo" 
+                          className="w-12 h-12 object-contain bg-white border p-1 rounded" 
+                       />
+                       <p className="text-xs text-slate-500">Current logo remains unchanged.</p>
+                    </div>
+                  )}
+                </div>
+                <div className="pt-4 flex gap-4">
+                   <Button 
+                     onClick={handleSaveEdit} 
+                     disabled={actionLoading === 'saving'}
+                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                   >
+                     {actionLoading === 'saving' ? 'Saving...' : 'Save Changes'}
+                   </Button>
+                   <Button 
+                     onClick={() => handleDeleteOpp(editingOpp.id, editingOpp.title)}
+                     disabled={actionLoading === `delete_${editingOpp.id}`}
+                     className="flex-1 font-semibold flex items-center justify-center border-none hover:opacity-90 transition-opacity whitespace-nowrap"
+                     style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
+                   >
+                     <Trash2 className="w-4 h-4 mr-2" /> Delete Opportunity
+                   </Button>
+                </div>
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+               {allOpps.map(opp => (
+                 <Card key={opp.id} className="border-slate-200 shadow-sm overflow-hidden flex flex-col sm:flex-row items-center p-4 gap-4">
+                    <div className="w-16 h-16 shrink-0 bg-slate-100 rounded-md border border-slate-200 relative">
+                       <img 
+                          src={opp.logoUrl?.startsWith('/images/') 
+                            ? (API_BASE.replace('/api', '') + opp.logoUrl) 
+                            : (opp.logoUrl || "/Opportunities Kenya Logo 2.png")} 
+                          alt="Logo" 
+                          className="absolute inset-0 w-full h-full object-contain p-1"
+                          onError={(e: any) => { e.target.src = "/Opportunities Kenya Logo 2.png"; }}
+                       />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                       <h4 className="text-lg font-semibold text-slate-900 truncate">{opp.title}</h4>
+                       <p className="text-sm text-slate-600 truncate">{opp.provider} · {opp.category}</p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                       <Button variant="outline" size="sm" onClick={() => handleEditClick(opp)}>
+                         <Pencil className="w-4 h-4 mr-2" /> Edit
+                       </Button>
+                       <Button 
+                         variant="destructive"
+                         size="sm" 
+                         disabled={actionLoading === `delete_${opp.id}`}
+                         onClick={() => handleDeleteOpp(opp.id, opp.title)}
+                         className="font-semibold flex items-center justify-center"
+                       >
+                         <Trash2 className="w-4 h-4 mr-2 py-0 my-0" /> Delete
+                       </Button>
+                    </div>
                  </Card>
                ))}
             </div>

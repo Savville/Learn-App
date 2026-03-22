@@ -676,4 +676,65 @@ router.post('/organization-requests/reject/:id', verifyAdminKey, async (req, res
   }
 });
 
+// ── Opportunity Content Management ─────────────────────────────────────────
+
+// GET /api/admin/opportunities
+router.get('/opportunities', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const opportunities = await db.collection('opportunities')
+      .find()
+      .sort({ _id: -1 })
+      .toArray();
+    res.json(opportunities);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/admin/opportunities/:id
+router.put('/opportunities/:id', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    // remove _id to prevent mongodb update errors
+    delete updateData._id;
+
+    const result = await db.collection('opportunities').updateOne(
+      { id: id },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Opportunity not found.' });
+    }
+
+    res.json({ message: 'Opportunity updated successfully.' });
+  } catch (error) {
+    console.error('❌ Update opportunity error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/admin/opportunities/:id
+router.delete('/opportunities/:id', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    
+    const result = await db.collection('opportunities').deleteOne({ id: id });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Opportunity not found.' });
+    }
+    
+    res.json({ message: 'Opportunity deleted successfully.' });
+  } catch (error) {
+    console.error('❌ Delete opportunity error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
