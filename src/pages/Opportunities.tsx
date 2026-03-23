@@ -63,7 +63,7 @@ export function Opportunities() {
     fundingType: selectedFunding !== 'all' ? selectedFunding : undefined,
     search: searchQuery || undefined,
     page: pageNum,
-    limit: 12,
+    limit: 100,
   });
 
   const mergeLogos = (opps: Opportunity[]) =>
