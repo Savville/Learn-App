@@ -9,8 +9,28 @@ interface OpportunityCardProps {
   opportunity: Opportunity;
 }
 
+const CATEGORY_FALLBACKS: Record<string, string> = {
+  Scholarship: '/images/opportunities/internship.avif',
+  Fellowship: '/images/opportunities/fellowship.avif',
+  Attachment: '/images/opportunities/attachment.jpeg',
+  Internship: '/images/opportunities/internship.avif',
+  Grant: '/images/opportunities/grant.avif',
+  Conference: '/images/opportunities/tech.avif',
+  CallForPapers: '/images/opportunities/tech.avif',
+  Challenge: '/images/opportunities/tech.avif',
+  Hackathon: '/images/opportunities/tech.avif',
+  Project: '/images/opportunities/tech.avif'
+};
+
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const urgency = calculateUrgency(opportunity.deadline);
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const fallback = CATEGORY_FALLBACKS[opportunity.category] ?? '/images/opportunities/internship.avif';
+    if (e.currentTarget.src !== window.location.origin + fallback) {
+      e.currentTarget.src = fallback;
+    }
+  };
 
   const handleCardClick = async () => {
     try {
@@ -33,6 +53,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
         <img
           src={opportunity.logoUrl}
           alt={opportunity.provider}
+          onError={handleImageError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute top-4 right-4">
