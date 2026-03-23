@@ -1,145 +1,275 @@
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 const opportunities = [
   {
-    id: '4',
-    title: 'Mastercard Foundation Scholars Program - Kenya',
-    provider: 'Mastercard Foundation',
-    category: 'Scholarship',
-    description: 'Full scholarship for talented Kenyan students to pursue undergraduate and graduate studies.',
-    fullDescription: 'The Mastercard Foundation Scholars Program provides comprehensive support for academic talent from Kenya with demonstrated financial need. Beyond financial assistance, the program offers leadership development, mentorship, internship opportunities, and a commitment to transforming communities.',
-    deadline: '2026-01-15',
-    location: 'Kenya',
-    eligibility: {
-      educationLevel: 'Both',
-      requirements: [
-        'Kenyan citizen with demonstrated financial need',
-        'Strong academic record (minimum B+ average)',
-        'Leadership potential and community involvement',
-        'Excellent English proficiency'
-      ]
-    },
-    benefits: [
-      'Full tuition coverage',
-      'Living expenses and accommodation',
-      'Books and supplies',
-      'Leadership development programs',
-      'Career mentorship and internship support'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://mastercardfdn.org/scholars',
-    featured: true,
-    dateAdded: '2026-02-01',
-    logoUrl: '/images/opportunities/mastercard-scholarship.jpg',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '9',
-    title: 'Chevening Scholarships - Kenya Track',
-    provider: 'UK Government - British Council Kenya',
-    category: 'Scholarship',
-    description: 'Fully-funded scholarships for outstanding Kenyan leaders to pursue one-year master\'s degrees in the UK.',
-    fullDescription: 'Chevening Scholarships enable outstanding emerging leaders from Kenya to pursue one-year master\'s degrees at top UK universities. The program seeks individuals with leadership potential who can demonstrate how they will contribute to positive change in Kenya and the region.',
-    deadline: '2025-11-07',
-    location: 'International',
-    eligibility: {
-      educationLevel: 'PostGrad',
-      requirements: [
-        'Kenyan citizen',
-        'Bachelor\'s degree from recognized university',
-        'Minimum 2 years work experience',
-        'Strong leadership and networking skills',
-        'English proficiency (IELTS 6.5+)'
-      ]
-    },
-    benefits: [
-      'Full tuition fees at UK universities',
-      'Monthly living allowance (GBP 1,470)',
-      'Visa application fee paid',
-      'Travel costs to and from UK',
-      'Access to exclusive events',
-      'Global Chevening alumni network'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://www.chevening.org/apply',
-    featured: true,
-    dateAdded: '2026-01-15',
-    logoUrl: '/images/opportunities/uk.jpg',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '23',
-    title: 'Deloitte East Africa Graduate Program',
-    provider: 'Deloitte Kenya',
-    category: 'Internship',
-    description: 'Two-year graduate program for recent graduates in audit, tax, consulting.',
-    fullDescription: 'Deloitte\'s Graduate Program rotates recent graduates through different service lines and client engagements. Strong training, mentorship, and clear career progression paths in professional services.',
-    deadline: '2026-02-10',
-    location: 'Kenya',
+    id: 'aces-civexpo-2026-incubation',
+    title: 'ACES CivExpo 2026: Project Participation & Incubation',
+    provider: 'Association of Civil Engineering Students (ACES - KU)',
+    category: 'Project',
+    description: 'Official 6-month project incubation program for Civil Engineering students to bridge the gap between academia and industry. Includes Industry Skills, Tech & Automation, and Venture Studio tracks with direct paths to industry attachments.',
+    fullDescription: `ACES is here to bridge the gap between Industry and Academia. We are officially starting a 6-month project programme for the ACES CivExpo 2026 — focusing on student-led action rather than just hosting events.
+
+THE INCUBATION PROGRAMME
+Are you working on a project that can transform Kenya's infrastructure? Join one of our three dedicated tracks to build, optimize, and pitch your engineering ideas to industry giants.
+
+TRACK 1: INDUSTRY SKILLS & WORKFLOW (THE BIG THREE)
+Tackle the official CivExpo challenges: The Hillside Hostel, The Zero-Day Campus, or The Last Mile Mobility corridor. Focus on mastering industry-standard tools like Revit, Civil 3D, and EPANET.
+🎯 Reward: Direct paths to attachments and internships through ACES industry networks (Sika, KeNHA, Bamburi, etc.)
+
+TRACK 2: TECH & AUTOMATION (THE FUTURE-PROOF ENGINEER)
+For students using AI, Machine Learning, Rhino, Grasshopper, or Python scripts to automate and optimize engineering workflows. Show the industry how you are ahead of the curve.
+🎯 Reward: Get noticed by tech-driven engineering startups and consulting firms.
+
+TRACK 3: PROBLEM SOLVING, INNOVATION & BUSINESS (THE VENTURE STUDIO)
+Turn your research into a viable business or a funded pilot. Focus on sustainable materials (recycled plastics, natural binders) or solving community challenges like Nairobi Water network leakages.
+🎯 Reward: Access to project funding, professional mentorship, and the chance to pitch to VCs and Industry Giants like Sika and KeNHA.
+
+WHY PARTICIPATE?
+• ACES Advocacy: We pitch you directly to companies for personal career opportunities based on masterclass work.
+• Traction: Forums and feedback sessions to keep your project moving toward the September Expo.
+• Networking: High-level access to the IEK, NCA, and private sector leaders.
+
+Registered projects will present at ACES meet-ups leading up to the CivExpo in September 2026, where a big stage will be provided for presentations to partners and interested firms.`,
+    deadline: '2026-04-20',
+    location: 'Kenyatta University / Nairobi, Kenya',
     eligibility: {
       educationLevel: 'UnderGrad',
+      fieldOfStudy: ['Civil Engineering'],
       requirements: [
-        'Recent graduate (completed within 2 years)',
-        'Bachelor\'s degree in accounting, finance, business, or IT',
-        'Strong academic performance',
-        'Excellent communication and analytical skills'
+        'Kenyatta University Civil Engineering student (all years including 5th years)',
+        'Sign up individually or in teams (up to 4 members)',
+        'Select one of the three dedicated tracks: Industry, Tech, or Business',
+        'Commit to regular presentations and project milestones leading to the September Expo'
       ]
     },
     benefits: [
-      'Competitive salary (KES 250,000+/month)',
-      'Professional training and certifications',
-      'Mentorship from partners',
-      'Clear progression to permanent roles',
-      'International exposure'
+      'Direct paths to attachments and internships with ACES industry partners (Sika, KeNHA, Bamburi)',
+      'Access to project funding and professional mentorship from industry experts',
+      'Opportunity to pitch to Venture Capitalists and Industry Giants at CivExpo 2026',
+      'Networking with IEK (Institution of Engineers of Kenya) and NCA leaders',
+      'Portfolio-worthy project development with mastery of Revit, Civil 3D, and AI tools'
     ],
     applicationType: 'Online Form',
-    applicationLink: 'https://deloitte.co.ke/careers',
-    duration: '24 months',
+    applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLSdg83mA2Sw9gtzUYZxiEkf-N3tg9TpLzVQZsgOqHR3UBkK4aQ/viewform?usp=dialog',
+    fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
-    dateAdded: '2026-02-01',
-    logoUrl: '/images/opportunities/internship.avif',
+    dateAdded: '2026-03-23',
+    logoUrl: '/images/opportunities/aces_civexpo.jpeg',
+    thematicAreas: [
+      {
+        heading: 'Industry Skills (Phase 1)',
+        topics: ['Hillside Hostel Challenge', 'Zero-Day Campus Water Systems', 'Last Mile Mobility corridors', 'Mastery of Revit, Civil 3D & EPANET']
+      },
+      {
+        heading: 'Tech & Automation (Phase 2)',
+        topics: ['Python & Dynamo script automation', 'Parametric design (Rhino/Grasshopper)', 'BIM plugin development', 'AI-driven structural optimization']
+      },
+      {
+        heading: 'Innovation & Business (Phase 3)',
+        topics: ['Sustainable construction materials', 'Network leakage solutions (Nairobi Water)', 'Decentralized rainwater purification', 'Structural biofuel briquettes & business models']
+      }
+    ],
     views: 0,
     clicks: 0
   },
   {
-    id: '28',
-    title: 'City of Boston Summer Internship Program 2026',
-    provider: 'City of Boston',
-    category: 'Internship',
-    description: 'A paid summer internship with the City of Boston at $20/hr, 35 hours per week, working across city departments on real projects in public service, communications, data, and community engagement.',
-    fullDescription: 'The City of Boston Summer Internship Program offers undergraduate and graduate students a structured, full-time paid internship across a wide range of municipal departments. Interns contribute to real projects including drafting reports, designing social media content, analysing data, supporting community events, and assisting constituents directly. The programme runs at 35 hours per week at $20.00 per hour.',
-    deadline: '2026-03-06',
-    location: 'USA',
+    id: '37',
+    title: 'Non-Revenue Water Crisis — Can You Help Nairobi Fix It?',
+    provider: 'Opportunities Kenya',
+    category: 'Challenge',
+    description: 'Nairobi City Water & Sewerage Company loses 44–48% of all treated water to leaks, illegal connections, and billing failures. An open industry challenge brief for students to explore, research, and build solutions.',
+    fullDescription: `The Nairobi City Water and Sewerage Company (NCWSC) is the sole provider of water and sewerage services for over 4 million Nairobi residents. Like many urban utilities across sub-Saharan Africa, NCWSC faces a severe operational crisis rooted in Non-Revenue Water (NRW) — treated, pressurised water that is produced and distributed but never billed or paid for.
+
+This is not a formal call for applications. This is a curated industry challenge brief from LearnOpportunities Kenya — highlighting a real national problem where student talent, research, and innovation can make a meaningful difference.
+
+────────────────────────────────────
+ THE CORE PROBLEM
+────────────────────────────────────
+
+NCWSC currently loses approximately 44–48% of all treated water to NRW. That means nearly half of every litre pumped, treated, and pressurised never reaches a paying customer.
+
+💧 At the national level, Kenya loses an estimated Ksh 11.9 billion annually — equivalent to 203 million cubic metres of treated water disappearing from the system every year.
+
+The problem has three interconnected roots:
+
+🔴 Physical Losses — An ageing distribution network with pipes dating back decades. Hidden underground leaks that go undetected for months. Pipe bursts from pressure fluctuations and poor maintenance.
+
+🔴 Commercial Losses — Widespread illegal water connections in informal settlements including Kibagare, Kitusuru, and Mathare. Meter tampering, bypassing, and diversion of water. Over 8,000 broken meters recording zero consumption.
+
+🔴 Revenue Collection Failures — Ksh 344 million billed in 2024 to 23,384 accounts with zero payments and no disconnections enforced, according to a Senate Public Investments Committee audit.
+
+────────────────────────────────────
+ IMPACT ON NAIROBI RESIDENTS
+────────────────────────────────────
+
+• Only about 40% of connected households receive water continuously — the rest rely on rationing schedules
+• Residents of informal settlements pay up to 10× more per litre from water vendors than connected households
+• Low-pressure pipes and broken mains allow contamination ingress, increasing waterborne disease risk
+• Excessive abstraction from Thika Dam and Sasumua Dam to compensate for losses accelerates resource depletion
+────────────────────────────────────
+ WHAT NCWSC IS CURRENTLY DOING
+────────────────────────────────────
+
+NCWSC has deployed acoustic leak detection vans, launched a Rapid Results Initiative (RRI) targeting a 7.8% NRW reduction and Ksh 105.7 million/month increase in collections, and is conducting GIS mapping to grow its customer base by 37,000 accounts.
+
+Their technology roadmap includes:
+📡 Smart meters
+📡 Real-time monitoring of leaks and sewer flows
+🤖 AI-assisted asset management
+♻️ Potential reuse of treated wastewater
+🔬 Advanced water treatment technology
+
+Yet these initiatives remain under-resourced, manually intensive, and largely reactive rather than preventive.
+
+────────────────────────────────────
+ THE POTENTIAL IMPACT OF YOUR SOLUTION
+────────────────────────────────────
+
+A solution that reduces NCWSC's NRW by just 10 percentage points (from 48% to 38%) could:
+
+• Recover an estimated Ksh 1+ billion in annual revenue
+• Extend water access to an additional 300,000+ Nairobi residents
+• Reduce daily water abstraction load, easing pressure on Thika and Sasumua Dams
+• Serve as a replicable model for water utilities across sub-Saharan Africa
+
+────────────────────────────────────
+ HOW TO USE THIS
+────────────────────────────────────
+
+Use this challenge as inspiration for your:
+🎓 Final year project or capstone
+📚 Research paper or thesis
+💻 Class assignment or design sprint
+🌱 Community innovation initiative
+
+No formal application is needed — explore NCWSC's website, dig into the data, and start building.`,
+    location: 'Nairobi, Kenya',
     eligibility: {
       educationLevel: 'Both',
-      fieldOfStudy: ['Public Administration', 'Communications', 'Social Sciences', 'Any Field'],
+      fieldOfStudy: ['Engineering', 'Computer Science', 'Data Science', 'Environmental Science', 'Urban Planning', 'Business', 'Design', 'Any Field'],
       requirements: [
-        'Currently enrolled in an undergraduate or graduate programme, or 2–4 years of post-secondary work experience',
-        'Strong written and verbal communication skills',
-        'Ability to collaborate with people of all backgrounds and cultures',
-        'Effective time management and ability to meet deadlines',
-        'Genuine interest in community service and public sector work'
+        'Open to undergraduate and postgraduate students',
+        'Multidisciplinary teams strongly encouraged',
+        'Students based in Kenya or with knowledge of Nairobi\'s urban water context preferred',
+        'No formal application — use this as inspiration for academic projects, capstone work, or research'
       ]
     },
     benefits: [
-      'Competitive hourly wage of $20.00 per hour',
-      'Full-time, 35 hours per week in a professional government environment',
-      'Practical skills in research, data analysis, communications, and event support',
-      'Mentorship and constructive feedback throughout the programme',
-      "Tangible impact within Boston's neighbourhoods and communities"
+      'Real-world problem context for capstone, thesis, or final year project',
+      'Deep insight into Kenya\'s water infrastructure and governance challenges',
+      'Application domains: IoT sensors, GIS mapping, AI anomaly detection, predictive analytics',
+      'Portfolio-worthy project aligned with NCWSC\'s active technology roadmap',
+      'Potential for real-world impact affecting 4+ million Nairobi residents'
+    ],
+    contactLink: 'https://nairobiwater.co.ke',
+    featured: true,
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
+    dateAdded: '2026-03-06',
+    logoUrl: '/images/opportunities/nairobi_water.png',
+    thematicAreas: [
+      {
+        heading: 'Leak Detection',
+        topics: ['Low-cost acoustic or pressure sensors', 'Community-based leak reporting systems', 'Underground pipe network monitoring']
+      },
+      {
+        heading: 'Illegal Connection Mapping',
+        topics: ['GIS-based network analysis', 'AI anomaly detection in consumption data', 'Satellite or drone imagery analysis']
+      },
+      {
+        heading: 'Smart Metering',
+        topics: ['Affordable IoT meter design', 'Prepaid water systems for informal settlements', 'Remote meter reading infrastructure']
+      },
+      {
+        heading: 'Billing & Collections',
+        topics: ['Predictive default modelling', 'Behavioural nudge interventions', 'Mobile payment integration (M-Pesa)']
+      },
+      {
+        heading: 'Water Quality Monitoring',
+        topics: ['Real-time contamination sensors', 'Low-pressure zone risk mapping', 'Waterborne disease early warning systems']
+      },
+      {
+        heading: 'Wastewater Reuse',
+        topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
+      }
+    ],
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: 'worldquant-brain-iqc-2026',
+    title: 'WorldQuant BRAIN International Quant Championship (IQC) 2026',
+    provider: 'WorldQuant BRAIN',
+    category: 'Hackathon',
+    description: 'A three-stage, team-based global competition where participants develop and backtest Alphas — mathematical models that seek to predict future price movements of financial instruments — using WorldQuant’s proprietary BRAIN simulation platform. US$100,000 global prize pool.',
+    fullDescription: `The WorldQuant BRAIN International Quant Championship (IQC) 2026 is one of the premier global competitions for students and early-career professionals in quantitative finance, mathematics, and data science. It is a perfect opportunity for students with a strong interest in machine learning and coding to apply their skills to real-world financial modeling.
+
+THE COMPETITION
+The IQC is a team-based global competition where participants develop and backtest Alphas — mathematical models that seek to predict future price movements of financial instruments — using WorldQuant’s proprietary BRAIN simulation platform.
+
+COMPETITION TIMELINE
+• Qualifier Round (Stage 1): March 17 – May 18, 2026 (Virtual/University-based)
+• National/Regional Round (Stage 2): May 26 – Mid-July 2026 (Virtual & Final Presentation)
+• Global Finals (Stage 3): September 2026 (In-Person in Singapore)
+
+PRIZES & CAREER OPPORTUNITIES
+Beyond the prestige, the IQC offers significant rewards:
+• Cash Prizes: A total global prize pool of US$100,000.
+  - Global Finals: 1st Place (US$20,000), 2nd Place (US$12,000), 3rd Place (US$8,000)
+  - National Rounds: 1st Place (US$3,000), 2nd Place (US$2,000), 3rd Place (US$1,000)
+• Career Growth: Top performers are regularly considered for BRAIN Research Consultant positions, internships, and full-time quantitative researcher roles at WorldQuant.
+• Travel: Finalists are invited to an all-expenses-paid trip to Singapore for the Global Finals.
+
+HOW TO PARTICIPATE
+1. Sign Up: Create a free account on the WorldQuant BRAIN platform.
+2. Form a Team: Compete individually or in teams of up to 4 members (must be from the same university).
+3. Build Alphas: Use the BRAIN platform’s 125,000+ data fields and AI-powered analytics.
+4. Accumulate Points: Scores are based on both the quality (predictive power) and quantity of the Alphas you submit.`,
+    deadline: '2026-05-18',
+    location: 'Singapore (Global Finals) / Virtual (Qualifier)',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Mathematics', 'Quantitative Finance', 'Computer Science', 'Data Science', 'Engineering', 'Physics', 'Economics'],
+      requirements: [
+        'Open to students and early-career professionals worldwide',
+        'Teams of up to 4 members (must all be from the same university)',
+        'Sign up for a free account on the WorldQuant BRAIN platform',
+        'Must demonstrate ability to develop and backtest mathematical models (Alphas)'
+      ]
+    },
+    benefits: [
+      'US$100,000 total global prize pool',
+      'All-expenses-paid trip to Singapore for Global Finals',
+      'Direct pathway to Research Consultant, Intern, and Full-time roles',
+      'Access to 125,000+ data fields and AI-powered simulation tools',
+      'Participate in an elite global network of quants and researchers'
     ],
     applicationType: 'Platform Link',
-    applicationLink: 'https://city-boston.icims.com/jobs/31599/2026-summer-intern/job?mode=view',
-    fundingType: 'Stipend',
-    duration: 'Summer 2026 (35 hrs/week)',
-    featured: false,
-    dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/boston.jpg',
+    applicationLink: 'https://worldquantbrain.com/iqc',
+    fundingType: 'Fully Funded',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    featured: true,
+    dateAdded: '2026-03-23',
+    logoUrl: '/images/opportunities/world_brain.png',
+    thematicAreas: [
+      {
+        heading: 'Alpha Development',
+        topics: ['Mathematical modelling of financial signals', 'Predictive factor generation', 'Algorithmic strategy design']
+      },
+      {
+        heading: 'Simulation & Backtesting',
+        topics: ['WorldQuant BRAIN platform navigation', 'Performance metric analysis (Sharpe Ratio, Returns)', 'Risk management integration']
+      },
+      {
+        heading: 'Quant Finance Career',
+        topics: ['BRAIN Research Consultant positions', 'Quantitative Researcher networking', 'Global finals in Singapore']
+      }
+    ],
     views: 0,
     clicks: 0
   },
@@ -149,7 +279,7 @@ const opportunities = [
     provider: 'European Southern Observatory',
     category: 'Internship',
     description: 'A fully funded science communication internship at ESO headquarters in Germany. Covers monthly living allowance, accommodation, and a return flight from your home country. Open to applicants worldwide.',
-    fullDescription: 'The European Southern Observatory (ESO) Science Communication Internship offers students and recent graduates the chance to work with ESO\'s Department of Communication in Garching, Germany. Interns contribute to news articles, press releases, web content, video scripts, and exhibition materials. The internship runs for 3–6 months on a rolling basis, with applications reviewed every 4–6 months.',
+    fullDescription: 'The European Southern Observatory (ESO) Science Communication Internship offers students and recent graduates the chance to work with ESO\'s Department of Communication in Garching, Germany. Interns contribute to news articles, press releases, web content, video scripts, exhibition materials, and other public outreach products for one of the world\'s leading astronomical organisations. The internship runs for 3–6 months on a rolling basis, meaning applications are reviewed every 4–6 months year-round. ESO provides a monthly allowance for living expenses, accommodation, and covers the cost of a return ticket from the intern\'s home country, making it a genuinely fully funded opportunity.',
     deadline: 'Rolling',
     location: 'Germany',
     eligibility: {
@@ -160,7 +290,9 @@ const opportunities = [
         'Degree in Science, Science Communication, or Science Journalism preferred',
         'Proficiency in written and spoken English',
         'Experience in written science communication or journalism',
-        'Understanding of astronomy and science outreach'
+        'Understanding of astronomy and science outreach',
+        'Ability to work independently and in multicultural teams',
+        'Ability to work under time pressure and meet deadlines'
       ]
     },
     benefits: [
@@ -168,11 +300,15 @@ const opportunities = [
       'Accommodation provided',
       'Return flight from/to home country covered',
       'Work with world-renowned scientists and communicators',
-      'International and multicultural work environment'
+      'Access to state-of-the-art astronomical facilities',
+      'International and multicultural work environment',
+      'Strong addition to a science communication career'
     ],
     applicationType: 'Platform Link',
     applicationLink: 'https://recruitment.eso.org/',
-    fundingType: 'Fully Funded',
+    fundingType: 'Paid Internship',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
     duration: '3 to 6 months',
     featured: false,
     dateAdded: '2026-02-27',
@@ -186,7 +322,7 @@ const opportunities = [
     provider: 'World Food Programme',
     category: 'Internship',
     description: 'A paid internship with the UN World Food Programme open to students in any field. Offers a stipend of up to $1,000/month, medical insurance, and a flexible duration of 2–8 months across global WFP offices.',
-    fullDescription: 'The World Food Programme (WFP) Internship Program is a short-term learning opportunity for outstanding students from across the world. Interns work in WFP offices globally across fields such as logistics, communications, data, and nutrition — directly contributing to efforts to achieve zero hunger. WFP provides a stipend of up to US$1,000 per month, medical and accident insurance for interns from developing countries, certified sick leave, and potential visa support.',
+    fullDescription: 'The World Food Programme (WFP) Internship Program is a short-term learning opportunity for outstanding undergraduate and graduate students from across the world. Interns work in WFP offices globally across fields such as logistics, communications, data, nutrition, and more — directly contributing to efforts to achieve zero hunger. The programme runs for 2 to 8 months depending on the position, with different openings having different deadlines. WFP provides a stipend of up to US$1,000 per month based on duty station, medical and accident insurance for interns from developing countries, certified sick leave, and potential visa support. Applicants must be enrolled in a recognised university or have graduated within the last six months.',
     deadline: 'Rolling',
     location: 'International',
     eligibility: {
@@ -197,7 +333,8 @@ const opportunities = [
         'Completed at least two years of an undergraduate degree',
         'Fluency in English is compulsory',
         'Knowledge of another UN language is an advantage',
-        'Strong teamwork skills and willingness to take on challenges'
+        'Strong teamwork skills and willingness to take on challenges',
+        'Apply only for positions relevant to your field of study'
       ]
     },
     benefits: [
@@ -206,92 +343,18 @@ const opportunities = [
       'Certified sick leave',
       'Visa support may be available',
       'Training and e-learning resources',
+      'Exposure to international humanitarian work',
       'Real-world experience contributing to zero hunger goals'
     ],
     applicationType: 'Platform Link',
     applicationLink: 'https://wd3.myworkdaysite.com/recruiting/wfp/job_openings?workerSubType=59387fe40123101e856f1834e09b0002',
-    fundingType: 'Stipend',
+    fundingType: 'Paid Internship',
+    compensationType: 'Stipend',
+    upfrontCost: 'Has Upfront Cost',
     duration: '2 to 8 months',
     featured: false,
     dateAdded: '2026-02-27',
     logoUrl: '/images/opportunities/wfp.png',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '31',
-    title: 'AFRIKA KOMMT! Fellowship Programme 2026/2028',
-    provider: 'AFRIKA KOMMT!',
-    category: 'Fellowship',
-    description: 'A prestigious fellowship connecting young African professionals with leading German companies for 12 months of hands-on work experience in Germany.',
-    fullDescription: 'AFRIKA KOMMT! is a unique initiative by leading German companies offering young professionals from sub-Saharan Africa the opportunity to gain valuable work experience in Germany. Fellows are embedded in partner companies including BioNTech, B.Braun, Boehringer Ingelheim, Merck KGaA, ODDO BHF, Robert Bosch, and SAP SE, working on real projects for 12 months and gaining international exposure, mentorship, and professional development.',
-    deadline: '2026-03-22',
-    location: 'Germany',
-    eligibility: {
-      educationLevel: 'PostGrad',
-      fieldOfStudy: ['Business', 'Engineering', 'Technology', 'Sciences', 'Finance'],
-      requirements: [
-        'Citizen of a sub-Saharan African country',
-        'University degree (Bachelor\'s or Master\'s)',
-        'Minimum 2 years of professional work experience',
-        'Strong command of English (German is a plus)',
-        'Between 28 and 35 years old at the start of the programme',
-        'Must return to home country after completion',
-        'Not currently living in Germany or enrolled in a German academic programme'
-      ]
-    },
-    benefits: [
-      'Paid 12-month fellowship at a top German company',
-      'Partner companies: BioNTech, B.Braun, Boehringer Ingelheim, Merck KGaA, ODDO BHF, Robert Bosch, SAP SE',
-      'Monthly stipend and accommodation support',
-      'Intercultural training and German language course',
-      'Networking events and alumni community',
-      'Mentorship from senior company professionals',
-      'Return flight and visa support'
-    ],
-    applicationType: 'Online Application',
-    applicationLink: 'https://afrika-kommt.de/15th-apply/',
-    duration: '1 year',
-    featured: true,
-    dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/afrika_kommt.png',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '32',
-    title: 'IEEE Africa Entrepreneurship Summit Hackathon 2026',
-    provider: 'IEEE Africa & IEEE YESIST12',
-    category: 'Hackathon',
-    description: "A collaborative Hackathon empowering students and young innovators to develop scalable, technology-driven solutions addressing Africa's most pressing challenges. Top teams win fully funded travel to present at IEEE YESIST12 2026 in Indonesia.",
-    fullDescription: "This Hackathon is organized as a collaboration between the IEEE Africa Entrepreneurship Summit and IEEE YESIST12, aligned with YESIST12's Innovation and Sustainable Impact tracks. It empowers students and young innovators to develop scalable, technology-driven solutions addressing Africa's most pressing social, economic, and environmental challenges. Selected top teams will receive fully funded travel grants — covering transport, accommodation, and all costs — to represent their solutions at IEEE YESIST12 2026 in Indonesia.\n\nThematic Areas:\n• Climate & Sustainable Agriculture\n• Clean Energy & Sustainable Infrastructure\n• HealthTech & Well-being\n• Education & Digital Inclusion\n• Economic Empowerment & Smart Communities",
-    deadline: '2026-03-10',
-    location: 'Indonesia',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Technology', 'Engineering', 'Business', 'Health Sciences', 'Environmental Science', 'Education'],
-      requirements: [
-        'Teams of 3 to 5 members',
-        'Open to students and young innovators across Africa',
-        'Solution must address one of the 5 thematic areas',
-        'All submitted details must be accurate and truthful'
-      ]
-    },
-    benefits: [
-      'Fully funded transport to Indonesia for top teams',
-      'Fully covered accommodation in Indonesia',
-      'All costs covered for finals presentation at IEEE YESIST12 2026',
-      'Present at IEEE YESIST12 2026 in Indonesia',
-      'Exposure to the global IEEE innovation network'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://bit.ly/AfricaEntHack',
-    contactEmail: 'kipngeno.koech@ieee.org',
-    contactLink: 'mailto:kipngeno.koech@ieee.org',
-    fundingType: 'Fully Funded',
-    featured: true,
-    dateAdded: '2026-03-03',
-    logoUrl: '/images/opportunities/ieee_yesist.jpeg',
     views: 0,
     clicks: 0
   },
@@ -392,114 +455,180 @@ Because this year's conference is in Nairobi, Kenyan authors have a rare and mas
     applicationType: 'Platform Link',
     applicationLink: 'https://ieee-powerafrica.org/call-for-papers/',
     fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'Has Upfront Cost',
     duration: '21–25 September 2026',
     featured: true,
     dateAdded: '2026-03-04',
     logoUrl: '/images/opportunities/ieee_pac.jpeg',
     thematicAreas: [
-      { heading: 'Renewable Energy & Low-Carbon Technologies', topics: ['Renewable generation modeling & forecasting', 'Inverter-based and grid-forming technologies', 'Hybrid and low-carbon power systems', 'Power electronics for renewable integration'] },
-      { heading: 'Power System Resilience & Infrastructure', topics: ['Power system planning and optimization', 'Grid resilience and climate adaptation', 'Protection, stability, and control', 'Transmission and distribution infrastructure'] },
-      { heading: 'Digitalization, AI & Cyber-Physical Systems', topics: ['AI and machine learning in power systems', 'Digital twins and advanced analytics', 'Smart grids and automation', 'Cybersecurity and cyber-physical resilience'] },
-      { heading: 'Power Systems & Energy Storage', topics: ['Power generation, transmission & distribution', 'Power system stability & failure analysis', 'Security in smart grid networks', 'Energy storage for renewables integration'] },
-      { heading: 'Distributed Energy & Microgrids', topics: ['EV systems, battery tech & management', 'Grid-to-Vehicle (G2V) and Vehicle-to-Grid (V2G)', 'V2I, IoT and communication technologies', 'Control systems, drives & charging stations'] },
-      { heading: 'Industrial Electrification & Decarbonization', topics: ['Industrial electrification pathways', 'Electric mobility and EV socio-economic impacts', 'Sustainable transport safety', 'Decarbonization business models & policy'] },
-      { heading: 'Energy Markets, Policy & Regulation', topics: ['Energy market design and regulation', 'Cross-sector integration frameworks', 'Policy for resilient low-carbon systems', 'Africa-specific energy transition strategies'] },
-      { heading: 'Short Papers & Emerging Ideas', topics: ['Emerging ideas and early-stage research', 'Case studies from African energy projects', 'Work-in-progress and pilot studies', 'Student and early-career researcher papers'] }
+      {
+        heading: 'Renewable Energy & Low-Carbon Technologies',
+        topics: [
+          'Renewable generation modeling & forecasting',
+          'Inverter-based and grid-forming technologies',
+          'Hybrid and low-carbon power systems',
+          'Power electronics for renewable integration'
+        ]
+      },
+      {
+        heading: 'Power System Resilience & Infrastructure',
+        topics: [
+          'Power system planning and optimization',
+          'Grid resilience and climate adaptation',
+          'Protection, stability, and control',
+          'Transmission and distribution infrastructure'
+        ]
+      },
+      {
+        heading: 'Digitalization, AI & Cyber-Physical Systems',
+        topics: [
+          'AI and machine learning in power systems',
+          'Digital twins and advanced analytics',
+          'Smart grids and automation',
+          'Cybersecurity and cyber-physical resilience'
+        ]
+      },
+      {
+        heading: 'Power Systems & Energy Storage',
+        topics: [
+          'Power generation, transmission & distribution',
+          'Power system stability & failure analysis',
+          'Security in smart grid networks',
+          'Energy storage for renewables integration'
+        ]
+      },
+      {
+        heading: 'Distributed Energy & Microgrids',
+        topics: [
+          'EV systems, battery tech & management',
+          'Grid-to-Vehicle (G2V) and Vehicle-to-Grid (V2G)',
+          'V2I, IoT and communication technologies',
+          'Control systems, drives & charging stations'
+        ]
+      },
+      {
+        heading: 'Industrial Electrification & Decarbonization',
+        topics: [
+          'Industrial electrification pathways',
+          'Electric mobility and EV socio-economic impacts',
+          'Sustainable transport safety',
+          'Decarbonization business models & policy'
+        ]
+      },
+      {
+        heading: 'Energy Markets, Policy & Regulation',
+        topics: [
+          'Energy market design and regulation',
+          'Cross-sector integration frameworks',
+          'Policy for resilient low-carbon systems',
+          'Africa-specific energy transition strategies'
+        ]
+      },
+      {
+        heading: 'Short Papers & Emerging Ideas',
+        topics: [
+          'Emerging ideas and early-stage research',
+          'Case studies from African energy projects',
+          'Work-in-progress and pilot studies',
+          'Student and early-career researcher papers'
+        ]
+      }
     ],
     views: 0,
     clicks: 0
   },
   {
     id: '34',
-    title: 'Canadian Government Study in Canada Scholarships 2026–2027',
+    title: 'Canadian Government Study in Canada Scholarships 2026\u20132027',
     provider: 'Global Affairs Canada (EduCanada)',
     category: 'Scholarship',
-    description: 'Fully funded short-term exchange scholarships for international students from 20 eligible countries — including Kenya — to study or research at Canadian universities. Worth up to $14,000 USD. Applied through your home institution, not directly.',
+    description: 'Fully funded short-term exchange scholarships for international students from 20 eligible countries \u2014 including Kenya \u2014 to study or research at Canadian universities. Worth up to $14,000 USD. Applied through your home institution, not directly.',
     fullDescription: `The Study in Canada Scholarships (SICS) are funded by Global Affairs Canada through the Academic Relations program. They offer students from 20 eligible countries a short-term exchange at a Canadian post-secondary institution for study or research. Kenya is on the eligible countries list.
 
-────────────────────────────────────
-HOW IT WORKS — CRITICAL TO UNDERSTAND
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+HOW IT WORKS \u2014 CRITICAL TO UNDERSTAND
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-You cannot apply directly as a student. Only Canadian post-secondary institutions submit applications on students’ behalf. The process works like this:
+You cannot apply directly as a student. Only Canadian post-secondary institutions submit applications on students\u2019 behalf. The process works like this:
 
-• Your home university must have an existing exchange agreement with a Canadian Designated Learning Institution (DLI)
-• The Canadian institution identifies and selects you
-• They submit your Privacy Notice Statement (PNS) — signed and dated within the last 6 months — through the My EduCanada portal
-• They email a Management and Accountability Framework (MAF) to Scholarships-Info-Bourses@international.gc.ca
-• If selected, the Canadian institution receives the funds and disburses them directly to you
+\u2022 Your home university must have an existing exchange agreement with a Canadian Designated Learning Institution (DLI)
+\u2022 The Canadian institution identifies and selects you
+\u2022 They submit your Privacy Notice Statement (PNS) \u2014 signed and dated within the last 6 months \u2014 through the My EduCanada portal
+\u2022 They email a Management and Accountability Framework (MAF) to Scholarships-Info-Bourses@international.gc.ca
+\u2022 If selected, the Canadian institution receives the funds and disburses them directly to you
 
-📌 Your first step: Contact your university’s international office and ask if they have an active exchange partnership with a Canadian DLI.
+\ud83d\udccc Your first step: Contact your university\u2019s international office and ask if they have an active exchange partnership with a Canadian DLI.
 
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 SCHOLARSHIP VALUE & DURATION
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-💰 $10,200 USD — College or Undergraduate level, 4 months (one academic term)
-💰 $10,200 USD — Graduate (Masters/PhD), 4 months of study or research
-💰 $14,000 USD — Graduate (Masters/PhD), 5 to 6 months of study or research
-💰 $500 USD — Additional per scholarship paid to the Canadian institution for administrative costs
+\ud83d\udcb0 $10,200 USD \u2014 College or Undergraduate level, 4 months (one academic term)
+\ud83d\udcb0 $10,200 USD \u2014 Graduate (Masters/PhD), 4 months of study or research
+\ud83d\udcb0 $14,000 USD \u2014 Graduate (Masters/PhD), 5 to 6 months of study or research
+\ud83d\udcb0 $500 USD \u2014 Additional per scholarship paid to the Canadian institution for administrative costs
 
 Tuition is fully waived by the Canadian host institution. Scholarship funds cover:
-• Airfare (most economical route)
-• Health insurance
-• Accommodation and food
-• Books and other research requirements
+\u2022 Airfare (most economical route)
+\u2022 Health insurance
+\u2022 Accommodation and food
+\u2022 Books and other research requirements
 
 Note: Computers and equipment are NOT covered.
 
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 ELIGIBLE COUNTRIES
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-🌏 Asia: Bangladesh, Nepal, Taiwan
-🌍 Europe: Türkiye, Ukraine
-🌍 Middle East & North Africa: Algeria, Egypt, Jordan, Morocco, Tunisia
-🌍 Sub-Saharan Africa: Burkina Faso, Ethiopia, Ghana, Ivory Coast, Kenya ✅, Nigeria, Rwanda, Senegal, Tanzania, Uganda
+\ud83c\udf0f Asia: Bangladesh, Nepal, Taiwan
+\ud83c\udf0d Europe: T\u00fcrkiye, Ukraine
+\ud83c\udf0d Middle East & North Africa: Algeria, Egypt, Jordan, Morocco, Tunisia
+\ud83c\udf0d Sub-Saharan Africa: Burkina Faso, Ethiopia, Ghana, Ivory Coast, Kenya \u2705, Nigeria, Rwanda, Senegal, Tanzania, Uganda
 
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 KEY RESTRICTIONS
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-• No clinical training or direct patient care allowed
-• Cannot hold Canadian citizenship or permanent residency (or have a pending application)
-• Cannot already be enrolled in a degree program at a Canadian institution
-• Cannot hold another Global Affairs Canada (GAC/DFATD) grant simultaneously — all sources must be declared
-• Must return to your home institution after completing the scholarship
-• All project activities must be completed by September 30, 2027
+\u2022 No clinical training or direct patient care allowed
+\u2022 Cannot hold Canadian citizenship or permanent residency (or have a pending application)
+\u2022 Cannot already be enrolled in a degree program at a Canadian institution
+\u2022 Cannot hold another Global Affairs Canada (GAC/DFATD) grant simultaneously \u2014 all sources must be declared
+\u2022 Must return to your home institution after completing the scholarship
+\u2022 All project activities must be completed by September 30, 2027
 
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 KEY DATES
-────────────────────────────────────
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
-📅 Application deadline (Canadian institutions): March 31, 2026 at 11:59 PM EDT
-📅 Notification of results to institutions: May 2026
-📅 All activities must be completed by: September 30, 2027`,
+\ud83d\udcc5 Application deadline (Canadian institutions): March 31, 2026 at 11:59 PM EDT
+\ud83d\udcc5 Notification of results to institutions: May 2026
+\ud83d\udcc5 All activities must be completed by: September 30, 2027`,
     deadline: '2026-03-31',
     location: 'Canada',
     eligibility: {
       educationLevel: 'Both',
       fieldOfStudy: ['All Academic Fields'],
       requirements: [
-        'Citizen of one of the 20 eligible countries — Kenya is eligible',
+        'Citizen of one of the 20 eligible countries \u2014 Kenya is eligible',
         'Enrolled full-time at a post-secondary institution in your home country',
         'Currently paying tuition fees to your home institution',
         'Your home institution must have an exchange agreement with a Canadian DLI',
         'Must complete all program activities by September 30, 2027',
         'No Canadian citizenship, permanent residency, or pending application',
         'Not already enrolled in a degree program at a Canadian institution',
-        'No other active Global Affairs Canada (GAC/DFATD) funding — all sources must be declared',
+        'No other active Global Affairs Canada (GAC/DFATD) funding \u2014 all sources must be declared',
         'Must return to home institution after the exchange',
         'No clinical training or direct patient care involvement'
       ]
     },
     benefits: [
       '$10,200 USD for 4-month undergraduate or graduate exchange',
-      '$14,000 USD for 5–6 month graduate (Masters/PhD) exchange',
+      '$14,000 USD for 5\u20136 month graduate (Masters/PhD) exchange',
       'Full tuition waiver at the Canadian host institution',
       'Airfare covered (most economical route)',
       'Health insurance fully covered',
-      'Living costs covered — accommodation, food, books',
+      'Living costs covered \u2014 accommodation, food, books',
       'Research materials and requirements covered',
       'Exposure to Canadian academic and research environment',
       'Strengthens international academic linkages and CV'
@@ -509,6 +638,8 @@ KEY DATES
     contactEmail: 'Scholarships-Info-Bourses@international.gc.ca',
     contactLink: 'mailto:Scholarships-Info-Bourses@international.gc.ca',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     duration: '4 to 6 months',
     featured: true,
     dateAdded: '2026-03-04',
@@ -522,7 +653,48 @@ KEY DATES
     provider: 'Eastern European Machine Learning (EEML)',
     category: 'Conference',
     description: 'A fully funded 6-day intensive summer school in Cetinje, Montenegro covering Artificial Intelligence and Machine Learning — including Deep Learning and Reinforcement Learning. Open to all countries, all academic levels, ages 18+.',
-    fullDescription: 'The Eastern European Machine Learning (EEML) Summer School 2026 is a fully funded intensive programme held in Cetinje, Montenegro from 27 July to 1 August 2026. The school focuses on high-level training in Artificial Intelligence and Machine Learning, with sessions covering fundamental and advanced topics including Deep Learning and Reinforcement Learning.',
+    fullDescription: `The Eastern European Machine Learning (EEML) Summer School 2026 is a fully funded intensive programme held in Cetinje, Montenegro from 27 July to 1 August 2026. The school focuses on high-level training in Artificial Intelligence and Machine Learning, with sessions covering fundamental and advanced topics including Deep Learning and Reinforcement Learning.
+
+The EEML Summer School was established to strengthen Machine Learning education across Eastern Europe while welcoming international participants from all regions. It offers a concentrated, research-oriented environment where participants engage in lectures, discussions, poster sessions, and social events alongside peers, researchers, and experts from across the world.
+
+────────────────────────────────────
+ WHAT IS COVERED (FULLY FUNDED)
+────────────────────────────────────
+
+✈️ Travel costs for selected participants
+🏨 Accommodation for the duration of the programme
+🎟️ Registration fees fully waived
+🍽️ Meals during the programme
+📜 Certificate of participation upon completion
+
+────────────────────────────────────
+ PROGRAMME CONTENT
+────────────────────────────────────
+
+• Deep Learning theory and practice
+• Reinforcement Learning
+• Advanced Machine Learning concepts
+• Research presentations and poster sessions
+• Direct interaction with leading AI/ML researchers
+• Social events and networking opportunities
+
+────────────────────────────────────
+ KEY DETAILS
+────────────────────────────────────
+
+📍 Location: Cetinje, Montenegro
+📅 Dates: 27 July – 1 August 2026 (6 days)
+📅 Application deadline: 31 March 2026
+🌍 Open to: All countries worldwide
+🎓 Levels: High school, Undergraduate, Master's, PhD, Postdoctoral
+
+────────────────────────────────────
+ HOW TO APPLY
+────────────────────────────────────
+
+Submit your application via the official Google Form before the March 31 deadline. You will need to provide a CV and motivation details. Selections are competitive and based on academic background and interest in ML/AI.
+
+For full programme details visit: https://www.eeml.eu/`,
     deadline: '2026-03-31',
     location: 'Montenegro',
     eligibility: {
@@ -550,6 +722,8 @@ KEY DATES
     applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLSe0t-ZqFnKIF6KsEBMAC7UZg51kbItfuYfmrg9EqPZgcXDFKQ/viewform',
     contactLink: 'https://www.eeml.eu/',
     fundingType: 'Fully Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
     duration: '27 July – 1 August 2026 (6 days)',
     featured: true,
     dateAdded: '2026-03-04',
@@ -645,6 +819,8 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
     applicationLink: 'https://www.dfat.gov.au/people-to-people/australia-awards/how-to-apply-for-an-australia-awards-scholarship',
     contactLink: 'https://www.dfat.gov.au/contact-us',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     duration: 'Bachelor: 4 years | Masters: 2–3 years | PhD: 4–5 years',
     featured: true,
     dateAdded: '2026-03-05',
@@ -659,140 +835,50 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
     clicks: 0
   },
   {
-    id: '37',
-    title: 'Non-Revenue Water Crisis — Can You Help Nairobi Fix It?',
-    provider: 'Opportunities Kenya',
-    category: 'Challenge',
-    description: 'Nairobi City Water & Sewerage Company loses 44–48% of all treated water to leaks, illegal connections, and billing failures. An open industry challenge brief for students to explore, research, and build solutions.',
-    fullDescription: `The Nairobi City Water and Sewerage Company (NCWSC) is the sole provider of water and sewerage services for over 4 million Nairobi residents. Like many urban utilities across sub-Saharan Africa, NCWSC faces a severe operational crisis rooted in Non-Revenue Water (NRW) — treated, pressurised water that is produced and distributed but never billed or paid for.
-
-This is not a formal call for applications. This is a curated industry challenge brief from LearnOpportunities Kenya — highlighting a real national problem where student talent, research, and innovation can make a meaningful difference.
-
-────────────────────────────────────
- THE CORE PROBLEM
-────────────────────────────────────
-
-NCWSC currently loses approximately 44–48% of all treated water to NRW. That means nearly half of every litre pumped, treated, and pressurised never reaches a paying customer.
-
-💧 At the national level, Kenya loses an estimated Ksh 11.9 billion annually — equivalent to 203 million cubic metres of treated water disappearing from the system every year.
-
-The problem has three interconnected roots:
-
-🔴 Physical Losses — An ageing distribution network with pipes dating back decades. Hidden underground leaks that go undetected for months. Pipe bursts from pressure fluctuations and poor maintenance.
-
-🔴 Commercial Losses — Widespread illegal water connections in informal settlements including Kibagare, Kitusuru, and Mathare. Meter tampering, bypassing, and diversion of water. Over 8,000 broken meters recording zero consumption.
-
-🔴 Revenue Collection Failures — Ksh 344 million billed in 2024 to 23,384 accounts with zero payments and no disconnections enforced, according to a Senate Public Investments Committee audit.
-
-────────────────────────────────────
- IMPACT ON NAIROBI RESIDENTS
-────────────────────────────────────
-
-• Only about 40% of connected households receive water continuously — the rest rely on rationing schedules
-• Residents of informal settlements pay up to 10× more per litre from water vendors than connected households
-• Low-pressure pipes and broken mains allow contamination ingress, increasing waterborne disease risk
-• Excessive abstraction from Thika Dam and Sasumua Dam to compensate for losses accelerates resource depletion
-────────────────────────────────────
- WHAT NCWSC IS CURRENTLY DOING
-────────────────────────────────────
-
-NCWSC has deployed acoustic leak detection vans, launched a Rapid Results Initiative (RRI) targeting a 7.8% NRW reduction and Ksh 105.7 million/month increase in collections, and is conducting GIS mapping to grow its customer base by 37,000 accounts.
-
-Their technology roadmap includes:
-📡 Smart meters
-📡 Real-time monitoring of leaks and sewer flows
-🤖 AI-assisted asset management
-♻️ Potential reuse of treated wastewater
-🔬 Advanced water treatment technology
-
-Yet these initiatives remain under-resourced, manually intensive, and largely reactive rather than preventive.
-
-────────────────────────────────────
- THE POTENTIAL IMPACT OF YOUR SOLUTION
-────────────────────────────────────
-
-A solution that reduces NCWSC's NRW by just 10 percentage points (from 48% to 38%) could:
-
-• Recover an estimated Ksh 1+ billion in annual revenue
-• Extend water access to an additional 300,000+ Nairobi residents
-• Reduce daily water abstraction load, easing pressure on Thika and Sasumua Dams
-• Serve as a replicable model for water utilities across sub-Saharan Africa
-
-────────────────────────────────────
- HOW TO USE THIS
-────────────────────────────────────
-
-Use this challenge as inspiration for your:
-🎓 Final year project or capstone
-📚 Research paper or thesis
-💻 Class assignment or design sprint
-🌱 Community innovation initiative
-
-No formal application is needed — explore NCWSC's website, dig into the data, and start building.`,
-    location: 'Nairobi, Kenya',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Engineering', 'Computer Science', 'Data Science', 'Environmental Science', 'Urban Planning', 'Business', 'Design', 'Any Field'],
-      requirements: [
-        'Open to undergraduate and postgraduate students',
-        'Multidisciplinary teams strongly encouraged',
-        'Students based in Kenya or with knowledge of Nairobi\'s urban water context preferred',
-        'No formal application — use this as inspiration for academic projects, capstone work, or research'
-      ]
-    },
-    benefits: [
-      'Real-world problem context for capstone, thesis, or final year project',
-      'Deep insight into Kenya\'s water infrastructure and governance challenges',
-      'Application domains: IoT sensors, GIS mapping, AI anomaly detection, predictive analytics',
-      'Portfolio-worthy project aligned with NCWSC\'s active technology roadmap',
-      'Potential for real-world impact affecting 4+ million Nairobi residents'
-    ],
-    contactLink: 'https://nairobiwater.co.ke',
-    featured: true,
-    dateAdded: '2026-03-06',
-    logoUrl: '/images/opportunities/nairobi_water.png',
-    thematicAreas: [
-      {
-        heading: 'Leak Detection',
-        topics: ['Low-cost acoustic or pressure sensors', 'Community-based leak reporting systems', 'Underground pipe network monitoring']
-      },
-      {
-        heading: 'Illegal Connection Mapping',
-        topics: ['GIS-based network analysis', 'AI anomaly detection in consumption data', 'Satellite or drone imagery analysis']
-      },
-      {
-        heading: 'Smart Metering',
-        topics: ['Affordable IoT meter design', 'Prepaid water systems for informal settlements', 'Remote meter reading infrastructure']
-      },
-      {
-        heading: 'Billing & Collections',
-        topics: ['Predictive default modelling', 'Behavioural nudge interventions', 'Mobile payment integration (M-Pesa)']
-      },
-      {
-        heading: 'Water Quality Monitoring',
-        topics: ['Real-time contamination sensors', 'Low-pressure zone risk mapping', 'Waterborne disease early warning systems']
-      },
-      {
-        heading: 'Wastewater Reuse',
-        topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
-      }
-    ],
-    views: 0,
-    clicks: 0
-  },
-  {
     id: '38',
     title: "HENNGE's Global Internship Program 2026",
     provider: 'HENNGE',
     category: 'Internship',
     description: 'Fully funded 4–6 week tech internship at HENNGE headquarters in Tokyo, Japan. Open to international students in Front-End or Full-Stack Software Engineering. No Japanese required.',
-    fullDescription: `HENNGE's Global Internship Program (GIP) 2026 is a fully funded international tech internship based at HENNGE's Shibuya headquarters in Tokyo, Japan. The program is open to international students and recent graduates worldwide pursuing a degree in Computer Science or a related field.\n\nTHE OPPORTUNITY\nGIP offers two distinct engineering tracks:\n• Full Stack Software Engineering — Python or Go, AWS, Terraform, server-side development\n• Front-End Software Engineering — React or Vue in TypeScript, UI/UX, modern web interfaces\n\nThe program runs for 4–6 weeks and is conducted entirely in English — no Japanese language skills required.\n\nPATHWAY DATES\n• Batch 4: 3 August – 11 September 2026 (Full-Stack Pathway)\n• Batch 5: 16 November – 18 December 2026 (Front-End Pathway)\n\nPositions are filled on a first-come, first-serve basis — apply early to secure your slot.\n\nELIGIBILITY\n• Currently pursuing a Bachelor's (3rd year or above), Master's, or Doctoral degree — OR a recent graduate\n• Degree or equivalent experience in Computer Science or a related technical field\n• Fluent in English\n• Knowledge of Linux, MacOS, or Unix-like systems\n• Interested in open source and tech community activities\n• For Full-Stack: experience in Python or Go\n• For Front-End: experience in React or Vue with TypeScript\n• Familiarity with AWS and Terraform is a plus\n• Basic understanding of server-side programming (for Front-End applicants)\n\nAPPLICATION PROCESS\n1. Visit the official website and select your internship track\n2. Register and complete the online coding challenge\n3. Submit your CV, cover letter, and completed challenge\n4. Shortlisted applicants will be contacted for phone screening and online interview`,
+    fullDescription: `HENNGE's Global Internship Program (GIP) 2026 is a fully funded international tech internship based at HENNGE's Shibuya headquarters in Tokyo, Japan. The program is open to international students and recent graduates worldwide pursuing a degree in Computer Science or a related field.
+
+THE OPPORTUNITY
+GIP offers two distinct engineering tracks:
+• Full Stack Software Engineering — Python or Go, AWS, Terraform, server-side development
+• Front-End Software Engineering — React or Vue in TypeScript, UI/UX, modern web interfaces
+
+The program runs for 4–6 weeks and is conducted entirely in English — no Japanese language skills required.
+
+PATHWAY DATES
+• Batch 4: 3 August – 11 September 2026 (Full-Stack Pathway)
+• Batch 5: 16 November – 18 December 2026 (Front-End Pathway)
+
+Positions are filled on a first-come, first-serve basis — apply early to secure your slot.
+
+ELIGIBILITY
+• Currently pursuing a Bachelor's (3rd year or above), Master's, or Doctoral degree — OR a recent graduate
+• Degree or equivalent experience in Computer Science or a related technical field
+• Fluent in English
+• Knowledge of Linux, MacOS, or Unix-like systems
+• Interested in open source and tech community activities
+• For Full-Stack: experience in Python or Go
+• For Front-End: experience in React or Vue with TypeScript
+• Familiarity with AWS and Terraform is a plus
+• Basic understanding of server-side programming (for Front-End applicants)
+
+APPLICATION PROCESS
+1. Visit the official website and select your internship track
+2. Register and complete the online coding challenge
+3. Submit your CV, cover letter, and completed challenge
+4. Shortlisted applicants will be contacted for phone screening and online interview
+
+No Japanese language skills required. All interns with outstanding performance may receive a full-time job offer at HENNGE.`,
     location: 'Tokyo, Japan',
     eligibility: {
       educationLevel: 'Both',
       fieldOfStudy: ['Computer Science', 'Software Engineering', 'Information Technology', 'Related Technical Field'],
       requirements: [
-        "Pursuing a Bachelor's degree (3rd year+), Master's, or Doctoral degree — or recent graduate",
+        'Pursuing a Bachelor\'s degree (3rd year+), Master\'s, or Doctoral degree — or recent graduate',
         'Degree or equivalent experience in Computer Science or related technical field',
         'Fluent in English (Japanese not required)',
         'Knowledge of Linux, MacOS, or Unix-like systems',
@@ -816,7 +902,9 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
     ],
     applicationType: 'Platform Link',
     applicationLink: 'https://recruit.hennge.com/en/gip/',
-    fundingType: 'Fully Funded',
+    fundingType: 'Paid Internship',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     duration: '4–6 weeks',
     featured: false,
     dateAdded: '2026-03-09',
@@ -829,66 +917,6 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
       {
         heading: 'Front-End Software Engineering',
         topics: ['React & Vue in TypeScript', 'Modern UI/UX development', 'Component-driven architecture', 'Web performance optimisation']
-      }
-    ],
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '39',
-    title: 'World Bank Group Youth Summit 2026',
-    provider: 'World Bank Group',
-    category: 'Conference',
-    description: 'Fully funded global youth summit in Washington D.C. for young innovators aged 18–35. Theme: "Future Works: Designing Jobs for the Digital Age." Includes delegate and pitch competition tracks.',
-    fullDescription: `The World Bank Group Youth Summit 2026 is one of the largest annual international youth gatherings organised by the World Bank Group. The summit will take place on June 11–12, 2026 in Washington, D.C., USA, in a hybrid format — participants may attend in person or virtually from anywhere in the world.\n\nTHEME: FUTURE WORKS — DESIGNING JOBS FOR THE DIGITAL AGE\nThe summit will bring together young innovators, leaders, and changemakers from around the world to discuss development challenges and explore innovative solutions for the future workforce. Focus areas include:\n• Education and skills for the digital economy\n• Entrepreneurship and job creation\n• Agriculture and food systems innovation\n\nTWO PARTICIPATION TRACKS\n\nDelegate Track\nParticipate in keynote speeches, panel discussions, workshops, and networking sessions with global experts, policymakers, and world leaders. Join the Young Changemaker Network and build lasting international connections.\n\nPitch Competition Track\nPresent a creative idea to solve pressing global challenges. Submit a project idea, pitch deck, and video pitch. Finalists present live at the summit and receive expert feedback, mentorship, and global exposure.\n\nELIGIBILITY\n• Open to citizens of World Bank Group member countries\n• Aged 18–35 at the time of the event\n• Any academic or professional background welcome\n• No GPA requirement\n• Demonstrated interest in technology, development policy, entrepreneurship, or economic growth\n• Proficiency in English required\n\nAPPLICATION DEADLINE: 11 March 2026\n\nApply via the official Google Form. Select your track (Delegate or Pitch Competition) and submit all required materials before the deadline.`,
-    deadline: '2026-03-11',
-    location: 'Washington D.C., USA',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: [],
-      requirements: [
-        'Citizen of a World Bank Group member country',
-        'Aged 18–35 at the time of the event (June 2026)',
-        'Any academic or professional background accepted',
-        'Demonstrated interest in technology, development policy, entrepreneurship, or economic growth',
-        'Proficiency in English (all activities conducted in English)',
-        'Pitch Competition applicants must submit a project idea, pitch deck, and video pitch'
-      ]
-    },
-    benefits: [
-      'Round-trip airfare support for selected in-person participants',
-      'Accommodation in Washington D.C. during the summit',
-      'Stipend to cover living expenses',
-      'Access to keynote sessions and panel discussions with global experts and policymakers',
-      'Interactive workshops and hands-on learning sessions',
-      'Live Q&A with speakers and finalists',
-      'Networking with young leaders and global professionals',
-      'Membership in the Young Changemaker Network',
-      'Expert feedback and mentorship for Pitch Competition finalists'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLScPHBBaYX8plrcX3pjR-BiLdmJt8OO8U5x1VQj511Tqs9_Jxw/viewform',
-    fundingType: 'Fully Funded',
-    duration: '2 days (June 11–12, 2026)',
-    featured: true,
-    dateAdded: '2026-03-09',
-    logoUrl: '/images/opportunities/world_bank.png',
-    thematicAreas: [
-      {
-        heading: 'Education & Digital Skills',
-        topics: ['Reskilling for the digital economy', 'Access to quality education', 'Youth employability programmes']
-      },
-      {
-        heading: 'Entrepreneurship & Jobs',
-        topics: ['Youth-led job creation', 'Inclusive economic growth', 'Startup ecosystems in emerging markets']
-      },
-      {
-        heading: 'Agriculture & Food Systems',
-        topics: ['Agri-tech innovation', 'Climate-resilient farming', 'Food security and supply chains']
-      },
-      {
-        heading: 'Pitch Competition',
-        topics: ['Innovative solutions to global challenges', 'Live pitching to global experts', 'Mentorship and expert feedback']
       }
     ],
     views: 0,
@@ -929,9 +957,95 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
     applicationType: 'Platform Link',
     applicationLink: 'https://mide.htw-berlin.de/applying/#c17445',
     fundingType: 'Fully Funded',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-13',
     logoUrl: '/images/opportunities/german.jpg',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: 'kpa-internship-2026',
+    title: 'Kenya Ports Authority (KPA) Internship Program 2026',
+    provider: 'Kenya Ports Authority (KPA)',
+    category: 'Internship',
+    description: '194 paid internship and apprenticeship vacancies across various departments for a one-year program designed to provide young professionals with hands-on experience in a leading maritime organization.',
+    fullDescription: 'The Kenya Ports Authority (KPA) invites applications for 194 paid internship/apprenticeship roles for a one-year period starting April 2026. This program aims to provide young adults with hands-on experience and exposure to the real workplace environment within one of the region\'s leading maritime organizations, which is responsible for managing all scheduled seaports and inland waterways in Kenya.',
+    deadline: '2026-03-27',
+    location: 'Various locations including Mombasa, Lamu, Kisumu, Nairobi, and Naivasha',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Maritime Studies', 'Engineering (Electrical, Mechanical, Civil, Marine)', 'IT & Technology', 'Health & Safety', 'Supply Chain & Logistics', 'Human Resources', 'Finance & Risk Management', 'Communications & Marketing', 'Security', 'Legal', 'Administration'],
+      requirements: [
+        'Must be a Kenyan citizen, not more than 27 years old',
+        'Must have graduated with a Degree, Diploma, or Certificate between Jan 2023 and Dec 2025',
+        'Must not have undertaken a prior internship',
+        'Not a retiree or having exited formal employment'
+      ]
+    },
+    benefits: [
+      'Gain hands-on experience in a leading maritime organization',
+      'Exposure to the real workplace environment',
+      'Work across various departments including operations, engineering, ICT, and administration',
+      'Receive a monthly stipend (amount not specified)'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.kpa.co.ke/Vacancies/Details/13',
+    fundingType: 'Paid Internship',
+    compensationType: 'Stipend',
+    upfrontCost: 'No Upfront Cost',
+    duration: '12 months',
+    featured: true,
+    dateAdded: '2026-03-15',
+    logoUrl: '/images/opportunities/KPA.png',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: 'google-student-researcher-internship-2026',
+    title: 'Google Student Researcher Internship 2026',
+    provider: 'Google',
+    category: 'Internship',
+    description: 'Paid student researcher position for B.S. and M.S. students to work on research projects across Google Teams including DeepMind, Research, and Cloud.',
+    fullDescription: 'The Student Researcher Program fosters academic collaborations by hiring students onto research projects aligned to company priorities in scientific advancement. Researchers across Google are working to advance the state of the art in computing and build the next generation of intelligent systems for all Google products.\n\nCOMPENSATION:\nThe US base salary range for this full-time position is $98,000-$131,000. Within the range, individual pay is determined by role, level, and location.\n\nFLEXIBILITY:\nStudent Researcher opportunities are flexible in time commitment, length of opportunity, and onsite/remote nature, depending on the specific project and host needs.',
+    deadline: '2026-07-17',
+    location: 'Various Locations, USA',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Computer Science', 'Linguistics', 'Statistics', 'Biostatistics', 'Applied Math', 'Economics', 'Natural Sciences'],
+      requirements: [
+        'Currently enrolled in a Bachelor\'s or Master’s degree program',
+        'Experience in one area of computer science (AI, ML, HCI, etc.)',
+        'Returning to the program after completion of internship',
+        'English proficiency is a requirement',
+        'Must be located in the United States for the duration'
+      ]
+    },
+    benefits: [
+      'Base salary range $98,000-$131,000 equivalent',
+      'Potential housing stipend and relocation bonus',
+      'Work with Google DeepMind and Google Research scientists',
+      'Flexible onshore/remote options based on project'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.google.com/about/careers/applications/jobs/results/140245524367188678-student-researcher-bsms-wintersummer-2026?target_level=INTERN_AND_APPRENTICE',
+    fundingType: 'Paid Internship',
+    compensationType: 'Paid',
+    upfrontCost: 'Has Upfront Cost',
+    featured: true,
+    dateAdded: '2026-03-22',
+    logoUrl: '/images/opportunities/google.jpg',
+    thematicAreas: [
+      {
+        heading: 'AI & Research',
+        topics: ['Deep Learning', 'Natural Language Understanding', 'Quantum Information Science']
+      },
+      {
+        heading: 'Software Engineering',
+        topics: ['Algorithmic Foundations', 'Infrastructure Engineering', 'Performance Optimization']
+      }
+    ],
     views: 0,
     clicks: 0
   }
@@ -954,17 +1068,13 @@ async function seedDatabase() {
     console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
     console.log('\n📊 Database Summary:');
     console.log(`   - Total opportunities: ${result.insertedCount}`);
-    console.log(`   - Kenya-based: 18`);
-    console.log(`   - International: 15`);
-    console.log(`   - Categories: CallForPapers (5), Internship (12), Grant (5), Conference (4), Scholarship (6)`);
-    console.log(`   - Featured opportunities: 21`);
 
   } catch (error) {
     console.error('❌ Error seeding database:', error.message);
     process.exit(1);
   } finally {
     await client.close();
-    console.log('\n✅ Database seeding complete!');
+    console.log('\n🏁 Database seeding complete!');
     process.exit(0);
   }
 }
