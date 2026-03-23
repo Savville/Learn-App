@@ -131,8 +131,8 @@ export function Opportunities() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setSearchParams({ 
-      search: searchQuery, 
+    setSearchParams({
+      search: searchQuery,
       type: selectedType,
       level: selectedLevel,
       funding: selectedFunding
@@ -155,7 +155,7 @@ export function Opportunities() {
       <div className="bg-gradient-to-br from-blue-600 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-3xl font-bold text-white mb-6">All Opportunities</h1>
-          
+
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="mb-6">
             <div className="flex flex-col md:flex-row gap-4">
@@ -169,7 +169,7 @@ export function Opportunities() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              
+
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
@@ -196,10 +196,13 @@ export function Opportunities() {
                 <option value="Grant" className="text-gray-900 bg-white">Grants ({countFor('Grant')})</option>
                 <option value="Conference" className="text-gray-900 bg-white">Conferences ({countFor('Conference')})</option>
                 <option value="Scholarship" className="text-gray-900 bg-white">Scholarships ({countFor('Scholarship')})</option>
+                <option value="Fellowship" className="text-gray-900 bg-white">Fellowships ({countFor('Fellowship')})</option>
                 <option value="Hackathon" className="text-gray-900 bg-white">Hackathons ({countFor('Hackathon')})</option>
                 <option value="Challenge" className="text-gray-900 bg-white">Industry Challenges ({countFor('Challenge')})</option>
                 <option value="Event" className="text-gray-900 bg-white">Events ({countFor('Event')})</option>
+                <option value="Attachment" className="text-gray-900 bg-white">Attachments ({countFor('Attachment')})</option>
                 <option value="Volunteer" className="text-gray-900 bg-white">Volunteer Programmes ({countFor('Volunteer')})</option>
+                <option value="Project" className="text-gray-900 bg-white">Projects ({countFor('Project')})</option>
                 <option value="Other" className="text-gray-900 bg-white">Others ({countFor('Other')})</option>
               </select>
 

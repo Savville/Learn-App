@@ -221,7 +221,8 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
         heading: 'Wastewater Reuse',
         topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
       }
-    ]  },
+    ]
+  },
   {
     id: 'worldquant-brain-iqc-2026',
     title: 'WorldQuant BRAIN International Quant Championship (IQC) 2026',
@@ -1012,7 +1013,8 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
         heading: 'Pitch Competition',
         topics: ['Innovative solutions to global challenges', 'Live pitching to global experts', 'Mentorship and expert feedback']
       }
-    ]  },
+    ]
+  },
   {
     id: '40',
     title: 'DAAD MIDE Scholarship 2026 in Germany',
