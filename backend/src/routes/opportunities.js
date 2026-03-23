@@ -7,6 +7,23 @@ const router = express.Router();
 
 const CACHE_PREFIX = '/api/opportunities';
 
+// Helper to ensure logoUrl is an absolute URL
+const ensureAbsoluteLogoUrl = (opp, req) => {
+  if (!opp || !opp.logoUrl) return opp;
+  
+  // If already absolute, or not an internal path, skip
+  if (opp.logoUrl.startsWith('http')) return opp;
+  
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  const host = req.get('host');
+  
+  // Prepend the current request's origin
+  return {
+    ...opp,
+    logoUrl: `${protocol}://${host}${opp.logoUrl}`
+  };
+};
+
 // GET all opportunities with filters + pagination (cached 5 min)
 router.get('/', cacheMiddleware(300), async (req, res) => {
   try {
@@ -33,7 +50,10 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
       db.collection('opportunities').countDocuments(filter),
     ]);
 
-    res.json({ data, total, page, pages: Math.ceil(total / limit) });
+    // Transform relative logos to absolute ones
+    const transformedData = data.map(opp => ensureAbsoluteLogoUrl(opp, req));
+
+    res.json({ data: transformedData, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -66,7 +86,7 @@ router.get('/:id', async (req, res) => {
 
     cacheSet(cacheKey, opportunity, 600); // 10 minutes
     res.setHeader('X-Cache', 'MISS');
-    res.json(opportunity);
+    res.json(ensureAbsoluteLogoUrl(opportunity, req));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

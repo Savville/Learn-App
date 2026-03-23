@@ -68,7 +68,17 @@ export function Opportunities() {
 
   const mergeLogos = (opps: Opportunity[]) =>
     opps.map((opp: Opportunity) => {
+      // Find local by ID
       const local = localOpportunities.find(l => l.id === opp.id);
+      
+      // If we have a local logo that exists in the frontend code, try to use it.
+      // But if the backend provides an absolute URL (starts with http), prioritize it 
+      // as it's the definitive "live" asset from the server.
+      if (opp.logoUrl && opp.logoUrl.startsWith('http')) {
+        return opp;
+      }
+      
+      // FALLBACK: Use local data if available
       return local ? { ...opp, logoUrl: local.logoUrl } : opp;
     });
 
