@@ -66,21 +66,30 @@ export function Opportunities() {
     limit: 100,
   });
 
-  const mergeLogos = (opps: Opportunity[]) =>
-    opps.map((opp: Opportunity) => {
-      // Find local by ID
+  const mergeLogos = (opps: Opportunity[]) => {
+    // Determine backend origin from the API URL (standard: http://localhost:5000)
+    const apiBase = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+    const backendOrigin = apiBase.replace('/api', '');
+
+    const resolveUrl = (url: string) => {
+      if (!url) return '';
+      if (url.startsWith('http')) return url;
+      if (url.startsWith('/images')) return `${backendOrigin}${url}`;
+      return url;
+    };
+
+    return opps.map((opp: Opportunity) => {
       const local = localOpportunities.find(l => l.id === opp.id);
       
-      // If we have a local logo that exists in the frontend code, try to use it.
-      // But if the backend provides an absolute URL (starts with http), prioritize it 
-      // as it's the definitive "live" asset from the server.
-      if (opp.logoUrl && opp.logoUrl.startsWith('http')) {
-        return opp;
-      }
+      // Use the logo path from the backend but resolve it to the backend server
+      const logoUrl = resolveUrl(opp.logoUrl || (local ? local.logoUrl : ''));
       
-      // FALLBACK: Use local data if available
-      return local ? { ...opp, logoUrl: local.logoUrl } : opp;
+      return { 
+        ...opp, 
+        logoUrl 
+      };
     });
+  };
 
   // Fetch page 1 when filters change
   useEffect(() => {
