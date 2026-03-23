@@ -85,7 +85,7 @@ Registered projects will present at ACES meet-ups leading up to the CivExpo in S
     upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-23',
-    logoUrl: '/images/opportunities/aces_civexpo.jpeg',
+    logoUrl: 'https://images.unsplash.com/photo-1517089596392-fb9a9033e05b?auto=format&fit=crop&q=80&w=800',
     thematicAreas: [
       {
         heading: 'Industry Skills (Phase 1)',
