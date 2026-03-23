@@ -152,6 +152,77 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
       }
     ]  },
   {
+    id: 'worldquant-brain-iqc-2026',
+    title: 'WorldQuant BRAIN International Quant Championship (IQC) 2026',
+    provider: 'WorldQuant BRAIN',
+    category: 'Hackathon',
+    description: 'A three-stage, team-based global competition where participants develop and backtest Alphas — mathematical models that seek to predict future price movements of financial instruments — using WorldQuant’s proprietary BRAIN simulation platform. US$100,000 global prize pool.',
+    fullDescription: `The WorldQuant BRAIN International Quant Championship (IQC) 2026 is one of the premier global competitions for students and early-career professionals in quantitative finance, mathematics, and data science. It is a perfect opportunity for students with a strong interest in machine learning and coding to apply their skills to real-world financial modeling.
+
+THE COMPETITION
+The IQC is a team-based global competition where participants develop and backtest Alphas — mathematical models that seek to predict future price movements of financial instruments — using WorldQuant’s proprietary BRAIN simulation platform.
+
+COMPETITION TIMELINE
+• Qualifier Round (Stage 1): March 17 – May 18, 2026 (Virtual/University-based)
+• National/Regional Round (Stage 2): May 26 – Mid-July 2026 (Virtual & Final Presentation)
+• Global Finals (Stage 3): September 2026 (In-Person in Singapore)
+
+PRIZES & CAREER OPPORTUNITIES
+Beyond the prestige, the IQC offers significant rewards:
+• Cash Prizes: A total global prize pool of US$100,000.
+  - Global Finals: 1st Place (US$20,000), 2nd Place (US$12,000), 3rd Place (US$8,000)
+  - National Rounds: 1st Place (US$3,000), 2nd Place (US$2,000), 3rd Place (US$1,000)
+• Career Growth: Top performers are regularly considered for BRAIN Research Consultant positions, internships, and full-time quantitative researcher roles at WorldQuant.
+• Travel: Finalists are invited to an all-expenses-paid trip to Singapore for the Global Finals.
+
+HOW TO PARTICIPATE
+1. Sign Up: Create a free account on the WorldQuant BRAIN platform.
+2. Form a Team: Compete individually or in teams of up to 4 members (must be from the same university).
+3. Build Alphas: Use the BRAIN platform’s 125,000+ data fields and AI-powered analytics.
+4. Accumulate Points: Scores are based on both the quality (predictive power) and quantity of the Alphas you submit.`,
+    deadline: '2026-05-18',
+    location: 'Singapore (Global Finals) / Virtual (Qualifier)',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Mathematics', 'Quantitative Finance', 'Computer Science', 'Data Science', 'Engineering', 'Physics', 'Economics'],
+      requirements: [
+        'Open to students and early-career professionals worldwide',
+        'Teams of up to 4 members (must all be from the same university)',
+        'Sign up for a free account on the WorldQuant BRAIN platform',
+        'Must demonstrate ability to develop and backtest mathematical models (Alphas)'
+      ]
+    },
+    benefits: [
+      'US$100,000 total global prize pool',
+      'All-expenses-paid trip to Singapore for Global Finals',
+      'Direct pathway to Research Consultant, Intern, and Full-time roles',
+      'Access to 125,000+ data fields and AI-powered simulation tools',
+      'Participate in an elite global network of quants and researchers'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://worldquantbrain.com/iqc',
+    fundingType: 'Fully Funded',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    featured: true,
+    dateAdded: '2026-03-23',
+    logoUrl: '/images/opportunities/world_brain.png',
+    thematicAreas: [
+      {
+        heading: 'Alpha Development',
+        topics: ['Mathematical modelling of financial signals', 'Predictive factor generation', 'Algorithmic strategy design']
+      },
+      {
+        heading: 'Simulation & Backtesting',
+        topics: ['WorldQuant BRAIN platform navigation', 'Performance metric analysis (Sharpe Ratio, Returns)', 'Risk management integration']
+      },
+      {
+        heading: 'Quant Finance Career',
+        topics: ['BRAIN Research Consultant positions', 'Quantitative Researcher networking', 'Global finals in Singapore']
+      }
+    ]
+  },
+  {
     id: '29',
     title: 'ESO Science Communication Internship 2026',
     provider: 'European Southern Observatory',
