@@ -31,6 +31,77 @@ export interface Opportunity {
 
 export const opportunities: Opportunity[] = [
   {
+    id: 'aces-civexpo-2026-incubation',
+    title: 'ACES CivExpo 2026: Project Participation & Incubation',
+    provider: 'Association of Civil Engineering Students (ACES - KU)',
+    category: 'Project',
+    description: 'Official 6-month project incubation program for Civil Engineering students to bridge the gap between academia and industry. Includes Industry Skills, Tech & Automation, and Venture Studio tracks with direct paths to industry attachments.',
+    fullDescription: `ACES is here to bridge the gap between Industry and Academia. We are officially starting a 6-month project programme for the ACES CivExpo 2026 — focusing on student-led action rather than just hosting events.
+
+THE INCUBATION PROGRAMME
+Are you working on a project that can transform Kenya's infrastructure? Join one of our three dedicated tracks to build, optimize, and pitch your engineering ideas to industry giants.
+
+TRACK 1: INDUSTRY SKILLS & WORKFLOW (THE BIG THREE)
+Tackle the official CivExpo challenges: The Hillside Hostel, The Zero-Day Campus, or The Last Mile Mobility corridor. Focus on mastering industry-standard tools like Revit, Civil 3D, and EPANET.
+🎯 Reward: Direct paths to attachments and internships through ACES industry networks (Sika, KeNHA, Bamburi, etc.)
+
+TRACK 2: TECH & AUTOMATION (THE FUTURE-PROOF ENGINEER)
+For students using AI, Machine Learning, Rhino, Grasshopper, or Python scripts to automate and optimize engineering workflows. Show the industry how you are ahead of the curve.
+🎯 Reward: Get noticed by tech-driven engineering startups and consulting firms.
+
+TRACK 3: PROBLEM SOLVING, INNOVATION & BUSINESS (THE VENTURE STUDIO)
+Turn your research into a viable business or a funded pilot. Focus on sustainable materials (recycled plastics, natural binders) or solving community challenges like Nairobi Water network leakages.
+🎯 Reward: Access to project funding, professional mentorship, and the chance to pitch to VCs and Industry Giants like Sika and KeNHA.
+
+WHY PARTICIPATE?
+• ACES Advocacy: We pitch you directly to companies for personal career opportunities based on masterclass work.
+• Traction: Forums and feedback sessions to keep your project moving toward the September Expo.
+• Networking: High-level access to the IEK, NCA, and private sector leaders.
+
+Registered projects will present at ACES meet-ups leading up to the CivExpo in September 2026, where a big stage will be provided for presentations to partners and interested firms.`,
+    deadline: '2026-04-20',
+    location: 'Kenyatta University / Nairobi, Kenya',
+    eligibility: {
+      educationLevel: 'UnderGrad',
+      fieldOfStudy: ['Civil Engineering'],
+      requirements: [
+        'Kenyatta University Civil Engineering student (all years including 5th years)',
+        'Sign up individually or in teams (up to 4 members)',
+        'Select one of the three dedicated tracks: Industry, Tech, or Business',
+        'Commit to regular presentations and project milestones leading to the September Expo'
+      ]
+    },
+    benefits: [
+      'Direct paths to attachments and internships with ACES industry partners (Sika, KeNHA, Bamburi)',
+      'Access to project funding and professional mentorship from industry experts',
+      'Opportunity to pitch to Venture Capitalists and Industry Giants at CivExpo 2026',
+      'Networking with IEK (Institution of Engineers of Kenya) and NCA leaders',
+      'Portfolio-worthy project development with mastery of Revit, Civil 3D, and AI tools'
+    ],
+    applicationType: 'Online Form',
+    applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLSdg83mA2Sw9gtzUYZxiEkf-N3tg9TpLzVQZsgOqHR3UBkK4aQ/viewform?usp=dialog',
+    fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
+    featured: true,
+    dateAdded: '2026-03-23',
+    logoUrl: '/images/opportunities/aces_civexpo.jpeg',
+    thematicAreas: [
+      {
+        heading: 'Industry Skills (Phase 1)',
+        topics: ['Hillside Hostel Challenge', 'Zero-Day Campus Water Systems', 'Last Mile Mobility corridors', 'Mastery of Revit, Civil 3D & EPANET']
+      },
+      {
+        heading: 'Tech & Automation (Phase 2)',
+        topics: ['Python & Dynamo script automation', 'Parametric design (Rhino/Grasshopper)', 'BIM plugin development', 'AI-driven structural optimization']
+      },
+      {
+        heading: 'Innovation & Business (Phase 3)',
+        topics: ['Sustainable construction materials', 'Network leakage solutions (Nairobi Water)', 'Decentralized rainwater purification', 'Structural biofuel briquettes & business models']
+      }
+    ]
+  },
+  {
     id: '37',
     title: 'Non-Revenue Water Crisis — Can You Help Nairobi Fix It?',
     provider: 'Opportunities Kenya',
