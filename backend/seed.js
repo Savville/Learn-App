@@ -4,6 +4,55 @@ dotenv.config();
 
 const opportunities = [
   {
+    id: 'science-scilifelab-prize-for-young-scientists-2026',
+    title: 'Science & SciLifeLab Prize for Young Scientists 2026',
+
+    provider: 'Science, SciLifeLab, and AAAS',
+    category: 'Grant',
+    description: 'An international award recognizing excellence amongst young researchers worldwide. Win up to $30,000 and get your thesis essay published in Science.',
+    fullDescription: `The SciLifeLab Prize for Young Scientists was established in 2013 and is a global prize aimed to reward scientists at an early stage of their career. Science, SciLifeLab, and the American Association for the Advancement of Science (AAAS) have collaborated to create this international award.
+
+The prize provides a strong platform for young scientists to showcase their research on a global level and gain recognition from leading scientific organizations. The award will be provided to outstanding life science researchers based on their doctoral degree earned in the previous two years.
+
+CATEGORIES:
+1. Cell and Molecular Biology
+2. Genomics, Proteomics, and Systems Biology Approaches
+3. Ecology & Environment
+4. Molecular Medicine
+
+PRIZES:
+The grand winner will get a prize money of $30,000 USD, and the other three category winners will get $10,000 USD each. The grand prize-winning essay will be published in Science, while category winners will be published online. The award ceremony will take place in Stockholm in December.`,
+    deadline: '2026-07-15',
+    location: 'Stockholm, Sweden / Online',
+    eligibility: {
+      educationLevel: 'PostGrad',
+      fieldOfStudy: ['Cell and Molecular Biology', 'Genomics', 'Proteomics', 'Systems Biology', 'Ecology', 'Environment', 'Molecular Medicine'],
+      requirements: [
+        'Must have received a Ph.D. between January 1, 2024, and December 31, 2025.',
+        'Submit a 1,000-word essay describing your thesis work.',
+        'Submit a one-page reference letter from an advisor or thesis committee member.',
+        'Provide a thesis abstract (max four pages) and a list of citations and awards.',
+        'No AI allowed for essay generation (minor editing tools like Grammarly require declaration).'
+      ]
+    },
+    benefits: [
+      '$30,000 USD for the Grand Winner',
+      '$10,000 USD for three Category Winners',
+      'Publication in Science magazine (Grand Winner)',
+      'Trip to Stockholm for the award ceremony in December',
+      'Global recognition and visibility in the scientific community'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.science.org/content/page/how-enter-science-scilifelab-prize-young-scientists',
+    contactEmail: 'SciLifeLabPrize@aaas.org',
+    fundingType: 'Fully Funded',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    featured: true,
+    dateAdded: '2026-03-29',
+    logoUrl: '/images/opportunities/Scilifelab.png',
+  },
+  {
     id: 'aces-civexpo-2026-incubation',
     title: 'ACES CivExpo 2026: Project Participation & Incubation',
     provider: 'Association of Civil Engineering Students (ACES - KU)',

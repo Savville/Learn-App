@@ -59,6 +59,57 @@ function renderDescription(text: string): JSX.Element {
 }
 
 export function OpportunityDetails() {
+  const generateSchema = (opp: Opportunity) => {
+    const baseSchema: any = {
+      "@context": "https://schema.org",
+      "name": opp.title,
+      "description": opp.description,
+      "url": `https://opportunitieskenya.live/opportunity/${toSlug(opp.title)}`,
+      "image": opp.logoUrl?.startsWith('/') ? `https://opportunitieskenya.live${opp.logoUrl}` : opp.logoUrl,
+      "provider": {
+        "@type": "Organization",
+        "name": opp.provider,
+        "logo": opp.logoUrl?.startsWith('/') ? `https://opportunitieskenya.live${opp.logoUrl}` : opp.logoUrl
+      }
+    };
+
+    if (['Internship', 'Attachment'].includes(opp.category)) {
+      baseSchema["@type"] = "JobPosting";
+      baseSchema.datePosted = opp.dateAdded || new Date().toISOString();
+      baseSchema.validThrough = opp.deadline;
+      baseSchema.employmentType = "INTERN";
+      baseSchema.hiringOrganization = baseSchema.provider;
+      baseSchema.jobLocation = {
+        "@type": "Place",
+        "address": opp.location || "Remote"
+      };
+    } else if (['Conference', 'Hackathon', 'Event', 'CallForPapers'].includes(opp.category)) {
+      baseSchema["@type"] = "Event";
+      baseSchema.startDate = opp.deadline;
+      baseSchema.endDate = opp.deadline;
+      baseSchema.eventAttendanceMode = opp.location?.toLowerCase().includes('online') 
+        ? "https://schema.org/OnlineEventAttendanceMode" 
+        : "https://schema.org/OfflineEventAttendanceMode";
+      baseSchema.location = {
+        "@type": "VirtualLocation",
+        "url": baseSchema.url
+      };
+      if (!opp.location?.toLowerCase().includes('online')) {
+        baseSchema.location = {
+          "@type": "Place",
+          "name": opp.location || "TBA",
+          "address": opp.location
+        };
+      }
+    } else {
+      baseSchema["@type"] = "EducationalOccupationalProgram";
+      baseSchema.applicationDeadline = opp.deadline;
+      baseSchema.educationalCredentialAwarded = opp.category;
+    }
+
+    return JSON.stringify(baseSchema);
+  };
+
   const { slug } = useParams();
   const localMatch = localOpportunities.find(l => toSlug(l.title) === slug);
   const id = localMatch?.id;
@@ -182,6 +233,12 @@ export function OpportunityDetails() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* JSON-LD Schema for Google Rich Snippets */}
+      <script 
+        type="application/ld+json" 
+        dangerouslySetInnerHTML={{ __html: generateSchema(opportunity) }} 
+      />
+
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

@@ -744,4 +744,215 @@ export async function sendOrganizationApprovalEmail(request) {
   }
 }
 
-export { seangapoTemplate, yesistTemplate, eepTemplate };
+// ── ACES Broadcast ────────────────────────────────────────────────────────────
+
+const acesTemplate = (name = 'Engineer') => wrapEmail(`
+  <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+    
+    <div style="background:#e0f2fe;border-left:4px solid #0284c7;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
+      <p style="color:#0369a1;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">🏗️ Calling all ACES Members!</p>
+      <p style="color:#075985;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
+        Hello ${name}, as a member of the <strong>Association of Civil Engineering Students (ACES)</strong>, 
+        we are calling on you to participate in the project programme for the upcoming <strong>CivExpo 2026</strong>.
+      </p>
+    </div>
+
+    <p style="color:#1e293b;font-size:15px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+      This is a unique opportunity for students from the <strong>Class of 2021 and above</strong> 
+      (including those currently working on their 5th-year projects) to bridge the gap between 
+      academic theory and professional industry practice.
+    </p>
+
+    <div style="margin-bottom:28px;text-align:center;">
+        <img src="${FRONTEND_URL}/images/opportunities/aces_civexpo.jpeg" alt="ACES CivExpo" style="max-width:100%;height:auto;border-radius:12px;" />
+    </div>
+
+    <h3 style="color:#0f2744;font-size:17px;margin:0 0 12px;font-family:Arial,sans-serif;">The Three Participation Tracks</h3>
+    <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
+      <tr>
+        <td style="padding:8px 0; border-bottom:1px solid #f1f5f9;">
+          <strong style="color:#0f2744;display:block;">🏗️ Industry Skills & Workflow</strong>
+          <span style="color:#64748b;font-size:13px;">Master Revit, Civil 3D, and EPANET on real projects.</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0; border-bottom:1px solid #f1f5f9;">
+          <strong style="color:#0f2744;display:block;">💻 Tech & Automation</strong>
+          <span style="color:#64748b;font-size:13px;">Explore AI, Machine Learning, and Python in Civil Engineering.</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;">
+          <strong style="color:#0f2744;display:block;">🚀 Innovation & Business</strong>
+          <span style="color:#64748b;font-size:13px;">Solve community crises and pitch your projects to VCs.</span>
+        </td>
+      </tr>
+    </table>
+
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
+      We have partnered with <strong>Opportunities Kenya</strong> to ensure your projects get the 
+      traction and industry visibility they deserve. Don't let your research gather dust—make it count.
+    </p>
+
+    <div style="text-align:center;margin-bottom:32px;">
+      ${ctaButton('Sign Up for Participation', 'https://docs.google.com/forms/d/e/1FAIpQLSdg83mA2Sw9gtzUYZxiEkf-N3tg9TpLzVQZsgOqHR3UBkK4aQ/viewform?usp=dialog')}
+    </div>
+
+    <p style="color:#64748b;font-size:12px;text-align:center;">
+      Association of Civil Engineering Students (ACES - KU)<br/>
+      In partnership with Opportunities Kenya
+    </p>
+
+  </div>`);
+
+export async function sendAcesEmail(email, name, cc = []) {
+  try {
+    const subject = '🏗️ ACES: Call for Project Participation – CivExpo 2026';
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      cc: cc,
+      reply_to: 'lead@opportunitieskenya.live',
+      subject,
+      html: acesTemplate(name),
+    });
+    console.log(`ACES Project email sent to ${email}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`ACES Project email failed for ${email}:`, error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// ── WorldQuant BRAIN Broadcast ───────────────────────────────────────────────
+
+const worldQuantTemplate = (name = 'Member') => wrapEmail(`
+  <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+    
+    <div style="background:#f8fafc;border-left:4px solid #1e293b;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
+      <p style="color:#0f172a;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">🧠 Can you build the best Alpha?</p>
+      <p style="color:#334155;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
+        Hello ${name}, as an <strong>IEEE Member</strong>, you are already part of the technical elite. 
+        We are bringing the <strong>WorldQuant BRAIN IQC 2026</strong> directly to your radar because it 
+        demands the exact mathematical and algorithmic rigor you possess.
+      </p>
+    </div>
+
+    <p style="color:#1e293b;font-size:15px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+      WorldQuant has launched the <strong>International Quant Championship (IQC) 2026</strong>. 
+      This is a three-stage, global competition where you translate your predictive models into 
+      financial signals (Alphas) using their proprietary simulation platform.
+    </p>
+
+    <div style="margin-bottom:28px;text-align:center;">
+        <img src="https://images.unsplash.com/photo-1611974714014-48f706d32aa6?auto=format&fit=crop&q=80&w=800" alt="WorldQuant BRAIN" style="max-width:100%;height:auto;border-radius:12px;" />
+    </div>
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;background:#f1f5f9;border-radius:10px;padding:20px;">
+      <tr>
+        <td style="padding-bottom:12px;font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">🏆 <strong>$100,000</strong> Global Prize Pool</td>
+      </tr>
+      <tr>
+        <td style="padding-bottom:12px;font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">📈 <strong>Quant Fast-Track:</strong> Top performers considered for researcher roles</td>
+      </tr>
+      <tr>
+        <td style="font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">🌍 <strong>Global Stage:</strong> Compete with 100+ countries</td>
+      </tr>
+    </table>
+
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
+      This isn't just finance; it's high-level <strong>Data Science</strong> and <strong>Algorithmic Strategy</strong>. 
+      We've curated all the competition details, tracks, and requirements on our platform to help you get started.
+    </p>
+
+    <div style="text-align:center;margin-bottom:32px;">
+      ${ctaButton('View IQC 2026 Details & Apply', 'https://opportunitieskenya.live/opportunity/worldquant-brain-international-quant-championship-iqc-2026')}
+    </div>
+
+    <p style="color:#64748b;font-size:13px;text-align:center;">
+      Brought to you by <strong>Opportunities Kenya</strong><br/>
+      Empowering the next generation of Quants.
+    </p>
+
+  </div>`);
+
+export async function sendWorldQuantEmail(email, name, cc = []) {
+  try {
+    const subject = '🧠 Can you build the best Alpha? WorldQuant BRAIN IQC 2026';
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      cc: cc,
+      reply_to: 'lead@opportunitieskenya.live',
+      subject,
+      html: worldQuantTemplate(name),
+    });
+    console.log(`WorldQuant email sent to ${email}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`WorldQuant email failed for ${email}:`, error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// ── PowerAfrica Broadcast ───────────────────────────────────────────────
+
+const powerAfricaTemplate = (name = 'Member') => wrapEmail(`
+  <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+    
+    <div style="background:#fefce8;border-left:4px solid #eab308;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
+      <p style="color:#854d0e;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">⚡ Deadline Approaching: 2026 IEEE PowerAfrica Call for Papers</p>
+      <p style="color:#713f12;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
+        Hello ${name}, the deadline for paper submissions to the <strong>2026 IEEE PES/IAS PowerAfrica Conference</strong> is fast approaching on <strong>April 5, 2026</strong>.
+      </p>
+    </div>
+
+    <p style="color:#1e293b;font-size:15px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
+      As an IEEE Member, this is a prime opportunity to showcase your research, highlight your capstone projects, and connect with professionals working on solving the energy and power systems challenges across the continent. 
+    </p>
+
+    <div style="text-align:center;margin-bottom:32px;margin-top:20px;">
+      ${ctaButton('Read Guidelines & Submit Paper', 'https://opportunitieskenya.live/opportunity/2026-ieee-pesias-powerafrica-conference-call-for-papers')}
+    </div>
+
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;"/>
+
+    <h2 style="color:#0f2744;font-size:18px;margin:0 0 8px;font-family:Arial,sans-serif;">📣 Have Something to Share? Post With Us!</h2>
+    <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 16px;font-family:Arial,sans-serif;">
+      Did you know you can now directly share your own opportunities with our growing community of thousands of students and change-makers across Kenya?
+    </p>
+
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:24px;">
+      <p style="color:#475569;font-size:14px;margin:0 0 8px;">✅ <strong>Project Collaborations:</strong> Looking for a team for your hackathon or research?</p>
+      <p style="color:#475569;font-size:14px;margin:0 0 8px;">✅ <strong>Webinars & Workshops:</strong> Hosting an online training session?</p>
+      <p style="color:#475569;font-size:14px;margin:0 0 12px;">✅ <strong>Conferences & Events:</strong> Organizing a tech meetup on campus?</p>
+      <a href="https://opportunitieskenya.live/post-with-us" style="color:#1a4a7a;font-weight:700;text-decoration:none;">👉 Click here to Post With Us</a>
+    </div>
+
+    <p style="color:#64748b;font-size:13px;text-align:center;">
+      <strong>Opportunities Kenya</strong><br/>
+      Empowering the next generation.
+    </p>
+
+  </div>`);
+
+export async function sendPowerAfricaEmail(email, name, cc = []) {
+  try {
+    const subject = '⚡ Approaching Deadline: IEEE PowerAfrica Call for Papers & Share Your Projects!';
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      cc: cc,
+      reply_to: 'lead@opportunitieskenya.live',
+      subject,
+      html: powerAfricaTemplate(name),
+    });
+    console.log(`PowerAfrica email sent to ${email}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`PowerAfrica email failed for ${email}:`, error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+export { seangapoTemplate, yesistTemplate, eepTemplate, acesTemplate, worldQuantTemplate, powerAfricaTemplate };

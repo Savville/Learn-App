@@ -1,14 +1,4 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
 Sitemap: https://opportunitieskenya.live/sitemap.xml
-
-# Crawl important pages
-Allow: /opportunities
-Allow: /opportunity/
-Allow: /about
-Allow: /contact
-
-# Block non-content paths
-Disallow: /api/
