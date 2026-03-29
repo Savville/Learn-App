@@ -53,11 +53,20 @@
             "@types/react": "^19.2.7",
             "@types/react-dom": "^19.2.3",
             "@vitejs/plugin-react-swc": "^3.10.2",
+            "react-snap": "^1.23.0",
             "vite": "6.3.5"
       },
       "scripts": {
             "dev": "vite",
-            "build": "node scripts/generate-sitemap.mjs && vite build",
-            "generate-sitemap": "node scripts/generate-sitemap.mjs"
+            "build": "node scripts/generate-sitemap.js && vite build",
+            "postbuild": "react-snap",
+            "generate-sitemap": "node scripts/generate-sitemap.js"
+      },
+      "reactSnap": {
+            "source": "dist",
+            "puppeteerArgs": [
+                  "--no-sandbox",
+                  "--disable-setuid-sandbox"
+            ]
       }
 }
