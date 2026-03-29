@@ -59,13 +59,6 @@
       "scripts": {
             "dev": "vite",
             "build": "node scripts/generate-sitemap.js && vite build",
-            "postbuild": "react-snap",
             "generate-sitemap": "node scripts/generate-sitemap.js"
-      },
-      "reactSnap": {
-            "puppeteerArgs": [
-                  "--no-sandbox",
-                  "--disable-setuid-sandbox"
-            ]
       }
 }

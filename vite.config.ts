@@ -50,7 +50,7 @@
       },
     },
     build: {
-      target: 'es2015',
+      target: 'esnext',
       outDir: 'build',
     },
     server: {
