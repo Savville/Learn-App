@@ -63,7 +63,6 @@
             "generate-sitemap": "node scripts/generate-sitemap.js"
       },
       "reactSnap": {
-            "source": "dist",
             "puppeteerArgs": [
                   "--no-sandbox",
                   "--disable-setuid-sandbox"
