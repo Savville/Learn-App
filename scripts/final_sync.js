@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
-const tsPath = 'c:/Users/User/Downloads/PortableGit/Learn Opportunities/src/data/opportunities.ts';
-const seedPath = 'c:/Users/User/Downloads/PortableGit/Learn Opportunities/backend/seed.js';
+const tsPath = path.join(process.cwd(), 'src', 'data', 'opportunities.ts');
+const seedPath = path.join(process.cwd(), 'backend', 'seed.js');
 
 const tsContent = fs.readFileSync(tsPath, 'utf8');
 

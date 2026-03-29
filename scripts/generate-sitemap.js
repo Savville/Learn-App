@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
-// Load directly from the TS file to ensure all opportunities are mapped
-const tsPath = 'c:/Users/User/Downloads/PortableGit/Learn Opportunities/src/data/opportunities.ts';
-const sitemapPath = 'c:/Users/User/Downloads/PortableGit/Learn Opportunities/public/sitemap.xml';
-const robotsPath = 'c:/Users/User/Downloads/PortableGit/Learn Opportunities/public/robots.txt';
+// Use process.cwd() to construct absolute paths dynamically on both Windows and Vercel
+const tsPath = path.join(process.cwd(), 'src', 'data', 'opportunities.ts');
+const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+const robotsPath = path.join(process.cwd(), 'public', 'robots.txt');
 
 const baseUrl = 'https://opportunitieskenya.live';
 
