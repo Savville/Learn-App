@@ -48,20 +48,23 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
       onClick={handleCardClick}
       className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
     >
-      {/* Header Image */}
-      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-        <img
-          src={opportunity.logoUrl}
-          alt={opportunity.provider}
-          onError={handleImageError}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        <div className="absolute top-4 right-4">
-          <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-gray-700 text-sm font-medium">
-            {opportunity.category}
-          </span>
+      <article className="h-full flex flex-col pt-0">
+        {/* Header Image */}
+        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+          <img
+            src={opportunity.logoUrl}
+            alt={`${opportunity.category} opportunity from ${opportunity.provider}`}
+            loading="lazy"
+            decoding="async"
+            onError={handleImageError}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute top-4 right-4">
+            <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-gray-700 text-sm font-medium">
+              {opportunity.category}
+            </span>
+          </div>
         </div>
-      </div>
 
       {/* Content */}
       <div className="p-6">
@@ -92,11 +95,12 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
         </div>
 
         {/* View Button */}
-        <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm group-hover:gap-3 transition-all">
+        <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm group-hover:gap-3 transition-all mt-auto">
           <span>View More</span>
           <ArrowRight className="w-4 h-4" />
         </div>
       </div>
+      </article>
     </Link>
   );
 }

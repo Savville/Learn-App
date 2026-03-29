@@ -253,13 +253,14 @@ export function OpportunityDetails() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <article className="bg-white rounded-2xl shadow-sm overflow-hidden">
           {/* Header Image */}
           <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
             <img
               src={opportunity.logoUrl}
-              alt={opportunity.provider}
+              alt={`${opportunity.category}: ${opportunity.title} by ${opportunity.provider}`}
+              decoding="async"
               className="w-full h-full object-cover"
             />
           </div>
@@ -496,11 +497,11 @@ export function OpportunityDetails() {
               </Link>
             </div>
           </div>
-        </div>
+        </article>
 
         {/* Related Opportunities */}
         {relatedOpportunities.length > 0 && (
-          <div className="mt-12">
+          <section className="mt-12">
             <h2 className="text-gray-900 mb-6 text-2xl font-bold">Similar Opportunities</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedOpportunities.map(opp => {
@@ -518,9 +519,9 @@ export function OpportunityDetails() {
                 );
               })}
             </div>
-          </div>
+          </section>
         )}
-      </div>
+      </main>
     </div>
   );
 }
