@@ -31,6 +31,71 @@ export interface Opportunity {
 
 export const opportunities: Opportunity[] = [
   {
+    id: 'bishops-university-admissions-2026-2027',
+    title: "Bishop's University Undergraduate & Graduate Admissions 2026-2027",
+    provider: "Bishop's University",
+    category: 'Scholarship',
+    description: "Applications are open for Fall 2026 and Winter 2027 at Bishop's University, Canada. Includes opportunities for B.A., B.Sc., B.B.A., B.Ed., M.A., M.Sc., and M.Ed. programs.",
+    fullDescription: `Bishop's University welcomes applications for the 2026-2027 academic year. For anyone looking to apply to a Bachelor of Arts (B.A.), Bachelor of Science (B.Sc.), Bachelor of Business Administration (B.B.A.), Bachelor of Education (B.Ed.), Master of Arts (M.A.), Master of Science (M.Sc.), or Master of Education (M.Ed.) degree.
+
+────────────────────────────────────
+ FALL 2026 SEMESTER DEADLINES
+────────────────────────────────────
+
+• August 4, 2025: Application opens
+• March 31, 2026:
+  - Deadline for international students (except USA) to submit an application.
+  - Deadline for all applicants to apply for Competitive Entrance Scholarships.
+  - Deadline for all applicants to submit Entrance Awards and Bursaries application.
+• April 15, 2026: Deadline for international students (except USA) to submit supporting documentation.
+• May 1, 2026: Deadline for Canadian and USA Citizens to submit an application.
+• May 15, 2026: Deadline for Canadian and USA Citizens to submit supporting documentation.
+
+────────────────────────────────────
+ WINTER 2027 SEMESTER DEADLINES
+────────────────────────────────────
+
+• Spring 2026: Admissions evaluation begins.
+• September 1, 2026: Deadline for international students to submit an application.
+• September 15, 2026: Deadline for international students to submit supporting documentation.
+• November 1, 2026: Deadline for Canadian students to submit an application.
+• November 15, 2026: Deadline for Canadian students to submit supporting documentation.
+
+* Canadian and USA Citizens: Please check the programs dropdown list on the corresponding form to see what programs remain open for admission consideration after May 1.
+
+** Applications to the School of Education’s Bachelor of Education programs are subject to different timelines and deadlines.
+
+Incoming International Exchange students (one or two semesters) have separate forms for Fall 2026 and Winter 2027. Contact exchange@ubishops.ca for any questions.`,
+    deadline: '2026-03-31',
+    location: 'Sherbrooke, Quebec, Canada',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Arts', 'Science', 'Business Administration', 'Education'],
+      requirements: [
+        'Open to Undergraduate (B.A., B.Sc., B.B.A., B.Ed.) and Graduate (M.A., M.Sc., M.Ed.) applicants',
+        'International students must apply by March 31 for Fall entry to be considered for scholarships',
+        'Canadian and USA citizens must apply by May 1 for Fall entry',
+        'International students must apply by September 1 for Winter entry',
+        'Canadian students must apply by November 1 for Winter entry'
+      ]
+    },
+    benefits: [
+      'Competitive Entrance Scholarships (Apply by March 31)',
+      'Entrance Awards and Bursaries (Apply by March 31)',
+      'Access to a wide range of undergraduate and graduate programs',
+      'International exchange opportunities',
+      'Vibrant campus life in Sherbrooke, Quebec'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.ubishops.ca/future-students/bishops-university-online-application/',
+    fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'Has Upfront Cost',
+    featured: true,
+    dateAdded: '2026-04-07',
+    logoUrl: '/images/opportunities/ubishops_canada.jpeg',
+  },
+  {
     id: 'science-scilifelab-prize-for-young-scientists-2026',
     title: 'Science & SciLifeLab Prize for Young Scientists 2026',
 
