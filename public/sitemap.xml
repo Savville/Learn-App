@@ -21,6 +21,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://opportunitieskenya.live/opportunity/bishop</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://opportunitieskenya.live/opportunity/science-scilifelab-prize-for-young-scientists-2026</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -76,17 +81,7 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://opportunitieskenya.live/opportunity/world-bank-group-youth-summit-2026</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://opportunitieskenya.live/opportunity/daad-mide-scholarship-2026-in-germany</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://opportunitieskenya.live/opportunity/eep-africa-call-for-proposals-2026</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
