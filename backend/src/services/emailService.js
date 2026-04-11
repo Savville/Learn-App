@@ -148,6 +148,10 @@ export async function sendAdminSubmissionNotification(reporter, opportunity) {
         </p>
         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;">
           <p style="margin:0 0 8px; font-size:14px;"><strong>Submitted By:</strong> ${reporter.name} (${reporter.email})</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Organization:</strong> ${reporter.organization || 'Not provided'}</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Role:</strong> ${reporter.role || 'Not provided'}</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Phone:</strong> ${reporter.telephone || 'Not provided'}</p>
+          <p style="margin:0 0 8px; font-size:14px;"><strong>Website / Social:</strong> ${reporter.websiteOrSocial || 'Not provided'}</p>
           <p style="margin:0 0 8px; font-size:14px;"><strong>Title:</strong> ${opportunity.title}</p>
           <p style="margin:0 0 8px; font-size:14px;"><strong>Provider:</strong> ${opportunity.provider}</p>
           <p style="margin:0; font-size:14px;"><strong>Category:</strong> ${opportunity.category}</p>

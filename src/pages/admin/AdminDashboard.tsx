@@ -260,7 +260,11 @@ export default function AdminDashboard() {
                        <div>
                           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Submitted By</p>
                           <p className="font-medium text-slate-900 line-clamp-1">{item.reporter?.name}</p>
+                          <p className="text-sm text-slate-600 line-clamp-1">{item.reporter?.organization}</p>
+                          <p className="text-sm text-slate-600 line-clamp-1">{item.reporter?.role}</p>
                           <p className="text-sm text-slate-600 line-clamp-1 italic">{item.reporter?.email}</p>
+                          <p className="text-sm text-slate-600 line-clamp-1">{item.reporter?.telephone}</p>
+                          <p className="text-xs text-slate-500 break-all">{item.reporter?.websiteOrSocial}</p>
                           {item.isOrganizationPost && (
                             <Badge className="mt-2 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">
                               Verified Org Post

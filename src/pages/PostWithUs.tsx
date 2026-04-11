@@ -35,7 +35,14 @@ const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000
 
 export function PostWithUs() {
   const [rawText, setRawText] = useState('');
-  const [reporter, setReporter] = useState({ name: '', email: '' });
+  const [reporter, setReporter] = useState({
+    name: '',
+    organization: '',
+    role: '',
+    telephone: '',
+    email: '',
+    websiteOrSocial: '',
+  });
   const [isParsing, setIsParsing] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [parsedData, setParsedData] = useState<ParsedOpportunityData | null>(null);
@@ -47,8 +54,8 @@ export function PostWithUs() {
   const [requestStatus, setRequestStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
   const handleParse = async () => {
-    if (!reporter.name || !reporter.email) {
-      setError('Please provide your name and email first.');
+    if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email || !reporter.websiteOrSocial) {
+      setError('Please provide your full identity details first.');
       return;
     }
     setIsParsing(true);
@@ -128,8 +135,8 @@ export function PostWithUs() {
     setError(null);
 
     try {
-        if (!reporter.name || !reporter.email) {
-            throw new Error('Name and email are required to submit.');
+      if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email || !reporter.websiteOrSocial) {
+        throw new Error('Identity details are required to submit.');
         }
 
         // Step 1: Upload the image (optional — skip if no image selected)
@@ -245,26 +252,64 @@ export function PostWithUs() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Your Name</label>
-                  <Input 
-                    placeholder="e.g. John Doe" 
+                  <label className="text-sm font-medium">Full Name</label>
+                  <Input
+                    required
+                    placeholder="e.g. John Doe"
                     value={reporter.name}
-                    onChange={(e) => setReporter({...reporter, name: e.target.value})}
+                    onChange={(e) => setReporter({ ...reporter, name: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Your Email</label>
-                  <Input 
-                    type="email" 
-                    placeholder="e.g. john@example.com" 
+                  <label className="text-sm font-medium">Organization</label>
+                  <Input
+                    required
+                    placeholder="e.g. IEEE Kenya"
+                    value={reporter.organization}
+                    onChange={(e) => setReporter({ ...reporter, organization: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Role / Position</label>
+                  <Input
+                    required
+                    placeholder="e.g. Communications Lead"
+                    value={reporter.role}
+                    onChange={(e) => setReporter({ ...reporter, role: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Phone Number</label>
+                  <Input
+                    required
+                    placeholder="e.g. +254 700 000 000"
+                    value={reporter.telephone}
+                    onChange={(e) => setReporter({ ...reporter, telephone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Organization Email</label>
+                  <Input
+                    required
+                    type="email"
+                    placeholder="e.g. name@organization.org"
                     value={reporter.email}
-                    onChange={(e) => setReporter({...reporter, email: e.target.value})}
+                    onChange={(e) => setReporter({ ...reporter, email: e.target.value })}
                   />
                   <p className="text-[10px] text-gray-500 italic">
-                    Verified organizations: use your registered email for "Official" attribution.
+                    Use an organization-domain email if possible.
                   </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Website or Social Page</label>
+                  <Input
+                    required
+                    placeholder="e.g. https://linkedin.com/company/..."
+                    value={reporter.websiteOrSocial}
+                    onChange={(e) => setReporter({ ...reporter, websiteOrSocial: e.target.value })}
+                  />
                 </div>
               </div>
 

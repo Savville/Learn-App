@@ -138,14 +138,33 @@ router.post('/parse-opportunity', async (req, res) => {
 router.post('/submit-opportunity', async (req, res) => {
   try {
     const { opportunity, reporter } = req.body;
-    if (!opportunity || !reporter || !reporter.name || !reporter.email) {
-        return res.status(400).json({ error: 'Opportunity data and reporter details are required.' });
+    if (
+      !opportunity ||
+      !reporter ||
+      !reporter.name ||
+      !reporter.organization ||
+      !reporter.role ||
+      !reporter.telephone ||
+      !reporter.email ||
+      !reporter.websiteOrSocial
+    ) {
+        return res.status(400).json({ error: 'Opportunity data and full reporter identity details are required.' });
     }
     const db = getDB();
+
+    const normalizedReporter = {
+      ...reporter,
+      name: reporter.name.trim(),
+      organization: reporter.organization.trim(),
+      role: reporter.role.trim(),
+      telephone: reporter.telephone.trim(),
+      email: reporter.email.trim().toLowerCase(),
+      websiteOrSocial: reporter.websiteOrSocial.trim(),
+    };
     
     // Check if reporter is a verified organization
     const org = await db.collection('organizations').findOne({ 
-      email: reporter.email.toLowerCase() 
+      email: normalizedReporter.email 
     });
     
     const isOrganizationPost = !!org;
@@ -153,7 +172,7 @@ router.post('/submit-opportunity', async (req, res) => {
 
     // Save with status pending
     await db.collection('pending_opportunities').insertOne({
-      reporter,
+      reporter: normalizedReporter,
       opportunity,
       isOrganizationPost,
       orgName,
@@ -162,12 +181,12 @@ router.post('/submit-opportunity', async (req, res) => {
     });
     
     // Notify admin in the background
-    sendAdminSubmissionNotification(reporter, opportunity).catch(err => {
+    sendAdminSubmissionNotification(normalizedReporter, opportunity).catch(err => {
         console.error('Submission notification failed:', err.message);
     });
 
     // Notify the poster that we received it
-    sendPosterAcknowledgementEmail(reporter.email, reporter.name, opportunity.title).catch(err => {
+    sendPosterAcknowledgementEmail(normalizedReporter.email, normalizedReporter.name, opportunity.title).catch(err => {
         console.error('Acknowledgment email to poster failed:', err.message);
     });
 
