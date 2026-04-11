@@ -41,6 +41,106 @@ const upload = multer({
   }
 });
 
+const GENERIC_EMAIL_DOMAINS = new Set([
+  'gmail.com',
+  'yahoo.com',
+  'outlook.com',
+  'hotmail.com',
+  'live.com',
+  'aol.com',
+  'icloud.com',
+  'proton.me',
+  'protonmail.com',
+]);
+
+const WHITELISTED_LINK_HOSTS = [
+  'google.com',
+  'forms.gle',
+  'typeform.com',
+  'tally.so',
+  'airtable.com',
+  'linkedin.com',
+  'facebook.com',
+  'instagram.com',
+  'x.com',
+  'twitter.com',
+  'whatsapp.com',
+  'bit.ly',
+  'tinyurl.com',
+  'eventbrite.com',
+  'career2.successfactors.com',
+  'jobs.lever.co',
+  'jobs.smartrecruiters.com',
+  'boards.greenhouse.io',
+];
+
+function getHost(value = '') {
+  try {
+    return new URL(value).hostname.replace(/^www\./, '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function tokenizeName(value = '') {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(token => token.length > 2 && !['ltd', 'limited', 'company', 'co', 'inc'].includes(token));
+}
+
+function detectRedFlags(opportunity = {}, reporter = {}) {
+  const flags = [];
+  const text = `${opportunity.title || ''} ${opportunity.description || ''} ${opportunity.fullDescription || ''}`.toLowerCase();
+  const provider = (opportunity.provider || '').trim();
+  const applicationLink = opportunity.applicationLink || '';
+  const websiteOrSocial = reporter.websiteOrSocial || '';
+  const email = (reporter.email || '').toLowerCase();
+  const emailDomain = email.includes('@') ? email.split('@').pop() : '';
+
+  if (opportunity.upfrontCost === 'Has Upfront Cost') {
+    flags.push('Upfront fee mentioned');
+  }
+
+  if (!provider || provider.length < 3 || /^(unknown|various|n\/a|tbd|private|confidential)$/i.test(provider)) {
+    flags.push('Vague company name');
+  }
+
+  if (emailDomain && GENERIC_EMAIL_DOMAINS.has(emailDomain)) {
+    flags.push('Personal email used');
+  }
+
+  if (/urgent|apply immediately|limited slots|last chance|act fast|today only|hurry|deadline looming/i.test(text)) {
+    flags.push('Pressure language detected');
+  }
+
+  if (/passport|bank account|bank details|otp|pin|password|national id|id number|cvv|mpesa pin/i.test(text)) {
+    flags.push('Sensitive data request language detected');
+  }
+
+  if (applicationLink) {
+    const linkHost = getHost(applicationLink);
+    if (linkHost && !WHITELISTED_LINK_HOSTS.some(host => linkHost === host || linkHost.endsWith(`.${host}`))) {
+      const providerTokens = tokenizeName(provider);
+      const providerMatch = providerTokens.some(token => linkHost.includes(token));
+      if (!providerMatch) {
+        flags.push('Application link does not match provider');
+      }
+    }
+  }
+
+  if (websiteOrSocial) {
+    const websiteHost = getHost(websiteOrSocial);
+    const orgTokens = tokenizeName(reporter.organization || provider || '');
+    if (websiteHost && orgTokens.length > 0 && !orgTokens.some(token => websiteHost.includes(token))) {
+      flags.push('Website or social page does not match organization');
+    }
+  }
+
+  return [...new Set(flags)];
+}
+
 const router = express.Router();
 
 router.post('/upload-image', upload.single('coverImage'), (req, res) => {
@@ -161,6 +261,7 @@ router.post('/submit-opportunity', async (req, res) => {
       email: reporter.email.trim().toLowerCase(),
       websiteOrSocial: reporter.websiteOrSocial.trim(),
     };
+    const riskFlags = detectRedFlags(opportunity, normalizedReporter);
     
     // Check if reporter is a verified organization
     const org = await db.collection('organizations').findOne({ 
@@ -176,7 +277,15 @@ router.post('/submit-opportunity', async (req, res) => {
       opportunity,
       isOrganizationPost,
       orgName,
-      status: 'pending',
+      status: 'Unverified',
+      reviewState: 'Unverified',
+      riskFlags,
+      auditTrail: {
+        submittedAt: new Date(),
+        reviewedAt: null,
+        reviewedBy: null,
+        proofLinks: [],
+      },
       submittedAt: new Date()
     });
     
@@ -191,6 +300,32 @@ router.post('/submit-opportunity', async (req, res) => {
     });
 
     res.json({ message: 'Submitted successfully for verification.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/report-opportunity/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason, details, reporterName, reporterEmail } = req.body;
+
+    if (!id || !reason) {
+      return res.status(400).json({ error: 'Report reason is required.' });
+    }
+
+    const db = getDB();
+    await db.collection('opportunity_reports').insertOne({
+      opportunityId: id,
+      reason: reason.trim(),
+      details: (details || '').trim(),
+      reporterName: (reporterName || '').trim(),
+      reporterEmail: (reporterEmail || '').trim().toLowerCase(),
+      status: 'open',
+      submittedAt: new Date(),
+    });
+
+    res.json({ message: 'Report received. We will review it quickly.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

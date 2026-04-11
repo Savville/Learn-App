@@ -58,6 +58,9 @@ export const opportunitiesAPI = {
     });
   },
 
+  report: (id: string, data: { reason: string; details?: string; reporterName?: string; reporterEmail?: string }) =>
+    apiClient.post(`/public/report-opportunity/${id}`, data),
+
   create: (data: any, apiKey: string) =>
     apiClient.post('/opportunities', data, {
       headers: { 'x-api-key': apiKey },

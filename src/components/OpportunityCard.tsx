@@ -24,6 +24,7 @@ const CATEGORY_FALLBACKS: Record<string, string> = {
 
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const urgency = calculateUrgency(opportunity.deadline);
+  const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const fallback = CATEGORY_FALLBACKS[opportunity.category] ?? '/images/opportunities/internship.avif';
@@ -64,6 +65,13 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
               {opportunity.category}
             </span>
           </div>
+          {verificationLabel && (
+            <div className="absolute top-4 left-4">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${verificationLabel === 'Verified' ? 'bg-green-600 text-white' : verificationLabel === 'Rejected' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'}`}>
+                {verificationLabel}
+              </span>
+            </div>
+          )}
         </div>
 
       {/* Content */}
@@ -78,7 +86,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
               <span className="text-xs uppercase tracking-widest text-gray-400 font-bold">
                 Posted by {opportunity.postedBy}
               </span>
-              {opportunity.isVerified && (
+              {verificationLabel === 'Verified' && (
                 <CheckCircle className="w-4 h-4 text-blue-500" />
               )}
             </div>

@@ -16,7 +16,12 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 12));
     const skip  = (page - 1) * limit;
 
-    const filter = {};
+    const filter = {
+      $or: [
+        { status: { $exists: false } },
+        { status: 'Verified' }
+      ]
+    };
     
     // New tab logic
     const WORK_CATEGORIES = ['Gig', 'Job', 'Project', 'Challenge', 'Hackathon', 'Attachment', 'Internship'];
@@ -66,7 +71,12 @@ router.get('/:id', async (req, res) => {
 
     const db = getDB();
     const opportunity = await db.collection('opportunities')
-      .findOne({ $or: [{ id: req.params.id }, { slug: req.params.id }] });
+      .findOne({
+        $and: [
+          { $or: [{ id: req.params.id }, { slug: req.params.id }] },
+          { $or: [{ status: { $exists: false } }, { status: 'Verified' }] }
+        ]
+      });
 
     if (!opportunity) {
       return res.status(404).json({ error: 'Opportunity not found' });

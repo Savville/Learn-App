@@ -32,6 +32,14 @@ export async function connectDB() {
     const orgs = db.collection('organizations');
     await orgs.createIndex({ email: 1 }, { unique: true });
 
+    const pending = db.collection('pending_opportunities');
+    await pending.createIndex({ status: 1, submittedAt: -1 });
+    await pending.createIndex({ 'reporter.email': 1 });
+
+    const reports = db.collection('opportunity_reports');
+    await reports.createIndex({ status: 1, submittedAt: -1 });
+    await reports.createIndex({ opportunityId: 1, submittedAt: -1 });
+
     console.log('✅ Indexes ensured');
 
     return db;

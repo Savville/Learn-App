@@ -26,6 +26,13 @@ export interface Opportunity {
   logoUrl: string;
   postedBy?: string;
   isVerified?: boolean;
+  status?: 'Unverified' | 'Verified' | 'Rejected';
+  verificationAudit?: {
+    reviewedAt?: string;
+    reviewedBy?: string;
+    proofLinks?: string[];
+    riskFlags?: string[];
+  };
   thematicAreas?: { heading: string; topics: string[] }[];
 }
 

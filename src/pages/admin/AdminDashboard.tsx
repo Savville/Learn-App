@@ -5,17 +5,19 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings } from 'lucide-react';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminDashboard() {
   const [pending, setPending] = useState<any[]>([]);
   const [orgRequests, setOrgRequests] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
   const [allOpps, setAllOpps] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'opps' | 'orgs' | 'manage'>('opps');
+  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage'>('opps');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
   
   // Edit State
   const [editingOpp, setEditingOpp] = useState<any | null>(null);
@@ -28,13 +30,15 @@ export default function AdminDashboard() {
       const token = sessionStorage.getItem('adminToken');
       if (!token) return;
       
-      const [oppsRes, orgsRes, allOppsRes] = await Promise.all([
+      const [oppsRes, reportsRes, orgsRes, allOppsRes] = await Promise.all([
         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/opportunities`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
       if (oppsRes.ok) setPending(await oppsRes.json());
+      if (reportsRes.ok) setReports(await reportsRes.json());
       if (orgsRes.ok) setOrgRequests(await orgsRes.json());
       if (allOppsRes.ok) setAllOpps(await allOppsRes.json());
     } catch (e) {
@@ -122,6 +126,21 @@ export default function AdminDashboard() {
     fetchPending();
   }, []);
 
+  useEffect(() => {
+    setReviewFormById(prev => {
+      const next = { ...prev };
+      pending.forEach(item => {
+        if (!next[item._id]) {
+          next[item._id] = {
+            reviewerName: item.reviewedBy || 'Opportunities Kenya Admin',
+            proofLinksText: Array.isArray(item.proofLinks) ? item.proofLinks.join('\n') : '',
+          };
+        }
+      });
+      return next;
+    });
+  }, [pending]);
+
   const handleApproveOrg = async (objId: string) => {
     setActionLoading(objId);
     try {
@@ -156,16 +175,36 @@ export default function AdminDashboard() {
     setActionLoading(null);
   };
 
-  const handleApprove = async (id: string, objId: string) => {
+  const handleApprove = async (objId: string) => {
+    const reviewForm = reviewFormById[objId] || { reviewerName: '', proofLinksText: '' };
+    const reviewerName = reviewForm.reviewerName.trim();
+    if (!reviewerName) {
+      alert('Reviewer name is required before approval.');
+      return;
+    }
+    const proofLinks = reviewForm.proofLinksText
+      .split(/\r?\n|,/) 
+      .map((link: string) => link.trim())
+      .filter((link: string) => !!link);
+
     setActionLoading(objId);
     try {
       const token = sessionStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/approve/${objId}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reviewerName, proofLinks }),
       });
       if (res.ok) {
         setPending(prev => prev.filter(p => p._id !== objId));
+        setReviewFormById(prev => {
+          const next = { ...prev };
+          delete next[objId];
+          return next;
+        });
         alert('Opportunity Approved & Published!');
       } else {
         const data = await res.json();
@@ -198,6 +237,23 @@ export default function AdminDashboard() {
     setActionLoading(null);
   };
 
+  const handleResolveReport = async (objId: string) => {
+    setActionLoading(`resolve_${objId}`);
+    try {
+      const token = sessionStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/reports/${objId}/resolve`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setReports(prev => prev.filter(r => r._id !== objId));
+      }
+    } catch (e: any) {
+      alert('Error: ' + e.message);
+    }
+    setActionLoading(null);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
@@ -211,7 +267,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="rounded-full bg-primary/5 px-4 py-1 text-xs font-medium text-primary">
-            Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'manage' ? 'Manage Content' : 'Organization Management'}
+            Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'reports' ? 'Reports Inbox' : activeTab === 'manage' ? 'Manage Content' : 'Organization Management'}
           </div>
         </header>
 
@@ -222,7 +278,14 @@ export default function AdminDashboard() {
             className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'opps' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
           >
             <User className="w-4 h-4" />
-            Pending Opportunities ({pending.length})
+            Unverified Opportunities ({pending.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab('reports')}
+            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'reports' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <Flag className="w-4 h-4" />
+            Reports ({reports.length})
           </button>
           <button 
             onClick={() => setActiveTab('orgs')}
@@ -265,6 +328,15 @@ export default function AdminDashboard() {
                           <p className="text-sm text-slate-600 line-clamp-1 italic">{item.reporter?.email}</p>
                           <p className="text-sm text-slate-600 line-clamp-1">{item.reporter?.telephone}</p>
                           <p className="text-xs text-slate-500 break-all">{item.reporter?.websiteOrSocial}</p>
+                          {item.riskFlags?.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {item.riskFlags.map((flag: string, index: number) => (
+                                <Badge key={index} className="bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100">
+                                  {flag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                           {item.isOrganizationPost && (
                             <Badge className="mt-2 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">
                               Verified Org Post
@@ -287,10 +359,36 @@ export default function AdminDashboard() {
                           </div>
                        </div>
                        <div className="mt-6 flex flex-col gap-2">
+                          <div className="rounded-md border border-slate-200 bg-white p-3 space-y-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Verification Audit</p>
+                            <Input
+                              placeholder="Reviewer name"
+                              value={reviewFormById[item._id]?.reviewerName || ''}
+                              onChange={(e) => setReviewFormById(prev => ({
+                                ...prev,
+                                [item._id]: {
+                                  reviewerName: e.target.value,
+                                  proofLinksText: prev[item._id]?.proofLinksText || '',
+                                }
+                              }))}
+                            />
+                            <Textarea
+                              placeholder="Proof links (one per line or comma-separated)"
+                              className="min-h-[72px] text-xs"
+                              value={reviewFormById[item._id]?.proofLinksText || ''}
+                              onChange={(e) => setReviewFormById(prev => ({
+                                ...prev,
+                                [item._id]: {
+                                  reviewerName: prev[item._id]?.reviewerName || 'Opportunities Kenya Admin',
+                                  proofLinksText: e.target.value,
+                                }
+                              }))}
+                            />
+                          </div>
                           <Button 
                              className="w-full bg-green-600 hover:bg-green-700 text-white" 
-                             disabled={actionLoading === item._id}
-                             onClick={() => handleApprove(item.opportunity.id, item._id)}
+                             disabled={actionLoading === item._id || !(reviewFormById[item._id]?.reviewerName || '').trim()}
+                             onClick={() => handleApprove(item._id)}
                           >
                              <CheckCircle className="mr-2 h-4 w-4" /> Approve & Publish
                           </Button>
@@ -407,6 +505,67 @@ export default function AdminDashboard() {
                     </div>
                  </Card>
                ))}
+            </div>
+          )
+        ) : activeTab === 'reports' ? (
+          /* Reports Tab */
+          reports.length === 0 ? (
+            <Card className="border-slate-200 shadow-sm">
+               <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                  <AlertTriangle className="h-12 w-12 text-slate-300 mb-4" />
+                  <h3 className="text-lg font-medium text-slate-900">No open reports</h3>
+                  <p className="text-sm text-slate-500 max-w-sm mt-1">Suspicious posts reported by users will appear here.</p>
+               </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {reports.map((report: any) => (
+                <Card key={report._id} className="border-slate-200 shadow-sm overflow-hidden">
+                  <CardContent className="p-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">Open Report</Badge>
+                          <span className="text-xs text-slate-400">{new Date(report.submittedAt).toLocaleString()}</span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-900">{report.reason}</h3>
+                        <p className="text-sm text-slate-600">Opportunity ID: {report.opportunityId}</p>
+                        {report.reporterName && <p className="text-sm text-slate-600">Reporter: {report.reporterName}</p>}
+                        {report.reporterEmail && <p className="text-sm text-slate-600">Email: {report.reporterEmail}</p>}
+                        {report.details && <p className="text-sm text-slate-700 whitespace-pre-wrap">{report.details}</p>}
+                      </div>
+                      <div className="flex flex-col gap-2 shrink-0 lg:items-end">
+                        <Button
+                          variant="outline"
+                          className="border-slate-200"
+                          onClick={() => window.open(`/opportunity/${report.opportunityId}`, '_blank')}
+                        >
+                          <Eye className="w-4 h-4 mr-2" /> Open Post
+                        </Button>
+                        <Button
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => handleResolveReport(report._id)}
+                          disabled={actionLoading === `resolve_${report._id}`}
+                        >
+                          Mark Resolved
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={async () => {
+                            if (report.opportunityId) {
+                              await handleDeleteOpp(report.opportunityId, report.reason);
+                            }
+                            await handleResolveReport(report._id);
+                          }}
+                          disabled={actionLoading === `delete_${report.opportunityId}`}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" /> Delete Opportunity
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )
         ) : activeTab === 'orgs' ? (

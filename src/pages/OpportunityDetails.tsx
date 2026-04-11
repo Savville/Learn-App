@@ -1,7 +1,10 @@
 import { useParams, Link } from 'react-router-dom';
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX, type FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
-import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, AlertCircle, Flag } from 'lucide-react';
 import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
@@ -118,8 +121,37 @@ export function OpportunityDetails() {
   const [loading, setLoading] = useState(!localMatch); // only show spinner if no local fallback
   const [error, setError] = useState<string | null>(null);
   const [relatedOpportunities, setRelatedOpportunities] = useState<Opportunity[]>([]);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportMessage, setReportMessage] = useState<string | null>(null);
+  const [reportForm, setReportForm] = useState({ name: '', email: '', reason: '', details: '' });
 
   const urgency = opportunity ? calculateUrgency(opportunity.deadline) : null;
+  const verificationLabel = opportunity?.status || (opportunity?.isVerified ? 'Verified' : 'Unverified');
+  const proofLinks = opportunity?.verificationAudit?.proofLinks ?? [];
+
+  const handleReportSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!opportunity) return;
+
+    try {
+      setReportSubmitting(true);
+      setReportMessage(null);
+      await opportunitiesAPI.report(opportunity.id, {
+        reason: reportForm.reason,
+        details: reportForm.details,
+        reporterName: reportForm.name,
+        reporterEmail: reportForm.email,
+      });
+      setReportMessage('Report received. We will review this post quickly.');
+      setReportForm({ name: '', email: '', reason: '', details: '' });
+      setReportOpen(false);
+    } catch (reportError: any) {
+      setReportMessage(reportError?.response?.data?.error || 'Failed to send report.');
+    } finally {
+      setReportSubmitting(false);
+    }
+  };
 
   useSEO({
     title: opportunity?.title,
@@ -255,6 +287,12 @@ export function OpportunityDetails() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <article className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="border-b border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-900 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+            <p>
+              We review submissions manually, but we do not guarantee every opportunity, especially external postings. Verify details before applying.
+            </p>
+          </div>
           {/* Header Image */}
           <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
             <img
@@ -284,12 +322,42 @@ export function OpportunityDetails() {
                     <span className="text-xs uppercase tracking-widest text-gray-400 font-bold">
                       Posted by {opportunity.postedBy}
                     </span>
-                    {opportunity.isVerified && (
+                    {verificationLabel === 'Verified' && (
                       <CheckCircle className="w-4 h-4 text-blue-500" />
                     )}
                   </div>
                 )}
                 <p className="text-gray-600 text-lg">{opportunity.provider}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wider">
+                  <span className={`rounded-full px-3 py-1 ${verificationLabel === 'Verified' ? 'bg-green-100 text-green-700' : verificationLabel === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {verificationLabel}
+                  </span>
+                  {opportunity.verificationAudit?.reviewedAt && (
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">
+                      Reviewed {new Date(opportunity.verificationAudit.reviewedAt).toLocaleDateString()}
+                    </span>
+                  )}
+                  {opportunity.verificationAudit?.reviewedBy && (
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">
+                      By {opportunity.verificationAudit.reviewedBy}
+                    </span>
+                  )}
+                </div>
+                {proofLinks.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {proofLinks.map((proofLink, index) => (
+                      <a
+                        key={index}
+                        href={proofLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-semibold text-blue-700 underline underline-offset-2"
+                      >
+                        Proof Link {index + 1}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -483,6 +551,64 @@ export function OpportunityDetails() {
                     </a>
                   )}
                 </>
+              )}
+            </div>
+
+            {/* Report + Verification audit */}
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-gray-900 text-lg font-bold">See something suspicious?</h3>
+                  <p className="text-sm text-gray-600">Report it and we will remove or review it quickly.</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="inline-flex items-center gap-2 self-start border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  onClick={() => setReportOpen(prev => !prev)}
+                >
+                  <Flag className="w-4 h-4" />
+                  Report Suspicious Post
+                </Button>
+              </div>
+
+              {reportMessage && (
+                <p className="mt-3 text-sm font-medium text-slate-700">{reportMessage}</p>
+              )}
+
+              {reportOpen && (
+                <form onSubmit={handleReportSubmit} className="mt-4 grid grid-cols-1 gap-4 rounded-xl bg-white p-4 border border-slate-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      required
+                      placeholder="Your name"
+                      value={reportForm.name}
+                      onChange={(e) => setReportForm({ ...reportForm, name: e.target.value })}
+                    />
+                    <Input
+                      required
+                      type="email"
+                      placeholder="Your email"
+                      value={reportForm.email}
+                      onChange={(e) => setReportForm({ ...reportForm, email: e.target.value })}
+                    />
+                  </div>
+                  <Input
+                    required
+                    placeholder="Reason for report"
+                    value={reportForm.reason}
+                    onChange={(e) => setReportForm({ ...reportForm, reason: e.target.value })}
+                  />
+                  <Textarea
+                    placeholder="Add any details, screenshots, or context"
+                    className="min-h-[100px]"
+                    value={reportForm.details}
+                    onChange={(e) => setReportForm({ ...reportForm, details: e.target.value })}
+                  />
+                  <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white" disabled={reportSubmitting}>
+                    {reportSubmitting ? 'Sending report...' : 'Send Report'}
+                  </Button>
+                </form>
               )}
             </div>
 

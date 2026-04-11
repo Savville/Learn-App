@@ -243,6 +243,13 @@ export function PostWithUs() {
           </div>
         </header>
 
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex items-start gap-3">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <p>
+            We manually review submissions, but we do not guarantee every opportunity, especially external postings. Please provide accurate identity and proof details.
+          </p>
+        </div>
+
         {/* STEP 1: Details & Text Input */}
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="pb-3">

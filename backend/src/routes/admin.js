@@ -462,7 +462,7 @@ router.post('/parse-opportunity', verifyAdminKey, async (req, res) => {
 router.get('/pending', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
-    const pending = await db.collection('pending_opportunities').find({ status: 'pending' }).sort({ submittedAt: -1 }).toArray();
+    const pending = await db.collection('pending_opportunities').find({ status: 'Unverified' }).sort({ submittedAt: -1 }).toArray();
     res.json(pending);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -494,15 +494,31 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     // Add attribution
     if (pendingDoc.isOrganizationPost && pendingDoc.orgName) {
       oppToPublish.postedBy = pendingDoc.orgName;
-      oppToPublish.isVerified = true; // Add a verification flag for the UI
+      oppToPublish.isVerified = true;
     } else {
       oppToPublish.postedBy = pendingDoc.reporter?.name || 'Opportunities Kenya Admin';
     }
 
+    const reviewedBy = (req.body?.reviewerName || 'Opportunities Kenya Admin').toString().trim() || 'Opportunities Kenya Admin';
+    const proofLinks = Array.isArray(req.body?.proofLinks)
+      ? req.body.proofLinks
+          .map(link => (link || '').toString().trim())
+          .filter(link => /^https?:\/\//i.test(link))
+      : [];
+    oppToPublish.status = 'Verified';
+    oppToPublish.isVerified = true;
+    oppToPublish.verificationAudit = {
+      reviewedAt: new Date().toISOString(),
+      reviewedBy,
+      proofLinks,
+      riskFlags: pendingDoc.riskFlags || [],
+    };
+    oppToPublish.reporter = pendingDoc.reporter;
+
     await db.collection('opportunities').replaceOne({ id: oppToPublish.id }, oppToPublish, { upsert: true });
 
     // Update pending status
-    await db.collection('pending_opportunities').updateOne({ _id: pendingDoc._id }, { $set: { status: 'approved', approvedAt: new Date() } });
+    await db.collection('pending_opportunities').updateOne({ _id: pendingDoc._id }, { $set: { status: 'Verified', approvedAt: new Date(), reviewedAt: new Date(), reviewedBy, proofLinks } });
 
     // Fetch active subscribers to send the new opportunity alert
     const subscribers = await db
@@ -534,14 +550,42 @@ router.post('/reject/:id', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
+    const reviewedBy = req.body?.reviewerName || 'Opportunities Kenya Admin';
     
     const { ObjectId } = await import('mongodb');
     
     await db.collection('pending_opportunities').updateOne(
         { _id: new ObjectId(id) },
-        { $set: { status: 'rejected', rejectedAt: new Date() } }
+        { $set: { status: 'Rejected', rejectedAt: new Date(), reviewedAt: new Date(), reviewedBy } }
     );
     res.json({ message: 'Opportunity rejected.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/reports
+router.get('/reports', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const reports = await db.collection('opportunity_reports').find({ status: 'open' }).sort({ submittedAt: -1 }).toArray();
+    res.json(reports);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/reports/:id/resolve
+router.post('/reports/:id/resolve', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const { ObjectId } = await import('mongodb');
+    await db.collection('opportunity_reports').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status: 'resolved', resolvedAt: new Date() } }
+    );
+    res.json({ message: 'Report marked as resolved.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
