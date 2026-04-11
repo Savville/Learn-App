@@ -2,7 +2,7 @@ export interface Opportunity {
   id: string;
   title: string;
   provider: string;
-  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'Other';
+  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'Gig' | 'Job' | 'Other';
   description: string;
   fullDescription: string;
   deadline?: string;

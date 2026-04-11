@@ -62,7 +62,7 @@ router.post('/parse-opportunity', async (req, res) => {
       You are an expert data extractor for a student and professional opportunities portal.
       Analyze the following raw text and extract key data points to create an opportunity listing.
       
-      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'Other'.
+      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'Gig', 'Job', 'Other'.
       
       For missing information like deadlines, if the text says something generic like "End of September", extract that. If the application link is missing, return an empty string "".
       

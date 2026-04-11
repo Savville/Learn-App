@@ -14,7 +14,7 @@ export function About() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <h1 className="mb-6">About Opportunities Kenya</h1>
           <p className="text-blue-100 max-w-2xl mx-auto">
-            Empowering students and young professionals by connecting them with life-changing opportunities from around the world.
+            Empowering Kenya's technical talent by connecting them with paid subcontracting gigs, industry innovation challenges, and global career opportunities.
           </p>
         </div>
       </div>
@@ -39,16 +39,16 @@ export function About() {
             <h2 className="text-gray-900 mb-6">Who We Are</h2>
             <div className="space-y-4 text-gray-700 leading-relaxed">
               <p>
-                Opportunities Kenya is a youth-focused initiative dedicated to connecting students, graduates and practitioners with problem solving challenges and valuable learning opportunities, grants, internships, fellowships, and career-building programs from around the world.
+                Opportunities Kenya is an Open Innovation Platform and Talent Subcontracting Hub. We bridge the gap between academia and industry by connecting Kenya's top university students, graduates, and practitioners with pressing corporate challenges and paid subcontracting jobs.
               </p>
               <p>
-                We believe that access to the right opportunity can transform a young person's future, and our mission is to make that access simple, clear, and free.
+                While we actively curate high-value global scholarships, internships, and fellowships to foster continuous learning, our primary focus is on <strong>Value Creation</strong>. We facilitate direct subcontracting gigs—allowing professionals and organizations to outsource technical, administrative, and research tasks to our verified database of student talent.
               </p>
               <p>
-                At Opportunities Kenya, we curate and publish high-quality opportunities daily, ensuring that learners never miss out on programs that can advance their knowledge, skills, or career path. Our goal is to incentivize learning by bringing life-changing opportunities closer to those who need them most.
+                Furthermore, we host Industry Innovation Challenges, Hackathons, and Calls for Papers that let students apply their academic knowledge to real-world bottlenecks (such as local infrastructure or utility crises).
               </p>
               <p>
-                Whether you're looking for a scholarship, a competitive fellowship, a professional internship, or a grant to support your ideas, Opportunities Kenya serves as your trusted gateway. We simplify the process by researching, verifying, and linking you directly to official application pages, so you can focus on learning, growing, and achieving your goals.
+                We are transitioning from a simple opportunity-listing platform into an active ecosystem where students build real-world portfolios, earn income through executed gigs, and incubate their final-year projects into scalable, venture-backed startups.
               </p>
             </div>
           </div>
@@ -62,7 +62,7 @@ export function About() {
             </div>
             <h2 className="text-gray-900 mb-4">Our Vision</h2>
             <p className="text-gray-700 leading-relaxed">
-              To empower students and young professionals across Africa and beyond by giving them equal access to global opportunities.
+              To transform Kenya's student talent pool into an active, monetizable engine for industry innovation and specialized subcontracting.
             </p>
           </div>
 
@@ -74,19 +74,19 @@ export function About() {
             <ul className="space-y-3 text-gray-700">
               <li className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-2 flex-shrink-0"></span>
-                <span>To highlight meaningful opportunities that promote learning and career growth</span>
+                <span>To facilitate seamless subcontracting between industry professionals and skilled students</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-2 flex-shrink-0"></span>
-                <span>To bridge the information gap between youth and global organizations</span>
+                <span>To digitize corporate challenges and crowdsource actionable, verifiable prototypes</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-2 flex-shrink-0"></span>
-                <span>To motivate and inspire continuous learning through accessible opportunities</span>
+                <span>To curate high-value global academic opportunities, call for papers, and internships</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 bg-purple-600 rounded-full mt-2 flex-shrink-0"></span>
-                <span>To create a platform that supports personal development and professional readiness</span>
+                <span>To incubate breakthrough student projects into scalable, real-world solutions</span>
               </li>
             </ul>
           </div>
@@ -101,7 +101,7 @@ export function About() {
             <div>
               <h2 className="text-gray-900 mb-4">Why We Exist</h2>
               <p className="text-gray-700 leading-relaxed">
-                Many young Kenyans miss out on life-changing opportunities simply because they never hear about them. Opportunities Kenya exists to solve that problem—by making sure you stay informed, inspired, and connected to the opportunities that can shape your future.
+                African corporates lose billions to inefficiencies while universities produce thousands of skilled engineers and professionals who lack practical application paths. We exist to bridge this gap—providing organizations with an agile student workforce, and giving students real-world income, experience, and global exposure.
               </p>
             </div>
           </div>
@@ -121,8 +121,8 @@ export function About() {
                     1
                   </span>
                   <div>
-                    <p className="text-gray-900 mb-1">Curate Quality Opportunities</p>
-                    <p className="text-gray-600">We research and verify opportunities from trusted organizations worldwide, ensuring you only see legitimate programs.</p>
+                    <p className="text-gray-900 font-semibold mb-1">Talent Subcontracting (Jobs)</p>
+                    <p className="text-gray-600">We match professionals needing specific operational tasks (tech, admin, engineering, research) with vetted student freelancers for quick, paid deliverables.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -130,8 +130,8 @@ export function About() {
                     2
                   </span>
                   <div>
-                    <p className="text-gray-900 mb-1">Daily Updates</p>
-                    <p className="text-gray-600">Our team updates the platform daily with new internships, fellowships, jobs, scholarships, grants, and events.</p>
+                    <p className="text-gray-900 font-semibold mb-1">Industry Innovation Challenges</p>
+                    <p className="text-gray-600">We host corporate challenges, hackathons, and calls for papers, giving learners real-world data to solve infrastructural bottlenecks.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -139,8 +139,8 @@ export function About() {
                     3
                   </span>
                   <div>
-                    <p className="text-gray-900 mb-1">Simplify Access</p>
-                    <p className="text-gray-600">We provide clear information and direct links to official application pages, making it easy for you to apply.</p>
+                    <p className="text-gray-900 font-semibold mb-1">Global Opportunities</p>
+                    <p className="text-gray-600">We continually curate the best scholarships, internships, fellowships, and grants to ensure our community has access to continuous academic and career growth.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -148,8 +148,8 @@ export function About() {
                     4
                   </span>
                   <div>
-                    <p className="text-gray-900 mb-1">Free for Everyone</p>
-                    <p className="text-gray-600">All our services are completely free. We believe opportunities should be accessible to everyone, regardless of their financial situation.</p>
+                    <p className="text-gray-900 font-semibold mb-1">Project Incubation</p>
+                    <p className="text-gray-600">We guide top-performing students and their final-year projects toward industry attachments or transition them into venture-backed startups.</p>
                   </div>
                 </div>
               </div>

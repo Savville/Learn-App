@@ -7,12 +7,16 @@ import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 import { useSEO } from '../hooks/useSEO';
 
+const WORK_CATEGORIES = ['Gig', 'Job', 'Project', 'Challenge', 'Hackathon', 'Attachment', 'Internship'];
+const ACADEMIC_CATEGORIES = ['Scholarship', 'Fellowship', 'Conference', 'Grant', 'CallForPapers', 'Event', 'Volunteer'];
+
 const applyFilters = (
   opps: Opportunity[],
   searchQuery: string,
   selectedType: string,
   selectedLevel: string,
-  selectedFunding: string
+  selectedFunding: string,
+  activeTab: string
 ) => {
   return opps.filter(opp => {
     const q = searchQuery.toLowerCase();
@@ -20,15 +24,22 @@ const applyFilters = (
       opp.title.toLowerCase().includes(q) ||
       opp.provider.toLowerCase().includes(q) ||
       opp.description.toLowerCase().includes(q);
+
+    let matchesTab = true;
+    if (activeTab === 'work') matchesTab = WORK_CATEGORIES.includes(opp.category);
+    else if (activeTab === 'academic') matchesTab = ACADEMIC_CATEGORIES.includes(opp.category);
+
     const matchesType = selectedType === 'all' || opp.category === selectedType;
     const matchesLevel = selectedLevel === 'all' || opp.eligibility.educationLevel === selectedLevel;
     const matchesFunding = selectedFunding === 'all' || opp.fundingType === selectedFunding;
-    return matchesSearch && matchesType && matchesLevel && matchesFunding;
+    
+    return matchesSearch && matchesTab && matchesType && matchesLevel && matchesFunding;
   });
 };
 
 export function Opportunities() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedType, setSelectedType] = useState(searchParams.get('type') || 'all');
   const [selectedLevel, setSelectedLevel] = useState(searchParams.get('level') || 'all');
@@ -54,6 +65,7 @@ export function Opportunities() {
     setSelectedType(searchParams.get('type') || 'all');
     setSelectedLevel(searchParams.get('level') || 'all');
     setSelectedFunding(searchParams.get('funding') || 'all');
+    setActiveTab(searchParams.get('tab') || 'all');
     setPage(1);
   }, [searchParams]);
 
@@ -62,6 +74,7 @@ export function Opportunities() {
     level: selectedLevel !== 'all' ? selectedLevel : undefined,
     fundingType: selectedFunding !== 'all' ? selectedFunding : undefined,
     search: searchQuery || undefined,
+    tab: activeTab !== 'all' ? activeTab : undefined,
     page: pageNum,
     limit: 100,
   });
@@ -80,7 +93,7 @@ export function Opportunities() {
         setError(null);
 
         // Show local data immediately so there's never a white page
-        const localFiltered = applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding);
+        const localFiltered = applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding, activeTab);
         setOpportunities(localFiltered);
         setHasMore(false);
         setLoading(false); // stop spinner — cards visible now, API upgrades silently
@@ -99,14 +112,14 @@ export function Opportunities() {
       } catch (err) {
         // API failed (Render cold start etc.) — local data already visible, just stop loading
         console.error('Error fetching opportunities:', err);
-        const localFiltered = applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding);
+        const localFiltered = applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding, activeTab);
         setOpportunities(localFiltered);
         setHasMore(false);
         setLoading(false);
       }
     };
     fetchOpportunities();
-  }, [searchQuery, selectedType, selectedLevel, selectedFunding]);
+  }, [searchQuery, selectedType, selectedLevel, selectedFunding, activeTab]);
 
   const loadMore = async () => {
     try {
@@ -135,24 +148,51 @@ export function Opportunities() {
       search: searchQuery,
       type: selectedType,
       level: selectedLevel,
-      funding: selectedFunding
+      funding: selectedFunding,
+      tab: activeTab
     });
   };
 
-  const hasActiveFilters = selectedType !== 'all' || selectedLevel !== 'all' || selectedFunding !== 'all' || searchQuery;
+  const hasActiveFilters = selectedType !== 'all' || selectedLevel !== 'all' || selectedFunding !== 'all' || searchQuery || activeTab !== 'all';
 
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedType('all');
     setSelectedLevel('all');
     setSelectedFunding('all');
+    setActiveTab('all');
     setSearchParams({});
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-blue-600 to-purple-600">
+      <div className="bg-gradient-to-br from-blue-600 to-purpOpportunities</h1>
+
+          {/* Subcontracting vs Academic Tabs */}
+          <div className="flex bg-white/10 p-1 rounded-lg w-fit mb-6 overflow-x-auto max-w-full">
+            <button
+              type="button"
+              onClick={() => setActiveTab('all')}
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === 'all' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}`}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('work')}
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === 'work' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}`}
+            >
+              Work & Innovation (Gigs)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('academic')}
+              className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === 'academic' ? 'bg-white text-blue-900 shadow-sm' : 'text-white hover:bg-white/20'}`}
+            >
+              Academic & Learning
+            </button>
+          </div
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-3xl font-bold text-white mb-6">All Opportunities</h1>
 

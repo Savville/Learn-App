@@ -11,12 +11,20 @@ const CACHE_PREFIX = '/api/opportunities';
 router.get('/', cacheMiddleware(300), async (req, res) => {
   try {
     const db = getDB();
-    const { category, level, fundingType, search } = req.query;
+    const { category, level, fundingType, search, tab } = req.query;
     const page  = Math.max(1, parseInt(req.query.page)  || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 12));
     const skip  = (page - 1) * limit;
 
     const filter = {};
+    
+    // New tab logic
+    const WORK_CATEGORIES = ['Gig', 'Job', 'Project', 'Challenge', 'Hackathon', 'Attachment', 'Internship'];
+    const ACADEMIC_CATEGORIES = ['Scholarship', 'Fellowship', 'Conference', 'Grant', 'CallForPapers', 'Event', 'Volunteer'];
+
+    if (tab === 'work') filter.category = { $in: WORK_CATEGORIES };
+    else if (tab === 'academic') filter.category = { $in: ACADEMIC_CATEGORIES };
+
     if (category && category !== 'all') filter.category = category;
     if (level && level !== 'all') filter['eligibility.educationLevel'] = level;
     if (fundingType && fundingType !== 'all') filter.fundingType = fundingType;
