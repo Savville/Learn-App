@@ -430,12 +430,22 @@ router.get('/me/applications', verifyUserToken, async (req, res) => {
     const email = req.user.email;
     const db = getDB();
     
+    // Convert status='Pending' to 'pending' from old data
     const applications = await db.collection('applications')
       .find({ applicantEmail: email })
       .sort({ appliedAt: -1 })
       .toArray();
 
-    // Map opportunity titles and URLs if you want better links
+    // Map through applications and inject contactEmail if approved/paid
+    for (let app of applications) {
+      if (app.status === 'Pending') app.status = 'pending'; // Fallback
+      if (app.status === 'approved' || app.status === 'paid') {
+        const opp = await db.collection('opportunities').findOne({ id: app.opportunityId });
+        const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': app.opportunityId });
+        app.posterContactEmail = opp?.contactEmail || originalPending?.reporter?.email;
+      }
+    }
+
     res.json(applications);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -494,6 +504,42 @@ router.get('/me/posts/:id/applicants', verifyUserToken, async (req, res) => {
   }
 });
 
+// 6. SECURE ENDPOINT: Update an Applicant's Status
+router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const { status } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+
+    if (!['pending', 'approved', 'rejected', 'paid'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const { ObjectId } = await import('mongodb');
+    const application = await db.collection('applications').findOne({ _id: new ObjectId(appId) });
+    if (!application) return res.status(404).json({ error: 'Application not found' });
+
+    // Verify ownership of the opportunity
+    const oppId = application.opportunityId;
+    const opp = await db.collection('opportunities').findOne({ id: oppId });
+    const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': oppId });
+    
+    if (originalPending?.reporter?.email !== email && opp?.contactEmail !== email) {
+      return res.status(403).json({ error: 'You do not own the post this application is for' });
+    }
+
+    await db.collection('applications').updateOne(
+      { _id: new ObjectId(appId) },
+      { $set: { status, updatedAt: new Date() } }
+    );
+
+    res.json({ message: 'Status updated successfully', status });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Submit an application to a custom internal form
 router.post('/opportunities/:id/apply', async (req, res) => {
   try {
@@ -528,7 +574,7 @@ router.post('/opportunities/:id/apply', async (req, res) => {
       opportunityTitle: opportunity.title,
       applicantEmail: normalizedEmail,
       applicantData: data,
-      status: 'Pending',
+      status: 'pending',
       appliedAt: new Date(),
     });
 

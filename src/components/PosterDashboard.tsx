@@ -87,6 +87,26 @@ export function PosterDashboard() {
     }
   };
 
+  const handleUpdateApplicantStatus = async (appId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/public/applications/${appId}/status`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update status');
+      
+      // Update local state
+      setApplicants(prev => prev.map(a => a._id === appId ? { ...a, status: newStatus } : a));
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchPosts(token);
@@ -230,12 +250,23 @@ export function PosterDashboard() {
                            </h5>
                            <div className="grid gap-4 md:grid-cols-2">
                              {applicants.map((app, idx) => (
-                               <div key={app._id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative">
+                               <div key={app._id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative flex flex-col h-full">
                                   <div className="flex items-center justify-between mb-3 border-b border-slate-50 pb-2">
-                                    <span className="font-semibold text-slate-700 text-sm">Applicant {idx + 1}</span>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold text-slate-700 text-sm">Applicant {idx + 1}</span>
+                                      {app.status && (
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                          app.status === 'approved' || app.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                          app.status === 'rejected' ? 'bg-red-100 text-red-700' : 
+                                          'bg-yellow-100 text-yellow-700'
+                                        }`}>
+                                          {app.status.toUpperCase()}
+                                        </span>
+                                      )}
+                                    </div>
                                     <span className="text-xs text-slate-400">{new Date(app.appliedAt).toLocaleString()}</span>
                                   </div>
-                                  <div className="space-y-2 text-sm">
+                                  <div className="space-y-2 text-sm flex-1">
                                      <div className="grid grid-cols-[100px_1fr] gap-2">
                                        <span className="text-slate-500 font-medium">Email:</span>
                                        <span className="text-slate-900 break-all">
@@ -254,6 +285,40 @@ export function PosterDashboard() {
                                           </div>
                                         );
                                      })}
+                                  </div>
+                                  
+                                  {/* Actions */}
+                                  <div className="mt-4 pt-3 border-t border-slate-100 flex gap-2 justify-end">
+                                    {(app.status === 'pending' || !app.status) && (
+                                      <>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                          onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}
+                                        >
+                                          Reject
+                                        </Button>
+                                        <Button 
+                                          variant="default" 
+                                          size="sm" 
+                                          className="bg-green-600 hover:bg-green-700"
+                                          onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}
+                                        >
+                                          Approve for Work
+                                        </Button>
+                                      </>
+                                    )}
+                                    {app.status === 'approved' && (
+                                      <p className="text-xs text-green-600 font-medium my-auto text-right w-full">
+                                        Approved! Candidate can now see your contact info.
+                                      </p>
+                                    )}
+                                    {app.status === 'rejected' && (
+                                      <p className="text-xs text-red-500 font-medium my-auto text-right w-full">
+                                        Rejected.
+                                      </p>
+                                    )}
                                   </div>
                                </div>
                              ))}
