@@ -1,3 +1,20 @@
+export interface FormField {
+  id: string;
+  key: string;
+  label: string;
+  type: 'text' | 'textarea' | 'email' | 'url' | 'number' | 'file';
+  required: boolean;
+  validation?: {
+    maxLength?: number;
+    numberOnly?: boolean;
+  };
+}
+
+export interface ApplicationForm {
+  isEnabled: boolean;
+  fields: FormField[];
+}
+
 export interface Opportunity {
   id: string;
   title: string;
@@ -34,6 +51,8 @@ export interface Opportunity {
     riskFlags?: string[];
   };
   thematicAreas?: { heading: string; topics: string[] }[];
+  applicationForm?: ApplicationForm;
+  suggestCustomForm?: boolean; // Temporary flag from AI parsing
 }
 
 export const opportunities: Opportunity[] = [

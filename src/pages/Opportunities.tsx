@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { OpportunityCard } from '../components/OpportunityCard';
+import { AppliedDashboard } from '../components/AppliedDashboard';
 import { opportunitiesAPI } from '../services/api';
 import { Search, Filter } from 'lucide-react';
 import type { Opportunity } from '../data/opportunities';
@@ -192,6 +193,13 @@ export function Opportunities() {
             >
               Academic & Learning
             </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('applied')}
+              className={`px-6 sm:px-8 py-3 rounded-md font-semibold transition-all whitespace-nowrap ${activeTab === 'applied' ? 'bg-white text-blue-900 shadow-md scale-105' : 'text-white hover:bg-white/20'}`}
+            >
+              Applied
+            </button>
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-6">Opportunities</h1>
@@ -285,17 +293,21 @@ export function Opportunities() {
           </div>
 
           {/* Results Count */}
-          <div className="mt-6">
-            <p className="text-white">
-              Showing <span className="font-semibold text-white">{filteredOpportunities.length}</span> {filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
-            </p>
-          </div>
+          {activeTab !== 'applied' && (
+            <div className="mt-6">
+              <p className="text-white">
+                Showing <span className="font-semibold text-white">{filteredOpportunities.length}</span> {filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Opportunities Grid */}
+      {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {loading ? (
+        {activeTab === 'applied' ? (
+          <AppliedDashboard />
+        ) : loading ? (
           <div className="fixed inset-0 flex items-center justify-center">
             <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-900 rounded-full animate-spin"></div>
           </div>

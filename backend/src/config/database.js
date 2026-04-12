@@ -40,6 +40,14 @@ export async function connectDB() {
     await reports.createIndex({ status: 1, submittedAt: -1 });
     await reports.createIndex({ opportunityId: 1, submittedAt: -1 });
 
+    const applications = db.collection('applications');
+    await applications.createIndex({ opportunityId: 1, appliedAt: -1 });
+    await applications.createIndex({ applicantEmail: 1, appliedAt: -1 });
+
+    const authOtps = db.collection('auth_otps');
+    await authOtps.createIndex({ email: 1 });
+    await authOtps.createIndex({ createdAt: 1 }, { expireAfterSeconds: 600 }); // Expires after 10 mins
+
     console.log('✅ Indexes ensured');
 
     return db;

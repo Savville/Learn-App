@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
-import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, AlertCircle, Flag } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, Flag } from 'lucide-react';
 import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
@@ -125,6 +125,43 @@ export function OpportunityDetails() {
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportMessage, setReportMessage] = useState<string | null>(null);
   const [reportForm, setReportForm] = useState({ name: '', email: '', reason: '', details: '' });
+
+  // Custom Form Application State
+  const [showApplyForm, setShowApplyForm] = useState(false);
+  const [applicationData, setApplicationData] = useState<Record<string, any>>({});
+  const [isSubmittingApp, setIsSubmittingApp] = useState(false);
+  const [appSubmitSuccess, setAppSubmitSuccess] = useState(false);
+  const [appSubmitError, setAppSubmitError] = useState<string | null>(null);
+
+  const handleApplySubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!opportunity || !opportunity.applicationForm) return;
+
+    setIsSubmittingApp(true);
+    setAppSubmitError(null);
+
+    // The backend expects `email` at the root, and the rest in `data`
+    // Find the field that was marked as 'email' type, or default to checking 'email' key
+    const emailField = opportunity.applicationForm.fields.find(f => f.type === 'email' || f.key === 'email');
+    const emailValue = emailField ? applicationData[emailField.key] : applicationData['email'];
+
+    try {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailValue, data: applicationData }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to submit application');
+      
+      setAppSubmitSuccess(true);
+    } catch (err: any) {
+      setAppSubmitError(err.message);
+    } finally {
+      setIsSubmittingApp(false);
+    }
+  };
 
   const urgency = opportunity ? calculateUrgency(opportunity.deadline) : null;
   const verificationLabel = opportunity?.status || (opportunity?.isVerified ? 'Verified' : 'Unverified');
@@ -287,12 +324,6 @@ export function OpportunityDetails() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <article className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="border-b border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-900 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-            <p>
-              We review submissions manually, but we do not guarantee every opportunity, especially external postings. Verify details before applying.
-            </p>
-          </div>
           {/* Header Image */}
           <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
             <img
@@ -506,8 +537,111 @@ export function OpportunityDetails() {
 
             
             {/* Apply Button / Challenge CTA */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 text-center">
-              {opportunity.applicationLink ? (
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 text-center" id="apply-section">
+              {opportunity.applicationForm?.isEnabled ? (
+                <>
+                  <h3 className="text-gray-900 mb-6 text-xl font-bold">Ready to Apply?</h3>
+                  {!showApplyForm && !appSubmitSuccess && (
+                     <div className="flex justify-center">
+                        <Button
+                          onClick={() => setShowApplyForm(true)}
+                          className="flex-1 max-w-xs inline-flex items-center justify-center py-6 text-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                        >
+                          Fill Application Form
+                        </Button>
+                     </div>
+                  )}
+
+                  {showApplyForm && !appSubmitSuccess && (
+                    <form onSubmit={handleApplySubmit} className="text-left max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+                      <p className="text-sm text-gray-500 mb-6 border-b border-gray-100 pb-4">
+                        Please fill out the form below. Your email address will be used to track your application.
+                      </p>
+                      
+                      <div className="space-y-5">
+                        {opportunity.applicationForm.fields.map(field => (
+                          <div key={field.id}>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              {field.label} {field.required && <span className="text-red-500">*</span>}
+                            </label>
+                            
+                            {field.type === 'textarea' ? (
+                              <Textarea
+                                required={field.required}
+                                placeholder={`Enter your ${field.label.toLowerCase()}`}
+                                className="w-full rounded-lg border-gray-300"
+                                rows={4}
+                                maxLength={field.validation?.maxLength}
+                                value={applicationData[field.key] || ''}
+                                onChange={(e) => setApplicationData({ ...applicationData, [field.key]: e.target.value })}
+                              />
+                            ) : (
+                              <Input
+                                type={field.type}
+                                required={field.required}
+                                placeholder={field.type === 'url' ? 'https://...' : `Enter your ${field.label.toLowerCase()}`}
+                                className="w-full rounded-lg border-gray-300"
+                                value={applicationData[field.key] || ''}
+                                onChange={(e) => setApplicationData({ ...applicationData, [field.key]: e.target.value })}
+                              />
+                            )}
+                            
+                            {field.type === 'textarea' && field.validation?.maxLength && (
+                              <p className="text-xs text-gray-400 mt-1 text-right">
+                                Max {field.validation.maxLength} characters
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {appSubmitError && (
+                        <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">
+                          {appSubmitError}
+                        </div>
+                      )}
+
+                      <div className="mt-8 flex gap-3">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => setShowApplyForm(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          type="submit" 
+                          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600"
+                          disabled={isSubmittingApp}
+                        >
+                          {isSubmittingApp ? 'Submitting...' : 'Submit Application'}
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+
+                  {appSubmitSuccess && (
+                     <div className="max-w-md mx-auto bg-green-50 rounded-xl p-8 border border-green-100 shadow-sm animate-in fade-in zoom-in duration-300">
+                       <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                       <h4 className="text-xl font-bold text-gray-900 mb-2">Application Sent!</h4>
+                       <p className="text-gray-600 text-sm">
+                         Your application has been securely delivered to the poster. You can track your status in the "Applied" tab on the main page.
+                       </p>
+                       <Button 
+                         variant="outline" 
+                         className="mt-6 w-full shadow-sm text-green-700 border-green-200 hover:bg-green-100"
+                         onClick={() => {
+                           setAppSubmitSuccess(false);
+                           setShowApplyForm(false);
+                         }}
+                       >
+                         Submit Another Application
+                       </Button>
+                     </div>
+                  )}
+                </>
+              ) : opportunity.applicationLink ? (
                 <>
                   <h3 className="text-gray-900 mb-6 text-xl font-bold">Ready to Apply?</h3>
                   <div className="flex gap-4 justify-center">

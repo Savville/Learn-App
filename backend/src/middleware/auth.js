@@ -30,6 +30,27 @@ export function verifyAdminKey(req, res, next) {
   return res.status(401).json({ error: 'Unauthorized — no valid credentials provided.' });
 }
 
+export function verifyUserToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized — token needed' });
+  }
+
+  const token = authHeader.slice(7);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.type !== 'user') throw new Error('Invalid token type');
+    req.user = decoded;
+    return next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Unauthorized — token expired or invalid' });
+  }
+}
+
+export function generateUserToken(email) {
+  return jwt.sign({ email, type: 'user' }, JWT_SECRET, { expiresIn: '7d' });
+}
+
 /**
  * generateAdminToken — signs a JWT for a verified admin.
  * Called by POST /api/admin/login after password check.

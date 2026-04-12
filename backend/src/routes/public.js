@@ -5,11 +5,13 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateUserToken, verifyUserToken } from '../middleware/auth.js';
 import { 
   sendAdminSubmissionNotification, 
   sendPosterAcknowledgementEmail,
   sendOrganizationVerificationRequest,
-  sendOrganizationRequestAcknowledgement
+  sendOrganizationRequestAcknowledgement,
+  sendOTPEmail
 } from '../services/emailService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -211,13 +213,15 @@ router.post('/parse-opportunity', async (req, res) => {
             "heading": "...",
             "topics": ["topic 1", "topic 2"]
           }
-        ]
+        ],
+        "suggestCustomForm": false
       }
       
       Intelligence Rules for New Fields:
       - compensationType: Use 'Paid' if a salary is mentioned, 'Stipend' for fixed pocket money/allowance, 'Unpaid' if zero payment, and 'N/A' for conferences/events.
       - upfrontCost: Set to 'No Upfront Cost' ONLY if the text explicitly says travel/visa are covered, if it's remote, or if it is local to Kenya with zero fees. 
       - If the opportunity is international and doesn't mention airfare/visa coverage, set upfrontCost to 'Has Upfront Cost'.
+      - suggestCustomForm: Set to true ONLY IF category is 'Job' or 'Internship' AND there is NO clear external application URL detected in the text. This allows the poster to build an internal form.
 
       Raw Text to analyze:
       """
@@ -263,6 +267,11 @@ router.post('/submit-opportunity', async (req, res) => {
     };
     const riskFlags = detectRedFlags(opportunity, normalizedReporter);
     
+    // Clean up temporary AI flags before saving
+    if (opportunity.suggestCustomForm !== undefined) {
+      delete opportunity.suggestCustomForm;
+    }
+
     // Check if reporter is a verified organization
     const org = await db.collection('organizations').findOne({ 
       email: normalizedReporter.email 
@@ -356,6 +365,176 @@ router.post('/organizations/request', async (req, res) => {
     res.json({ message: 'Request sent successfully. We will contact you soon.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ==========================================
+// Phase 4: Secure Data Access for Posters & Applicants
+// ==========================================
+
+// 1. Generate & Send OTP
+router.post('/auth/send-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const normalizedEmail = email.trim().toLowerCase();
+    
+    // Generate 4-digit code
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+    const db = getDB();
+    await db.collection('auth_otps').updateOne(
+      { email: normalizedEmail },
+      { $set: { otp, createdAt: new Date() } },
+      { upsert: true }
+    );
+
+    // Send it
+    await sendOTPEmail(normalizedEmail, otp);
+    res.json({ message: 'Code sent to email' });
+  } catch (error) {
+    console.error('OTP Send Error:', error);
+    res.status(500).json({ error: 'Failed to send code' });
+  }
+});
+
+// 2. Verify OTP & Issue Token
+router.post('/auth/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const normalizedEmail = email.trim().toLowerCase();
+    
+    const db = getDB();
+    const record = await db.collection('auth_otps').findOne({ email: normalizedEmail, otp });
+
+    if (!record) {
+      return res.status(400).json({ error: 'Invalid or expired code' });
+    }
+
+    // Burn the code after successful use
+    await db.collection('auth_otps').deleteOne({ _id: record._id });
+
+    // Issue JWT
+    const token = generateUserToken(normalizedEmail);
+    res.json({ token, email: normalizedEmail });
+  } catch (error) {
+    console.error('OTP Verify Error:', error);
+    res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+// 3. SECURE ENDPOINT: Get Applicant's History
+router.get('/me/applications', verifyUserToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+    const db = getDB();
+    
+    const applications = await db.collection('applications')
+      .find({ applicantEmail: email })
+      .sort({ appliedAt: -1 })
+      .toArray();
+
+    // Map opportunity titles and URLs if you want better links
+    res.json(applications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 4. SECURE ENDPOINT: Get Poster's Jobs
+router.get('/me/posts', verifyUserToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+    const db = getDB();
+
+    // Find jobs in raw opportunities and pending_opportunities
+    const livePosts = await db.collection('opportunities')
+      .find({ 'reporter.email': email }) // Assuming you saved reporter info or contactEmail
+      .toArray();
+      
+    // Because in our submit route we saved reporter: { email } to pending_opportunities and might not have persisted reporter to the main opportunities initially,
+    // let's grab from both to be safe, or just look up anything linked to their email string. We track submitted stuff.
+    const pendingPosts = await db.collection('pending_opportunities')
+      .find({ 'reporter.email': email })
+      .toArray();
+    
+    res.json({ live: livePosts, pending: pendingPosts });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 5. SECURE ENDPOINT: Get Candidates for a specific Job owned by this Poster
+router.get('/me/posts/:id/applicants', verifyUserToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const email = req.user.email;
+    const db = getDB();
+
+    // Verify ownership
+    const opp = await db.collection('opportunities').findOne({ id });
+    if (!opp) return res.status(404).json({ error: 'Opportunity not found' });
+    
+    // NOTE: If your opportunity object doesn't strictly have `reporter.email` attached to the live document, 
+    // you might need to check pending_opportunities for ownership. Let's do that:
+    const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': id });
+    if (originalPending?.reporter?.email !== email && opp.contactEmail !== email) {
+        return res.status(403).json({ error: 'You do not own this post' });
+    }
+
+    const applicants = await db.collection('applications')
+      .find({ opportunityId: id })
+      .sort({ appliedAt: -1 })
+      .toArray();
+
+    res.json(applicants);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Submit an application to a custom internal form
+router.post('/opportunities/:id/apply', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, data } = req.body; // 'data' is the JSON object mapped to the form keys
+
+    if (!email || !data || typeof data !== 'object') {
+      return res.status(400).json({ error: "Applicant email and application data are required." });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const db = getDB();
+    const opportunity = await db.collection('opportunities').findOne({ id });
+
+    if (!opportunity) {
+      return res.status(404).json({ error: "Opportunity not found." });
+    }
+
+    if (!opportunity.applicationForm?.isEnabled) {
+      return res.status(400).json({ error: "This opportunity does not accept internal applications." });
+    }
+
+    // Check for double applying
+    const existing = await db.collection('applications').findOne({ opportunityId: id, applicantEmail: normalizedEmail });
+    if (existing) {
+       return res.status(400).json({ error: "You have already applied to this opportunity." });
+    }
+
+    // Insert the new application
+    await db.collection('applications').insertOne({
+      opportunityId: id,
+      opportunityTitle: opportunity.title,
+      applicantEmail: normalizedEmail,
+      applicantData: data,
+      status: 'Pending',
+      appliedAt: new Date(),
+    });
+
+    res.status(201).json({ message: "Application submitted successfully." });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 });
 

@@ -5,10 +5,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, AlertCircle, Info, CheckCircle2, Building2, User, Camera } from 'lucide-react';
+import { Sparkles, AlertCircle, Info, CheckCircle2, Building2, User, Camera, Plus, Trash2, LayoutDashboard } from 'lucide-react';
+import { FormField, ApplicationForm } from '@/data/opportunities';
+import { PosterDashboard } from '@/components/PosterDashboard';
 
 // Type definition for the data returned by the AI parser
 interface ParsedOpportunityData {
+  suggestCustomForm?: boolean;
   basicInfo: {
     title: string;
     provider: string;
@@ -53,6 +56,12 @@ export function PostWithUs() {
   const [orgRequest, setOrgRequest] = useState({ name: '', organization: '', email: '', telephone: '', description: '' });
   const [requestStatus, setRequestStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
+  // Custom Form Builder State
+  const [customForm, setCustomForm] = useState<ApplicationForm>({ isEnabled: false, fields: [] });
+
+  // View Mode
+  const [viewMode, setViewMode] = useState<'post' | 'manage'>('post');
+
   const handleParse = async () => {
     if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email || !reporter.websiteOrSocial) {
       setError('Please provide your full identity details first.');
@@ -79,6 +88,19 @@ export function PostWithUs() {
       }
       
       setParsedData(data);
+
+      if (data.suggestCustomForm) {
+        setCustomForm({
+          isEnabled: true,
+          fields: [
+            { id: Date.now().toString(), key: 'email', label: 'Email Address', type: 'email', required: true },
+            { id: (Date.now() + 1).toString(), key: 'full_name', label: 'Full Name', type: 'text', required: true }
+          ]
+        });
+      } else {
+        setCustomForm({ isEnabled: false, fields: [] });
+      }
+
     } catch (error: any) {
       console.error(error);
       setError(`Parsing failed: ${error.message}`);
@@ -166,12 +188,12 @@ export function PostWithUs() {
         const applicationLink = parsedData.extractedFeatures.find(f => f.feature === 'Application Link')?.value || '';
         const location = parsedData.extractedFeatures.find(f => f.feature === 'Location')?.value || '';
 
-        // Validation: Application Link is MANDATORY for most categories
+        // Validation: Application Link is MANDATORY for most categories UNLESS custom form is enabled
         const category = parsedData.basicInfo.category;
         const isDemoLink = applicationLink.toLowerCase().includes('demo') || applicationLink.includes('example.com');
         
-        if (category !== 'Open Challenge' && (!applicationLink || applicationLink.trim().length < 8 || isDemoLink)) {
-          throw new Error(`For ${category}, a valid application link is required. Please edit the "Application Link" field in the extraction table below before submitting.`);
+        if (!customForm.isEnabled && category !== 'Open Challenge' && (!applicationLink || applicationLink.trim().length < 8 || isDemoLink)) {
+          throw new Error(`For ${category}, a valid application link is required unless you enable the Custom Form. Please edit the "Application Link" field below.`);
         }
 
         const slug = parsedData.basicInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -195,6 +217,7 @@ export function PostWithUs() {
           },
           benefits: parsedData.benefits || [],
           thematicAreas: parsedData.thematicAreas || [],
+          applicationForm: customForm,
           featured: false,
           dateAdded: new Date().toISOString().split('T')[0],
           logoUrl: imageUrl,
@@ -232,26 +255,50 @@ export function PostWithUs() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-        <header className="flex flex-col items-start justify-between gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center">
+        <header className="flex flex-col items-start justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
-              Post With Us
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl flex items-center gap-3">
+              {viewMode === 'post' ? 'Post With Us' : 'Manage My Postings'}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Share an opportunity with thousands of students and change-makers across Kenya.
+              {viewMode === 'post' 
+                ? 'Share an opportunity with thousands of students and change-makers across Kenya.' 
+                : 'Review your live and pending posts, and see who has applied.'
+              }
             </p>
+          </div>
+          <div className="flex gap-3">
+             <Button 
+               variant={viewMode === 'post' ? 'default' : 'outline'}
+               onClick={() => setViewMode('post')}
+               className={viewMode === 'post' ? 'bg-[#0933ed] text-white hover:bg-blue-800' : 'text-slate-600'}
+             >
+               Post Opportunity
+             </Button>
+             <Button 
+               variant={viewMode === 'manage' ? 'default' : 'outline'}
+               onClick={() => setViewMode('manage')}
+               className={viewMode === 'manage' ? 'bg-[#0933ed] text-white hover:bg-blue-800' : 'text-slate-600 border-slate-300'}
+             >
+               <LayoutDashboard className="w-4 h-4 mr-2" />
+               View Dashboard
+             </Button>
           </div>
         </header>
 
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex items-start gap-3">
-          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p>
-            We manually review submissions, but we do not guarantee every opportunity, especially external postings. Please provide accurate identity and proof details.
-          </p>
-        </div>
+        {viewMode === 'manage' ? (
+           <PosterDashboard />
+        ) : (
+          <>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+              <p>
+                We manually review submissions, but we do not guarantee every opportunity, especially external postings. Please provide accurate identity and proof details.
+              </p>
+            </div>
 
-        {/* STEP 1: Details & Text Input */}
-        <Card className="border-slate-200 shadow-sm">
+            {/* STEP 1: Details & Text Input */}
+            <Card className="border-slate-200 shadow-sm">
           <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold text-slate-900">
                 1. Provide the Details
@@ -688,7 +735,123 @@ export function PostWithUs() {
                   </div>
                 </div>
 
-                {/* STEP 3: Desktop Wide Image Upload */}
+                {/* STEP 3: Application Form Builder */}
+                <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900">Application Form Builder</h3>
+                      <p className="text-sm text-slate-500">
+                        Toggle this to collect applications directly on our platform instead of an external website.
+                      </p>
+                    </div>
+                    <label className="relative inline-flex cursor-pointer items-center">
+                      <input
+                        type="checkbox"
+                        className="peer sr-only"
+                        checked={customForm.isEnabled}
+                        onChange={(e) => setCustomForm(prev => ({ ...prev, isEnabled: e.target.checked }))}
+                      />
+                      <div className="peer h-6 w-11 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rtl:peer-checked:after:-translate-x-full dark:border-slate-600 dark:bg-slate-700"></div>
+                      <span className="ml-3 text-sm font-medium text-slate-900">
+                        {customForm.isEnabled ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </label>
+                  </div>
+
+                  {customForm.isEnabled && (
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                      <p className="mb-4 text-xs text-slate-500">
+                        Configure the fields applicants need to fill. An "Email Address" step will be automatically enforced for verification.
+                      </p>
+                      <div className="mb-4 space-y-3">
+                        {customForm.fields.map((field, idx) => (
+                          <div key={field.id} className="flex flex-wrap items-center gap-2 rounded bg-white p-3 shadow-sm border border-slate-100">
+                            <Input
+                              value={field.label}
+                              onChange={(e) => {
+                                const newFields = [...customForm.fields];
+                                newFields[idx].label = e.target.value;
+                                newFields[idx].key = e.target.value.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+                                setCustomForm({ ...customForm, fields: newFields });
+                              }}
+                              placeholder="Field Label (e.g. Portfolio Link)"
+                              className="w-48 text-sm"
+                            />
+                            <select
+                              value={field.type}
+                              onChange={(e) => {
+                                const newFields = [...customForm.fields];
+                                newFields[idx].type = e.target.value as FormField['type'];
+                                setCustomForm({ ...customForm, fields: newFields });
+                              }}
+                              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <option value="text">Short Text</option>
+                              <option value="textarea">Paragraph</option>
+                              <option value="email">Email</option>
+                              <option value="url">URL Link</option>
+                              <option value="number">Number</option>
+                            </select>
+                            
+                            {field.type === 'textarea' && (
+                              <Input
+                                type="number"
+                                placeholder="Max words (e.g. 500)"
+                                value={field.validation?.maxLength || ''}
+                                onChange={(e) => {
+                                  const newFields = [...customForm.fields];
+                                  newFields[idx].validation = { ...newFields[idx].validation, maxLength: parseInt(e.target.value) || undefined };
+                                  setCustomForm({ ...customForm, fields: newFields });
+                                }}
+                                className="w-40 text-sm"
+                              />
+                            )}
+
+                            <label className="flex items-center gap-1 ml-auto text-sm text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={field.required}
+                                onChange={(e) => {
+                                  const newFields = [...customForm.fields];
+                                  newFields[idx].required = e.target.checked;
+                                  setCustomForm({ ...customForm, fields: newFields });
+                                }}
+                                className="rounded border-slate-300 text-primary focus:ring-primary"
+                              />
+                              Required
+                            </label>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
+                              onClick={() => {
+                                const newFields = customForm.fields.filter((_, i) => i !== idx);
+                                setCustomForm({ ...customForm, fields: newFields });
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setCustomForm({
+                            ...customForm,
+                            fields: [...customForm.fields, { id: Date.now().toString(), key: 'new_field', label: 'New Field', type: 'text', required: false }]
+                          });
+                        }}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Field
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* STEP 4: Desktop Wide Image Upload */}
                 <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
                   <label className="block text-sm font-semibold text-slate-900">
                     Upload cover image (desktop / wide)
@@ -718,6 +881,8 @@ export function PostWithUs() {
               </CardContent>
           </Card>
         )}
+        </>
+      )}
       </div>
     </div>
   );

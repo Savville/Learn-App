@@ -650,6 +650,35 @@ const eepTemplate = (name = 'Innovator') => wrapEmail(`
 
   </div>`);
 
+export async function sendOTPEmail(email, otp) {
+  try {
+    const html = wrapEmail(`
+      <div style="padding:32px 28px;">
+        <h2 style="color:#0f2744;font-size:24px;margin:0 0 12px;font-family:Arial,sans-serif;">Your Verification Code</h2>
+        <p style="color:#475569;font-size:15px;line-height:1.7;margin:0 0 24px;font-family:Arial,sans-serif;">
+          Use the 4-digit code below to securely access your data on Opportunities Kenya.
+        </p>
+        <div style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:12px; padding:24px; text-align:center; margin-bottom:32px;">
+          <h1 style="color:#0f2744;font-size:42px;letter-spacing:0.2em;margin:0;font-family:monospace;">${otp}</h1>
+        </div>
+        <p style="color:#64748b;font-size:13px;line-height:1.6;margin:0;font-family:Arial,sans-serif;">
+          This code will expire in 10 minutes. If you didn't request this, you can safely ignore this email.
+        </p>
+      </div>
+    `);
+
+    const data = await resend.emails.send({
+      from: 'Opportunities Kenya Security <security@opportunitieskenya.live>',
+      to: [email],
+      subject: `Your Login Code: ${otp}`,
+      html,
+    });
+    console.log(`[Email] OTP sent to ${email}`, data.id);
+  } catch (error) {
+    console.error(`[Email Error] Failed to send OTP to ${email}:`, error);
+  }
+}
+
 export async function sendOrganizationVerificationRequest(request) {
   const adminEmails = ['lead@opportunitieskenya.live', 'opportunitieskenyalive@gmail.com'];
   try {
