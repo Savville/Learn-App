@@ -1,9 +1,9 @@
 # Product Requirements Document (PRD)
 ## Learn Opportunities - Kenya University Student Focus
 
-**Document Version**: 1.0  
-**Date**: February 20, 2026  
-**Status**: In Development
+**Document Version**: 2.0  
+**Date**: April 12, 2026  
+**Status**: In Development (Escrow ATS Completed)
 
 ---
 
@@ -197,30 +197,35 @@ Each opportunity object should include:
 - [ ] Implement urgency color coding
 
 ### Phase 3: Content Management
-- [ ] Populate system with initial 20-30 Kenya-focused opportunities
+- [x] Populate system with initial 20-30 Kenya-focused opportunities
+
+### Phase 4: ATS & Escrow Integration (Completed)
+- [x] Implement Custom Form Builder for Posters to collect applications.
+- [x] Integrate URL/Link fields instead of complex file uploads.
+- [x] Build Applicant Status Management (Pending, Approved, Rejected, Paid).
+- [x] Implement Contact Unmasking (replaces in-app chat) for approved candidates.
+- [x] Build Admin Dispute / Resolution UI for escrowed jobs (Offline Hybrid Approach).
+
+### Phase 5: Production Payments Migration (Planned for Tomorrow)
+- [ ] Migrate M-PESA STK Push from Safaricom Daraja Sandbox to a Payment Aggregator (IntaSend/Paystack).
+- [ ] Bypass Safaricom's sole-proprietor business registration constraints (eCitizen CR12/Till requirements).
+- [ ] Implement live webhook handling for the chosen aggregator to automatically flip `isEscrowFunded` state.
+- [ ] Finalize end-to-end testing of Escrow deposit workflow using real funds.
 - [ ] Add cross-category opportunities (especially Call for Papers + Scholarship combos)
 - [ ] Create content validation checklist
 
-### Phase 4: Additional Features
-- [ ] Set up Node.js + Express backend server
-- [ ] Configure MongoDB database (Atlas cloud)
-- [ ] Create admin API endpoints for content management
-- [ ] Implement email subscription system (Gmail/SendGrid)
-- [ ] Add email notification service (new opportunities & reminders)
-- [ ] Build admin dashboard for analytics
-- [ ] Implement ad management system
-- [ ] Integrate frontend with backend APIs
-- [ ] Analytics tracking for user interactions
-- [ ] Deploy backend to Railway/Render
+### Phase 6: Core Infrastructure (Completed)
+- [x] Set up Node.js + Express backend server & MongoDB (Atlas cloud)
+- [x] Create admin API endpoints for content management
+- [x] Implement email subscription & notification system
+- [x] Integrate frontend with backend APIs
+- [x] Build admin dashboard for management
+- [ ] Deploy backend to production (Railway/Render)
 
-### Phase 5: Future Enhancements (Post-MVP)
-- [ ] Application tracking dashboard for users
-- [ ] Success stories from students who applied
-- [ ] Partner organization profiles
-- [ ] Community forum for opportunity discussions
-- [ ] Opportunity recommendations based on student profile
-- [ ] Curriculum vitae builder tool
-- [ ] Interview preparation resources
+### Phase 7: Future Enhancements (Post-MVP)
+- [ ] Automated matching engine based on student STEM footprint
+- [ ] Automated platform transaction fee deduction logic inside the Escrow payout
+- [ ] Partner organization profiles and public success stories
 
 ---
 
@@ -274,29 +279,6 @@ Each opportunity object should include:
 }
 ```
 
-#### Analytics Collection
-```
-{
-  _id: ObjectId,
-  opportunityId: String,
-  action: String (view, click, apply),
-  timestamp: Date,
-  userIP: String
-}
-```
-
-#### Ads Collection
-```
-{
-  _id: ObjectId,
-  title: String,
-  imageUrl: String,
-  link: String,
-  active: Boolean,
-  createdAt: Date
-}
-```
-
 #### Admin Collection
 ```
 {
@@ -313,18 +295,16 @@ Each opportunity object should include:
 **Public Endpoints**:
 - `GET /api/opportunities` - Fetch all with filters (category, level, location)
 - `GET /api/opportunities/:id` - Fetch single opportunity detail
-- `POST /api/subscribe` - Email subscription (body: email, categories, preferences)
-- `POST /api/analytics/track` - Track views/clicks/applies
-- `GET /api/ads/random` - Get random active ad
+- `POST /api/subscribe` - Email subscription (body: email, categories)
+- `POST /api/public/applications/*` - Handle Escrow forms, updates, and disputes
+- `POST /api/public/payments/mpesa/callback` - Production Aggregator Webhook Endpoints
 
-**Admin Endpoints** (requires API key):
-- `POST /api/opportunities` - Create new opportunity
-- `PUT /api/opportunities/:id` - Update opportunity
-- `DELETE /api/opportunities/:id` - Delete opportunity
-- `GET /api/analytics/dashboard` - View stats and metrics
-- `POST /api/ads` - Create ad
-- `PUT /api/ads/:id` - Update ad
-- `DELETE /api/ads/:id` - Delete ad
+**Admin Endpoints** (requires API key / JWT):
+- `GET /api/admin/disputes` - View Active Escrow Disputes
+- `PUT /api/admin/applications/:id/resolve` - Mediate/resolve disputes
+- `POST /api/admin/opportunities` - Content Management
+- `PUT /api/admin/opportunities/:id` - Content Management
+- `DELETE /api/admin/opportunities/:id` - Content Management
 
 ### Email Services
 
@@ -388,33 +368,19 @@ VITE_API_URL=http://localhost:5000/api
 ## 8. Success Metrics
 
 - Number of active opportunities in system
-- Click-through rate to applications (target: >25%)
+- Usage of the Escrow functionality (deposits vs resolved applications)
 - Average time per opportunity page (target: >2 minutes)
-- Successful application completions (qualitative)
+- Successful micro-internships completed (qualitative)
 - Newsletter subscription rate
-- Return visitor percentage
 
 ---
 
-## 8. Technical Considerations
+## 9. Technical Considerations
 
 - **Performance**: Filter operations must be responsive (<200ms)
 - **SEO**: Ensure opportunity pages are search-engine optimized
-- **Mobile**: Ensure 100% responsive design, especially for deadline viewing
+- **Mobile**: Ensure 100% responsive design, especially for M-PESA payment modals
 - **Accessibility**: WCAG 2.1 AA compliance for all components
-- **Data Updates**: Establish weekly update schedule for opportunities
-
----
-
-## 9. Future Enhancements
-
-- Application tracking dashboard for users
-- Success stories from students who applied
-- Partner organization profiles
-- Community forum for opportunity discussions
-- Opportunity recommendations based on student profile
-- Curriculum vitae builder tool
-- Interview preparation resources
 
 ---
 

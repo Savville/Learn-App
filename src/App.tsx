@@ -11,6 +11,7 @@ import { Contact } from './pages/Contact';
 import { PostWithUs } from './pages/PostWithUs';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
+import { AdminDisputes } from './pages/AdminDisputes';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PageLoader } from './components/PageLoader';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -75,6 +76,7 @@ function AppContent() {
               </ProtectedRoute>
             } 
           />
+          <Route path="/admin/disputes" element={<AdminDisputes />} />
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}

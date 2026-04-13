@@ -18,6 +18,9 @@ export interface ApplicationForm {
 export interface Opportunity {
   id: string;
   title: string;
+  isEscrow?: boolean;
+  escrowAmount?: number;
+  isEscrowFunded?: boolean;
   provider: string;
   category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'Gig' | 'Job' | 'Other';
   description: string;

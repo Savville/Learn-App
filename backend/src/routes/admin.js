@@ -520,16 +520,18 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     // Update pending status
     await db.collection('pending_opportunities').updateOne({ _id: pendingDoc._id }, { $set: { status: 'Verified', approvedAt: new Date(), reviewedAt: new Date(), reviewedBy, proofLinks } });
 
-    // Fetch active subscribers to send the new opportunity alert
-    const subscribers = await db
-      .collection('subscribers')
-      .find({ unsubscribed: { $ne: true } })
-      .project({ email: 1 })
-      .toArray();
+    // Fetch active subscribers to send the new opportunity alert if it's not an edit
+    if (!oppToPublish.editOf) {
+      const subscribers = await db
+        .collection('subscribers')
+        .find({ unsubscribed: { $ne: true } })
+        .project({ email: 1 })
+        .toArray();
 
-    if (subscribers.length > 0) {
-      // Non-blocking: send the email in the background so the admin UI responds instantly
-      sendNewOpportunityEmail(subscribers, oppToPublish).catch(err => console.error("Failed to send alert:", err));
+      if (subscribers.length > 0) {
+        // Non-blocking: send the email in the background so the admin UI responds instantly
+        sendNewOpportunityEmail(subscribers, oppToPublish).catch(err => console.error("Failed to send alert:", err));
+      }
     }
 
     // NEW: Notify the original poster that their opportunity is now live
@@ -780,5 +782,78 @@ router.delete('/opportunities/:id', verifyAdminKey, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// ── NEW ESCROW DISPUTE ADMIN ROUTES ───────────────────────────────────────────
+
+router.get('/disputes', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const disputes = await db.collection('applications')
+      .find({ status: 'disputed' })
+      .sort({ updatedAt: -1 })
+      .toArray();
+
+    // Attach opportunity data for better context on the admin UI
+    const oppIds = [...new Set(disputes.map(d => d.opportunityId))];
+    const opportunities = await db.collection('opportunities')
+      .find({ id: { $in: oppIds } })
+      .toArray();
+    
+    const pendingOpps = await db.collection('pending_opportunities')
+      .find({ 'opportunity.id': { $in: oppIds } })
+      .toArray();
+
+    // Map opportunities so they are easy to look up
+    const oppMap = {};
+    opportunities.forEach(o => { oppMap[o.id] = o; });
+    pendingOpps.forEach(po => {
+      if (!oppMap[po.opportunity.id]) {
+        oppMap[po.opportunity.id] = {
+          ...po.opportunity,
+          posterEmail: po.reporter?.email
+        };
+      }
+    });
+
+    const enrichedDisputes = disputes.map(d => ({
+      ...d,
+      opportunityTitle: oppMap[d.opportunityId]?.title || 'Unknown Title',
+      escrowAmount: oppMap[d.opportunityId]?.escrowAmount || 0,
+      posterEmailFallback: oppMap[d.opportunityId]?.posterEmail || oppMap[d.opportunityId]?.contactEmail
+    }));
+
+    res.json(enrichedDisputes);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/applications/:appId/resolve', verifyAdminKey, async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const { resolution } = req.body; // 'resolved_paid' or 'resolved_refunded'
+    
+    if (!['resolved_paid', 'resolved_refunded'].includes(resolution)) {
+      return res.status(400).json({ error: "Invalid resolution status" });
+    }
+
+    const { ObjectId } = await import('mongodb');
+    const db = getDB();
+    const result = await db.collection('applications').updateOne(
+      { _id: new ObjectId(appId), status: 'disputed' }, // Ensure we only resolve disputed apps
+      { $set: { status: resolution, updatedAt: new Date(), resolvedAt: new Date() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Disputed application not found." });
+    }
+
+    res.json({ message: `Dispute resolved as ${resolution}` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default router;

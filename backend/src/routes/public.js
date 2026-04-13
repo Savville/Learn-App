@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateUserToken, verifyUserToken } from '../middleware/auth.js';
+import { ObjectId } from 'mongodb';
 import { 
   sendAdminSubmissionNotification, 
   sendPosterAcknowledgementEmail,
@@ -13,6 +14,7 @@ import {
   sendOrganizationRequestAcknowledgement,
   sendOTPEmail
 } from '../services/emailService.js';
+import { initiateSTKPush } from '../services/mpesaService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
@@ -229,7 +231,21 @@ router.post('/parse-opportunity', async (req, res) => {
       """
     `;
 
-    const result = await model.generateContent(prompt);
+    let result;
+    try {
+      result = await model.generateContent(prompt);
+    } catch (apiError) {
+      if (apiError.message?.includes('503') || apiError.message?.includes('demand') || apiError.message?.includes('overloaded')) {
+        console.warn(`[GEMINI DELAY] API is currently overloaded. Waiting 3 seconds before retrying exactly once...`);
+        // Wait 3 seconds
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Retry with the exact same model since demand spikes are usually extremely short-lived
+        result = await model.generateContent(prompt);
+      } else {
+        throw apiError; 
+      }
+    }
+
     const responseText = result.response.text();
     const cleaned = responseText.replace(/```[\s\S]*?```/g, '').trim();
     const parsedData = JSON.parse(cleaned);
@@ -504,34 +520,95 @@ router.get('/me/posts/:id/applicants', verifyUserToken, async (req, res) => {
   }
 });
 
-// 6. SECURE ENDPOINT: Update an Applicant's Status
-router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
+// 6. SECURE ENDPOINT: Delete pending post
+router.delete('/me/posts/:id', verifyUserToken, async (req, res) => {
   try {
-    const { appId } = req.params;
-    const { status } = req.body;
+    const { id } = req.params;
     const email = req.user.email;
     const db = getDB();
 
-    if (!['pending', 'approved', 'rejected', 'paid'].includes(status)) {
-      return res.status(400).json({ error: 'Invalid status' });
+    // Only allow deletion of pending_opportunities. 
+    // First, verify if it is in pending_opportunities and matches the email
+    const pendingPost = await db.collection('pending_opportunities').findOne({ 
+      'opportunity.id': id,
+      'reporter.email': email
+    });
+
+    if (!pendingPost) {
+      return res.status(404).json({ error: 'Pending post not found or you do not have permission to delete it.' });
     }
 
-    const { ObjectId } = await import('mongodb');
+    // Ensure it's not actually live
+    const livePost = await db.collection('opportunities').findOne({ id });
+    if (livePost) {
+       return res.status(403).json({ error: 'Cannot delete a live post.' });
+    }
+
+    await db.collection('pending_opportunities').deleteOne({ _id: pendingPost._id });
+    
+    res.json({ success: true, message: 'Pending post deleted successfully.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const { status, reason } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+
     const application = await db.collection('applications').findOne({ _id: new ObjectId(appId) });
     if (!application) return res.status(404).json({ error: 'Application not found' });
 
-    // Verify ownership of the opportunity
-    const oppId = application.opportunityId;
-    const opp = await db.collection('opportunities').findOne({ id: oppId });
-    const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': oppId });
-    
-    if (originalPending?.reporter?.email !== email && opp?.contactEmail !== email) {
-      return res.status(403).json({ error: 'You do not own the post this application is for' });
+    if (status === 'disputed') {
+      // Must be the applicant raising the dispute
+      if (application.applicantEmail !== email) {
+         return res.status(403).json({ error: 'Only the applicant can raise a dispute.' });
+      }
+      
+      const oppId = application.opportunityId;
+      const opp = await db.collection('opportunities').findOne({ id: oppId });
+      const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': oppId });
+      
+      const posterEmail = application.posterContactEmail || opp?.contactEmail || originalPending?.reporter?.email;
+      const escrowAmount = opp?.escrowAmount || originalPending?.opportunity?.escrowAmount;
+
+      // In production, an actual email using nodemailer (e.g. `sendDisputeAlertEmail()`) would fire here.
+      console.log(`\n\x1b[31m[SYSTEM ALERT] DISPUTE RAISED OFFLINE TRIGGRED\x1b[0m`);
+      console.log(`Email Sent to: admin@opportunities.ke`);
+      console.log(`Job Title: ${opp?.title || originalPending?.opportunity?.title}`);
+      console.log(`Applicant Email: ${email}`);
+      console.log(`Poster Email: ${posterEmail}`);
+      console.log(`Escrow Amount at Risk: KES ${escrowAmount}`);
+      console.log(`Complaint from Applicant: "${reason || 'No specific reason provided'}"`);
+      console.log(`\x1b[33mAdmin must reply-all to ${email} and ${posterEmail} to mediate.\x1b[0m\n`);
+
+    } else {
+      // For all other statuses ('approved', 'rejected', 'paid'), ONLY the poster can trigger them.
+      const oppId = application.opportunityId;
+      const opp = await db.collection('opportunities').findOne({ id: oppId });
+      const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': oppId });
+      
+      if (originalPending?.reporter?.email !== email && opp?.contactEmail !== email) {
+        return res.status(403).json({ error: 'You do not own the post this application is for' });
+      }
+
+      // If it's currently disputed, the poster cannot change the status! Admin locked.
+      if (application.status === 'disputed' || application.status?.startsWith('resolved_')) {
+        return res.status(403).json({ error: 'Status is locked. An active dispute is underway.' });
+      }
+    }
+
+    const updateDoc = { $set: { status, updatedAt: new Date() } };
+    if (reason && status === 'disputed') {
+      updateDoc.$set.disputeReason = reason;
     }
 
     await db.collection('applications').updateOne(
       { _id: new ObjectId(appId) },
-      { $set: { status, updatedAt: new Date() } }
+      updateDoc
     );
 
     res.json({ message: 'Status updated successfully', status });
@@ -581,6 +658,95 @@ router.post('/opportunities/:id/apply', async (req, res) => {
     res.status(201).json({ message: "Application submitted successfully." });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+});
+
+// ==========================================
+// Phase 3: The Escrow Financial Engine
+// ==========================================
+
+// Initiate STK Push (Poster depositing Escrow)
+router.post('/payments/deposit', verifyUserToken, async (req, res) => {
+  try {
+    const { amount, phone, opportunityId } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+
+    if (!amount || amount < 1) return res.status(400).json({ error: 'Valid amount required' });
+    if (!phone || !phone.match(/^2547\d{8}$/)) return res.status(400).json({ error: 'Valid Safari phone required (format 2547XXXXXXXX)' });
+
+    // Validate ownership
+    const pendingOpp = await db.collection('pending_opportunities').findOne({ 'opportunity.id': opportunityId });
+    if (!pendingOpp || pendingOpp.reporter?.email !== email) {
+       return res.status(403).json({ error: 'Unauthorized to fund this post' });
+    }
+
+    // Call Daraja Sandbox
+    const result = await initiateSTKPush(phone, amount, opportunityId, 'Escrow Deposit');
+
+    if (!result.success) {
+      return res.status(500).json({ error: result.error || 'Failed to initiate STK Push' });
+    }
+
+    // Log transaction so the webhook can find it
+    await db.collection('transactions').insertOne({
+      opportunityId,
+      posterEmail: email,
+      amount,
+      phone,
+      checkoutRequestId: result.data.CheckoutRequestID,
+      status: 'pending',
+      createdAt: new Date(),
+    });
+
+    res.json({ message: 'STK Push sent to your phone. Enter PIN to complete deposit.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Daraja Webhook Callback (Safaricom calls this silently)
+router.post('/payments/mpesa/callback', async (req, res) => {
+  try {
+    const callbackData = req.body?.Body?.stkCallback;
+    if (!callbackData) return res.status(200).send('OK');
+
+    const db = getDB();
+    const checkoutRequestId = callbackData.CheckoutRequestID;
+    
+    // ResultCode 0 means Success
+    if (callbackData.ResultCode === 0) {
+      // Find the metadata items
+      const meta = callbackData.CallbackMetadata?.Item || [];
+      const receiptNo = meta.find(i => i.Name === 'MpesaReceiptNumber')?.Value;
+      const amountPaid = meta.find(i => i.Name === 'Amount')?.Value;
+
+      const tx = await db.collection('transactions').findOneAndUpdate(
+        { checkoutRequestId },
+        { $set: { status: 'completed', receiptNo, amountPaid, completedAt: new Date() } },
+        { returnDocument: 'after' }
+      );
+
+      if (tx.value) {
+         // Auto-publish the pending job now that Escrow is funded!
+         await db.collection('pending_opportunities').updateOne(
+           { 'opportunity.id': tx.value.opportunityId },
+           { $set: { isEscrowFunded: true, escrowAmount: amountPaid, status: 'approved' } }
+         );
+         // You'd also ideally move it directly to the 'opportunities' collection here, similar to your Admin logic.
+      }
+    } else {
+      // Payment Failed or User Cancelled
+      await db.collection('transactions').updateOne(
+        { checkoutRequestId },
+        { $set: { status: 'failed', failReason: callbackData.ResultDesc, completedAt: new Date() } }
+      );
+    }
+    
+    res.status(200).send('Webhook Processed');
+  } catch (error) {
+    console.error('M-PESA Callback Error:', error);
+    res.status(500).send('Error');
   }
 });
 

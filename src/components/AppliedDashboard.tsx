@@ -13,6 +13,7 @@ interface Application {
   appliedAt: string;
   applicantData: Record<string, string>;
   posterContactEmail?: string;
+  isEscrowFunded?: boolean;
 }
 
 export function AppliedDashboard() {
@@ -22,7 +23,40 @@ export function AppliedDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Dispute Modal State
+  const [disputeAppId, setDisputeAppId] = useState<string | null>(null);
+  const [disputeReason, setDisputeReason] = useState('');
+  const [submittingDispute, setSubmittingDispute] = useState(false);
+
   const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+
+  const handleRaiseDispute = async () => {
+    if (!disputeAppId || !disputeReason) return;
+    setSubmittingDispute(true);
+    try {
+      const res = await fetch(`${API_BASE}/public/applications/${disputeAppId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: 'disputed', reason: disputeReason })
+      });
+
+      if (!res.ok) throw new Error('Failed to raise dispute');
+
+      setApplications(apps => apps.map(app => 
+        app._id === disputeAppId ? { ...app, status: 'disputed' } : app
+      ));
+      
+      setDisputeAppId(null);
+      setDisputeReason('');
+    } catch (err: any) {
+      alert(err.message || 'Error communicating with server');
+    } finally {
+      setSubmittingDispute(false);
+    }
+  };
 
   const fetchApplications = async (currentToken: string) => {
     setLoading(true);
@@ -129,6 +163,8 @@ export function AppliedDashboard() {
                       app.status === 'pending' || app.status === 'Pending' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
                       app.status === 'approved' || app.status === 'paid' ? 'bg-green-100 text-green-700 border border-green-200' :
                       app.status === 'rejected' ? 'bg-red-100 text-red-700 border border-red-200' :
+                      app.status === 'disputed' ? 'bg-red-600 text-white' :
+                      app.status.startsWith('resolved_') ? 'bg-blue-600 text-white' :
                       'bg-slate-100 text-slate-600'
                     }`}>
                       {app.status}
@@ -136,12 +172,34 @@ export function AppliedDashboard() {
                   </div>
                   
                   {/* Phase 2: Contact Unmasking for Approved Applicants */}
-                  {(app.status === 'approved' || app.status === 'paid') && app.posterContactEmail && (
+                  {(app.status === 'approved' || app.status === 'paid' || app.status === 'disputed') && app.posterContactEmail && (
                     <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-100 flex flex-col sm:flex-row sm:items-center gap-2">
                        <span className="text-xs font-semibold text-green-800">You've been approved for work!</span>
                        <span className="text-sm text-green-900 border-l border-green-200 pl-3">
-                         Contact the poster: <a href={`mailto:${app.posterContactEmail}`} className="font-bold underline text-blue-700">{app.posterContactEmail}</a>
+                         Employer email: <a href={`mailto:${app.posterContactEmail}`} className="font-bold underline text-blue-700">{app.posterContactEmail}</a>
                        </span>
+                    </div>
+                  )}
+
+                  {/* Phase 4: Raise a Dispute for Approved Escrow Apps */}
+                  {app.status === 'approved' && app.isEscrowFunded && (
+                     <div className="mt-4 border-t border-slate-100 pt-3 flex flex-col md:flex-row md:items-center justify-between">
+                        <p className="text-xs text-slate-500">Is this employer unresponsive or refusing to pay via Escrow?</p>
+                        <Button 
+                          onClick={() => setDisputeAppId(app._id)}
+                          variant="destructive" size="sm" className="mt-2 md:mt-0 text-xs">
+                          Raise a Dispute
+                        </Button>
+                     </div>
+                  )}
+                  {app.status === 'disputed' && (
+                    <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm border border-red-100 rounded-md font-medium">
+                      Dispute Active: Admins have been notified and will email you directly to mediate this transaction.
+                    </div>
+                  )}
+                  {app.status.startsWith('resolved_') && (
+                    <div className="mt-4 p-3 bg-blue-50 text-blue-700 text-sm border border-blue-100 rounded-md font-medium">
+                      Dispute Resolved: {app.status === 'resolved_paid' ? 'Funds released to you.' : 'Funds refunded to poster.'}
                     </div>
                   )}
                 </div>
@@ -158,6 +216,32 @@ export function AppliedDashboard() {
           </div>
         )}
       </div>
+
+      {/* DISPUTE MODAL */}
+      {disputeAppId && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Raise a Dispute</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              If you have finished the digital work but the employer is unresponsive or refusing to pay the escrowed amount, please explain the situation below. Admins will mediate over email.
+            </p>
+            <textarea
+              className="w-full border border-slate-200 rounded-lg p-3 text-sm min-h-[120px] focus:ring-2 focus:ring-blue-500 outline-none mb-4"
+              placeholder="E.g., I mailed the final Google Drive link on Tuesday, but they haven't replied or released funds."
+              value={disputeReason}
+              onChange={(e) => setDisputeReason(e.target.value)}
+            />
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setDisputeAppId(null)} disabled={submittingDispute}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleRaiseDispute} disabled={submittingDispute || !disputeReason.trim()}>
+                {submittingDispute ? 'Submitting...' : 'Submit Dispute'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

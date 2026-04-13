@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,8 @@ interface ParsedOpportunityData {
   eligibilityRequirements?: string[];
   benefits?: string[];
   thematicAreas?: { heading: string; topics: string[] }[];
+  isEscrow?: boolean;
+  escrowAmount?: number;
 }
 
 // Use the same API base URL as the rest of the app — reads from VITE_API_URL env var
@@ -58,6 +60,51 @@ export function PostWithUs() {
 
   // Custom Form Builder State
   const [customForm, setCustomForm] = useState<ApplicationForm>({ isEnabled: false, fields: [] });
+
+  // Handle Edit Redirection from Dashboard
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editPost = location.state?.editPost;
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editPost) {
+      setEditingPostId(editPost.id);
+      setReporter({
+        name: 'Edit Update',
+        organization: editPost.provider || 'Self',
+        role: 'Author',
+        telephone: '0000000000',
+        email: localStorage.getItem('user_email') || '',
+        websiteOrSocial: 'N/A'
+      });
+      setParsedData({
+        suggestCustomForm: editPost.applicationForm?.isEnabled,
+        basicInfo: {
+          title: editPost.title,
+          provider: editPost.provider || '',
+          category: editPost.category,
+          description: editPost.description || '',
+          fullDescription: editPost.fullDescription || '',
+          fundingType: editPost.fundingType || '',
+          compensationType: editPost.compensationType || '',
+          upfrontCost: editPost.upfrontCost || ''
+        },
+        extractedFeatures: editPost.extractedFeatures || [],
+        eligibilityRequirements: editPost.eligibilityRequirements || [],
+        benefits: editPost.benefits || [],
+        thematicAreas: editPost.thematicAreas || [],
+        isEscrow: editPost.isEscrow,
+        escrowAmount: editPost.escrowAmount,
+      });
+      if (editPost.applicationForm) {
+        setCustomForm(editPost.applicationForm);
+      }
+      
+      // Clear location state so refresh doesn't trigger edit mode again accidentally
+      navigate('.', { replace: true });
+    }
+  }, [editPost, navigate]);
 
   // View Mode
   const [viewMode, setViewMode] = useState<'post' | 'manage'>('post');
@@ -199,7 +246,8 @@ export function PostWithUs() {
         const slug = parsedData.basicInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
         const finalOpportunity = {
-          id: `pub-${Date.now()}`,          // unique ID
+          id: editingPostId || `pub-${Date.now()}`,          // unique ID, or keep original if editing
+          editOf: editingPostId || undefined,                // Flag it as an edit request for admins
           title: parsedData.basicInfo.title,
           provider: parsedData.basicInfo.provider,
           category: parsedData.basicInfo.category,
@@ -218,6 +266,9 @@ export function PostWithUs() {
           benefits: parsedData.benefits || [],
           thematicAreas: parsedData.thematicAreas || [],
           applicationForm: customForm,
+          isEscrow: parsedData.isEscrow,
+          escrowAmount: parsedData.escrowAmount,
+          isEscrowFunded: false,
           featured: false,
           dateAdded: new Date().toISOString().split('T')[0],
           logoUrl: imageUrl,
@@ -258,11 +309,11 @@ export function PostWithUs() {
         <header className="flex flex-col items-start justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl flex items-center gap-3">
-              {viewMode === 'post' ? 'Post With Us' : 'Manage My Postings'}
+              {viewMode === 'post' ? (editingPostId ? 'Edit Opportunity Request' : 'Post With Us') : 'Manage My Postings'}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
               {viewMode === 'post' 
-                ? 'Share an opportunity with thousands of students and change-makers across Kenya.' 
+                ? (editingPostId ? 'Update your live opportunity parameters below and re-submit it for verification. The Admin team will approve changes shortly.' : 'Share an opportunity with thousands of students and change-makers across Kenya.') 
                 : 'Review your live and pending posts, and see who has applied.'
               }
             </p>
@@ -290,15 +341,18 @@ export function PostWithUs() {
            <PosterDashboard />
         ) : (
           <>
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex items-start gap-3">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex items-start gap-3 mt-4">
               <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
               <p>
-                We manually review submissions, but we do not guarantee every opportunity, especially external postings. Please provide accurate identity and proof details.
+                {editingPostId 
+                  ? "You are submitting changes to an already verified live opportunity. An admin will review these changes before they reflect publicly."
+                  : "We manually review submissions, but we do not guarantee every opportunity, especially external postings. Please provide accurate identity and proof details."}
               </p>
             </div>
 
-            {/* STEP 1: Details & Text Input */}
-            <Card className="border-slate-200 shadow-sm">
+            {/* STEP 1: Details & Text Input (Hidden during Edit Mode) */}
+            {!editingPostId && (
+            <Card className="border-slate-200 shadow-sm mt-4">
           <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold text-slate-900">
                 1. Provide the Details
@@ -458,18 +512,9 @@ export function PostWithUs() {
                     </Button>
                 </div>
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              {publishedSlug && (
-                <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-center justify-between mt-4">
-                  <div>
-                    <p className="text-sm font-semibold text-green-800">✅ Opportunity sent for verification!</p>
-                    <p className="text-xs text-green-700 mt-0.5">Our admin team will review it shortly. Thank you for contributing.</p>
-                  </div>
-                </div>
-              )}
           </CardContent>
         </Card>
-
+        )}
 
         {/* STEP 2: Review Table & Dictionary */}
         {parsedData && (
@@ -851,6 +896,35 @@ export function PostWithUs() {
                   )}
                 </div>
 
+                {/* Optional Escrow Security Field */}
+                <div className="mt-6 border border-blue-200 bg-blue-50 rounded-xl p-5 space-y-4">
+                  <div className="flex items-start gap-4">
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={!!parsedData.isEscrow}
+                      onChange={(e) => setParsedData({ ...parsedData, isEscrow: e.target.checked, escrowAmount: e.target.checked ? 1000 : undefined })}
+                    />
+                    <div>
+                      <h4 className="font-semibold text-blue-900 text-base">Protect this job with Escrow?</h4>
+                      <p className="text-sm text-blue-700">We will hold the payment securely via M-PESA until the work is approved. You will deposit the funds via your Dashboard after submitting the job.</p>
+                      
+                      {parsedData.isEscrow && (
+                        <div className="mt-4 flex items-center gap-3">
+                          <label className="text-sm font-semibold text-blue-900 whitespace-nowrap">Amount to lock (KES):</label>
+                          <Input 
+                            type="number" 
+                            className="bg-white border-blue-200 text-blue-900 font-bold max-w-[200px]" 
+                            min="100"
+                            value={parsedData.escrowAmount || 1000} 
+                            onChange={(e) => setParsedData({ ...parsedData, escrowAmount: Number(e.target.value) })}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {/* STEP 4: Desktop Wide Image Upload */}
                 <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
                   <label className="block text-sm font-semibold text-slate-900">
@@ -869,6 +943,21 @@ export function PostWithUs() {
                   />
                 </div>
 
+                {error && <p className="text-sm text-red-500 font-medium p-3 bg-red-50 border border-red-200 rounded-lg">{error}</p>}
+                {publishedSlug && (
+                  <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-center justify-between mt-4">
+                    <div>
+                      <p className="text-sm font-semibold text-green-800">✅ {editingPostId ? 'Edit request submitted!' : 'Opportunity sent for verification!'}</p>
+                      <p className="text-xs text-green-700 mt-0.5">Our admin team will review it shortly. Thank you for contributing.</p>
+                      {editingPostId && (
+                         <Button asChild size="sm" variant="link" className="mt-2 text-green-700 p-0 h-auto font-bold underline">
+                           <Link to="/post-with-us" onClick={() => window.location.reload()}>Return to Dashboard</Link>
+                         </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <Button
                   className="mt-4 w-full"
                   size="lg"
@@ -876,7 +965,7 @@ export function PostWithUs() {
                   onClick={handlePublish}
                   disabled={isPublishing || !parsedData}
                 >
-                  {isPublishing ? 'Submitting…' : 'Submit for verification'}
+                  {isPublishing ? 'Submitting…' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
                 </Button>
               </CardContent>
           </Card>
