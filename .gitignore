@@ -57,9 +57,29 @@ TODO.md
 Tech Content/
 /OPPORTUNITIES/
 backend/scripts/
+scripts/final_sync.js
+scripts/sync_seed.js
+scripts/sync_seed.py
+scripts/sync_seed_v2.py
+scripts/generate-sitemap.mjs
+
 
 
 # Package manager lock files (optional - uncomment if you want to ignore)
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+# Proposal Docs
+Partnership_Proposal.pdf
+Partnership_and_Employment_Proposal.md
+
+# Uploaded Images (Public)
+public/images/opportunities/coverImage-*
+public/Dandora.jpg
+public/Email Banner.png
+public/Email Footer.png
+public/Opportunities Kenya Logo 3.png
+public/Opportunities Kenya Logo.png
+public/poster admin UI.png
+
