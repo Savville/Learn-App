@@ -512,6 +512,11 @@ export function PostWithUs() {
                     </Button>
                 </div>
               </div>
+              {error && !parsedData && (
+                <div className="mt-4">
+                  <p className="text-sm text-red-500 font-medium p-3 bg-red-50 border border-red-200 rounded-lg">{error}</p>
+                </div>
+              )}
           </CardContent>
         </Card>
         )}

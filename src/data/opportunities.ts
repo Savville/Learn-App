@@ -60,6 +60,63 @@ export interface Opportunity {
 
 export const opportunities: Opportunity[] = [
   {
+    id: 'agea-startup-lab-2026',
+    title: "AGEA Start-up Lab Call for Applications 2026",
+    provider: "African German Entrepreneurship Academy (AGEA)",
+    category: 'Project',
+    description: "The 2026 edition of the AGEA Start-up Lab is officially open for submissions. Support for innovative, research-based tech start-ups and spin-offs from African HEIs.",
+    fullDescription: `The 2026 edition of the AGEA Start-up Lab is now officially open for submissions of innovative start-up projects. The competition is the first arm of the three-phase programme (AGEA Start-up Lab), which aims to support innovative spin-offs, technology-oriented start-ups, and start-up projects, and to strengthen the link between academia and industry in Africa.
+
+We invite submissions of innovative spin-offs and technology-oriented start-ups, developed from academic and scientific research activities by students (Masters and PhD), lecturers, and researchers at African universities in partner countries: Benin, Ghana, Kenya, Nigeria, Rwanda, Tunisia, and Ethiopia.
+
+The application window for the 2026 edition officially opens on 13 April 2026 and closes on 17 May 2026.
+
+────────────────────────────────────
+ THE THREE-PHASE ACCELERATION PROGRAMME
+────────────────────────────────────
+
+Phase 1: Start-up Competition (13 April – 17 May 2026)
+The foundational application and selection phase followed by evaluation and candidate interviews.
+
+Phase 2: Start-up Class (23 September – 02 October 2026)
+An intensive, highly focused training program held in-person at Leipzig University, Germany. Includes investment readiness training, dedicated coaching, and connections to early-stage investors.
+
+Phase 3: Start-up Investment Coaching (November 2026 – 2027)
+Extended, tailored support for top-performing start-ups to help secure funding and scale. Includes direct introductions to Angel Investors and specialised investor trips.`,
+    deadline: '2026-05-17',
+    location: 'Leipzig, Germany / Hybrid',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Any Field', 'Technology', 'Agriculture', 'Health', 'Education', 'Energy', 'IT', 'Commerce'],
+      requirements: [
+        'Academics (lecturers, professors, researchers)',
+        'Students currently enrolled in Masters and PhD programmes',
+        'Entrepreneurs, recent Masters or PhD graduates (1 – 2 years)',
+        'Applicants must be affiliated with universities in Benin, Ghana, Kenya, Nigeria, Rwanda, Tunisia, or Ethiopia',
+        'Minimum Viable Product (MVP) or Minimum Marketable Product (MMP) must be available',
+        'Student-led teams or recent graduate founders should have a faculty mentor'
+      ]
+    },
+    benefits: [
+      'Intensive Investment Readiness Training (Start-up Class in Leipzig, Germany)',
+      'Partial funding for travel and accommodation for up to two team members',
+      'Investment Coaching and direct connections to Angel Investors',
+      'Strategic Support for Grant Applications (including EXIST)',
+      'Professional Promotional Video Development for the start-up'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.ageacademy.de/agea-business-idea-competition/',
+    contactEmail: 'bayeboah@uni-leipzig.de',
+    fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
+    duration: 'Multi-phase (April 2026 - 2027)',
+    featured: true,
+    dateAdded: '2026-04-24',
+    logoUrl: '/images/opportunities/agea.png',
+    postedBy: 'Opportunities Kenya Admin'
+  },
+  {
     id: 'bishops-university-admissions-2026-2027',
     title: "Bishop's University Undergraduate & Graduate Admissions 2026-2027",
     provider: "Bishop's University",
