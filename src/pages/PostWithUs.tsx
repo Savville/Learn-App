@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,6 +39,7 @@ interface ParsedOpportunityData {
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
 export function PostWithUs() {
+  const reviewSectionRef = useRef<HTMLDivElement>(null);
   const [rawText, setRawText] = useState('');
   const [reporter, setReporter] = useState({
     name: '',
@@ -136,6 +137,9 @@ export function PostWithUs() {
       thematicAreas: [],
       suggestCustomForm: false
     });
+    setTimeout(() => {
+      reviewSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
   };
 
   const handleParse = async () => {
@@ -574,6 +578,7 @@ export function PostWithUs() {
 
         {/* STEP 2: Review Table & Dictionary */}
         {parsedData && (
+          <div ref={reviewSectionRef}>
           <Card className="animate-fade-in border-slate-200 shadow-sm mt-6">
               <CardHeader className="pb-3">
                   <CardTitle className="text-base font-semibold text-slate-900">
@@ -1059,6 +1064,7 @@ export function PostWithUs() {
                 </Button>
               </CardContent>
           </Card>
+          </div>
         )}
         </>
       )}
