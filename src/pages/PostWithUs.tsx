@@ -648,10 +648,7 @@ export function PostWithUs() {
                       <option value="Fully Funded">Fully Funded</option>
                       <option value="Partially Funded">Partially Funded</option>
                       <option value="Self Funded">Self Funded</option>
-                      <option value="Paid / Salary">Paid / Salary</option>
-                      <option value="Stipend Provided">Stipend Provided</option>
-                      <option value="Unpaid">Unpaid</option>
-                      <option value="Prize Money / Award">Prize Money / Award</option>
+                      <option value="Grant / Venture Backed">Grant / Venture Backed</option>
                       <option value="Not Applicable">Not Applicable</option>
                     </select>
                   </div>
