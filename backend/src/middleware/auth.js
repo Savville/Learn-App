@@ -1,6 +1,12 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-fallback-secret-change-in-prod';
+// SECURITY: crash loudly if JWT_SECRET is not configured.
+// A missing secret means any attacker who reads our source can forge admin tokens.
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is not set. Refusing to start.');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
  * verifyAdminKey — now accepts EITHER:

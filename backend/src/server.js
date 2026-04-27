@@ -5,6 +5,8 @@ import rateLimit from 'express-rate-limit';
 import compression from 'compression';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { connectDB } from './config/database.js';
 import { generateAdminToken } from './middleware/auth.js';
 import opportunitiesRoutes from './routes/opportunities.js';
@@ -16,6 +18,12 @@ import publicRoutes from './routes/public.js';
 
 dotenv.config();
 
+// ── SECURITY: Validate critical env vars at startup — fail fast before accepting traffic.
+if (!process.env.ADMIN_PASSWORD) {
+  console.error('FATAL: ADMIN_PASSWORD environment variable is not set. Refusing to start.');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -25,7 +33,7 @@ app.use(helmet());
 // Gzip compression
 app.use(compression());
 
-// Rate limiting — 100 requests per IP per 15 min
+// Rate limiting — 100 requests per IP per 15 min (global)
 app.use('/api/', rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -33,6 +41,17 @@ app.use('/api/', rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many requests. Please slow down.' }
 }));
+
+// SECURITY: Strict rate limit for admin login — max 5 attempts per IP per 15 minutes.
+// Prevents brute-force password attacks on the admin panel.
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts. Please wait 15 minutes and try again.' },
+  skipSuccessfulRequests: true // Only count failed attempts toward the limit
+});
 
 // Middleware
 app.use(cors({
@@ -63,8 +82,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files from the root public directory
-import path from 'path';
-import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 app.use('/images', express.static(path.join(PROJECT_ROOT, 'public', 'images')));
@@ -75,13 +92,11 @@ connectDB();
 // ── Admin Login ─────────────────────────────────────────────────────────────
 // POST /api/admin/login  { password: "..." }
 // Returns a signed JWT on success — no raw API key ever leaves the server.
-app.post('/api/admin/login', (req, res) => {
+// adminLoginLimiter: max 5 attempts per IP per 15 minutes to block brute-force.
+app.post('/api/admin/login', adminLoginLimiter, (req, res) => {
   const { password } = req.body;
   const adminPassword = process.env.ADMIN_PASSWORD;
 
-  if (!adminPassword) {
-    return res.status(500).json({ error: 'Server misconfiguration: ADMIN_PASSWORD not set.' });
-  }
   if (!password || password !== adminPassword) {
     return res.status(401).json({ error: 'Invalid password.' });
   }
@@ -123,5 +138,3 @@ app.listen(PORT, () => {
   console.log(`📧 Email Service: ${process.env.RESEND_API_KEY ? 'Resend configured' : 'Not configured'}`);
   console.log(`🗄️  Database: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
 });
-
-// Refurbished

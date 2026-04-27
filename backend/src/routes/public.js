@@ -706,6 +706,8 @@ router.post('/payments/deposit', verifyUserToken, async (req, res) => {
 });
 
 // Daraja Webhook Callback (Safaricom calls this silently)
+// SECURITY: Validate CheckoutRequestID against our own DB before trusting any data.
+// A forged callback from an attacker will not match a real transaction we initiated.
 router.post('/payments/mpesa/callback', async (req, res) => {
   try {
     const callbackData = req.body?.Body?.stkCallback;
@@ -713,13 +715,37 @@ router.post('/payments/mpesa/callback', async (req, res) => {
 
     const db = getDB();
     const checkoutRequestId = callbackData.CheckoutRequestID;
+
+    // SECURITY: Reject callbacks with no ID.
+    if (!checkoutRequestId) {
+      console.warn('[M-PESA] Callback received with no CheckoutRequestID. Ignoring.');
+      return res.status(200).send('OK');
+    }
+
+    // SECURITY: Only process callbacks for transactions WE created with status 'pending'.
+    // This blocks webhook forgery — an attacker's ID won't exist in our DB.
+    const existingTx = await db.collection('transactions').findOne({ checkoutRequestId, status: 'pending' });
+    if (!existingTx) {
+      console.warn(`[M-PESA] SECURITY: Callback for unknown or already-processed ID: ${checkoutRequestId}. Ignoring.`);
+      return res.status(200).send('OK'); // Always return 200 to Safaricom to stop retries
+    }
     
     // ResultCode 0 means Success
     if (callbackData.ResultCode === 0) {
-      // Find the metadata items
       const meta = callbackData.CallbackMetadata?.Item || [];
       const receiptNo = meta.find(i => i.Name === 'MpesaReceiptNumber')?.Value;
       const amountPaid = meta.find(i => i.Name === 'Amount')?.Value;
+
+      // SECURITY: Cross-check paid amount vs. what was requested.
+      // Prevents underpayment attacks (e.g. paying KES 1 for a KES 1000 escrow).
+      if (amountPaid && existingTx.amount && Number(amountPaid) < Number(existingTx.amount)) {
+        console.warn(`[M-PESA] SECURITY: Amount mismatch on ${checkoutRequestId}. Expected KES ${existingTx.amount}, got KES ${amountPaid}.`);
+        await db.collection('transactions').updateOne(
+          { checkoutRequestId },
+          { $set: { status: 'failed', failReason: 'Amount mismatch — possible underpayment', completedAt: new Date() } }
+        );
+        return res.status(200).send('OK');
+      }
 
       const tx = await db.collection('transactions').findOneAndUpdate(
         { checkoutRequestId },
@@ -733,7 +759,7 @@ router.post('/payments/mpesa/callback', async (req, res) => {
            { 'opportunity.id': tx.value.opportunityId },
            { $set: { isEscrowFunded: true, escrowAmount: amountPaid, status: 'approved' } }
          );
-         // You'd also ideally move it directly to the 'opportunities' collection here, similar to your Admin logic.
+         console.log(`[M-PESA] ✅ Escrow funded for opportunity: ${tx.value.opportunityId} (Receipt: ${receiptNo})`);
       }
     } else {
       // Payment Failed or User Cancelled
@@ -741,6 +767,7 @@ router.post('/payments/mpesa/callback', async (req, res) => {
         { checkoutRequestId },
         { $set: { status: 'failed', failReason: callbackData.ResultDesc, completedAt: new Date() } }
       );
+      console.log(`[M-PESA] Payment failed for ${checkoutRequestId}: ${callbackData.ResultDesc}`);
     }
     
     res.status(200).send('Webhook Processed');
