@@ -11,6 +11,48 @@ import { useSEO } from '../hooks/useSEO';
 const WORK_CATEGORIES = ['Gig', 'Job', 'Project', 'Challenge', 'Hackathon', 'Attachment', 'Internship'];
 const ACADEMIC_CATEGORIES = ['Scholarship', 'Fellowship', 'Conference', 'Grant', 'CallForPapers', 'Event', 'Volunteer'];
 
+// All category options, each tagged with which tab they belong to
+const ALL_CATEGORY_OPTIONS: { value: string; label: string; tab: 'work' | 'academic' | 'all' }[] = [
+  { value: 'Gig',           label: 'Microgigs',            tab: 'work' },
+  { value: 'Job',           label: 'Jobs',                 tab: 'work' },
+  { value: 'Internship',    label: 'Internships',          tab: 'work' },
+  { value: 'Attachment',    label: 'Attachments',          tab: 'work' },
+  { value: 'Project',       label: 'Projects',             tab: 'work' },
+  { value: 'Hackathon',     label: 'Hackathons',           tab: 'work' },
+  { value: 'Challenge',     label: 'Industry Challenges',  tab: 'work' },
+  { value: 'Scholarship',   label: 'Scholarships',         tab: 'academic' },
+  { value: 'Fellowship',    label: 'Fellowships',          tab: 'academic' },
+  { value: 'Grant',         label: 'Grants',               tab: 'academic' },
+  { value: 'Conference',    label: 'Conferences',          tab: 'academic' },
+  { value: 'CallForPapers', label: 'Call for Papers',      tab: 'academic' },
+  { value: 'Event',         label: 'Events',               tab: 'academic' },
+  { value: 'Volunteer',     label: 'Volunteer Programmes', tab: 'academic' },
+  { value: 'Other',         label: 'Others',               tab: 'all' },
+];
+
+// Funding options differ by tab context
+const WORK_FUNDING_OPTIONS = [
+  { value: 'all',              label: 'All Pay Types' },
+  { value: 'Paid Internship',  label: 'Paid' },
+  { value: 'Partially Funded', label: 'Partially Paid' },
+  { value: 'Unpaid Internship',label: 'Unpaid / Volunteer' },
+];
+const ACADEMIC_FUNDING_OPTIONS = [
+  { value: 'all',              label: 'All Funding Types' },
+  { value: 'Fully Funded',     label: 'Fully Funded' },
+  { value: 'Partially Funded', label: 'Partially Funded' },
+  { value: 'Stipend',          label: 'Stipend' },
+  { value: 'Unpaid',           label: 'Unpaid' },
+];
+const ALL_FUNDING_OPTIONS = [
+  { value: 'all',              label: 'All Funding Types' },
+  { value: 'Fully Funded',     label: 'Fully Funded' },
+  { value: 'Partially Funded', label: 'Partially Funded' },
+  { value: 'Paid Internship',  label: 'Paid Internship' },
+  { value: 'Stipend',          label: 'Stipend' },
+  { value: 'Unpaid',           label: 'Unpaid' },
+];
+
 const applyFilters = (
   opps: Opportunity[],
   searchQuery: string,
@@ -70,6 +112,22 @@ export function Opportunities() {
     setPage(1);
   }, [searchParams]);
 
+  // When the tab changes, reset Type filter if it doesn't belong to the new tab,
+  // so you never see "Scholarships" selected while on the Gigs tab (and vice versa).
+  const handleTabChange = (tab: string) => {
+    const currentCategoryTab = ALL_CATEGORY_OPTIONS.find(o => o.value === selectedType)?.tab;
+    const typeIsCompatible =
+      selectedType === 'all' ||
+      tab === 'all' ||
+      currentCategoryTab === tab ||
+      currentCategoryTab === 'all';
+
+    setActiveTab(tab);
+    if (!typeIsCompatible) setSelectedType('all');
+    // Reset funding when switching tabs since the options differ
+    if (tab !== activeTab) setSelectedFunding('all');
+  };
+
   const buildParams = (pageNum: number) => ({
     category: selectedType !== 'all' ? selectedType : undefined,
     level: selectedLevel !== 'all' ? selectedLevel : undefined,
@@ -97,11 +155,10 @@ export function Opportunities() {
         const localFiltered = applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding, activeTab);
         setOpportunities(localFiltered);
         setHasMore(false);
-        setLoading(false); // stop spinner — cards visible now, API upgrades silently
+        setLoading(false);
 
         const response = await opportunitiesAPI.getAll(buildParams(1));
         const result = response.data;
-        // Support both paginated { data, pages } and plain array (fallback)
         const items: Opportunity[] = Array.isArray(result) ? result : result.data;
         const pages: number = result.pages ?? 1;
 
@@ -111,7 +168,6 @@ export function Opportunities() {
         }
         setPage(1);
       } catch (err) {
-        // API failed (Render cold start etc.) — local data already visible, just stop loading
         console.error('Error fetching opportunities:', err);
         const localFiltered = applyFilters(localOpportunities, searchQuery, selectedType, selectedLevel, selectedFunding, activeTab);
         setOpportunities(localFiltered);
@@ -140,7 +196,31 @@ export function Opportunities() {
     }
   };
 
-  const countFor = (type: string) => localOpportunities.filter(o => o.category === type).length;
+  // Only show category options that belong to the current tab
+  const visibleCategoryOptions = ALL_CATEGORY_OPTIONS.filter(opt => {
+    if (activeTab === 'all') return true;
+    return opt.tab === (activeTab as 'work' | 'academic') || opt.tab === 'all';
+  });
+
+  // Show funding options tailored to the active tab
+  const visibleFundingOptions =
+    activeTab === 'work' ? WORK_FUNDING_OPTIONS :
+    activeTab === 'academic' ? ACADEMIC_FUNDING_OPTIONS :
+    ALL_FUNDING_OPTIONS;
+
+  // Count opportunities for a given category, scoped to the current tab
+  const countFor = (categoryValue: string) =>
+    localOpportunities.filter(o => {
+      if (activeTab === 'work') return WORK_CATEGORIES.includes(o.category) && o.category === categoryValue;
+      if (activeTab === 'academic') return ACADEMIC_CATEGORIES.includes(o.category) && o.category === categoryValue;
+      return o.category === categoryValue;
+    }).length;
+
+  const totalVisible =
+    activeTab === 'work' ? localOpportunities.filter(o => WORK_CATEGORIES.includes(o.category)).length :
+    activeTab === 'academic' ? localOpportunities.filter(o => ACADEMIC_CATEGORIES.includes(o.category)).length :
+    localOpportunities.length;
+
   const filteredOpportunities = opportunities;
 
   const handleSearch = (e: React.FormEvent) => {
@@ -154,7 +234,7 @@ export function Opportunities() {
     });
   };
 
-  const hasActiveFilters = selectedType !== 'all' || selectedLevel !== 'all' || selectedFunding !== 'all' || searchQuery || activeTab !== 'all';
+  const hasActiveFilters = selectedType !== 'all' || selectedLevel !== 'all' || selectedFunding !== 'all' || searchQuery !== '' || activeTab !== 'all';
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -170,39 +250,41 @@ export function Opportunities() {
       {/* Header Section */}
       <div className="bg-gradient-to-br from-blue-600 to-purple-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Subcontracting vs Academic Tabs */}
+          {/* Tab Navigation */}
           <div className="flex bg-white/10 p-1 rounded-lg w-fit mx-auto mb-8 overflow-x-auto max-w-full justify-center">
             <button
               type="button"
-              onClick={() => setActiveTab('all')}
+              onClick={() => handleTabChange('all')}
               className={`px-6 sm:px-8 py-3 rounded-md font-semibold transition-all whitespace-nowrap ${activeTab === 'all' ? 'bg-white text-blue-900 shadow-md scale-105' : 'text-white hover:bg-white/20'}`}
             >
               All
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('work')}
+              onClick={() => handleTabChange('work')}
               className={`px-6 sm:px-8 py-3 rounded-md font-semibold transition-all whitespace-nowrap ${activeTab === 'work' ? 'bg-white text-blue-900 shadow-md scale-105' : 'text-white hover:bg-white/20'}`}
             >
-              Work & Innovation (Gigs)
+              Work &amp; Innovation (Gigs)
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('academic')}
+              onClick={() => handleTabChange('academic')}
               className={`px-6 sm:px-8 py-3 rounded-md font-semibold transition-all whitespace-nowrap ${activeTab === 'academic' ? 'bg-white text-blue-900 shadow-md scale-105' : 'text-white hover:bg-white/20'}`}
             >
-              Academic & Learning
+              Academic &amp; Learning
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('applied')}
+              onClick={() => handleTabChange('applied')}
               className={`px-6 sm:px-8 py-3 rounded-md font-semibold transition-all whitespace-nowrap ${activeTab === 'applied' ? 'bg-white text-blue-900 shadow-md scale-105' : 'text-white hover:bg-white/20'}`}
             >
               Applied
             </button>
           </div>
 
-          <h1 className="text-3xl font-bold text-white mb-6">Opportunities</h1>
+          <h1 className="text-3xl font-bold text-white mb-6">
+            {activeTab === 'work' ? 'Work & Microgigs' : activeTab === 'academic' ? 'Academic & Learning' : 'Opportunities'}
+          </h1>
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="mb-6">
@@ -211,7 +293,11 @@ export function Opportunities() {
                 <Search className="w-5 h-5 text-white/70" />
                 <input
                   type="text"
-                  placeholder="Search by title, organization, or keyword..."
+                  placeholder={
+                    activeTab === 'work' ? 'Search gigs, jobs, projects...' :
+                    activeTab === 'academic' ? 'Search scholarships, fellowships...' :
+                    'Search by title, organization, or keyword...'
+                  }
                   className="flex-1 outline-none bg-transparent text-white placeholder-white/60"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -229,29 +315,24 @@ export function Opportunities() {
             </div>
           </form>
 
-          {/* Filters */}
+          {/* Filters — dynamically adapt to active tab */}
           <div className={`${showFilters ? 'block' : 'hidden'} md:block`}>
             <div className="flex flex-wrap gap-3">
-              {/* Type Filter */}
+
+              {/* Type Filter — only shows categories that belong to the active tab */}
               <select
                 className="px-4 py-2 rounded-sm border border-white/30 outline-none cursor-pointer bg-white/20 text-white font-medium backdrop-blur-sm hover:bg-white/30 transition-colors"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
-                <option value="all" className="text-gray-900 bg-white">All Types ({localOpportunities.length})</option>
-                <option value="CallForPapers" className="text-gray-900 bg-white">Call for Papers ({countFor('CallForPapers')})</option>
-                <option value="Internship" className="text-gray-900 bg-white">Internships ({countFor('Internship')})</option>
-                <option value="Grant" className="text-gray-900 bg-white">Grants ({countFor('Grant')})</option>
-                <option value="Conference" className="text-gray-900 bg-white">Conferences ({countFor('Conference')})</option>
-                <option value="Scholarship" className="text-gray-900 bg-white">Scholarships ({countFor('Scholarship')})</option>
-                <option value="Fellowship" className="text-gray-900 bg-white">Fellowships ({countFor('Fellowship')})</option>
-                <option value="Hackathon" className="text-gray-900 bg-white">Hackathons ({countFor('Hackathon')})</option>
-                <option value="Challenge" className="text-gray-900 bg-white">Industry Challenges ({countFor('Challenge')})</option>
-                <option value="Event" className="text-gray-900 bg-white">Events ({countFor('Event')})</option>
-                <option value="Attachment" className="text-gray-900 bg-white">Attachments ({countFor('Attachment')})</option>
-                <option value="Volunteer" className="text-gray-900 bg-white">Volunteer Programmes ({countFor('Volunteer')})</option>
-                <option value="Project" className="text-gray-900 bg-white">Projects ({countFor('Project')})</option>
-                <option value="Other" className="text-gray-900 bg-white">Others ({countFor('Other')})</option>
+                <option value="all" className="text-gray-900 bg-white">
+                  {activeTab === 'work' ? 'All Work Types' : activeTab === 'academic' ? 'All Academic Types' : `All Types (${totalVisible})`}
+                </option>
+                {visibleCategoryOptions.map(opt => (
+                  <option key={opt.value} value={opt.value} className="text-gray-900 bg-white">
+                    {opt.label} ({countFor(opt.value)})
+                  </option>
+                ))}
               </select>
 
               {/* Level Filter */}
@@ -267,17 +348,17 @@ export function Opportunities() {
                 <option value="All" className="text-gray-900 bg-white">All (Everyone)</option>
               </select>
 
-              {/* Funding Type Filter */}
+              {/* Funding / Pay Type Filter — options change based on active tab */}
               <select
                 className="px-4 py-2 rounded-sm border border-white/30 outline-none cursor-pointer bg-white/20 text-white font-medium backdrop-blur-sm hover:bg-white/30 transition-colors"
                 value={selectedFunding}
                 onChange={(e) => setSelectedFunding(e.target.value)}
               >
-                <option value="all" className="text-gray-900 bg-white">All Funding Types</option>
-                <option value="Fully Funded" className="text-gray-900 bg-white">Fully Funded</option>
-                <option value="Partially Funded" className="text-gray-900 bg-white">Partially Funded</option>
-                <option value="Stipend" className="text-gray-900 bg-white">Stipend</option>
-                <option value="Unpaid" className="text-gray-900 bg-white">Unpaid</option>
+                {visibleFundingOptions.map(opt => (
+                  <option key={opt.value} value={opt.value} className="text-gray-900 bg-white">
+                    {opt.label}
+                  </option>
+                ))}
               </select>
 
               {/* Clear Filters */}
@@ -296,7 +377,9 @@ export function Opportunities() {
           {activeTab !== 'applied' && (
             <div className="mt-6">
               <p className="text-white">
-                Showing <span className="font-semibold text-white">{filteredOpportunities.length}</span> {filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
+                Showing <span className="font-semibold">{filteredOpportunities.length}</span> {filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
+                {activeTab === 'work' && <span className="text-white/70 text-sm ml-2">in Work &amp; Gigs</span>}
+                {activeTab === 'academic' && <span className="text-white/70 text-sm ml-2">in Academic &amp; Learning</span>}
               </p>
             </div>
           )}
@@ -355,9 +438,7 @@ export function Opportunities() {
               <Search className="w-16 h-16 mx-auto" />
             </div>
             <h3 className="text-xl text-gray-900 mb-2 font-semibold">No opportunities found</h3>
-            <p className="text-gray-600 mb-6">
-              Try adjusting your filters or search query
-            </p>
+            <p className="text-gray-600 mb-6">Try adjusting your filters or search query</p>
             <button
               onClick={clearFilters}
               className="px-6 py-3 bg-blue-900 text-white rounded-sm hover:bg-blue-800 transition-colors font-medium"

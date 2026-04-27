@@ -7,8 +7,8 @@ import { getDB } from '../config/database.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateUserToken, verifyUserToken } from '../middleware/auth.js';
 import { ObjectId } from 'mongodb';
-import { 
-  sendAdminSubmissionNotification, 
+import {
+  sendAdminSubmissionNotification,
   sendPosterAcknowledgementEmail,
   sendOrganizationVerificationRequest,
   sendOrganizationRequestAcknowledgement,
@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: function (req, file, cb) {
@@ -242,7 +242,7 @@ router.post('/parse-opportunity', async (req, res) => {
         // Retry with the exact same model since demand spikes are usually extremely short-lived
         result = await model.generateContent(prompt);
       } else {
-        throw apiError; 
+        throw apiError;
       }
     }
 
@@ -268,7 +268,7 @@ router.post('/submit-opportunity', async (req, res) => {
       !reporter.email ||
       !reporter.websiteOrSocial
     ) {
-        return res.status(400).json({ error: 'Opportunity data and full reporter identity details are required.' });
+      return res.status(400).json({ error: 'Opportunity data and full reporter identity details are required.' });
     }
     const db = getDB();
 
@@ -282,17 +282,17 @@ router.post('/submit-opportunity', async (req, res) => {
       websiteOrSocial: reporter.websiteOrSocial.trim(),
     };
     const riskFlags = detectRedFlags(opportunity, normalizedReporter);
-    
+
     // Clean up temporary AI flags before saving
     if (opportunity.suggestCustomForm !== undefined) {
       delete opportunity.suggestCustomForm;
     }
 
     // Check if reporter is a verified organization
-    const org = await db.collection('organizations').findOne({ 
-      email: normalizedReporter.email 
+    const org = await db.collection('organizations').findOne({
+      email: normalizedReporter.email
     });
-    
+
     const isOrganizationPost = !!org;
     const orgName = org ? org.orgName : null;
 
@@ -313,15 +313,15 @@ router.post('/submit-opportunity', async (req, res) => {
       },
       submittedAt: new Date()
     });
-    
+
     // Notify admin in the background
     sendAdminSubmissionNotification(normalizedReporter, opportunity).catch(err => {
-        console.error('Submission notification failed:', err.message);
+      console.error('Submission notification failed:', err.message);
     });
 
     // Notify the poster that we received it
     sendPosterAcknowledgementEmail(normalizedReporter.email, normalizedReporter.name, opportunity.title).catch(err => {
-        console.error('Acknowledgment email to poster failed:', err.message);
+      console.error('Acknowledgment email to poster failed:', err.message);
     });
 
     res.json({ message: 'Submitted successfully for verification.' });
@@ -360,7 +360,7 @@ router.post('/report-opportunity/:id', async (req, res) => {
 router.post('/organizations/request', async (req, res) => {
   try {
     const { name, organization, email, telephone, description } = req.body;
-    
+
     if (!name || !organization || !email) {
       return res.status(400).json({ error: 'Name, Organization, and Email are required.' });
     }
@@ -395,7 +395,7 @@ router.post('/auth/send-otp', async (req, res) => {
     if (!email) return res.status(400).json({ error: 'Email is required' });
 
     const normalizedEmail = email.trim().toLowerCase();
-    
+
     // Generate 4-digit code
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
@@ -420,7 +420,7 @@ router.post('/auth/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
     const normalizedEmail = email.trim().toLowerCase();
-    
+
     const db = getDB();
     const record = await db.collection('auth_otps').findOne({ email: normalizedEmail, otp });
 
@@ -445,7 +445,7 @@ router.get('/me/applications', verifyUserToken, async (req, res) => {
   try {
     const email = req.user.email;
     const db = getDB();
-    
+
     // Convert status='Pending' to 'pending' from old data
     const applications = await db.collection('applications')
       .find({ applicantEmail: email })
@@ -478,13 +478,13 @@ router.get('/me/posts', verifyUserToken, async (req, res) => {
     const livePosts = await db.collection('opportunities')
       .find({ 'reporter.email': email }) // Assuming you saved reporter info or contactEmail
       .toArray();
-      
+
     // Because in our submit route we saved reporter: { email } to pending_opportunities and might not have persisted reporter to the main opportunities initially,
     // let's grab from both to be safe, or just look up anything linked to their email string. We track submitted stuff.
     const pendingPosts = await db.collection('pending_opportunities')
       .find({ 'reporter.email': email })
       .toArray();
-    
+
     res.json({ live: livePosts, pending: pendingPosts });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -501,12 +501,12 @@ router.get('/me/posts/:id/applicants', verifyUserToken, async (req, res) => {
     // Verify ownership
     const opp = await db.collection('opportunities').findOne({ id });
     if (!opp) return res.status(404).json({ error: 'Opportunity not found' });
-    
+
     // NOTE: If your opportunity object doesn't strictly have `reporter.email` attached to the live document, 
     // you might need to check pending_opportunities for ownership. Let's do that:
     const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': id });
     if (originalPending?.reporter?.email !== email && opp.contactEmail !== email) {
-        return res.status(403).json({ error: 'You do not own this post' });
+      return res.status(403).json({ error: 'You do not own this post' });
     }
 
     const applicants = await db.collection('applications')
@@ -529,7 +529,7 @@ router.delete('/me/posts/:id', verifyUserToken, async (req, res) => {
 
     // Only allow deletion of pending_opportunities. 
     // First, verify if it is in pending_opportunities and matches the email
-    const pendingPost = await db.collection('pending_opportunities').findOne({ 
+    const pendingPost = await db.collection('pending_opportunities').findOne({
       'opportunity.id': id,
       'reporter.email': email
     });
@@ -541,11 +541,11 @@ router.delete('/me/posts/:id', verifyUserToken, async (req, res) => {
     // Ensure it's not actually live
     const livePost = await db.collection('opportunities').findOne({ id });
     if (livePost) {
-       return res.status(403).json({ error: 'Cannot delete a live post.' });
+      return res.status(403).json({ error: 'Cannot delete a live post.' });
     }
 
     await db.collection('pending_opportunities').deleteOne({ _id: pendingPost._id });
-    
+
     res.json({ success: true, message: 'Pending post deleted successfully.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -565,13 +565,13 @@ router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
     if (status === 'disputed') {
       // Must be the applicant raising the dispute
       if (application.applicantEmail !== email) {
-         return res.status(403).json({ error: 'Only the applicant can raise a dispute.' });
+        return res.status(403).json({ error: 'Only the applicant can raise a dispute.' });
       }
-      
+
       const oppId = application.opportunityId;
       const opp = await db.collection('opportunities').findOne({ id: oppId });
       const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': oppId });
-      
+
       const posterEmail = application.posterContactEmail || opp?.contactEmail || originalPending?.reporter?.email;
       const escrowAmount = opp?.escrowAmount || originalPending?.opportunity?.escrowAmount;
 
@@ -590,7 +590,7 @@ router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
       const oppId = application.opportunityId;
       const opp = await db.collection('opportunities').findOne({ id: oppId });
       const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': oppId });
-      
+
       if (originalPending?.reporter?.email !== email && opp?.contactEmail !== email) {
         return res.status(403).json({ error: 'You do not own the post this application is for' });
       }
@@ -642,7 +642,7 @@ router.post('/opportunities/:id/apply', async (req, res) => {
     // Check for double applying
     const existing = await db.collection('applications').findOne({ opportunityId: id, applicantEmail: normalizedEmail });
     if (existing) {
-       return res.status(400).json({ error: "You have already applied to this opportunity." });
+      return res.status(400).json({ error: "You have already applied to this opportunity." });
     }
 
     // Insert the new application
@@ -678,7 +678,7 @@ router.post('/payments/deposit', verifyUserToken, async (req, res) => {
     // Validate ownership
     const pendingOpp = await db.collection('pending_opportunities').findOne({ 'opportunity.id': opportunityId });
     if (!pendingOpp || pendingOpp.reporter?.email !== email) {
-       return res.status(403).json({ error: 'Unauthorized to fund this post' });
+      return res.status(403).json({ error: 'Unauthorized to fund this post' });
     }
 
     // Call Daraja Sandbox
@@ -729,7 +729,7 @@ router.post('/payments/mpesa/callback', async (req, res) => {
       console.warn(`[M-PESA] SECURITY: Callback for unknown or already-processed ID: ${checkoutRequestId}. Ignoring.`);
       return res.status(200).send('OK'); // Always return 200 to Safaricom to stop retries
     }
-    
+
     // ResultCode 0 means Success
     if (callbackData.ResultCode === 0) {
       const meta = callbackData.CallbackMetadata?.Item || [];
@@ -754,12 +754,12 @@ router.post('/payments/mpesa/callback', async (req, res) => {
       );
 
       if (tx.value) {
-         // Auto-publish the pending job now that Escrow is funded!
-         await db.collection('pending_opportunities').updateOne(
-           { 'opportunity.id': tx.value.opportunityId },
-           { $set: { isEscrowFunded: true, escrowAmount: amountPaid, status: 'approved' } }
-         );
-         console.log(`[M-PESA] ✅ Escrow funded for opportunity: ${tx.value.opportunityId} (Receipt: ${receiptNo})`);
+        // Auto-publish the pending job now that Escrow is funded!
+        await db.collection('pending_opportunities').updateOne(
+          { 'opportunity.id': tx.value.opportunityId },
+          { $set: { isEscrowFunded: true, escrowAmount: amountPaid, status: 'approved' } }
+        );
+        console.log(`[M-PESA] Escrow funded for opportunity: ${tx.value.opportunityId} (Receipt: ${receiptNo})`);
       }
     } else {
       // Payment Failed or User Cancelled
@@ -769,7 +769,7 @@ router.post('/payments/mpesa/callback', async (req, res) => {
       );
       console.log(`[M-PESA] Payment failed for ${checkoutRequestId}: ${callbackData.ResultDesc}`);
     }
-    
+
     res.status(200).send('Webhook Processed');
   } catch (error) {
     console.error('M-PESA Callback Error:', error);
