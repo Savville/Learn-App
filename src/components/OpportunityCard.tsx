@@ -25,13 +25,30 @@ const CATEGORY_IMAGES: Record<string, string[]> = {
   Event: ['/images/opportunities/community.jpg', '/images/opportunities/tech.avif']
 };
 
-export const getDynamicImageUrl = (category: string, id: string, providedUrl?: string) => {
+export const getDynamicImageUrl = (category: string, id: string, providedUrl?: string, title?: string) => {
   // If the provided url is not the default generic logo, use it
   if (providedUrl && !providedUrl.includes('Opportunities Kenya Logo')) {
     return providedUrl;
   }
   
-  const options = CATEGORY_IMAGES[category] || ['/images/opportunities/internship.avif'];
+  let options = CATEGORY_IMAGES[category] || ['/images/opportunities/internship.avif'];
+
+  // Override based on TITLE keywords for smarter image assignment!
+  if (title) {
+    const t = title.toLowerCase();
+    if (t.includes('tech') || t.includes('software') || t.includes('data') || t.includes('developer') || t.includes('engineer')) {
+      options = ['/images/opportunities/tech.avif'];
+    } else if (t.includes('community') || t.includes('volunteer') || t.includes('social') || t.includes('youth')) {
+      options = ['/images/opportunities/community.jpg'];
+    } else if (t.includes('health') || t.includes('medical') || t.includes('clinical')) {
+      options = ['/images/opportunities/kemri.png']; // or a generic health one if we generate it
+    } else if (t.includes('finance') || t.includes('business') || t.includes('marketing')) {
+      options = ['/images/opportunities/job_1.png'];
+    } else if (t.includes('design') || t.includes('creative') || t.includes('art')) {
+      options = ['/images/opportunities/gig_1.png'];
+    }
+  }
+
   // Use a simple hash of the ID to consistently pick the same image for the same post
   const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return options[hash % options.length];
@@ -41,10 +58,10 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
 
-  const finalImageUrl = getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl);
+  const finalImageUrl = getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl, opportunity.title);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const fallback = getDynamicImageUrl(opportunity.category, opportunity.id);
+    const fallback = getDynamicImageUrl(opportunity.category, opportunity.id, undefined, opportunity.title);
     if (e.currentTarget.src !== window.location.origin + fallback) {
       e.currentTarget.src = fallback;
     }
