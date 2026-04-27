@@ -327,7 +327,7 @@ export function OpportunityDetails() {
           {/* Header Image */}
           <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
             <img
-              src={getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl, opportunity.title)}
+              src={opportunity.logoUrl}
               alt={`${opportunity.category}: ${opportunity.title} by ${opportunity.provider}`}
               decoding="async"
               className="w-full h-full object-cover"

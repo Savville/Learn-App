@@ -87,7 +87,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
         {/* Header Image */}
         <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           <img
-            src={finalImageUrl}
+            src={opportunity.logoUrl}
             alt={`${opportunity.category} opportunity from ${opportunity.provider}`}
             loading="lazy"
             decoding="async"
