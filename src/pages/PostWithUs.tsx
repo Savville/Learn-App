@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,7 +35,7 @@ interface ParsedOpportunityData {
   escrowAmount?: number;
 }
 
-// Use the same API base URL as the rest of the app — reads from VITE_API_URL env var
+// Use the same API base URL as the rest of the app â€” reads from VITE_API_URL env var
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
 export function PostWithUs() {
@@ -208,7 +208,7 @@ export function PostWithUs() {
         throw new Error('Identity details are required to submit.');
         }
 
-        // Step 1: Upload the image (optional — skip if no image selected)
+        // Step 1: Upload the image (optional â€” skip if no image selected)
         let imageUrl = '/Opportunities Kenya Logo 2.png'; // default fallback
 
         if (coverImage) {
@@ -222,7 +222,7 @@ export function PostWithUs() {
 
           const uploadData = await uploadResponse.json();
           if (!uploadResponse.ok) {
-              // Don't block publish on image failure — just warn and use default
+              // Don't block publish on image failure â€” just warn and use default
               console.warn('Image upload failed, using default logo:', uploadData.error);
           } else {
               imageUrl = uploadData.imageUrl;
@@ -508,7 +508,7 @@ export function PostWithUs() {
                       className="w-full"
                       style={{ backgroundColor: '#0933ed', color: '#ffffff' }}
                     >
-                      {isParsing ? 'Extracting…' : 'Extract data points'}
+                      {isParsing ? 'Extractingâ€¦' : 'Extract data points'}
                     </Button>
                 </div>
               </div>
@@ -553,10 +553,36 @@ export function PostWithUs() {
                     <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
                       Category
                     </span>
-                    <Input
+                    <select
+                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                       value={parsedData.basicInfo.category}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBasicInfoEdit('category', e.target.value)}
-                    />
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('category', e.target.value)}
+                    >
+                      <option value="" disabled>Select a category</option>
+                      <optgroup label="Microgigs and Jobs">
+                        <option value="Gig">Microgig</option>
+                        <option value="Job">Job</option>
+                      </optgroup>
+                      <optgroup label="Career and Innovation">
+                        <option value="Internship">Internship</option>
+                        <option value="Attachment">Attachment</option>
+                        <option value="Project">Project</option>
+                        <option value="Hackathon">Hackathon</option>
+                        <option value="Challenge">Industry Challenge</option>
+                      </optgroup>
+                      <optgroup label="Academic and Learning">
+                        <option value="Scholarship">Scholarship</option>
+                        <option value="Fellowship">Fellowship</option>
+                        <option value="Grant">Grant</option>
+                        <option value="Conference">Conference</option>
+                        <option value="CallForPapers">Call for Papers</option>
+                        <option value="Event">Event</option>
+                        <option value="Volunteer">Volunteer Programme</option>
+                      </optgroup>
+                      <optgroup label="Other">
+                        <option value="Other">Other</option>
+                      </optgroup>
+                    </select>
                   </div>
                   <div className="space-y-1.5">
                     <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -723,7 +749,7 @@ export function PostWithUs() {
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                       handleFeatureEdit(idx, 'value', e.target.value)
                                     }
-                                    placeholder="Leave blank or edit…"
+                                    placeholder="Leave blank or editâ€¦"
                                   />
                                 )}
                               </td>
@@ -758,7 +784,7 @@ export function PostWithUs() {
                                       variant="outline"
                                       size="sm"
                                     >
-                                      Use “Visit main page”
+                                      Use â€œVisit main pageâ€
                                     </Button>
                                   )}
                                   {feat.feature === 'Deadline' && !feat.value && (
@@ -772,7 +798,7 @@ export function PostWithUs() {
                                       variant="outline"
                                       size="sm"
                                     >
-                                      Use “Rolling” template
+                                      Use â€œRollingâ€ template
                                     </Button>
                                   )}
                                 </div>
@@ -952,7 +978,7 @@ export function PostWithUs() {
                 {publishedSlug && (
                   <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-center justify-between mt-4">
                     <div>
-                      <p className="text-sm font-semibold text-green-800">✅ {editingPostId ? 'Edit request submitted!' : 'Opportunity sent for verification!'}</p>
+                      <p className="text-sm font-semibold text-green-800">âœ… {editingPostId ? 'Edit request submitted!' : 'Opportunity sent for verification!'}</p>
                       <p className="text-xs text-green-700 mt-0.5">Our admin team will review it shortly. Thank you for contributing.</p>
                       {editingPostId && (
                          <Button asChild size="sm" variant="link" className="mt-2 text-green-700 p-0 h-auto font-bold underline">
@@ -970,7 +996,7 @@ export function PostWithUs() {
                   onClick={handlePublish}
                   disabled={isPublishing || !parsedData}
                 >
-                  {isPublishing ? 'Submitting…' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
+                  {isPublishing ? 'Submittingâ€¦' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
                 </Button>
               </CardContent>
           </Card>
