@@ -1,23 +1,27 @@
-# Learn Opportunities
+# Opportunities Pathways
 
 A comprehensive platform dedicated to empowering students and young professionals by connecting them with life-changing opportunities from around the globe.
 
 ## About
 
-Learn Opportunities is a youth-focused initiative that curates and publishes high-quality internships, fellowships, scholarships, grants, jobs, and events. We believe that access to the right opportunity can transform a young person's future—and our mission is to make that access simple, clear, and free.
+Opportunities Pathways is a dual-purpose platform dedicated to empowering students and young professionals. We bridge the gap between traditional career growth and the modern gig economy by serving as both an **Opportunity Hub** and a **Microgig Platform**.
+
+Whether you are looking for long-term career foundations or immediate ways to earn and build your portfolio, we make access simple, clear, and free. Organizations and individuals can list tasks, and students can apply to complete them and get paid.
 
 ## Features
 
 - **Daily Updates**: Fresh opportunities added every day from verified organizations worldwide
+- **Microgig Marketplace**: A specialized space for short-term jobs and tasks that students can complete for payment
 - **Advanced Search**: Filter opportunities by category, location, and keywords
 - **Detailed Information**: Comprehensive details about requirements, benefits, and deadlines
 - **Direct Links**: Quick access to official application pages
-- **Responsive Design**: Beautiful, modern interface that works on all devices
-- **100% Free**: All services are completely free for everyone
+- **Portfolio Building**: Gain real-world experience through gig work while you study
+- **100% Free for Students**: Accessing and applying to opportunities is completely free
 
 ## Categories
 
 - 🎓 Internships
+- 🚀 Microgigs (New!)
 - 💼 Jobs
 - 🏆 Fellowships
 - 📚 Scholarships
