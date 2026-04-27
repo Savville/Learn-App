@@ -23,21 +23,27 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
       ]
     };
     
-    // New tab logic
-    const WORK_CATEGORIES = ['Gig', 'Job', 'Project', 'Challenge', 'Hackathon', 'Attachment', 'Internship'];
+    // ── Tab category buckets (must match frontend constants exactly) ───────────
+    const GIG_CATEGORIES      = ['Gig', 'Job'];
+    const CAREER_CATEGORIES   = ['Internship', 'Attachment', 'Project', 'Hackathon', 'Challenge'];
     const ACADEMIC_CATEGORIES = ['Scholarship', 'Fellowship', 'Conference', 'Grant', 'CallForPapers', 'Event', 'Volunteer'];
 
-    if (tab === 'work') filter.category = { $in: WORK_CATEGORIES };
+    if (tab === 'gigs')          filter.category = { $in: GIG_CATEGORIES };
+    else if (tab === 'career')   filter.category = { $in: CAREER_CATEGORIES };
     else if (tab === 'academic') filter.category = { $in: ACADEMIC_CATEGORIES };
+    // tab === 'all' or undefined → no category filter applied
 
     if (category && category !== 'all') filter.category = category;
     if (level && level !== 'all') filter['eligibility.educationLevel'] = level;
     if (fundingType && fundingType !== 'all') filter.fundingType = fundingType;
+    // SECURITY: Escape regex special chars to prevent ReDoS
     if (search) {
+      if (search.length > 100) return res.status(400).json({ error: 'Search query too long.' });
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { provider: { $regex: search, $options: 'i' } }
+        { title:       { $regex: escaped, $options: 'i' } },
+        { description: { $regex: escaped, $options: 'i' } },
+        { provider:    { $regex: escaped, $options: 'i' } }
       ];
     }
 
@@ -48,7 +54,7 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
 
     res.json({ data, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
 });
 
