@@ -56,8 +56,8 @@ We welcome contributions! If you know of legitimate opportunities that should be
 
 ## 📧 Contact
 
-- Email: learnorganistion@gmail.com
-- Website: [Your website URL]
+- Email: opportunitieskenyalive@gmail.com
+- Website: https://opportunitieskenya.live/
 
 ## 📄 License
 
