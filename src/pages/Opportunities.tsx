@@ -180,7 +180,10 @@ export function Opportunities() {
         const pages: number = result.pages ?? 1;
 
         if (items && items.length > 0) {
-          setOpportunities(mergeLogos(items));
+          // Apply client-side filter as a safety net — ensures the displayed list always
+          // matches the active tab/filters even if the backend returns stale or unfiltered data.
+          const apiFiltered = applyFilters(mergeLogos(items), searchQuery, selectedType, selectedLevel, selectedFunding, activeTab);
+          setOpportunities(apiFiltered);
           setHasMore(1 < pages);
         }
         setPage(1);
@@ -203,7 +206,8 @@ export function Opportunities() {
       const result   = response.data;
       const items: Opportunity[] = Array.isArray(result) ? result : result.data;
       const pages: number = result.pages ?? 1;
-      setOpportunities(prev => [...prev, ...mergeLogos(items)]);
+      const apiFiltered = applyFilters(mergeLogos(items), searchQuery, selectedType, selectedLevel, selectedFunding, activeTab);
+      setOpportunities(prev => [...prev, ...apiFiltered]);
       setHasMore(nextPage < pages);
       setPage(nextPage);
     } catch (err) {
