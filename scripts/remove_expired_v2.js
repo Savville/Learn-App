@@ -1,6 +1,8 @@
 const fs = require('fs');
-const filePath = 'src/data/opportunities.ts';
-let lines = fs.readFileSync(filePath, 'utf8').split('\n');
+const filePaths = ['src/data/opportunities.ts', 'backend/seed.js'];
+
+filePaths.forEach(filePath => {
+    let lines = fs.readFileSync(filePath, 'utf8').split('\n');
 
 const idsToRemove = ['33', '34', '35', 'kpa-internship-2026'];
 
@@ -47,5 +49,6 @@ for (let i = 0; i < lines.length; i++) {
     filteredLines.push(line);
 }
 
-fs.writeFileSync(filePath, filteredLines.join('\n'));
-console.log('Removed expired opportunities via line filtering.');
+    fs.writeFileSync(filePath, filteredLines.join('\n'));
+    console.log(`Removed expired opportunities from ${filePath} via line filtering.`);
+});
