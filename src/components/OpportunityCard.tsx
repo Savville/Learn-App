@@ -9,25 +9,42 @@ interface OpportunityCardProps {
   opportunity: Opportunity;
 }
 
-const CATEGORY_FALLBACKS: Record<string, string> = {
-  Scholarship: '/images/opportunities/internship.avif',
-  Fellowship: '/images/opportunities/fellowship.avif',
-  Attachment: '/images/opportunities/attachment.jpeg',
-  Internship: '/images/opportunities/internship.avif',
-  Grant: '/images/opportunities/grant.avif',
-  Conference: '/images/opportunities/tech.avif',
-  CallForPapers: '/images/opportunities/tech.avif',
-  Challenge: '/images/opportunities/tech.avif',
-  Hackathon: '/images/opportunities/tech.avif',
-  Project: '/images/opportunities/tech.avif'
+const CATEGORY_IMAGES: Record<string, string[]> = {
+  Job: ['/images/opportunities/job_1.png', '/images/opportunities/job_2.png'],
+  Gig: ['/images/opportunities/gig_1.png'],
+  Scholarship: ['/images/opportunities/scholarship.jpeg', '/images/opportunities/scholarship.jpg'],
+  Fellowship: ['/images/opportunities/fellowship.avif'],
+  Attachment: ['/images/opportunities/attachment.jpeg'],
+  Internship: ['/images/opportunities/internship.avif'],
+  Grant: ['/images/opportunities/grant.avif'],
+  Conference: ['/images/opportunities/conference.jpeg', '/images/opportunities/tech.avif'],
+  CallForPapers: ['/images/opportunities/call-for-papers.png', '/images/opportunities/tech.avif'],
+  Challenge: ['/images/opportunities/tech.avif'],
+  Hackathon: ['/images/opportunities/hackathon.jpg', '/images/opportunities/tech.avif'],
+  Project: ['/images/opportunities/tech.avif'],
+  Event: ['/images/opportunities/community.jpg', '/images/opportunities/tech.avif']
+};
+
+export const getDynamicImageUrl = (category: string, id: string, providedUrl?: string) => {
+  // If the provided url is not the default generic logo, use it
+  if (providedUrl && !providedUrl.includes('Opportunities Kenya Logo')) {
+    return providedUrl;
+  }
+  
+  const options = CATEGORY_IMAGES[category] || ['/images/opportunities/internship.avif'];
+  // Use a simple hash of the ID to consistently pick the same image for the same post
+  const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return options[hash % options.length];
 };
 
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
 
+  const finalImageUrl = getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl);
+
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const fallback = CATEGORY_FALLBACKS[opportunity.category] ?? '/images/opportunities/internship.avif';
+    const fallback = getDynamicImageUrl(opportunity.category, opportunity.id);
     if (e.currentTarget.src !== window.location.origin + fallback) {
       e.currentTarget.src = fallback;
     }
@@ -53,7 +70,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
         {/* Header Image */}
         <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
           <img
-            src={opportunity.logoUrl}
+            src={finalImageUrl}
             alt={`${opportunity.category} opportunity from ${opportunity.provider}`}
             loading="lazy"
             decoding="async"
