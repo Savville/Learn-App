@@ -64,12 +64,12 @@ const ALL_FUNDING_OPTIONS = [
 ];
 
 // Tab metadata
-const TABS: { id: TabId; label: string; emoji: string; description: string }[] = [
-  { id: 'all',      label: 'All',                    emoji: '🌍', description: 'Opportunities' },
-  { id: 'gigs',     label: 'Microgigs & Jobs',       emoji: '🚀', description: 'Work & Microgigs' },
-  { id: 'career',   label: 'Career & Innovation',    emoji: '💼', description: 'Career & Innovation' },
-  { id: 'academic', label: 'Academic & Learning',    emoji: '🎓', description: 'Academic & Learning' },
-  { id: 'applied',  label: 'Applied',                emoji: '✅', description: 'Applied' },
+const TABS: { id: TabId; label: string; description: string }[] = [
+  { id: 'all',      label: 'All',                  description: 'Opportunities' },
+  { id: 'gigs',     label: 'Microgigs & Jobs',      description: 'Microgigs & Jobs' },
+  { id: 'career',   label: 'Career & Innovation',   description: 'Career & Innovation' },
+  { id: 'academic', label: 'Academic & Learning',   description: 'Academic & Learning' },
+  { id: 'applied',  label: 'Applied',               description: 'Applied' },
 ];
 
 const applyFilters = (
@@ -284,14 +284,13 @@ export function Opportunities() {
                     : 'text-white hover:bg-white/20'
                 }`}
               >
-                <span className="mr-1.5">{tab.emoji}</span>
                 {tab.label}
               </button>
             ))}
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-6">
-            {currentTab.emoji} {currentTab.description}
+            {currentTab.description}
           </h1>
 
           {/* Search Bar */}
