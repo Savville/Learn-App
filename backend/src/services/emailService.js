@@ -989,3 +989,5 @@ export async function sendPowerAfricaEmail(email, name, cc = []) {
 }
 
 export { seangapoTemplate, yesistTemplate, eepTemplate, acesTemplate, worldQuantTemplate, powerAfricaTemplate };
+
+// Refurbished

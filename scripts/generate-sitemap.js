@@ -70,3 +70,5 @@ function generateSitemap() {
 }
 
 generateSitemap();
+
+// Refurbished

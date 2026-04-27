@@ -61,3 +61,5 @@ export function useSEO({ title, description, image, url, type = 'website' }: SEO
     setMeta('twitter:image', img);
   }, [title, description, image, url, type]);
 }
+
+// Refurbished

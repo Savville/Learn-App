@@ -29,3 +29,4 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+

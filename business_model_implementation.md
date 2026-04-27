@@ -65,3 +65,4 @@ When presenting this model to stakeholders, we must avoid sounding like a "non-p
 5. **Competitive Advantage:** Exclusive access to a massive pipeline of high-skill, low-cost engineering talent that traditional R&D cannot replicate.
 6. **Alignment with Global Capital:** We address SDG 9 (Innovation) while creating highly valuable, licensable software IP across East Africa.
 7. **IP & Legal Moat:** A formalized pipeline where students own their founder shares, but Opportunities Kenya holds standard studio equity for scale and exit opportunities.
+

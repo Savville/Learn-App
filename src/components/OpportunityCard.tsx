@@ -112,3 +112,5 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
     </Link>
   );
 }
+
+// Refurbished

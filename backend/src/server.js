@@ -123,3 +123,5 @@ app.listen(PORT, () => {
   console.log(`📧 Email Service: ${process.env.RESEND_API_KEY ? 'Resend configured' : 'Not configured'}`);
   console.log(`🗄️  Database: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
 });
+
+// Refurbished
