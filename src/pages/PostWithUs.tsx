@@ -639,10 +639,21 @@ export function PostWithUs() {
                     <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
                       Funding type
                     </span>
-                    <Input
-                      value={parsedData.basicInfo.fundingType}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBasicInfoEdit('fundingType', e.target.value)}
-                    />
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={parsedData.basicInfo.fundingType || ''}
+                      onChange={(e) => handleBasicInfoEdit('fundingType', e.target.value)}
+                    >
+                      <option value="">Select funding type...</option>
+                      <option value="Fully Funded">Fully Funded</option>
+                      <option value="Partially Funded">Partially Funded</option>
+                      <option value="Self Funded">Self Funded</option>
+                      <option value="Paid / Salary">Paid / Salary</option>
+                      <option value="Stipend Provided">Stipend Provided</option>
+                      <option value="Unpaid">Unpaid</option>
+                      <option value="Prize Money / Award">Prize Money / Award</option>
+                      <option value="Not Applicable">Not Applicable</option>
+                    </select>
                   </div>
                   <div className="space-y-1.5">
                     <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
