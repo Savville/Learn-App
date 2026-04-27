@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,7 +35,7 @@ interface ParsedOpportunityData {
   escrowAmount?: number;
 }
 
-// Use the same API base URL as the rest of the app â€” reads from VITE_API_URL env var
+// Use the same API base URL as the rest of the app — reads from VITE_API_URL env var
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
 export function PostWithUs() {
@@ -109,6 +109,35 @@ export function PostWithUs() {
   // View Mode
   const [viewMode, setViewMode] = useState<'post' | 'manage'>('post');
 
+  const handleManualEntry = () => {
+    if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email || !reporter.websiteOrSocial) {
+      setError('Please provide your full identity details first.');
+      return;
+    }
+    setError(null);
+    setParsedData({
+      basicInfo: {
+        title: '',
+        provider: '',
+        category: '',
+        description: '',
+        fullDescription: '',
+        fundingType: '',
+        compensationType: 'N/A',
+        upfrontCost: 'No Upfront Cost'
+      },
+      extractedFeatures: [
+        { feature: 'Application Link', value: '', importance: 'High', notes: 'Critical for applying' },
+        { feature: 'Deadline', value: '', importance: 'High', notes: '' },
+        { feature: 'Location', value: '', importance: 'Medium', notes: '' }
+      ],
+      eligibilityRequirements: [],
+      benefits: [],
+      thematicAreas: [],
+      suggestCustomForm: false
+    });
+  };
+
   const handleParse = async () => {
     if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email || !reporter.websiteOrSocial) {
       setError('Please provide your full identity details first.');
@@ -119,14 +148,18 @@ export function PostWithUs() {
     setParsedData(null);
     setPublishedSlug(null);
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
       const response = await fetch(`${API_BASE}/public/parse-opportunity`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ rawText }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (!response.ok) {
@@ -150,7 +183,11 @@ export function PostWithUs() {
 
     } catch (error: any) {
       console.error(error);
-      setError(`Parsing failed: ${error.message}`);
+      if (error.name === 'AbortError') {
+        setError('Extraction timed out. The server might be busy. Please try "Enter Manually".');
+      } else {
+        setError(`Parsing failed: ${error.message}`);
+      }
     }
     setIsParsing(false);
   };
@@ -208,7 +245,7 @@ export function PostWithUs() {
         throw new Error('Identity details are required to submit.');
         }
 
-        // Step 1: Upload the image (optional â€” skip if no image selected)
+        // Step 1: Upload the image (optional — skip if no image selected)
         let imageUrl = '/Opportunities Kenya Logo 2.png'; // default fallback
 
         if (coverImage) {
@@ -222,7 +259,7 @@ export function PostWithUs() {
 
           const uploadData = await uploadResponse.json();
           if (!uploadResponse.ok) {
-              // Don't block publish on image failure â€” just warn and use default
+              // Don't block publish on image failure — just warn and use default
               console.warn('Image upload failed, using default logo:', uploadData.error);
           } else {
               imageUrl = uploadData.imageUrl;
@@ -508,7 +545,21 @@ export function PostWithUs() {
                       className="w-full"
                       style={{ backgroundColor: '#0933ed', color: '#ffffff' }}
                     >
-                      {isParsing ? 'Extractingâ€¦' : 'Extract data points'}
+                      {isParsing ? 'Extracting...' : 'AI Extract Data'}
+                    </Button>
+                    <div className="relative flex items-center py-2">
+                      <div className="flex-grow border-t border-slate-300"></div>
+                      <span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-medium uppercase">OR</span>
+                      <div className="flex-grow border-t border-slate-300"></div>
+                    </div>
+                    <Button
+                      onClick={handleManualEntry}
+                      disabled={isParsing}
+                      variant="outline"
+                      size="lg"
+                      className="w-full border-slate-300 text-slate-700 hover:bg-slate-100"
+                    >
+                      Enter Manually
                     </Button>
                 </div>
               </div>
@@ -749,7 +800,7 @@ export function PostWithUs() {
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                       handleFeatureEdit(idx, 'value', e.target.value)
                                     }
-                                    placeholder="Leave blank or editâ€¦"
+                                    placeholder="Leave blank or edit…"
                                   />
                                 )}
                               </td>
@@ -784,7 +835,7 @@ export function PostWithUs() {
                                       variant="outline"
                                       size="sm"
                                     >
-                                      Use â€œVisit main pageâ€
+                                      Use “Visit main page”
                                     </Button>
                                   )}
                                   {feat.feature === 'Deadline' && !feat.value && (
@@ -798,7 +849,7 @@ export function PostWithUs() {
                                       variant="outline"
                                       size="sm"
                                     >
-                                      Use â€œRollingâ€ template
+                                      Use “Rolling” template
                                     </Button>
                                   )}
                                 </div>
@@ -978,7 +1029,7 @@ export function PostWithUs() {
                 {publishedSlug && (
                   <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-center justify-between mt-4">
                     <div>
-                      <p className="text-sm font-semibold text-green-800">âœ… {editingPostId ? 'Edit request submitted!' : 'Opportunity sent for verification!'}</p>
+                      <p className="text-sm font-semibold text-green-800">✅ {editingPostId ? 'Edit request submitted!' : 'Opportunity sent for verification!'}</p>
                       <p className="text-xs text-green-700 mt-0.5">Our admin team will review it shortly. Thank you for contributing.</p>
                       {editingPostId && (
                          <Button asChild size="sm" variant="link" className="mt-2 text-green-700 p-0 h-auto font-bold underline">
@@ -996,7 +1047,7 @@ export function PostWithUs() {
                   onClick={handlePublish}
                   disabled={isPublishing || !parsedData}
                 >
-                  {isPublishing ? 'Submittingâ€¦' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
+                  {isPublishing ? 'Submitting…' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
                 </Button>
               </CardContent>
           </Card>
