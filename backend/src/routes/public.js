@@ -19,17 +19,7 @@ import { initiateSTKPush } from '../services/mpesaService.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dest = path.join(PROJECT_ROOT, 'public', 'images', 'opportunities');
-    fs.mkdirSync(dest, { recursive: true });
-    cb(null, dest);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
@@ -147,9 +137,37 @@ function detectRedFlags(opportunity = {}, reporter = {}) {
 
 const router = express.Router();
 
-router.post('/upload-image', upload.single('coverImage'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
-  res.json({ imageUrl: `/images/opportunities/${req.file.filename}` });
+router.post('/upload-image', upload.single('coverImage'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+
+    const base64Image = req.file.buffer.toString('base64');
+    const formData = new URLSearchParams();
+    formData.append('image', base64Image);
+    
+    // Using the ImgBB API key
+    const IMGBB_API_KEY = process.env.IMGBB_API_KEY || '3c9815af4ede90b33765fe8fa05dcb65';
+    
+    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      console.error('ImgBB upload failed:', data);
+      throw new Error(data.error?.message || 'Failed to upload to image host');
+    }
+
+    res.json({ imageUrl: data.data.url });
+  } catch (err) {
+    console.error('Upload Error:', err);
+    res.status(500).json({ error: 'Image upload failed' });
+  }
 });
 
 router.post('/parse-opportunity', async (req, res) => {
