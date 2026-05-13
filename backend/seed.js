@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const opportunities = [
-  [
   {
     id: 'mock-gig-student-project',
     title: 'Need help with React Native App UI for Final Year Project',
@@ -39,9 +38,7 @@ const opportunities = [
     isEscrow: true,
     isEscrowFunded: false,
     escrowAmount: 3000,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
+    status: 'Verified'
   },
   {
     id: 'mock-gig-lecturer-ppt',
@@ -78,9 +75,7 @@ const opportunities = [
     isEscrow: true,
     isEscrowFunded: true,
     escrowAmount: 5000,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
+    status: 'Verified'
   },
   {
     id: 'mock-gig-grad-research',
@@ -117,9 +112,7 @@ const opportunities = [
     isEscrow: true,
     isEscrowFunded: false,
     escrowAmount: 2500,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
+    status: 'Verified'
   },
   {
     id: 'agea-startup-lab-2026',
@@ -176,9 +169,7 @@ Extended, tailored support for top-performing start-ups to help secure funding a
     featured: true,
     dateAdded: '2026-04-24',
     logoUrl: '/images/opportunities/agea.png',
-    postedBy: 'Opportunities Kenya Admin',
-    views: 0,
-    clicks: 0
+    postedBy: 'Opportunities Kenya Admin'
   },
   {
     id: 'bishops-university-admissions-2026-2027',
@@ -244,8 +235,6 @@ Incoming International Exchange students (one or two semesters) have separate fo
     featured: true,
     dateAdded: '2026-04-07',
     logoUrl: '/images/opportunities/ubishops_canada.jpeg',
-    views: 0,
-    clicks: 0
   },
   {
     id: 'science-scilifelab-prize-for-young-scientists-2026',
@@ -295,8 +284,6 @@ The grand winner will get a prize money of $30,000 USD, and the other three cate
     featured: true,
     dateAdded: '2026-03-29',
     logoUrl: '/images/opportunities/Scilifelab.png',
-    views: 0,
-    clicks: 0
   },
   {
     id: 'aces-civexpo-2026-incubation',
@@ -367,9 +354,7 @@ Registered projects will present at ACES meet-ups leading up to the CivExpo in S
         heading: 'Innovation & Business (Phase 3)',
         topics: ['Sustainable construction materials', 'Network leakage solutions (Nairobi Water)', 'Decentralized rainwater purification', 'Structural biofuel briquettes & business models']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: '37',
@@ -491,9 +476,7 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
         heading: 'Wastewater Reuse',
         topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: 'worldquant-brain-iqc-2026',
@@ -564,9 +547,7 @@ HOW TO PARTICIPATE
         heading: 'Quant Finance Career',
         topics: ['BRAIN Research Consultant positions', 'Quantitative Researcher networking', 'Global finals in Singapore']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: '29',
@@ -607,9 +588,7 @@ HOW TO PARTICIPATE
     duration: '3 to 6 months',
     featured: false,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/european-union.jpg',
-    views: 0,
-    clicks: 0
+    logoUrl: '/images/opportunities/european-union.jpg'
   },
   {
     id: '30',
@@ -649,9 +628,7 @@ HOW TO PARTICIPATE
     duration: '2 to 8 months',
     featured: false,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/wfp.png',
-    views: 0,
-    clicks: 0
+    logoUrl: '/images/opportunities/wfp.png'
   },
   {
     id: '36',
@@ -752,9 +729,7 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
         heading: 'General',
         topics: ['All academic fields (excluding aviation, nuclear technology, and military training)']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: '38',
@@ -840,9 +815,7 @@ No Japanese language skills required. All interns with outstanding performance m
         heading: 'Front-End Software Engineering',
         topics: ['React & Vue in TypeScript', 'Modern UI/UX development', 'Component-driven architecture', 'Web performance optimisation']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: '40',
@@ -883,9 +856,7 @@ No Japanese language skills required. All interns with outstanding performance m
     upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-13',
-    logoUrl: '/images/opportunities/german.jpg',
-    views: 0,
-    clicks: 0
+    logoUrl: '/images/opportunities/german.jpg'
   },
   {
     id: 'google-student-researcher-internship-2026',
@@ -932,11 +903,7 @@ No Japanese language skills required. All interns with outstanding performance m
       }
     ]
   }
-],
-    views: 0,
-    clicks: 0
-  }
-]];
+];
 
 async function seedDatabase() {
   const client = new MongoClient(process.env.MONGODB_URI);
