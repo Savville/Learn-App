@@ -21,6 +21,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://opportunitieskenya.live/opportunity/agea-start-up-lab-call-for-applications-2026</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://opportunitieskenya.live/opportunity/bishop</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -56,21 +61,6 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://opportunitieskenya.live/opportunity/2026-ieee-pesias-powerafrica-conference-call-for-papers</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://opportunitieskenya.live/opportunity/canadian-government-study-in-canada-scholarships-2026u20132027</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://opportunitieskenya.live/opportunity/eeml-summer-school-2026</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://opportunitieskenya.live/opportunity/australia-awards-scholarships-2027</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -82,11 +72,6 @@
   </url>
   <url>
     <loc>https://opportunitieskenya.live/opportunity/daad-mide-scholarship-2026-in-germany</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://opportunitieskenya.live/opportunity/kenya-ports-authority-kpa-internship-program-2026</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>

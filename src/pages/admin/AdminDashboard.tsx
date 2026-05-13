@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle } from 'lucide-react';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -14,7 +14,9 @@ export default function AdminDashboard() {
   const [orgRequests, setOrgRequests] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [allOpps, setAllOpps] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage'>('opps');
+  const [escrowReleases, setEscrowReleases] = useState<any[]>([]);
+  const [payDoerLoading, setPayDoerLoading] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage' | 'escrow'>('opps');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
@@ -30,17 +32,19 @@ export default function AdminDashboard() {
       const token = sessionStorage.getItem('adminToken');
       if (!token) return;
       
-      const [oppsRes, reportsRes, orgsRes, allOppsRes] = await Promise.all([
+      const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes] = await Promise.all([
         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/opportunities`, { headers: { Authorization: `Bearer ${token}` } })
+        fetch(`${API_BASE}/admin/opportunities`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/escrow-releases`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
 
       if (oppsRes.ok) setPending(await oppsRes.json());
       if (reportsRes.ok) setReports(await reportsRes.json());
       if (orgsRes.ok) setOrgRequests(await orgsRes.json());
       if (allOppsRes.ok) setAllOpps(await allOppsRes.json());
+      if (escrowRes.ok) setEscrowReleases(await escrowRes.json());
     } catch (e) {
       console.error(e);
     } finally {
@@ -254,6 +258,24 @@ export default function AdminDashboard() {
     setActionLoading(null);
   };
 
+  const handlePayDoer = async (appId: string) => {
+    if (!window.confirm('Send M-PESA payment to this job doer? This action cannot be undone.')) return;
+    setPayDoerLoading(appId);
+    try {
+      const token = sessionStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/applications/${appId}/pay-doer`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Payment failed');
+      alert(`âœ… ${data.message}`);
+      setEscrowReleases(prev => prev.filter(r => r._id !== appId));
+    } catch (e: any) {
+      alert(`âŒ Error: ${e.message}`);
+    }
+    setPayDoerLoading(null);
+  };
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
@@ -267,7 +289,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="rounded-full bg-primary/5 px-4 py-1 text-xs font-medium text-primary">
-            Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'reports' ? 'Reports Inbox' : activeTab === 'manage' ? 'Manage Content' : 'Organization Management'}
+            Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'reports' ? 'Reports Inbox' : activeTab === 'manage' ? 'Manage Content' : activeTab === 'escrow' ? 'Escrow Payouts' : 'Organization Management'}
           </div>
         </header>
 
@@ -338,8 +360,13 @@ export default function AdminDashboard() {
                             </div>
                           )}
                           {item.isOrganizationPost && (
-                            <Badge className="mt-2 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">
+                            <Badge className="mt-2 mr-2 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">
                               Verified Org Post
+                            </Badge>
+                          )}
+                          {item.isEscrowFunded && (
+                            <Badge className="mt-2 bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
+                              <DollarSign className="w-3 h-3 mr-1" /> Escrow Funded (KES {item.escrowAmount})
                             </Badge>
                           )}
                           {item.opportunity.editOf && (

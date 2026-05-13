@@ -3,6 +3,250 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const opportunities = [
+  [
+  {
+    id: 'mock-gig-student-project',
+    title: 'Need help with React Native App UI for Final Year Project',
+    provider: 'David Ochieng (Student, KU)',
+    category: 'Gig',
+    description: 'Looking for a student who knows React Native to help me fix some UI bugs on my final year project. Needs to be done ASAP.',
+    fullDescription: 'I am a final year computer science student at Kenyatta University and I am building a React Native application for my project. I am struggling with the UI layout, specifically flexbox and some navigation issues. Looking for someone who can help me polish the design and fix the bugs over the weekend. I have applied some funds to my escrow.\\n\\n**Status:** Job has been assigned and work is currently ongoing.',
+    deadline: '2026-05-20',
+    location: 'Remote / Nairobi',
+    eligibility: {
+      educationLevel: 'UnderGrad',
+      fieldOfStudy: ['Computer Science', 'Software Engineering'],
+      requirements: [
+        'Must be proficient in React Native and Expo',
+        'Available to work this weekend',
+        'Student preferred'
+      ]
+    },
+    benefits: [
+      'Flexible remote work',
+      'Quick payment via escrow'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: '#',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '2 days',
+    featured: false,
+    dateAdded: '2026-04-29',
+    logoUrl: '/images/opportunities/default-avatar.png',
+    postedBy: 'David Ochieng',
+    isEscrow: true,
+    isEscrowFunded: false,
+    escrowAmount: 3000,
+    status: 'Verified',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: 'mock-gig-lecturer-ppt',
+    title: 'Design Professional PowerPoint for Lecture Notes with Graphics',
+    provider: 'Dr. Sarah Wanjiku (Lecturer, Kenyatta University)',
+    category: 'Gig',
+    description: 'I need a student proficient in PowerPoint and Canva to turn my 50-page word document of lecture notes into a visually appealing presentation with infographics.',
+    fullDescription: 'As a busy lecturer, I am looking for a creative professional or student to convert my plain text lecture notes into a professional and visually engaging PowerPoint presentation. The notes cover topics in environmental science, and I need relevant graphics, charts, and icons added. The final output should be 30-40 slides.\\n\\n**Status:** Job has been assigned and paid already. Escrow is fully funded.',
+    deadline: '2026-05-18',
+    location: 'Remote',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Design', 'Communication', 'Any Field'],
+      requirements: [
+        'Strong skills in Microsoft PowerPoint and Canva',
+        'Ability to summarize text into bullet points',
+        'Experience with data visualization and infographics'
+      ]
+    },
+    benefits: [
+      'Guaranteed payment (Escrow Funded)',
+      'Potential for future work on other modules'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: '#',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '1 week',
+    featured: true,
+    dateAdded: '2026-05-06',
+    logoUrl: '/images/opportunities/default-avatar.png',
+    postedBy: 'Dr. Sarah Wanjiku',
+    isEscrow: true,
+    isEscrowFunded: true,
+    escrowAmount: 5000,
+    status: 'Verified',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: 'mock-gig-grad-research',
+    title: 'Data Entry and Survey Analysis using SPSS/Excel',
+    provider: 'Brian Mutua (Research Consultant)',
+    category: 'Gig',
+    description: 'I have 200 survey responses that need to be entered into Excel and cleaned for SPSS analysis. Looking for a meticulous graduate or student.',
+    fullDescription: 'I am a recent graduate and research consultant working on a public health survey. I have collected 200 physical questionnaires that need to be digitized. You will be responsible for entering the data into an Excel spreadsheet, cleaning the dataset, and performing some basic descriptive statistics in SPSS. Accuracy is key.\\n\\n**Status:** Job has been assigned. Escrow is set up and work is in progress.',
+    deadline: '2026-05-15',
+    location: 'Remote',
+    eligibility: {
+      educationLevel: 'PostGrad',
+      fieldOfStudy: ['Statistics', 'Public Health', 'Data Science'],
+      requirements: [
+        'High attention to detail',
+        'Proficiency in Microsoft Excel and SPSS',
+        'Previous experience with data entry'
+      ]
+    },
+    benefits: [
+      'Gain experience in real-world data analysis',
+      'Flexible working hours'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: '#',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '3 days',
+    featured: false,
+    dateAdded: '2026-05-02',
+    logoUrl: '/images/opportunities/default-avatar.png',
+    postedBy: 'Brian Mutua',
+    isEscrow: true,
+    isEscrowFunded: false,
+    escrowAmount: 2500,
+    status: 'Verified',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: 'agea-startup-lab-2026',
+    title: "AGEA Start-up Lab Call for Applications 2026",
+    provider: "African German Entrepreneurship Academy (AGEA)",
+    category: 'Project',
+    description: "The 2026 edition of the AGEA Start-up Lab is officially open for submissions. Support for innovative, research-based tech start-ups and spin-offs from African HEIs.",
+    fullDescription: `The 2026 edition of the AGEA Start-up Lab is now officially open for submissions of innovative start-up projects. The competition is the first arm of the three-phase programme (AGEA Start-up Lab), which aims to support innovative spin-offs, technology-oriented start-ups, and start-up projects, and to strengthen the link between academia and industry in Africa.
+
+We invite submissions of innovative spin-offs and technology-oriented start-ups, developed from academic and scientific research activities by students (Masters and PhD), lecturers, and researchers at African universities in partner countries: Benin, Ghana, Kenya, Nigeria, Rwanda, Tunisia, and Ethiopia.
+
+The application window for the 2026 edition officially opens on 13 April 2026 and closes on 17 May 2026.
+
+────────────────────────────────────
+ THE THREE-PHASE ACCELERATION PROGRAMME
+────────────────────────────────────
+
+Phase 1: Start-up Competition (13 April – 17 May 2026)
+The foundational application and selection phase followed by evaluation and candidate interviews.
+
+Phase 2: Start-up Class (23 September – 02 October 2026)
+An intensive, highly focused training program held in-person at Leipzig University, Germany. Includes investment readiness training, dedicated coaching, and connections to early-stage investors.
+
+Phase 3: Start-up Investment Coaching (November 2026 – 2027)
+Extended, tailored support for top-performing start-ups to help secure funding and scale. Includes direct introductions to Angel Investors and specialised investor trips.`,
+    deadline: '2026-05-17',
+    location: 'Leipzig, Germany / Hybrid',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Any Field', 'Technology', 'Agriculture', 'Health', 'Education', 'Energy', 'IT', 'Commerce'],
+      requirements: [
+        'Academics (lecturers, professors, researchers)',
+        'Students currently enrolled in Masters and PhD programmes',
+        'Entrepreneurs, recent Masters or PhD graduates (1 – 2 years)',
+        'Applicants must be affiliated with universities in Benin, Ghana, Kenya, Nigeria, Rwanda, Tunisia, or Ethiopia',
+        'Minimum Viable Product (MVP) or Minimum Marketable Product (MMP) must be available',
+        'Student-led teams or recent graduate founders should have a faculty mentor'
+      ]
+    },
+    benefits: [
+      'Intensive Investment Readiness Training (Start-up Class in Leipzig, Germany)',
+      'Partial funding for travel and accommodation for up to two team members',
+      'Investment Coaching and direct connections to Angel Investors',
+      'Strategic Support for Grant Applications (including EXIST)',
+      'Professional Promotional Video Development for the start-up'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.ageacademy.de/agea-business-idea-competition/',
+    contactEmail: 'bayeboah@uni-leipzig.de',
+    fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'No Upfront Cost',
+    duration: 'Multi-phase (April 2026 - 2027)',
+    featured: true,
+    dateAdded: '2026-04-24',
+    logoUrl: '/images/opportunities/agea.png',
+    postedBy: 'Opportunities Kenya Admin',
+    views: 0,
+    clicks: 0
+  },
+  {
+    id: 'bishops-university-admissions-2026-2027',
+    title: "Bishop's University Undergraduate & Graduate Admissions 2026-2027",
+    provider: "Bishop's University",
+    category: 'Scholarship',
+    description: "Applications are open for Fall 2026 and Winter 2027 at Bishop's University, Canada. Includes opportunities for B.A., B.Sc., B.B.A., B.Ed., M.A., M.Sc., and M.Ed. programs.",
+    fullDescription: `Bishop's University welcomes applications for the 2026-2027 academic year. For anyone looking to apply to a Bachelor of Arts (B.A.), Bachelor of Science (B.Sc.), Bachelor of Business Administration (B.B.A.), Bachelor of Education (B.Ed.), Master of Arts (M.A.), Master of Science (M.Sc.), or Master of Education (M.Ed.) degree.
+
+────────────────────────────────────
+ FALL 2026 SEMESTER DEADLINES
+────────────────────────────────────
+
+• August 4, 2025: Application opens
+• March 31, 2026:
+  - Deadline for international students (except USA) to submit an application.
+  - Deadline for all applicants to apply for Competitive Entrance Scholarships.
+  - Deadline for all applicants to submit Entrance Awards and Bursaries application.
+• April 15, 2026: Deadline for international students (except USA) to submit supporting documentation.
+• May 1, 2026: Deadline for Canadian and USA Citizens to submit an application.
+• May 15, 2026: Deadline for Canadian and USA Citizens to submit supporting documentation.
+
+────────────────────────────────────
+ WINTER 2027 SEMESTER DEADLINES
+────────────────────────────────────
+
+• Spring 2026: Admissions evaluation begins.
+• September 1, 2026: Deadline for international students to submit an application.
+• September 15, 2026: Deadline for international students to submit supporting documentation.
+• November 1, 2026: Deadline for Canadian students to submit an application.
+• November 15, 2026: Deadline for Canadian students to submit supporting documentation.
+
+* Canadian and USA Citizens: Please check the programs dropdown list on the corresponding form to see what programs remain open for admission consideration after May 1.
+
+** Applications to the School of Education’s Bachelor of Education programs are subject to different timelines and deadlines.
+
+Incoming International Exchange students (one or two semesters) have separate forms for Fall 2026 and Winter 2027. Contact exchange@ubishops.ca for any questions.`,
+    deadline: '2026-03-31',
+    location: 'Sherbrooke, Quebec, Canada',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Arts', 'Science', 'Business Administration', 'Education'],
+      requirements: [
+        'Open to Undergraduate (B.A., B.Sc., B.B.A., B.Ed.) and Graduate (M.A., M.Sc., M.Ed.) applicants',
+        'International students must apply by March 31 for Fall entry to be considered for scholarships',
+        'Canadian and USA citizens must apply by May 1 for Fall entry',
+        'International students must apply by September 1 for Winter entry',
+        'Canadian students must apply by November 1 for Winter entry'
+      ]
+    },
+    benefits: [
+      'Competitive Entrance Scholarships (Apply by March 31)',
+      'Entrance Awards and Bursaries (Apply by March 31)',
+      'Access to a wide range of undergraduate and graduate programs',
+      'International exchange opportunities',
+      'Vibrant campus life in Sherbrooke, Quebec'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.ubishops.ca/future-students/bishops-university-online-application/',
+    fundingType: 'Partially Funded',
+    compensationType: 'N/A',
+    upfrontCost: 'Has Upfront Cost',
+    featured: true,
+    dateAdded: '2026-04-07',
+    logoUrl: '/images/opportunities/ubishops_canada.jpeg',
+    views: 0,
+    clicks: 0
+  },
   {
     id: 'science-scilifelab-prize-for-young-scientists-2026',
     title: 'Science & SciLifeLab Prize for Young Scientists 2026',
@@ -51,6 +295,8 @@ The grand winner will get a prize money of $30,000 USD, and the other three cate
     featured: true,
     dateAdded: '2026-03-29',
     logoUrl: '/images/opportunities/Scilifelab.png',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'aces-civexpo-2026-incubation',
@@ -121,7 +367,9 @@ Registered projects will present at ACES meet-ups leading up to the CivExpo in S
         heading: 'Innovation & Business (Phase 3)',
         topics: ['Sustainable construction materials', 'Network leakage solutions (Nairobi Water)', 'Decentralized rainwater purification', 'Structural biofuel briquettes & business models']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: '37',
@@ -243,7 +491,9 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
         heading: 'Wastewater Reuse',
         topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: 'worldquant-brain-iqc-2026',
@@ -314,7 +564,9 @@ HOW TO PARTICIPATE
         heading: 'Quant Finance Career',
         topics: ['BRAIN Research Consultant positions', 'Quantitative Researcher networking', 'Global finals in Singapore']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: '29',
@@ -355,7 +607,9 @@ HOW TO PARTICIPATE
     duration: '3 to 6 months',
     featured: false,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/european-union.jpg'
+    logoUrl: '/images/opportunities/european-union.jpg',
+    views: 0,
+    clicks: 0
   },
   {
     id: '30',
@@ -395,7 +649,9 @@ HOW TO PARTICIPATE
     duration: '2 to 8 months',
     featured: false,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/wfp.png'
+    logoUrl: '/images/opportunities/wfp.png',
+    views: 0,
+    clicks: 0
   },
   {
     id: '36',
@@ -496,7 +752,9 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
         heading: 'General',
         topics: ['All academic fields (excluding aviation, nuclear technology, and military training)']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: '38',
@@ -582,93 +840,9 @@ No Japanese language skills required. All interns with outstanding performance m
         heading: 'Front-End Software Engineering',
         topics: ['React & Vue in TypeScript', 'Modern UI/UX development', 'Component-driven architecture', 'Web performance optimisation']
       }
-    ]
-  },
-  {
-    id: '39',
-    title: 'World Bank Group Youth Summit 2026',
-    provider: 'World Bank Group',
-    category: 'Conference',
-    description: 'Fully funded global youth summit in Washington D.C. for young innovators aged 18–35. Theme: "Future Works: Designing Jobs for the Digital Age." Includes delegate and pitch competition tracks.',
-    fullDescription: `The World Bank Group Youth Summit 2026 is one of the largest annual international youth gatherings organised by the World Bank Group. The summit will take place on June 11–12, 2026 in Washington, D.C., USA, in a hybrid format — participants may attend in person or virtually from anywhere in the world.
-
-THEME: FUTURE WORKS — DESIGNING JOBS FOR THE DIGITAL AGE
-The summit will bring together young innovators, leaders, and changemakers from around the world to discuss development challenges and explore innovative solutions for the future workforce. Focus areas include:
-• Education and skills for the digital economy
-• Entrepreneurship and job creation
-• Agriculture and food systems innovation
-
-TWO PARTICIPATION TRACKS
-
-📋 Delegate Track
-Participate in keynote speeches, panel discussions, workshops, and networking sessions with global experts, policymakers, and world leaders. Join the Young Changemaker Network and build lasting international connections.
-
-🏆 Pitch Competition Track
-Present a creative idea to solve pressing global challenges. Submit a project idea, pitch deck, and video pitch. Finalists present live at the summit and receive expert feedback, mentorship, and global exposure.
-
-ELIGIBILITY
-• Open to citizens of World Bank Group member countries
-• Aged 18–35 at the time of the event
-• Any academic or professional background welcome
-• No GPA requirement
-• Demonstrated interest in technology, development policy, entrepreneurship, or economic growth
-• Proficiency in English required
-
-APPLICATION DEADLINE: 11 March 2026
-
-Apply via the official Google Form. Select your track (Delegate or Pitch Competition) and submit all required materials before the deadline.`,
-    deadline: '2026-03-11',
-    location: 'Washington D.C., USA',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: [],
-      requirements: [
-        'Citizen of a World Bank Group member country',
-        'Aged 18–35 at the time of the event (June 2026)',
-        'Any academic or professional background accepted',
-        'Demonstrated interest in technology, development policy, entrepreneurship, or economic growth',
-        'Proficiency in English (all activities conducted in English)',
-        'Pitch Competition applicants must submit a project idea, pitch deck, and video pitch'
-      ]
-    },
-    benefits: [
-      'Round-trip airfare support for selected in-person participants',
-      'Accommodation in Washington D.C. during the summit',
-      'Stipend to cover living expenses',
-      'Access to keynote sessions and panel discussions with global experts and policymakers',
-      'Interactive workshops and hands-on learning sessions',
-      'Live Q&A with speakers and finalists',
-      'Networking with young leaders and global professionals',
-      'Membership in the Young Changemaker Network',
-      'Expert feedback and mentorship for Pitch Competition finalists'
     ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLScPHBBaYX8plrcX3pjR-BiLdmJt8OO8U5x1VQj511Tqs9_Jxw/viewform',
-    fundingType: 'Fully Funded',
-    compensationType: 'Stipend',
-    upfrontCost: 'No Upfront Cost',
-    duration: '2 days (June 11–12, 2026)',
-    featured: true,
-    dateAdded: '2026-03-09',
-    logoUrl: '/images/opportunities/world_bank.png',
-    thematicAreas: [
-      {
-        heading: 'Education & Digital Skills',
-        topics: ['Reskilling for the digital economy', 'Access to quality education', 'Youth employability programmes']
-      },
-      {
-        heading: 'Entrepreneurship & Jobs',
-        topics: ['Youth-led job creation', 'Inclusive economic growth', 'Startup ecosystems in emerging markets']
-      },
-      {
-        heading: 'Agriculture & Food Systems',
-        topics: ['Agri-tech innovation', 'Climate-resilient farming', 'Food security and supply chains']
-      },
-      {
-        heading: 'Pitch Competition',
-        topics: ['Innovative solutions to global challenges', 'Live pitching to global experts', 'Mentorship and expert feedback']
-      }
-    ]
+    views: 0,
+    clicks: 0
   },
   {
     id: '40',
@@ -709,42 +883,9 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
     upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-13',
-    logoUrl: '/images/opportunities/german.jpg'
-  },
-  {
-    id: '41',
-    title: 'EEP Africa Call for Proposals 2026',
-    provider: 'EEP Africa',
-    category: 'Grant',
-    description: 'Grant and repayable grant financing from EUR 200,000–500,000 to support early-stage, innovative clean energy projects in sub-Saharan Africa.',
-    fullDescription: 'EEP Africa invites private companies, start-ups, and social enterprises from around the world to submit early-stage, innovative clean energy projects in partner countries across sub-Saharan Africa. The programme provides grant and repayable grant financing from EUR 200,000–500,000 to support feasibility studies, pilot projects, and scale-up initiatives.\n\nFunding ranges from EUR 200,000–500,000 with a co-financing requirement of 10%–50% depending on the project type and company maturity. The application process involves a 2-stage mechanism, beginning with an Expression of Interest and then moving to a Full Proposal for shortlisted candidates.\n\nProject Phases Supported include Feasibility Studies, Pilot Projects by Early-Stage Companies, and Scale-up & Replication Projects. Focus technologies include Residential Electricity Access, Productive Uses of Energy, Mini Grids, Power Generation, Clean Cooking, Electric Mobility, and Energy Efficiency. \n\nKey Dates:\n- Call Opens: 16 February 2026\n- EoI Deadline: 16 March 2026 (2 PM EAT)\n- Longlist Pitch Interviews: May 2026\n- Full Proposal Deadline: 27 July 2026 (2 PM EAT)\n- Final Decision: End of September 2026 (Final Investment Committee decision ends the evaluation process)\n- Deployment: October 2026 onwards.',
-    deadline: '2026-03-16',
-    location: 'Sub-Saharan and Southern Africa',
-    eligibility: {
-      educationLevel: 'All',
-      fieldOfStudy: ['Clean Energy', 'Renewable Energy', 'Entrepreneurship'],
-      requirements: [
-        'Must be a private company, start-up, or social enterprise with commercial revenue model',
-        'Registered as a legal entity for at least 6 months prior to EoI deadline',
-        'Must have strong local presence in target country, be locally led, or have strong local partnerships',
-        'NGOs, charities, research institutions, and government bodies can only serve as partners'
-      ]
-    },
-    benefits: [
-      'EUR 200,000–500,000 in grant or repayable grant financing',
-      'Supports feasibility studies and pre-development (30% co-financing)',
-      'Supports pilot and demonstration activities (10% cash + 20% in-kind co-financing for early stage)',
-      'Supports scale-up equipment and installation (30%–50% co-financing for mature companies)',
-      'Access to EEP Africa network and support'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://eepafrica.org/financing/2026-call-for-proposals',
-    fundingType: 'Partially Funded',
-    compensationType: 'N/A',
-    upfrontCost: 'No Upfront Cost',
-    featured: true,
-    dateAdded: '2026-03-15',
-    logoUrl: '/images/opportunities/EEP.png'
+    logoUrl: '/images/opportunities/german.jpg',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'google-student-researcher-internship-2026',
@@ -791,7 +932,11 @@ Apply via the official Google Form. Select your track (Delegate or Pitch Competi
       }
     ]
   }
-];
+],
+    views: 0,
+    clicks: 0
+  }
+]];
 
 async function seedDatabase() {
   const client = new MongoClient(process.env.MONGODB_URI);

@@ -60,6 +60,117 @@ export interface Opportunity {
 
 export const opportunities: Opportunity[] = [
   {
+    id: 'mock-gig-student-project',
+    title: 'Need help with React Native App UI for Final Year Project',
+    provider: 'David Ochieng (Student, KU)',
+    category: 'Gig',
+    description: 'Looking for a student who knows React Native to help me fix some UI bugs on my final year project. Needs to be done ASAP.',
+    fullDescription: 'I am a final year computer science student at Kenyatta University and I am building a React Native application for my project. I am struggling with the UI layout, specifically flexbox and some navigation issues. Looking for someone who can help me polish the design and fix the bugs over the weekend. I have applied some funds to my escrow.\\n\\n**Status:** Job has been assigned and work is currently ongoing.',
+    deadline: '2026-05-20',
+    location: 'Remote / Nairobi',
+    eligibility: {
+      educationLevel: 'UnderGrad',
+      fieldOfStudy: ['Computer Science', 'Software Engineering'],
+      requirements: [
+        'Must be proficient in React Native and Expo',
+        'Available to work this weekend',
+        'Student preferred'
+      ]
+    },
+    benefits: [
+      'Flexible remote work',
+      'Quick payment via escrow'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: '#',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '2 days',
+    featured: false,
+    dateAdded: '2026-04-29',
+    logoUrl: '/images/opportunities/default-avatar.png',
+    postedBy: 'David Ochieng',
+    isEscrow: true,
+    isEscrowFunded: false,
+    escrowAmount: 3000,
+    status: 'Verified'
+  },
+  {
+    id: 'mock-gig-lecturer-ppt',
+    title: 'Design Professional PowerPoint for Lecture Notes with Graphics',
+    provider: 'Dr. Sarah Wanjiku (Lecturer, Kenyatta University)',
+    category: 'Gig',
+    description: 'I need a student proficient in PowerPoint and Canva to turn my 50-page word document of lecture notes into a visually appealing presentation with infographics.',
+    fullDescription: 'As a busy lecturer, I am looking for a creative professional or student to convert my plain text lecture notes into a professional and visually engaging PowerPoint presentation. The notes cover topics in environmental science, and I need relevant graphics, charts, and icons added. The final output should be 30-40 slides.\\n\\n**Status:** Job has been assigned and paid already. Escrow is fully funded.',
+    deadline: '2026-05-18',
+    location: 'Remote',
+    eligibility: {
+      educationLevel: 'Both',
+      fieldOfStudy: ['Design', 'Communication', 'Any Field'],
+      requirements: [
+        'Strong skills in Microsoft PowerPoint and Canva',
+        'Ability to summarize text into bullet points',
+        'Experience with data visualization and infographics'
+      ]
+    },
+    benefits: [
+      'Guaranteed payment (Escrow Funded)',
+      'Potential for future work on other modules'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: '#',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '1 week',
+    featured: true,
+    dateAdded: '2026-05-06',
+    logoUrl: '/images/opportunities/default-avatar.png',
+    postedBy: 'Dr. Sarah Wanjiku',
+    isEscrow: true,
+    isEscrowFunded: true,
+    escrowAmount: 5000,
+    status: 'Verified'
+  },
+  {
+    id: 'mock-gig-grad-research',
+    title: 'Data Entry and Survey Analysis using SPSS/Excel',
+    provider: 'Brian Mutua (Research Consultant)',
+    category: 'Gig',
+    description: 'I have 200 survey responses that need to be entered into Excel and cleaned for SPSS analysis. Looking for a meticulous graduate or student.',
+    fullDescription: 'I am a recent graduate and research consultant working on a public health survey. I have collected 200 physical questionnaires that need to be digitized. You will be responsible for entering the data into an Excel spreadsheet, cleaning the dataset, and performing some basic descriptive statistics in SPSS. Accuracy is key.\\n\\n**Status:** Job has been assigned. Escrow is set up and work is in progress.',
+    deadline: '2026-05-15',
+    location: 'Remote',
+    eligibility: {
+      educationLevel: 'PostGrad',
+      fieldOfStudy: ['Statistics', 'Public Health', 'Data Science'],
+      requirements: [
+        'High attention to detail',
+        'Proficiency in Microsoft Excel and SPSS',
+        'Previous experience with data entry'
+      ]
+    },
+    benefits: [
+      'Gain experience in real-world data analysis',
+      'Flexible working hours'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: '#',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '3 days',
+    featured: false,
+    dateAdded: '2026-05-02',
+    logoUrl: '/images/opportunities/default-avatar.png',
+    postedBy: 'Brian Mutua',
+    isEscrow: true,
+    isEscrowFunded: false,
+    escrowAmount: 2500,
+    status: 'Verified'
+  },
+  {
     id: 'agea-startup-lab-2026',
     title: "AGEA Start-up Lab Call for Applications 2026",
     provider: "African German Entrepreneurship Academy (AGEA)",

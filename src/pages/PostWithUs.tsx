@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,7 +35,7 @@ interface ParsedOpportunityData {
   escrowAmount?: number;
 }
 
-// Use the same API base URL as the rest of the app — reads from VITE_API_URL env var
+// Use the same API base URL as the rest of the app â€” reads from VITE_API_URL env var
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
 export function PostWithUs() {
@@ -249,7 +249,7 @@ export function PostWithUs() {
         throw new Error('Identity details are required to submit.');
         }
 
-        // Step 1: Upload the image (optional — skip if no image selected)
+        // Step 1: Upload the image (optional â€” skip if no image selected)
         let imageUrl = '/Opportunities Kenya Logo 2.png'; // default fallback
 
         if (coverImage) {
@@ -263,7 +263,7 @@ export function PostWithUs() {
 
           const uploadData = await uploadResponse.json();
           if (!uploadResponse.ok) {
-              // Don't block publish on image failure — just warn and use default
+              // Don't block publish on image failure â€” just warn and use default
               console.warn('Image upload failed, using default logo:', uploadData.error);
           } else {
               imageUrl = uploadData.imageUrl;
@@ -813,7 +813,7 @@ export function PostWithUs() {
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                       handleFeatureEdit(idx, 'value', e.target.value)
                                     }
-                                    placeholder="Leave blank or edit…"
+                                    placeholder="Leave blank or editâ€¦"
                                   />
                                 )}
                               </td>
@@ -848,7 +848,7 @@ export function PostWithUs() {
                                       variant="outline"
                                       size="sm"
                                     >
-                                      Use “Visit main page”
+                                      Use â€œVisit main pageâ€
                                     </Button>
                                   )}
                                   {feat.feature === 'Deadline' && !feat.value && (
@@ -862,7 +862,7 @@ export function PostWithUs() {
                                       variant="outline"
                                       size="sm"
                                     >
-                                      Use “Rolling” template
+                                      Use â€œRollingâ€ template
                                     </Button>
                                   )}
                                 </div>
@@ -1042,7 +1042,7 @@ export function PostWithUs() {
                 {publishedSlug && (
                   <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-center justify-between mt-4">
                     <div>
-                      <p className="text-sm font-semibold text-green-800">✅ {editingPostId ? 'Edit request submitted!' : 'Opportunity sent for verification!'}</p>
+                      <p className="text-sm font-semibold text-green-800">âœ… {editingPostId ? 'Edit request submitted!' : 'Opportunity sent for verification!'}</p>
                       <p className="text-xs text-green-700 mt-0.5">Our admin team will review it shortly. Thank you for contributing.</p>
                       {editingPostId && (
                          <Button asChild size="sm" variant="link" className="mt-2 text-green-700 p-0 h-auto font-bold underline">
@@ -1060,7 +1060,7 @@ export function PostWithUs() {
                   onClick={handlePublish}
                   disabled={isPublishing || !parsedData}
                 >
-                  {isPublishing ? 'Submitting…' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
+                  {isPublishing ? 'Submittingâ€¦' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
                 </Button>
               </CardContent>
           </Card>

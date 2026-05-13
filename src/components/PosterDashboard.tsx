@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { OTPLoginForm } from './OTPLoginForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle } from 'lucide-react';
+import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toSlug } from '@/utils/dateUtils';
 
@@ -50,6 +50,11 @@ export function PosterDashboard() {
   const [escrowPhone, setEscrowPhone] = useState('');
   const [escrowLoading, setEscrowLoading] = useState(false);
   const [escrowMessage, setEscrowMessage] = useState<string | null>(null);
+
+  // Escrow Release State
+  const [releaseJob, setReleaseJob] = useState<{ post: Post; app: Applicant } | null>(null);
+  const [releaseLoading, setReleaseLoading] = useState(false);
+  const [releaseMessage, setReleaseMessage] = useState<string | null>(null);
 
   // Delete State
   const [postToDelete, setPostToDelete] = useState<Post | null>(null);
@@ -217,6 +222,29 @@ export function PosterDashboard() {
       setEscrowMessage(err.message);
     } finally {
       setEscrowLoading(false);
+    }
+  };
+
+
+  const handleReleaseEscrow = async (post: Post, app: Applicant) => {
+    if (!window.confirm(`Release KES ${post.escrowAmount} escrow to ${app.applicantEmail}? This cannot be undone.`)) return;
+    setReleaseLoading(true);
+    setReleaseMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/public/me/posts/${post.id}/release-escrow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ applicationId: app._id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to request release');
+      setReleaseMessage(`âœ… ${data.message} Net payout: KES ${data.netPayable}`);
+      // Update local state
+      setApplicants(prev => prev.map(a => a._id === app._id ? { ...a, escrowReleaseRequested: true } as any : a));
+    } catch (err: any) {
+      setReleaseMessage(`âŒ ${err.message}`);
+    } finally {
+      setReleaseLoading(false);
     }
   };
 

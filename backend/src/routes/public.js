@@ -288,6 +288,32 @@ router.post('/submit-opportunity', async (req, res) => {
     ) {
       return res.status(400).json({ error: 'Opportunity data and full reporter identity details are required.' });
     }
+
+    // ── MANDATORY ESCROW for Job and Gig categories ────────────────────────────
+    const JOB_CATEGORIES = ['Job', 'Gig'];
+    if (JOB_CATEGORIES.includes(opportunity.category)) {
+      if (!opportunity.isEscrow) {
+        return res.status(400).json({
+          error: 'Escrow protection is mandatory for Job and Gig listings. Please enable escrow and set an amount before submitting.'
+        });
+      }
+      if (!opportunity.escrowAmount || Number(opportunity.escrowAmount) < 100) {
+        return res.status(400).json({
+          error: 'Escrow amount must be at least KES 100 for Job and Gig listings.'
+        });
+      }
+    }
+
+    // ── Block poster from re-submitting an edit of a live Job/Gig ──────────────
+    if (opportunity.editOf && JOB_CATEGORIES.includes(opportunity.category)) {
+      const db0 = getDB();
+      const liveJob = await db0.collection('opportunities').findOne({ id: opportunity.editOf });
+      if (liveJob && JOB_CATEGORIES.includes(liveJob.category)) {
+        return res.status(403).json({
+          error: 'Jobs and Gigs cannot be edited after approval to protect the integrity of the escrow agreement.'
+        });
+      }
+    }
     const db = getDB();
 
     const normalizedReporter = {
@@ -439,11 +465,17 @@ router.post('/auth/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
     const normalizedEmail = email.trim().toLowerCase();
 
+    // OTP is only valid for 10 minutes
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     const db = getDB();
-    const record = await db.collection('auth_otps').findOne({ email: normalizedEmail, otp });
+    const record = await db.collection('auth_otps').findOne({
+      email: normalizedEmail,
+      otp,
+      createdAt: { $gt: tenMinutesAgo }
+    });
 
     if (!record) {
-      return res.status(400).json({ error: 'Invalid or expired code' });
+      return res.status(400).json({ error: 'Invalid or expired code. Codes are valid for 10 minutes.' });
     }
 
     // Burn the code after successful use
@@ -663,6 +695,17 @@ router.post('/opportunities/:id/apply', async (req, res) => {
       return res.status(400).json({ error: "You have already applied to this opportunity." });
     }
 
+    // For Job/Gig, a valid M-PESA number is required so the admin can remit payment
+    const JOB_CATEGORIES = ['Job', 'Gig'];
+    if (JOB_CATEGORIES.includes(opportunity.category)) {
+      const mpesaNumber = (data.mpesa_number || '').toString().trim();
+      if (!/^2547\d{8}$/.test(mpesaNumber)) {
+        return res.status(400).json({
+          error: 'A valid M-PESA number in the format 2547XXXXXXXX is required for Job and Gig applications.'
+        });
+      }
+    }
+
     // Insert the new application
     await db.collection('applications').insertOne({
       opportunityId: id,
@@ -691,12 +734,28 @@ router.post('/payments/deposit', verifyUserToken, async (req, res) => {
     const db = getDB();
 
     if (!amount || amount < 1) return res.status(400).json({ error: 'Valid amount required' });
-    if (!phone || !phone.match(/^2547\d{8}$/)) return res.status(400).json({ error: 'Valid Safari phone required (format 2547XXXXXXXX)' });
+    if (!phone || !phone.match(/^2547\d{8}$/)) return res.status(400).json({ error: 'Valid Safaricom phone required (format 2547XXXXXXXX)' });
 
-    // Validate ownership
+    // ── Validate ownership: check pending first, then live opportunities ───────
+    let opportunityCategory = null;
     const pendingOpp = await db.collection('pending_opportunities').findOne({ 'opportunity.id': opportunityId });
-    if (!pendingOpp || pendingOpp.reporter?.email !== email) {
-      return res.status(403).json({ error: 'Unauthorized to fund this post' });
+    if (pendingOpp) {
+      if (pendingOpp.reporter?.email !== email) {
+        return res.status(403).json({ error: 'Unauthorized to fund this post' });
+      }
+      opportunityCategory = pendingOpp.opportunity?.category;
+    } else {
+      // Job was already approved and is now live
+      const liveOpp = await db.collection('opportunities').findOne({ id: opportunityId });
+      if (!liveOpp || liveOpp.reporter?.email !== email) {
+        return res.status(403).json({ error: 'Unauthorized to fund this post' });
+      }
+      opportunityCategory = liveOpp.category;
+    }
+
+    // ── Only allow escrow deposits for Job/Gig ─────────────────────────────────
+    if (!['Job', 'Gig'].includes(opportunityCategory)) {
+      return res.status(400).json({ error: 'Escrow deposits are only allowed for Job and Gig listings.' });
     }
 
     // Call Daraja Sandbox
@@ -765,19 +824,28 @@ router.post('/payments/mpesa/callback', async (req, res) => {
         return res.status(200).send('OK');
       }
 
-      const tx = await db.collection('transactions').findOneAndUpdate(
+      // MongoDB driver v6: findOneAndUpdate returns the document directly (no .value wrapper)
+      const txDoc = await db.collection('transactions').findOneAndUpdate(
         { checkoutRequestId },
         { $set: { status: 'completed', receiptNo, amountPaid, completedAt: new Date() } },
         { returnDocument: 'after' }
       );
 
-      if (tx.value) {
-        // Auto-publish the pending job now that Escrow is funded!
+      // Support both driver v4 ({value: doc}) and v6 (doc directly)
+      const txData = txDoc?.value || txDoc;
+
+      if (txData?.opportunityId) {
+        // Mark escrow as funded — do NOT auto-publish. Admin must still review and approve.
         await db.collection('pending_opportunities').updateOne(
-          { 'opportunity.id': tx.value.opportunityId },
-          { $set: { isEscrowFunded: true, escrowAmount: amountPaid, status: 'approved' } }
+          { 'opportunity.id': txData.opportunityId },
+          { $set: { isEscrowFunded: true, escrowAmount: amountPaid, status: 'EscrowHeld' } }
         );
-        console.log(`[M-PESA] Escrow funded for opportunity: ${tx.value.opportunityId} (Receipt: ${receiptNo})`);
+        // Also update live doc if already approved
+        await db.collection('opportunities').updateOne(
+          { id: txData.opportunityId },
+          { $set: { isEscrowFunded: true, escrowAmount: amountPaid } }
+        );
+        console.log(`[M-PESA] Escrow funded for opportunity: ${txData.opportunityId} (Receipt: ${receiptNo}) — awaiting admin approval.`);
       }
     } else {
       // Payment Failed or User Cancelled
@@ -792,6 +860,88 @@ router.post('/payments/mpesa/callback', async (req, res) => {
   } catch (error) {
     console.error('M-PESA Callback Error:', error);
     res.status(500).send('Error');
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Poster approves escrow release → notifies admin to send STK to job doer
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (req, res) => {
+  try {
+    const { opportunityId } = req.params;
+    const { applicationId } = req.body; // which applicant's payment to release
+    const email = req.user.email;
+    const db = getDB();
+
+    if (!applicationId) return res.status(400).json({ error: 'applicationId is required.' });
+
+    // Verify poster owns the job
+    const opp = await db.collection('opportunities').findOne({ id: opportunityId });
+    const pendingOpp = await db.collection('pending_opportunities').findOne({ 'opportunity.id': opportunityId });
+    const posterEmail = opp?.reporter?.email || pendingOpp?.reporter?.email;
+    if (!opp || posterEmail !== email) {
+      return res.status(403).json({ error: 'You do not own this job post.' });
+    }
+
+    // Verify escrow is funded
+    if (!opp.isEscrowFunded) {
+      return res.status(400).json({ error: 'Escrow has not been funded yet for this job.' });
+    }
+
+    // Verify the application is approved and belongs to this job
+    const application = await db.collection('applications').findOne({
+      _id: new ObjectId(applicationId),
+      opportunityId,
+      status: 'approved'
+    });
+    if (!application) {
+      return res.status(404).json({ error: 'Approved application not found for this job.' });
+    }
+
+    // Get the applicant's M-PESA number
+    const mpesaNumber = application.applicantData?.mpesa_number;
+    if (!mpesaNumber || !/^2547\d{8}$/.test(mpesaNumber.toString())) {
+      return res.status(400).json({ error: 'Applicant does not have a valid M-PESA number on record.' });
+    }
+
+    // Mark release as requested on the application
+    await db.collection('applications').updateOne(
+      { _id: new ObjectId(applicationId) },
+      { $set: {
+        escrowReleaseRequested: true,
+        escrowReleaseRequestedAt: new Date(),
+        updatedAt: new Date()
+      }}
+    );
+
+    // Calculate net payout (escrowAmount - 5% platform fee - 2% M-PESA B2C fee)
+    const escrowAmount = opp.escrowAmount || 0;
+    const platformFee = Math.ceil(escrowAmount * 0.05);
+    const transactionFee = Math.ceil((escrowAmount - platformFee) * 0.02);
+    const netPayable = escrowAmount - platformFee - transactionFee;
+
+    // Notify admin via email (non-blocking)
+    const { sendEscrowReleaseRequestEmail } = await import('../services/emailService.js');
+    sendEscrowReleaseRequestEmail({
+      jobTitle: opp.title,
+      posterEmail: email,
+      applicantEmail: application.applicantEmail,
+      mpesaNumber,
+      escrowAmount,
+      platformFee,
+      transactionFee,
+      netPayable,
+      applicationId,
+      opportunityId
+    }).catch(err => console.error('Escrow release email failed:', err));
+
+    res.json({
+      message: 'Payment release approved. Admin will process the M-PESA transfer within 24 hours.',
+      netPayable,
+      applicantPhone: mpesaNumber
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

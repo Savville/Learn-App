@@ -5,15 +5,15 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { verifyAdminKey } from '../middleware/auth.js';
-import { 
-  sendDigestEmail, 
-  sendPersonalizedDigestEmail, 
-  sendBroadcastEmail, 
-  sendNewOpportunityEmail, 
+import {
+  sendDigestEmail,
+  sendPersonalizedDigestEmail,
+  sendBroadcastEmail,
+  sendNewOpportunityEmail,
   sendPosterApprovalEmail,
   sendOrganizationApprovalEmail,
-  seangapoTemplate, 
-  yesistTemplate 
+  seangapoTemplate,
+  yesistTemplate
 } from '../services/emailService.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -21,7 +21,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
 
-// ── Multer Configuration for Image Uploads ──────────────────────────────────
+// â”€â”€ Multer Configuration for Image Uploads â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dest = path.join(PROJECT_ROOT, 'public', 'images', 'opportunities');
@@ -35,7 +35,7 @@ const storage = multer.diskStorage({
 });
 
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: function (req, file, cb) {
@@ -49,7 +49,7 @@ const upload = multer({
   }
 });
 
-// ── Interest-matching helper ────────────────────────────────────────────────
+// â”€â”€ Interest-matching helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Returns true when any subscriber interest keyword (category name or subfield)
 // appears in the opportunity's title, description, or fieldOfStudy array.
 function interestMatchesOpportunity(opp, interests) {
@@ -86,7 +86,7 @@ router.post('/upload-image', verifyAdminKey, upload.single('coverImage'), (req, 
 router.get('/stats', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
-    
+
     const stats = {
       totalOpportunities: await db.collection('opportunities').countDocuments(),
       totalSubscribers: await db.collection('subscribers').countDocuments({ unsubscribed: false }),
@@ -97,18 +97,18 @@ router.get('/stats', verifyAdminKey, async (req, res) => {
         deadline: { $lt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }
       })
     };
-    
+
     res.json(stats);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// POST /api/admin/send-digest  — send branded digest to all active subscribers
+// POST /api/admin/send-digest  â€” send branded digest to all active subscribers
 // Body (all optional):
-//   { opportunityIds: ["id1","id2",...] }  → specific opps
-//   { lastN: 5 }                            → last N added (default 5)
-//   {}                                      → last 5 added
+//   { opportunityIds: ["id1","id2",...] }  â†’ specific opps
+//   { lastN: 5 }                            â†’ last N added (default 5)
+//   {}                                      â†’ last 5 added
 router.post('/send-digest', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
@@ -157,7 +157,7 @@ router.post('/send-digest', verifyAdminKey, async (req, res) => {
       ...results,
     });
   } catch (error) {
-    console.error('❌ send-digest error:', error);
+    console.error('âŒ send-digest error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -165,7 +165,7 @@ router.post('/send-digest', verifyAdminKey, async (req, res) => {
 // POST /api/admin/send-personalized-digest
 // Sends each active subscriber opportunities matched to their interests.
 // Subscribers with no interests saved receive the full pool as a general digest.
-// Body (optional): { lastN: 10 }  — how many recent opportunities to pull (default 10)
+// Body (optional): { lastN: 10 }  â€” how many recent opportunities to pull (default 10)
 router.post('/send-personalized-digest', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
@@ -209,7 +209,7 @@ router.post('/send-personalized-digest', verifyAdminKey, async (req, res) => {
           oppsToSend = filtered;
           isPersonalized = true;
         } else {
-          // No keyword match — fall back to full pool so they still get something
+          // No keyword match â€” fall back to full pool so they still get something
           oppsToSend = allOpps;
           isPersonalized = false;
         }
@@ -237,12 +237,12 @@ router.post('/send-personalized-digest', verifyAdminKey, async (req, res) => {
       ...results,
     });
   } catch (error) {
-    console.error('❌ send-personalized-digest error:', error);
+    console.error('âŒ send-personalized-digest error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-const SEANGAPO_SUBJECT = 'From Seangapo Floods to Real Solutions – Nairobi\'s Solvable Water Crisis';
+const SEANGAPO_SUBJECT = 'From Seangapo Floods to Real Solutions â€“ Nairobi\'s Solvable Water Crisis';
 
 // POST /api/admin/send-seangapo-test
 // Sends the Seangapo broadcast to a single test address only.
@@ -252,7 +252,7 @@ router.post('/send-seangapo-test', verifyAdminKey, async (req, res) => {
     const result = await sendBroadcastEmail([testEmail], SEANGAPO_SUBJECT, seangapoTemplate());
     res.json({ message: `Test email sent to ${testEmail}`, ...result });
   } catch (error) {
-    console.error('❌ send-seangapo-test error:', error);
+    console.error('âŒ send-seangapo-test error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -281,12 +281,12 @@ router.post('/send-seangapo-broadcast', verifyAdminKey, async (req, res) => {
       ...results,
     });
   } catch (error) {
-    console.error('❌ send-seangapo-broadcast error:', error);
+    console.error('âŒ send-seangapo-broadcast error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-const YESIST_SUBJECT = '24 Hours Remaining — IEEE Africa Entrepreneurship Summit Hackathon 2026';
+const YESIST_SUBJECT = '24 Hours Remaining â€” IEEE Africa Entrepreneurship Summit Hackathon 2026';
 
 // POST /api/admin/send-yesist-broadcast
 // Accepts { emails: [...] } and sends the YESIST hackathon broadcast to that list.
@@ -304,7 +304,7 @@ router.post('/send-yesist-broadcast', verifyAdminKey, async (req, res) => {
       failed: results.failed,
     });
   } catch (error) {
-    console.error('❌ send-yesist-broadcast error:', error);
+    console.error('âŒ send-yesist-broadcast error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -326,12 +326,12 @@ router.post('/upsert-opportunities', verifyAdminKey, async (req, res) => {
     }
     res.json({ message: 'Upserted successfully.', ids: results });
   } catch (error) {
-    console.error('❌ upsert-opportunities error:', error);
+    console.error('âŒ upsert-opportunities error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// GET /api/admin/list-gemini-models — returns models your API key can use (for debugging)
+// GET /api/admin/list-gemini-models â€” returns models your API key can use (for debugging)
 router.get('/list-gemini-models', verifyAdminKey, async (req, res) => {
   try {
     if (!process.env.GEMINI_API_KEY) {
@@ -360,7 +360,7 @@ router.post('/parse-opportunity', verifyAdminKey, async (req, res) => {
     if (!rawText) {
       return res.status(400).json({ error: 'rawText is required in the request body.' });
     }
-    
+
     // IMPORTANT: Make sure to set the GEMINI_API_KEY in your backend's .env file
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
@@ -432,7 +432,7 @@ router.post('/parse-opportunity', verifyAdminKey, async (req, res) => {
     const responseText = result.response.text();
 
     console.log('Raw Gemini response for parse-opportunity:', responseText);
-    
+
     // Safely parse the JSON (stripping potential markdown blocks and extra text)
     const cleaned = responseText
       // Remove fenced code blocks like ```json ... ``` or ``` ... ```
@@ -456,7 +456,7 @@ router.post('/parse-opportunity', verifyAdminKey, async (req, res) => {
   }
 });
 
-// ── Pending Opportunities (Inbox) ──────────────────────────────────────────
+// â”€â”€ Pending Opportunities (Inbox) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // GET /api/admin/pending
 router.get('/pending', verifyAdminKey, async (req, res) => {
@@ -474,23 +474,31 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
-    
+
     const { ObjectId } = await import('mongodb');
-    
+
     // Find the pending document
     const pendingDoc = await db.collection('pending_opportunities').findOne({ _id: new ObjectId(id) });
     if (!pendingDoc) return res.status(404).json({ error: 'Pending opportunity not found.' });
+
+    // Block approval for Job/Gig if escrow not yet funded
+    const JOB_CATS = ['Job', 'Gig'];
+    if (JOB_CATS.includes(pendingDoc.opportunity?.category) && !pendingDoc.isEscrowFunded) {
+      return res.status(400).json({
+        error: 'Cannot approve: Escrow has not been funded. The poster must deposit the escrow amount via their Dashboard first.'
+      });
+    }
 
     // Move to opportunities collection
     const oppToPublish = { ...pendingDoc.opportunity };
     // Ensure it has an ID and correctly formatted fields:
     if (!oppToPublish.id) oppToPublish.id = `pub-${Date.now()}`;
     if (!oppToPublish.dateAdded) oppToPublish.dateAdded = new Date().toISOString().split('T')[0];
-    
+
     // Generate slug for clean URLs
     const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
     oppToPublish.slug = slugify(oppToPublish.title || '');
-    
+
     // Add attribution
     if (pendingDoc.isOrganizationPost && pendingDoc.orgName) {
       oppToPublish.postedBy = pendingDoc.orgName;
@@ -502,8 +510,8 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     const reviewedBy = (req.body?.reviewerName || 'Opportunities Kenya Admin').toString().trim() || 'Opportunities Kenya Admin';
     const proofLinks = Array.isArray(req.body?.proofLinks)
       ? req.body.proofLinks
-          .map(link => (link || '').toString().trim())
-          .filter(link => /^https?:\/\//i.test(link))
+        .map(link => (link || '').toString().trim())
+        .filter(link => /^https?:\/\//i.test(link))
       : [];
     oppToPublish.status = 'Verified';
     oppToPublish.isVerified = true;
@@ -514,6 +522,11 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
       riskFlags: pendingDoc.riskFlags || [],
     };
     oppToPublish.reporter = pendingDoc.reporter;
+    // Copy escrow funding state to the live opportunity doc
+    if (pendingDoc.isEscrowFunded) {
+      oppToPublish.isEscrowFunded = true;
+      oppToPublish.escrowAmount = pendingDoc.escrowAmount || oppToPublish.escrowAmount;
+    }
 
     await db.collection('opportunities').replaceOne({ id: oppToPublish.id }, oppToPublish, { upsert: true });
 
@@ -537,7 +550,7 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     // NEW: Notify the original poster that their opportunity is now live
     if (pendingDoc.reporter?.email) {
       sendPosterApprovalEmail(pendingDoc.reporter.email, oppToPublish).catch(err => {
-          console.error('Approval notification to poster failed:', err.message);
+        console.error('Approval notification to poster failed:', err.message);
       });
     }
 
@@ -553,12 +566,12 @@ router.post('/reject/:id', verifyAdminKey, async (req, res) => {
     const db = getDB();
     const { id } = req.params;
     const reviewedBy = req.body?.reviewerName || 'Opportunities Kenya Admin';
-    
+
     const { ObjectId } = await import('mongodb');
-    
+
     await db.collection('pending_opportunities').updateOne(
-        { _id: new ObjectId(id) },
-        { $set: { status: 'Rejected', rejectedAt: new Date(), reviewedAt: new Date(), reviewedBy } }
+      { _id: new ObjectId(id) },
+      { $set: { status: 'Rejected', rejectedAt: new Date(), reviewedAt: new Date(), reviewedBy } }
     );
     res.json({ message: 'Opportunity rejected.' });
   } catch (error) {
@@ -593,7 +606,7 @@ router.post('/reports/:id/resolve', verifyAdminKey, async (req, res) => {
   }
 });
 
-// ── Organization Management ────────────────────────────────────────────────
+// â”€â”€ Organization Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // GET /api/admin/organizations
 router.get('/organizations', verifyAdminKey, async (req, res) => {
@@ -611,20 +624,20 @@ router.post('/organizations', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     const { email, orgName, contactPerson, telephone } = req.body;
-    
+
     if (!email || !orgName) {
       return res.status(400).json({ error: 'Email and Organization Name are required.' });
     }
 
     await db.collection('organizations').updateOne(
       { email: email.toLowerCase() },
-      { 
-        $set: { 
-          orgName, 
-          contactPerson, 
+      {
+        $set: {
+          orgName,
+          contactPerson,
           telephone,
-          verifiedAt: new Date() 
-        } 
+          verifiedAt: new Date()
+        }
       },
       { upsert: true }
     );
@@ -641,11 +654,11 @@ router.delete('/organizations/:email', verifyAdminKey, async (req, res) => {
     const db = getDB();
     const { email } = req.params;
     const result = await db.collection('organizations').deleteOne({ email: email.toLowerCase() });
-    
+
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: 'Organization not found.' });
     }
-    
+
     res.json({ message: 'Organization removed.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -672,21 +685,21 @@ router.post('/organization-requests/approve/:id', verifyAdminKey, async (req, re
     const db = getDB();
     const { id } = req.params;
     const { ObjectId } = await import('mongodb');
-    
+
     const request = await db.collection('organization_requests').findOne({ _id: new ObjectId(id) });
     if (!request) return res.status(404).json({ error: 'Request not found.' });
 
     // 1. Add to verified organizations
     await db.collection('organizations').updateOne(
       { email: request.email.toLowerCase() },
-      { 
-        $set: { 
+      {
+        $set: {
           email: request.email.toLowerCase(),
           orgName: request.organization,
           contactPerson: request.name,
           telephone: request.telephone,
           verifiedAt: new Date()
-        } 
+        }
       },
       { upsert: true }
     );
@@ -722,7 +735,7 @@ router.post('/organization-requests/reject/:id', verifyAdminKey, async (req, res
   }
 });
 
-// ── Opportunity Content Management ─────────────────────────────────────────
+// â”€â”€ Opportunity Content Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // GET /api/admin/opportunities
 router.get('/opportunities', verifyAdminKey, async (req, res) => {
@@ -744,7 +757,7 @@ router.put('/opportunities/:id', verifyAdminKey, async (req, res) => {
     const db = getDB();
     const { id } = req.params;
     const updateData = req.body;
-    
+
     // remove _id to prevent mongodb update errors
     delete updateData._id;
 
@@ -759,7 +772,7 @@ router.put('/opportunities/:id', verifyAdminKey, async (req, res) => {
 
     res.json({ message: 'Opportunity updated successfully.' });
   } catch (error) {
-    console.error('❌ Update opportunity error:', error);
+    console.error('âŒ Update opportunity error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -769,21 +782,21 @@ router.delete('/opportunities/:id', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     const { id } = req.params;
-    
+
     const result = await db.collection('opportunities').deleteOne({ id: id });
-    
+
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: 'Opportunity not found.' });
     }
-    
+
     res.json({ message: 'Opportunity deleted successfully.' });
   } catch (error) {
-    console.error('❌ Delete opportunity error:', error);
+    console.error('âŒ Delete opportunity error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ── NEW ESCROW DISPUTE ADMIN ROUTES ───────────────────────────────────────────
+// â”€â”€ NEW ESCROW DISPUTE ADMIN ROUTES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 router.get('/disputes', verifyAdminKey, async (req, res) => {
   try {
@@ -798,7 +811,7 @@ router.get('/disputes', verifyAdminKey, async (req, res) => {
     const opportunities = await db.collection('opportunities')
       .find({ id: { $in: oppIds } })
       .toArray();
-    
+
     const pendingOpps = await db.collection('pending_opportunities')
       .find({ 'opportunity.id': { $in: oppIds } })
       .toArray();
@@ -832,7 +845,7 @@ router.put('/applications/:appId/resolve', verifyAdminKey, async (req, res) => {
   try {
     const { appId } = req.params;
     const { resolution } = req.body; // 'resolved_paid' or 'resolved_refunded'
-    
+
     if (!['resolved_paid', 'resolved_refunded'].includes(resolution)) {
       return res.status(400).json({ error: "Invalid resolution status" });
     }
@@ -854,7 +867,68 @@ router.put('/applications/:appId/resolve', verifyAdminKey, async (req, res) => {
   }
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”// POST /api/admin/applications/:appId/pay-doer — admin initiates M-PESA payment to job doer
+router.post('/applications/:appId/pay-doer', verifyAdminKey, async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const { ObjectId } = await import('mongodb');
+    const db = getDB();
+
+    const application = await db.collection('applications').findOne({ _id: new ObjectId(appId) });
+    if (!application) return res.status(404).json({ error: 'Application not found.' });
+    if (!application.escrowReleaseRequested) {
+      return res.status(400).json({ error: 'Poster has not approved release for this application yet.' });
+    }
+    if (application.status !== 'approved') {
+      return res.status(400).json({ error: `Cannot pay: application status is '${application.status}'.` });
+    }
+
+    const mpesaNumber = application.applicantData?.mpesa_number;
+    if (!mpesaNumber || !/^2547\d{8}$/.test(mpesaNumber.toString())) {
+      return res.status(400).json({ error: 'No valid M-PESA number on record for this applicant.' });
+    }
+
+    const opp = await db.collection('opportunities').findOne({ id: application.opportunityId });
+    const escrowAmount = opp?.escrowAmount || 0;
+    const platformFee = Math.ceil(escrowAmount * 0.05);
+    const transactionFee = Math.ceil((escrowAmount - platformFee) * 0.02);
+    const netPayable = escrowAmount - platformFee - transactionFee;
+
+    if (netPayable < 10) return res.status(400).json({ error: 'Net payable amount is too low.' });
+
+    // Initiate STK Push to the job doer (production: replace with Daraja B2C API)
+    const { initiateSTKPush } = await import('../services/mpesaService.js');
+    const result = await initiateSTKPush(mpesaNumber, netPayable, application.opportunityId, 'Job Payment');
+    if (!result.success) return res.status(500).json({ error: `STK Push failed: ${result.error}` });
+
+    // Mark application as paid
+    await db.collection('applications').updateOne(
+      { _id: new ObjectId(appId) },
+      { $set: { status: 'paid', paidAt: new Date(), netAmountPaid: netPayable, updatedAt: new Date() } }
+    );
+    await db.collection('opportunities').updateOne(
+      { id: application.opportunityId },
+      { $set: { escrowReleased: true, escrowReleasedAt: new Date() } }
+    );
+
+    // Send confirmation emails (non-blocking)
+    const { sendPaymentConfirmationEmail } = await import('../services/emailService.js');
+    sendPaymentConfirmationEmail({
+      applicantEmail: application.applicantEmail,
+      posterEmail: opp?.reporter?.email,
+      jobTitle: opp?.title || application.opportunityTitle,
+      netAmountPaid: netPayable,
+      mpesaNumber,
+    }).catch(err => console.error('Payment confirmation email failed:', err));
+
+    res.json({
+      message: `M-PESA prompt sent to ${mpesaNumber}. Amount: KES ${netPayable}. Application marked paid.`,
+      netAmountPaid: netPayable, platformFee, transactionFee,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 export default router;
 

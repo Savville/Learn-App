@@ -1,4 +1,4 @@
-import { Resend } from 'resend';
+﻿import { Resend } from 'resend';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -307,10 +307,10 @@ export async function sendEepEmail(subscribers) {
     const subject = 'CORRECTION: Got an idea? The EEP fund is looking for you.';
     console.log(`Starting EEP broadcast to ${subscribers.length} subscribers.`);
     await sendPersonalizedBroadcastEmail(subscribers, subject, eepTemplate);
-    console.log('✅ EEP broadcast successfully completed.');
+    console.log('âœ… EEP broadcast successfully completed.');
     return { success: true };
   } catch (error) {
-    console.error('❌ EEP broadcast email failed:', error.message);
+    console.error('âŒ EEP broadcast email failed:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -333,7 +333,7 @@ export async function sendPersonalizedBroadcastEmail(subscribers, subject, htmlG
   return results;
 }
 
-// ── YESIST Hackathon Broadcast ───────────────────────────────────────────────
+// â”€â”€ YESIST Hackathon Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const yesistTemplate = () => wrapEmail(`
   <div style="padding:32px 28px;font-family:Arial,sans-serif;">
@@ -361,7 +361,7 @@ const yesistTemplate = () => wrapEmail(`
       This is a rare opportunity to represent your university and your country on a global IEEE stage.
     </p>
 
-    <!-- Stats box — no emojis -->
+    <!-- Stats box â€” no emojis -->
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:20px 22px;margin-bottom:28px;">
       <h3 style="color:#1e40af;font-size:15px;margin:0 0 14px;font-family:Arial,sans-serif;">Key Details</h3>
       <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
@@ -390,22 +390,22 @@ const yesistTemplate = () => wrapEmail(`
       </table>
     </div>
 
-    <!-- Thematic areas — 1 emoji each -->
+    <!-- Thematic areas â€” 1 emoji each -->
     <h2 style="color:#0f2744;font-size:17px;margin:0 0 8px;font-family:Arial,sans-serif;">Five Thematic Areas</h2>
     <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 16px;font-family:Arial,sans-serif;">
       Your solution must address one of the following five thematic areas:
     </p>
     <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
       <tr>
-        <td style="width:50%;padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">🌿 Climate &amp; Sustainable Agriculture</td>
-        <td style="width:50%;padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">⚡ Clean Energy &amp; Sustainable Infrastructure</td>
+        <td style="width:50%;padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">ðŸŒ¿ Climate &amp; Sustainable Agriculture</td>
+        <td style="width:50%;padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">âš¡ Clean Energy &amp; Sustainable Infrastructure</td>
       </tr>
       <tr>
-        <td style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">🏥 HealthTech &amp; Well-being</td>
-        <td style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">🎓 Education &amp; Digital Inclusion</td>
+        <td style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">ðŸ¥ HealthTech &amp; Well-being</td>
+        <td style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">ðŸŽ“ Education &amp; Digital Inclusion</td>
       </tr>
       <tr>
-        <td colspan="2" style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">💼 Economic Empowerment &amp; Smart Communities</td>
+        <td colspan="2" style="padding:8px 6px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;">ðŸ’¼ Economic Empowerment &amp; Smart Communities</td>
       </tr>
     </table>
 
@@ -436,23 +436,23 @@ const yesistTemplate = () => wrapEmail(`
     <div style="background:#f8fafc;border-radius:8px;padding:16px 20px;">
       <p style="color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 10px;font-family:Arial,sans-serif;">Connect With Us</p>
       <p style="margin:0;font-size:13px;color:#475569;line-height:2.4;font-family:Arial,sans-serif;">
-        📸 <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
-        💬 <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
-        📞 <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
-        &nbsp;&nbsp;✉️ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+        ðŸ“¸ <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
+        ðŸ’¬ <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
+        ðŸ“ž <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
+        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
       </p>
     </div>
 
   </div>`);
 
-// ── Seangapo Broadcast ──────────────────────────────────────────────────────
+// â”€â”€ Seangapo Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const seangapoTemplate = () => wrapEmail(`
   <div style="padding:32px 28px;font-family:Arial,sans-serif;">
 
     <!-- Meme hook -->
     <div style="background:#fef3c7;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
-      <p style="color:#92400e;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">You've seen the memes. 😅</p>
+      <p style="color:#92400e;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">You've seen the memes. ðŸ˜…</p>
       <p style="color:#78350f;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
         <strong>Seangapo. Sinkapo. Singapool. Sea-ngapo. Sinkapore...</strong><br/>
         The dream of turning Nairobi into the &ldquo;Singapore of Africa&rdquo; has, thanks to yet another round
@@ -477,13 +477,13 @@ const seangapoTemplate = () => wrapEmail(`
     <!-- NRW stats box -->
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:20px 22px;margin-bottom:28px;">
       <h3 style="color:#1e40af;font-size:15px;margin:0 0 14px;font-family:Arial,sans-serif;">
-        💧 One massive, solvable crisis: <strong>Non-Revenue Water (NRW) at NCWSC</strong>
+        ðŸ’§ One massive, solvable crisis: <strong>Non-Revenue Water (NRW) at NCWSC</strong>
       </h3>
       <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">🔴&nbsp; Nairobi loses nearly <strong>half (44–54%)</strong> of all treated water before it reaches a single tap</td></tr>
-        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">🔴&nbsp; Estimated <strong>Ksh 11–12 billion</strong> lost every year through leaks, theft, broken meters &amp; billing failures</td></tr>
-        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">🔴&nbsp; Over <strong>10,000+ illegal connections</strong> in informal settlements</td></tr>
-        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;font-family:Arial,sans-serif;">🔴&nbsp; Hundreds of millions billed &mdash; <strong>zero collected.</strong> No enforcement. No disconnections.</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">ðŸ”´&nbsp; Nairobi loses nearly <strong>half (44â€“54%)</strong> of all treated water before it reaches a single tap</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">ðŸ”´&nbsp; Estimated <strong>Ksh 11â€“12 billion</strong> lost every year through leaks, theft, broken meters &amp; billing failures</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">ðŸ”´&nbsp; Over <strong>10,000+ illegal connections</strong> in informal settlements</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;font-family:Arial,sans-serif;">ðŸ”´&nbsp; Hundreds of millions billed &mdash; <strong>zero collected.</strong> No enforcement. No disconnections.</td></tr>
       </table>
       <p style="color:#1d4ed8;font-size:13px;font-weight:700;margin:14px 0 0;font-family:Arial,sans-serif;">
         This isn&rsquo;t fate. It&rsquo;s a solvable engineering, tech, and management problem.
@@ -491,37 +491,37 @@ const seangapoTemplate = () => wrapEmail(`
     </div>
 
     <!-- Challenge brief -->
-    <h2 style="color:#0f2744;font-size:18px;margin:0 0 8px;font-family:Arial,sans-serif;">🏗️ Industry Challenge Brief &mdash; Nairobi Water Crisis</h2>
+    <h2 style="color:#0f2744;font-size:18px;margin:0 0 8px;font-family:Arial,sans-serif;">ðŸ—ï¸ Industry Challenge Brief &mdash; Nairobi Water Crisis</h2>
     <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 4px;font-family:Arial,sans-serif;">
-      The Nairobi City Water &amp; Sewerage Company (NCWSC) is battling a 44–54% Non-Revenue Water crisis.<br/>
+      The Nairobi City Water &amp; Sewerage Company (NCWSC) is battling a 44â€“54% Non-Revenue Water crisis.<br/>
       <strong>Can you help fix it?</strong>
     </p>
     <table cellpadding="0" cellspacing="0" style="width:100%;margin:12px 0 20px;">
-      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">✅&nbsp; Use it as your <strong>final year project</strong> or capstone</td></tr>
-      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">✅&nbsp; Build it into your <strong>research paper</strong> or thesis</td></tr>
-      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">✅&nbsp; Prototype a solution for your <strong>capstone or hackathon</strong></td></tr>
+      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">âœ…&nbsp; Use it as your <strong>final year project</strong> or capstone</td></tr>
+      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">âœ…&nbsp; Build it into your <strong>research paper</strong> or thesis</td></tr>
+      <tr><td style="padding:5px 0;color:#1e293b;font-size:14px;font-family:Arial,sans-serif;">âœ…&nbsp; Prototype a solution for your <strong>capstone or hackathon</strong></td></tr>
     </table>
     <p style="color:#475569;font-size:13px;margin:0 0 6px;font-family:Arial,sans-serif;"><strong>No application needed.</strong> Just your skills and curiosity.</p>
 
     <p style="color:#0f2744;font-size:13px;font-weight:700;margin:16px 0 10px;font-family:Arial,sans-serif;">Explore 6 key problem areas:</p>
     <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
       <tr>
-        <td style="width:50%;padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">🔧 Leak detection technologies</td>
-        <td style="width:50%;padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">📡 Smart metering systems</td>
+        <td style="width:50%;padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">ðŸ”§ Leak detection technologies</td>
+        <td style="width:50%;padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">ðŸ“¡ Smart metering systems</td>
       </tr>
       <tr>
-        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">🗺️ GIS mapping for infrastructure</td>
-        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">🤖 AI analytics for loss prediction</td>
+        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">ðŸ—ºï¸ GIS mapping for infrastructure</td>
+        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">ðŸ¤– AI analytics for loss prediction</td>
       </tr>
       <tr>
-        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">⚡ Illegal connection monitoring</td>
-        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">♻️ Wastewater reuse systems</td>
+        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">âš¡ Illegal connection monitoring</td>
+        <td style="padding:5px 4px;font-size:13px;color:#374151;font-family:Arial,sans-serif;">â™»ï¸ Wastewater reuse systems</td>
       </tr>
     </table>
 
     <!-- CTA -->
     <div style="text-align:center;margin-bottom:32px;">
-      ${ctaButton('👉 Read the Full Challenge Brief', `${FRONTEND_URL}/opportunity/non-revenue-water-crisis-can-you-help-nairobi-fix-it`)}
+      ${ctaButton('ðŸ‘‰ Read the Full Challenge Brief', `${FRONTEND_URL}/opportunity/non-revenue-water-crisis-can-you-help-nairobi-fix-it`)}
     </div>
 
     <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;"/>
@@ -540,7 +540,7 @@ const seangapoTemplate = () => wrapEmail(`
 
     <!-- View all -->
     <p style="color:#475569;font-size:13px;margin:0 0 24px;font-family:Arial,sans-serif;">
-      🌐 View all opportunities at:
+      ðŸŒ View all opportunities at:
       <a href="${FRONTEND_URL}" style="color:#1a4a7a;font-weight:700;text-decoration:none;">${FRONTEND_URL}</a>
     </p>
 
@@ -548,10 +548,10 @@ const seangapoTemplate = () => wrapEmail(`
     <div style="background:#f8fafc;border-radius:8px;padding:16px 20px;">
       <p style="color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 10px;font-family:Arial,sans-serif;">Connect With Us</p>
       <p style="margin:0;font-size:13px;color:#475569;line-height:2.4;font-family:Arial,sans-serif;">
-        📸 <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
-        💬 <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
-        📞 <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
-        &nbsp;&nbsp;✉️ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+        ðŸ“¸ <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
+        ðŸ’¬ <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
+        ðŸ“ž <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
+        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
       </p>
     </div>
 
@@ -573,7 +573,7 @@ export async function sendBroadcastEmail(emails, subject, html) {
   return results;
 }
 
-// ── EEP Broadcast ────────────────────────────────────────────────────────────
+// â”€â”€ EEP Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const eepTemplate = (name = 'Innovator') => wrapEmail(`
   <div style="padding:32px 28px;font-family:Arial,sans-serif;">
@@ -582,16 +582,16 @@ const eepTemplate = (name = 'Innovator') => wrapEmail(`
     <div style="background:#f0fdf4;border-left:4px solid #22c55e;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
       <p style="color:#15803d;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">Tired of seeing the same problems with no solutions?</p>
       <p style="color:#166534;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
-        Mambo ${name}, we all have that one friend in the village, maybe in shagz, who has a brilliant idea but lacks the cash to make it happen. Ama it's you? You see a problem in your community—maybe it's access to clean water, maybe it's farm produce going to waste—and you know a tech solution could fix it. But pesa nani atatoa?
+        Mambo ${name}, we all have that one friend in the village, maybe in shagz, who has a brilliant idea but lacks the cash to make it happen. Ama it's you? You see a problem in your communityâ€”maybe it's access to clean water, maybe it's farm produce going to wasteâ€”and you know a tech solution could fix it. But pesa nani atatoa?
       </p>
     </div>
 
     <!-- The 'Why' -->
     <p style="color:#1e293b;font-size:15px;line-height:1.8;margin:0 0 12px;font-family:Arial,sans-serif;">
-     This is your chance to stop complaining and start building. The <strong>EEP (Empowering Engineers Program)</strong> isn't just another fund. It’s a challenge to you to look around your community, pinpoint a real-world problem, and propose a solution that works.
+     This is your chance to stop complaining and start building. The <strong>EEP (Empowering Engineers Program)</strong> isn't just another fund. Itâ€™s a challenge to you to look around your community, pinpoint a real-world problem, and propose a solution that works.
     </p>
     <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
-      Think about it. That project you discussed with your friends after class, the one that could help farmers in Makueni get weather alerts, or a simple system to manage waste collection in your estate in Nairobi. That’s what EEP is for. They provide the funding and support; you bring the idea, the passion, and the technical skills.
+      Think about it. That project you discussed with your friends after class, the one that could help farmers in Makueni get weather alerts, or a simple system to manage waste collection in your estate in Nairobi. Thatâ€™s what EEP is for. They provide the funding and support; you bring the idea, the passion, and the technical skills.
     </p>
 
     <!-- EEP Image -->
@@ -612,10 +612,10 @@ const eepTemplate = (name = 'Innovator') => wrapEmail(`
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:20px 22px;margin-bottom:28px;">
       <h3 style="color:#1e40af;font-size:15px;margin:0 0 14px;font-family:Arial,sans-serif;">Key Focus Areas</h3>
        <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">🌱&nbsp; Agri-Tech &amp; Food Security</td></tr>
-        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">💧&nbsp; Water, Sanitation &amp; Hygiene (WASH)</td></tr>
-        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">⚡&nbsp; Renewable Energy &amp; Smart Grids</td></tr>
-        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;font-family:Arial,sans-serif;">🏥&nbsp; Health-Tech &amp; Telemedicine</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">ðŸŒ±&nbsp; Agri-Tech &amp; Food Security</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">ðŸ’§&nbsp; Water, Sanitation &amp; Hygiene (WASH)</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;border-bottom:1px solid #dbeafe;font-family:Arial,sans-serif;">âš¡&nbsp; Renewable Energy &amp; Smart Grids</td></tr>
+        <tr><td style="padding:7px 0;color:#1e293b;font-size:13px;line-height:1.6;font-family:Arial,sans-serif;">ðŸ¥&nbsp; Health-Tech &amp; Telemedicine</td></tr>
       </table>
     </div>
 
@@ -633,7 +633,7 @@ const eepTemplate = (name = 'Innovator') => wrapEmail(`
     
     <!-- View all -->
     <p style="color:#475569;font-size:13px;margin:0 0 24px;font-family:Arial,sans-serif;">
-      🌐 View all opportunities at:
+      ðŸŒ View all opportunities at:
       <a href="${FRONTEND_URL}" style="color:#1a4a7a;font-weight:700;text-decoration:none;">${FRONTEND_URL}</a>
     </p>
 
@@ -641,10 +641,10 @@ const eepTemplate = (name = 'Innovator') => wrapEmail(`
     <div style="background:#f8fafc;border-radius:8px;padding:16px 20px;">
       <p style="color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin:0 0 10px;font-family:Arial,sans-serif;">Connect With Us</p>
       <p style="margin:0;font-size:13px;color:#475569;line-height:2.4;font-family:Arial,sans-serif;">
-        📸 <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
-        💬 <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
-        📞 <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
-        &nbsp;&nbsp;✉️ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+        ðŸ“¸ <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
+        ðŸ’¬ <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
+        ðŸ“ž <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
+        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
       </p>
     </div>
 
@@ -684,7 +684,7 @@ export async function sendOrganizationVerificationRequest(request) {
   try {
     const html = wrapEmail(`
       <div style="padding:32px 28px;">
-        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">🏢 Organization Verification Request</h2>
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">ðŸ¢ Organization Verification Request</h2>
         <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
           A new request has been received from an organization wishing to post officially on Opportunities Kenya.
         </p>
@@ -750,7 +750,7 @@ export async function sendOrganizationApprovalEmail(request) {
   try {
     const html = wrapEmail(`
       <div style="padding:32px 28px;">
-        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">✅ Verification Confirmed</h2>
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">âœ… Verification Confirmed</h2>
         <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
           Hello ${request.name},
         </p>
@@ -777,13 +777,13 @@ export async function sendOrganizationApprovalEmail(request) {
   }
 }
 
-// ── ACES Broadcast ────────────────────────────────────────────────────────────
+// â”€â”€ ACES Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const acesTemplate = (name = 'Engineer') => wrapEmail(`
   <div style="padding:32px 28px;font-family:Arial,sans-serif;">
     
     <div style="background:#e0f2fe;border-left:4px solid #0284c7;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
-      <p style="color:#0369a1;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">🏗️ Calling all ACES Members!</p>
+      <p style="color:#0369a1;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">ðŸ—ï¸ Calling all ACES Members!</p>
       <p style="color:#075985;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
         Hello ${name}, as a member of the <strong>Association of Civil Engineering Students (ACES)</strong>, 
         we are calling on you to participate in the project programme for the upcoming <strong>CivExpo 2026</strong>.
@@ -804,19 +804,19 @@ const acesTemplate = (name = 'Engineer') => wrapEmail(`
     <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
       <tr>
         <td style="padding:8px 0; border-bottom:1px solid #f1f5f9;">
-          <strong style="color:#0f2744;display:block;">🏗️ Industry Skills & Workflow</strong>
+          <strong style="color:#0f2744;display:block;">ðŸ—ï¸ Industry Skills & Workflow</strong>
           <span style="color:#64748b;font-size:13px;">Master Revit, Civil 3D, and EPANET on real projects.</span>
         </td>
       </tr>
       <tr>
         <td style="padding:8px 0; border-bottom:1px solid #f1f5f9;">
-          <strong style="color:#0f2744;display:block;">💻 Tech & Automation</strong>
+          <strong style="color:#0f2744;display:block;">ðŸ’» Tech & Automation</strong>
           <span style="color:#64748b;font-size:13px;">Explore AI, Machine Learning, and Python in Civil Engineering.</span>
         </td>
       </tr>
       <tr>
         <td style="padding:8px 0;">
-          <strong style="color:#0f2744;display:block;">🚀 Innovation & Business</strong>
+          <strong style="color:#0f2744;display:block;">ðŸš€ Innovation & Business</strong>
           <span style="color:#64748b;font-size:13px;">Solve community crises and pitch your projects to VCs.</span>
         </td>
       </tr>
@@ -824,7 +824,7 @@ const acesTemplate = (name = 'Engineer') => wrapEmail(`
 
     <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 28px;font-family:Arial,sans-serif;">
       We have partnered with <strong>Opportunities Kenya</strong> to ensure your projects get the 
-      traction and industry visibility they deserve. Don't let your research gather dust—make it count.
+      traction and industry visibility they deserve. Don't let your research gather dustâ€”make it count.
     </p>
 
     <div style="text-align:center;margin-bottom:32px;">
@@ -840,7 +840,7 @@ const acesTemplate = (name = 'Engineer') => wrapEmail(`
 
 export async function sendAcesEmail(email, name, cc = []) {
   try {
-    const subject = '🏗️ ACES: Call for Project Participation – CivExpo 2026';
+    const subject = 'ðŸ—ï¸ ACES: Call for Project Participation â€“ CivExpo 2026';
     await resend.emails.send({
       from: FROM,
       to: email,
@@ -857,13 +857,13 @@ export async function sendAcesEmail(email, name, cc = []) {
   }
 }
 
-// ── WorldQuant BRAIN Broadcast ───────────────────────────────────────────────
+// â”€â”€ WorldQuant BRAIN Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const worldQuantTemplate = (name = 'Member') => wrapEmail(`
   <div style="padding:32px 28px;font-family:Arial,sans-serif;">
     
     <div style="background:#f8fafc;border-left:4px solid #1e293b;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
-      <p style="color:#0f172a;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">🧠 Can you build the best Alpha?</p>
+      <p style="color:#0f172a;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">ðŸ§  Can you build the best Alpha?</p>
       <p style="color:#334155;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
         Hello ${name}, as an <strong>IEEE Member</strong>, you are already part of the technical elite. 
         We are bringing the <strong>WorldQuant BRAIN IQC 2026</strong> directly to your radar because it 
@@ -883,13 +883,13 @@ const worldQuantTemplate = (name = 'Member') => wrapEmail(`
 
     <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;background:#f1f5f9;border-radius:10px;padding:20px;">
       <tr>
-        <td style="padding-bottom:12px;font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">🏆 <strong>$100,000</strong> Global Prize Pool</td>
+        <td style="padding-bottom:12px;font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">ðŸ† <strong>$100,000</strong> Global Prize Pool</td>
       </tr>
       <tr>
-        <td style="padding-bottom:12px;font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">📈 <strong>Quant Fast-Track:</strong> Top performers considered for researcher roles</td>
+        <td style="padding-bottom:12px;font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">ðŸ“ˆ <strong>Quant Fast-Track:</strong> Top performers considered for researcher roles</td>
       </tr>
       <tr>
-        <td style="font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">🌍 <strong>Global Stage:</strong> Compete with 100+ countries</td>
+        <td style="font-size:14px;color:#1e293b;font-family:Arial,sans-serif;">ðŸŒ <strong>Global Stage:</strong> Compete with 100+ countries</td>
       </tr>
     </table>
 
@@ -911,7 +911,7 @@ const worldQuantTemplate = (name = 'Member') => wrapEmail(`
 
 export async function sendWorldQuantEmail(email, name, cc = []) {
   try {
-    const subject = '🧠 Can you build the best Alpha? WorldQuant BRAIN IQC 2026';
+    const subject = 'ðŸ§  Can you build the best Alpha? WorldQuant BRAIN IQC 2026';
     await resend.emails.send({
       from: FROM,
       to: email,
@@ -928,13 +928,13 @@ export async function sendWorldQuantEmail(email, name, cc = []) {
   }
 }
 
-// ── PowerAfrica Broadcast ───────────────────────────────────────────────
+// â”€â”€ PowerAfrica Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const powerAfricaTemplate = (name = 'Member') => wrapEmail(`
   <div style="padding:32px 28px;font-family:Arial,sans-serif;">
     
     <div style="background:#fefce8;border-left:4px solid #eab308;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:28px;">
-      <p style="color:#854d0e;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">⚡ Deadline Approaching: 2026 IEEE PowerAfrica Call for Papers</p>
+      <p style="color:#854d0e;font-size:16px;font-weight:700;margin:0 0 6px;font-family:Arial,sans-serif;">âš¡ Deadline Approaching: 2026 IEEE PowerAfrica Call for Papers</p>
       <p style="color:#713f12;font-size:14px;margin:0;line-height:1.7;font-family:Arial,sans-serif;">
         Hello ${name}, the deadline for paper submissions to the <strong>2026 IEEE PES/IAS PowerAfrica Conference</strong> is fast approaching on <strong>April 5, 2026</strong>.
       </p>
@@ -950,16 +950,16 @@ const powerAfricaTemplate = (name = 'Member') => wrapEmail(`
 
     <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;"/>
 
-    <h2 style="color:#0f2744;font-size:18px;margin:0 0 8px;font-family:Arial,sans-serif;">📣 Have Something to Share? Post With Us!</h2>
+    <h2 style="color:#0f2744;font-size:18px;margin:0 0 8px;font-family:Arial,sans-serif;">ðŸ“£ Have Something to Share? Post With Us!</h2>
     <p style="color:#475569;font-size:14px;line-height:1.8;margin:0 0 16px;font-family:Arial,sans-serif;">
       Did you know you can now directly share your own opportunities with our growing community of thousands of students and change-makers across Kenya?
     </p>
 
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:24px;">
-      <p style="color:#475569;font-size:14px;margin:0 0 8px;">✅ <strong>Project Collaborations:</strong> Looking for a team for your hackathon or research?</p>
-      <p style="color:#475569;font-size:14px;margin:0 0 8px;">✅ <strong>Webinars & Workshops:</strong> Hosting an online training session?</p>
-      <p style="color:#475569;font-size:14px;margin:0 0 12px;">✅ <strong>Conferences & Events:</strong> Organizing a tech meetup on campus?</p>
-      <a href="https://opportunitieskenya.live/post-with-us" style="color:#1a4a7a;font-weight:700;text-decoration:none;">👉 Click here to Post With Us</a>
+      <p style="color:#475569;font-size:14px;margin:0 0 8px;">âœ… <strong>Project Collaborations:</strong> Looking for a team for your hackathon or research?</p>
+      <p style="color:#475569;font-size:14px;margin:0 0 8px;">âœ… <strong>Webinars & Workshops:</strong> Hosting an online training session?</p>
+      <p style="color:#475569;font-size:14px;margin:0 0 12px;">âœ… <strong>Conferences & Events:</strong> Organizing a tech meetup on campus?</p>
+      <a href="https://opportunitieskenya.live/post-with-us" style="color:#1a4a7a;font-weight:700;text-decoration:none;">ðŸ‘‰ Click here to Post With Us</a>
     </div>
 
     <p style="color:#64748b;font-size:13px;text-align:center;">
@@ -971,7 +971,7 @@ const powerAfricaTemplate = (name = 'Member') => wrapEmail(`
 
 export async function sendPowerAfricaEmail(email, name, cc = []) {
   try {
-    const subject = '⚡ Approaching Deadline: IEEE PowerAfrica Call for Papers & Share Your Projects!';
+    const subject = 'âš¡ Approaching Deadline: IEEE PowerAfrica Call for Papers & Share Your Projects!';
     await resend.emails.send({
       from: FROM,
       to: email,
@@ -991,3 +991,142 @@ export async function sendPowerAfricaEmail(email, name, cc = []) {
 export { seangapoTemplate, yesistTemplate, eepTemplate, acesTemplate, worldQuantTemplate, powerAfricaTemplate };
 
 // Refurbished
+
+// --- Escrow & Payment Email Functions --------------------------------------
+
+const ADMIN_EMAILS = ['lead@opportunitieskenya.live', 'opportunitieskenyalive@gmail.com'];
+
+// Admin notification when poster requests escrow release
+export async function sendEscrowReleaseRequestEmail(data) {
+  const {
+    jobTitle, posterEmail, applicantEmail, mpesaNumber,
+    escrowAmount, platformFee, transactionFee, netPayable,
+    applicationId, opportunityId
+  } = data;
+
+  const html = wrapEmail(`
+    <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+      <div style="background:#fef3c7;border-left:4px solid #f59e0b;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:24px;">
+        <p style="color:#92400e;font-size:16px;font-weight:700;margin:0 0 4px;">Action Required: Escrow Release Approved</p>
+        <p style="color:#78350f;font-size:14px;margin:0;line-height:1.7;">
+          The poster has approved payment release for a completed job. Process the M-PESA transfer from the admin dashboard.
+        </p>
+      </div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:24px;">
+        <p style="margin:0 0 8px;font-size:14px;"><strong>Job:</strong> ${jobTitle}</p>
+        <p style="margin:0 0 8px;font-size:14px;"><strong>Poster Email:</strong> ${posterEmail}</p>
+        <p style="margin:0 0 8px;font-size:14px;"><strong>Applicant Email:</strong> ${applicantEmail}</p>
+        <p style="margin:0 0 8px;font-size:14px;"><strong>Pay To (M-PESA):</strong> <strong style="color:#16a34a;font-size:16px;">${mpesaNumber}</strong></p>
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:12px 0;"/>
+        <p style="margin:0 0 4px;font-size:14px;">Escrow Amount held: <strong>KES ${escrowAmount}</strong></p>
+        <p style="margin:0 0 4px;font-size:14px;">Platform Fee (5%): KES ${platformFee}</p>
+        <p style="margin:0 0 4px;font-size:14px;">Transaction Fee (2%): KES ${transactionFee}</p>
+        <p style="margin:0;font-size:16px;font-weight:700;color:#0f2744;">Net to Pay Doer: KES ${netPayable}</p>
+      </div>
+      <p style="color:#475569;font-size:13px;">Application ID: ${applicationId} | Opportunity ID: ${opportunityId}</p>
+      <div style="text-align:center;margin-top:20px;">
+        ${ctaButton('Go to Admin Dashboard', `${FRONTEND_URL}/admin/dashboard`)}
+      </div>
+    </div>
+  `);
+
+  for (const email of ADMIN_EMAILS) {
+    await sendEmail({
+      to: email,
+      subject: `[Pay Now] Escrow Release: ${jobTitle} — KES ${netPayable} to ${mpesaNumber}`,
+      html,
+    });
+  }
+  console.log(`[Email] Escrow release request sent to admins for job: ${jobTitle}`);
+}
+
+// Confirmation to both job doer and poster after payment is sent
+export async function sendPaymentConfirmationEmail({ applicantEmail, posterEmail, jobTitle, netAmountPaid, mpesaNumber }) {
+  const doerHtml = wrapEmail(`
+    <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+      <div style="background:#f0fdf4;border-left:4px solid #22c55e;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:24px;">
+        <p style="color:#15803d;font-size:16px;font-weight:700;margin:0 0 4px;">Payment Sent!</p>
+        <p style="color:#166534;font-size:14px;margin:0;line-height:1.7;">
+          Great work! Your payment for completing <strong>${jobTitle}</strong> has been processed.
+        </p>
+      </div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:24px;text-align:center;">
+        <p style="color:#64748b;font-size:14px;margin:0 0 8px;">Amount sent to your M-PESA (${mpesaNumber})</p>
+        <p style="color:#0f2744;font-size:32px;font-weight:700;margin:0;">KES ${netAmountPaid}</p>
+      </div>
+      <p style="color:#475569;font-size:14px;line-height:1.7;">
+        Please check your M-PESA for the STK push prompt and enter your PIN to complete the transaction.
+        If you do not receive it within 5 minutes, contact us at <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;">lead@opportunitieskenya.live</a>.
+      </p>
+    </div>
+  `);
+
+  const posterHtml = wrapEmail(`
+    <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+      <div style="background:#eff6ff;border-left:4px solid #3b82f6;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:24px;">
+        <p style="color:#1e40af;font-size:16px;font-weight:700;margin:0 0 4px;">Escrow Released — Job Complete</p>
+        <p style="color:#1e3a8a;font-size:14px;margin:0;line-height:1.7;">
+          Payment of KES ${netAmountPaid} has been sent to the job doer for <strong>${jobTitle}</strong>.
+        </p>
+      </div>
+      <p style="color:#475569;font-size:14px;line-height:1.7;">
+        Thank you for using Opportunities Kenya's escrow service. The transaction is now complete.
+      </p>
+    </div>
+  `);
+
+  const sends = [];
+  if (applicantEmail) {
+    sends.push(sendEmail({
+      to: applicantEmail,
+      subject: `Payment Sent: KES ${netAmountPaid} for ${jobTitle}`,
+      html: doerHtml,
+    }));
+  }
+  if (posterEmail) {
+    sends.push(sendEmail({
+      to: posterEmail,
+      subject: `Escrow Released: Payment sent for ${jobTitle}`,
+      html: posterHtml,
+    }));
+  }
+  await Promise.all(sends);
+  console.log(`[Email] Payment confirmation sent to doer (${applicantEmail}) and poster (${posterEmail})`);
+}
+
+// Dispute alert to admin, poster, and applicant
+export async function sendDisputeAlertEmail({ jobTitle, applicantEmail, posterEmail, reason, applicationId }) {
+  const html = wrapEmail(`
+    <div style="padding:32px 28px;font-family:Arial,sans-serif;">
+      <div style="background:#fef2f2;border-left:4px solid #ef4444;border-radius:0 8px 8px 0;padding:18px 20px;margin-bottom:24px;">
+        <p style="color:#991b1b;font-size:16px;font-weight:700;margin:0 0 4px;">Dispute Raised</p>
+        <p style="color:#7f1d1d;font-size:14px;margin:0;line-height:1.7;">
+          A dispute has been raised for job: <strong>${jobTitle}</strong>. Admin review required.
+        </p>
+      </div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:24px;">
+        <p style="margin:0 0 8px;font-size:14px;"><strong>Job:</strong> ${jobTitle}</p>
+        <p style="margin:0 0 8px;font-size:14px;"><strong>Poster:</strong> ${posterEmail || 'N/A'}</p>
+        <p style="margin:0 0 8px;font-size:14px;"><strong>Applicant:</strong> ${applicantEmail || 'N/A'}</p>
+        <p style="margin:0 0 8px;font-size:14px;"><strong>Reason:</strong> ${reason || 'Not specified'}</p>
+        <p style="margin:0;font-size:13px;color:#64748b;">Application ID: ${applicationId}</p>
+      </div>
+      <div style="text-align:center;margin-top:20px;">
+        ${ctaButton('Review in Admin Dashboard', `${FRONTEND_URL}/admin/dashboard`)}
+      </div>
+    </div>
+  `);
+
+  const recipients = [...ADMIN_EMAILS];
+  if (applicantEmail) recipients.push(applicantEmail);
+  if (posterEmail) recipients.push(posterEmail);
+
+  for (const email of recipients) {
+    await sendEmail({
+      to: email,
+      subject: `[Dispute] ${jobTitle}`,
+      html,
+    }).catch(err => console.error(`Dispute email failed for ${email}:`, err.message));
+  }
+  console.log(`[Email] Dispute alert sent for: ${jobTitle}`);
+}
