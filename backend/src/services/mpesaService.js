@@ -1,14 +1,25 @@
 import crypto from 'crypto';
 
-// Sandbox Credentials
+// Environment Setup
 const DARAJA_ENV = process.env.DARAJA_ENV || 'sandbox';
-const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || 'your_sandbox_consumer_key';
-const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || 'your_sandbox_consumer_secret';
-const SHORTCODE = process.env.MPESA_SHORTCODE || '174379'; // Sandbox Paybill
-const PASSKEY = process.env.MPESA_PASSKEY || 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919';
+const isProduction = DARAJA_ENV === 'production';
 
-const BASE_URL = DARAJA_ENV === 'production' 
-  ? 'https://api.safaricom.co.ke' 
+// In production, these must come from environment variables. In sandbox, fall back to defaults.
+const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || (isProduction ? '' : 'your_sandbox_consumer_key');
+const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || (isProduction ? '' : 'your_sandbox_consumer_secret');
+const SHORTCODE = process.env.MPESA_SHORTCODE || (isProduction ? '' : '174379'); 
+const PASSKEY = process.env.MPESA_PASSKEY || (isProduction ? '' : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919');
+
+// Validate production environment to ensure sandbox defaults don't slip in
+if (isProduction) {
+  if (!CONSUMER_KEY || !CONSUMER_SECRET || !SHORTCODE || !PASSKEY) {
+    console.error('❌ CRITICAL: Missing Daraja M-PESA environment variables in production!');
+    process.exit(1);
+  }
+}
+
+const BASE_URL = isProduction
+  ? 'https://api.safaricom.co.ke'
   : 'https://sandbox.safaricom.co.ke';
 
 /**
@@ -16,7 +27,7 @@ const BASE_URL = DARAJA_ENV === 'production'
  */
 async function getOAuthToken() {
   const credentials = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString('base64');
-  
+
   try {
     const response = await fetch(`${BASE_URL}/oauth/v1/generate?grant_type=client_credentials`, {
       method: 'GET',
@@ -24,7 +35,7 @@ async function getOAuthToken() {
         Authorization: `Basic ${credentials}`,
       },
     });
-    
+
     if (!response.ok) throw new Error(`OAuth failed: ${response.statusText}`);
     const data = await response.json();
     return data.access_token;
@@ -46,10 +57,10 @@ export async function initiateSTKPush(phone, amount, reference, description) {
     const token = await getOAuthToken();
     const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14); // YYYYMMDDHHmmss
     const password = Buffer.from(`${SHORTCODE}${PASSKEY}${timestamp}`).toString('base64');
-    
+
     // Your backend needs a public URL so Safaricom can send the callback
     // In dev, you'd use Ngrok. In production, your actual domain.
-    const callbackUrl = process.env.BACKEND_API_URL 
+    const callbackUrl = process.env.BACKEND_API_URL
       ? `${process.env.BACKEND_API_URL}/public/payments/mpesa/callback`
       : 'https://your-domain.com/api/public/payments/mpesa/callback';
 
@@ -78,9 +89,9 @@ export async function initiateSTKPush(phone, amount, reference, description) {
 
     const data = await response.json();
     if (!response.ok || data.errorMessage) {
-       throw new Error(data.errorMessage || 'STK Push failed');
+      throw new Error(data.errorMessage || 'STK Push failed');
     }
-    
+
     // data contains CheckoutRequestID which we use to track the transaction
     return { success: true, data };
   } catch (error) {
