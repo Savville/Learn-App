@@ -66,7 +66,7 @@ export const opportunities: Opportunity[] = [
     category: 'Gig',
     description: 'Looking for a student who knows React Native to help me fix some UI bugs on my final year project. Needs to be done ASAP.',
     fullDescription: 'I am a final year computer science student at Kenyatta University and I am building a React Native application for my project. I am struggling with the UI layout, specifically flexbox and some navigation issues. Looking for someone who can help me polish the design and fix the bugs over the weekend. I have applied some funds to my escrow.\\n\\n**Status:** Job has been assigned and work is currently ongoing.',
-    deadline: '2026-05-20',
+    deadline: '2026-05-10',
     location: 'Remote / Nairobi',
     eligibility: {
       educationLevel: 'UnderGrad',
@@ -103,7 +103,7 @@ export const opportunities: Opportunity[] = [
     category: 'Gig',
     description: 'I need a student proficient in PowerPoint and Canva to turn my 50-page word document of lecture notes into a visually appealing presentation with infographics.',
     fullDescription: 'As a busy lecturer, I am looking for a creative professional or student to convert my plain text lecture notes into a professional and visually engaging PowerPoint presentation. The notes cover topics in environmental science, and I need relevant graphics, charts, and icons added. The final output should be 30-40 slides.\\n\\n**Status:** Job has been assigned and paid already. Escrow is fully funded.',
-    deadline: '2026-05-18',
+    deadline: '2026-05-10',
     location: 'Remote',
     eligibility: {
       educationLevel: 'Both',
@@ -140,7 +140,7 @@ export const opportunities: Opportunity[] = [
     category: 'Gig',
     description: 'I have 200 survey responses that need to be entered into Excel and cleaned for SPSS analysis. Looking for a meticulous graduate or student.',
     fullDescription: 'I am a recent graduate and research consultant working on a public health survey. I have collected 200 physical questionnaires that need to be digitized. You will be responsible for entering the data into an Excel spreadsheet, cleaning the dataset, and performing some basic descriptive statistics in SPSS. Accuracy is key.\\n\\n**Status:** Job has been assigned. Escrow is set up and work is in progress.',
-    deadline: '2026-05-15',
+    deadline: '2026-05-10',
     location: 'Remote',
     eligibility: {
       educationLevel: 'PostGrad',

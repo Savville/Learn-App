@@ -538,7 +538,17 @@ export function OpportunityDetails() {
             
             {/* Apply Button / Challenge CTA */}
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 text-center" id="apply-section">
-              {opportunity.applicationForm?.isEnabled ? (
+              {urgency?.label === 'Closed' ? (
+                <>
+                  <h3 className="text-gray-900 mb-3 text-xl font-bold">Applications Closed</h3>
+                  <p className="text-gray-600 mb-6 text-sm max-w-md mx-auto">
+                    The deadline for this opportunity has passed and applications are no longer being accepted.
+                  </p>
+                  <Button variant="outline" className="opacity-50 cursor-not-allowed" disabled>
+                    Closed
+                  </Button>
+                </>
+              ) : opportunity.applicationForm?.isEnabled ? (
                 <>
                   <h3 className="text-gray-900 mb-6 text-xl font-bold">Ready to Apply?</h3>
                   {!showApplyForm && !appSubmitSuccess && (
