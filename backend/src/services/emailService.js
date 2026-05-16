@@ -239,6 +239,31 @@ export async function sendPosterAcknowledgementEmail(posterEmail, posterName, op
   }
 }
 
+export async function sendNewMessageNotification(receiverEmail) {
+  try {
+    const html = wrapEmail(`
+      <div style="padding:32px 28px;">
+        <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">You have a new message!</h2>
+        <p style="color:#475569;line-height:1.7;margin:0 0 16px;">
+          You have received a new message regarding an opportunity on <strong>Opportunities Kenya</strong>.
+        </p>
+        <div style="text-align:center; margin-top:20px;">
+          ${ctaButton('Go to Inbox', `${FRONTEND_URL}/inbox`)}
+        </div>
+      </div>
+    `);
+
+    await sendEmail({
+      to: receiverEmail,
+      subject: 'You have a new message on Opportunities Kenya',
+      html: html
+    });
+    console.log(`New message notification sent to ${receiverEmail}`);
+  } catch (error) {
+    console.error(`New message notification failed for ${receiverEmail}:`, error.message);
+  }
+}
+
 export async function sendNewOpportunityEmail(subscribers, opportunity) {
   try {
     const bcc = subscribers.map(s => s.email);

@@ -133,6 +133,13 @@ export function OpportunityDetails() {
   const [appSubmitSuccess, setAppSubmitSuccess] = useState(false);
   const [appSubmitError, setAppSubmitError] = useState<string | null>(null);
 
+  // Pitch State (For Microgigs)
+  const [pitchEmail, setPitchEmail] = useState('');
+  const [pitchMessage, setPitchMessage] = useState('');
+  const [isSubmittingPitch, setIsSubmittingPitch] = useState(false);
+  const [pitchSuccess, setPitchSuccess] = useState(false);
+  const [pitchError, setPitchError] = useState<string | null>(null);
+
   const handleApplySubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!opportunity || !opportunity.applicationForm) return;
@@ -160,6 +167,36 @@ export function OpportunityDetails() {
       setAppSubmitError(err.message);
     } finally {
       setIsSubmittingApp(false);
+    }
+  };
+
+  const handlePitchSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!opportunity) return;
+    
+    setIsSubmittingPitch(true);
+    setPitchError(null);
+
+    try {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gigId: opportunity.id,
+          senderEmail: pitchEmail,
+          receiverEmail: opportunity.contactEmail || 'admin@l-earn.co',
+          content: pitchMessage
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to send pitch');
+
+      setPitchSuccess(true);
+    } catch (err: any) {
+      setPitchError(err.message);
+    } finally {
+      setIsSubmittingPitch(false);
     }
   };
 
@@ -547,6 +584,69 @@ export function OpportunityDetails() {
                   <Button variant="outline" className="opacity-50 cursor-not-allowed" disabled>
                     Closed
                   </Button>
+                </>
+              ) : opportunity.category === 'Gig' || opportunity.category === 'Job' ? (
+                <>
+                  <h3 className="text-gray-900 mb-6 text-xl font-bold">Pitch for this {opportunity.category}</h3>
+                  {!pitchSuccess ? (
+                    <form onSubmit={handlePitchSubmit} className="text-left max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-blue-100">
+                      <p className="text-sm text-gray-500 mb-6 border-b border-gray-100 pb-4">
+                        Send a message directly to the poster. This will open a secure inbox where you can negotiate.
+                      </p>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Your Email</label>
+                          <Input
+                            type="email"
+                            required
+                            placeholder="Enter your email"
+                            value={pitchEmail}
+                            onChange={(e) => setPitchEmail(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Your Pitch Message</label>
+                          <Textarea
+                            required
+                            rows={5}
+                            placeholder="Why are you the best fit for this role?"
+                            value={pitchMessage}
+                            onChange={(e) => setPitchMessage(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {pitchError && (
+                        <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">
+                          {pitchError}
+                        </div>
+                      )}
+
+                      <div className="mt-6 flex gap-3">
+                        <Button
+                          type="submit"
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
+                          disabled={isSubmittingPitch}
+                        >
+                          {isSubmittingPitch ? 'Sending Pitch...' : 'Send Pitch'}
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="max-w-md mx-auto bg-green-50 rounded-xl p-8 border border-green-100 shadow-sm animate-in fade-in zoom-in duration-300">
+                      <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                      <h4 className="text-xl font-bold text-gray-900 mb-2">Pitch Sent Successfully!</h4>
+                      <p className="text-gray-600 text-sm mb-6">
+                        Your message has been delivered to the employer.
+                      </p>
+                      <Link to="/inbox">
+                        <Button className="w-full shadow-sm">
+                          Go to Inbox
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </>
               ) : opportunity.applicationForm?.isEnabled ? (
                 <>

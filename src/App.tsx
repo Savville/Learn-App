@@ -9,6 +9,7 @@ import { OpportunityDetails } from './pages/OpportunityDetails';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { PostWithUs } from './pages/PostWithUs';
+import { Inbox } from './pages/Inbox';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDisputes } from './pages/AdminDisputes';
@@ -65,6 +66,7 @@ function AppContent() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/post-with-us" element={<PostWithUs />} />
+          <Route path="/inbox" element={<Inbox />} />
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />

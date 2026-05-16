@@ -1,0 +1,201 @@
+import express from 'express';
+import { getDB } from '../config/database.js';
+import { ObjectId } from 'mongodb';
+import { sendNewMessageNotification } from '../services/emailService.js';
+import { initiateSTKPush } from '../services/mpesaService.js';
+
+const router = express.Router();
+
+// Stage 3: The Radical Anti-Leakage Rule (The Auto-Censor)
+const applyAutoCensor = (text) => {
+  if (!text) return '';
+  let censored = text;
+  
+  // 1. Censor Email Addresses
+  const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+  censored = censored.replace(emailRegex, '[REDACTED BY L-EARN]');
+  
+  // 2. Censor Phone Numbers (General matching for digits looking like phone numbers, particularly Kenyan ones)
+  // Matches: 0712345678, +254712345678, 254712345678, etc.
+  const phoneRegex = /\b(?:\+?254|0)[17]\d{8}\b/g;
+  censored = censored.replace(phoneRegex, '[REDACTED BY L-EARN]');
+  
+  // 3. Censor 'WhatsApp' keyword to prevent them asking to move offline
+  const whatsappRegex = /whatsapp/ig;
+  censored = censored.replace(whatsappRegex, '[REDACTED BY L-EARN]');
+
+  // 4. General link detection (outside links to prevent 'linktr.ee/mycontact' or personal portfolios)
+  const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|(\b[a-zA-Z0-9-]+\.(com|org|net|io|co|me|ee|ke)\b(\/[^\s]*)?)/ig;
+  censored = censored.replace(urlRegex, '[REDACTED LINK]');
+
+  return censored;
+};
+
+// GET /api/messages/:conversationId
+// Get messages for a specific conversation
+router.get('/:conversationId', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId } = req.params;
+
+    const messages = await db.collection('messages')
+      .find({ conversationId: new ObjectId(conversationId) })
+      .sort({ createdAt: 1 })
+      .toArray();
+
+    res.json(messages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+// GET /api/messages/user/:email
+// Get all conversations for a specific user
+router.get('/user/:email', async (req, res) => {
+  try {
+    const db = getDB();
+    const { email } = req.params;
+
+    const conversations = await db.collection('conversations')
+      .find({ participants: email })
+      .sort({ updatedAt: -1 })
+      .toArray();
+
+    // Fetch basic gig details to display in the inbox list
+    const enrichedConversations = await Promise.all(
+      conversations.map(async (conv) => {
+        const query = (typeof conv.gigId === 'string') 
+          ? { id: conv.gigId } 
+          : { _id: conv.gigId };
+        
+        const gig = await db.collection('opportunities').findOne(query);
+        
+        return {
+          ...conv,
+          gigTitle: gig ? gig.title : 'Unknown Gig'
+        };
+      })
+    );
+
+    res.json(enrichedConversations);
+  } catch (error) {
+    console.error('Error fetching user conversations:', error);
+    res.status(500).json({ error: 'Failed to fetch conversations' });
+  }
+});
+
+// POST /api/messages
+// Send a new message (The pitch or a reply)
+router.post('/', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId, gigId, senderEmail, receiverEmail, content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'Message content is required' });
+    }
+
+    // Apply the auto-censor!
+    const censoredContent = applyAutoCensor(content);
+
+    let convId = conversationId ? new ObjectId(conversationId) : null;
+
+    // If this is the FIRST message (the pitch), create the conversation
+    if (!convId) {
+      const newConversation = {
+        gigId: gigId.length === 24 ? new ObjectId(gigId) : gigId,
+        participants: [senderEmail, receiverEmail],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: 'pending', // 'pending' = locked, 'active' = unlocked, 'hired' = escrow funded
+      };
+      const convResult = await db.collection('conversations').insertOne(newConversation);
+      convId = convResult.insertedId;
+    }
+
+    const newMessage = {
+      conversationId: convId,
+      senderEmail,
+      receiverEmail,
+      content: censoredContent,
+      originalContent: content, // Keep the original just in case for admin review (optional)
+      createdAt: new Date(),
+      read: false
+    };
+
+    await db.collection('messages').insertOne(newMessage);
+    
+    // Update the conversation's updatedAt
+    await db.collection('conversations').updateOne(
+      { _id: convId },
+      { $set: { updatedAt: new Date() } }
+    );
+
+    // Send an email via Resend to `receiverEmail`
+    sendNewMessageNotification(receiverEmail).catch(err => {
+      console.error('Failed to send new message email:', err);
+    });
+
+    res.status(201).json({ success: true, message: 'Message sent successfully', conversationId: convId });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// POST /api/messages/:conversationId/unlock
+// Stage 4 prep: Employer unlocks the conversation to reply
+router.post('/:conversationId/unlock', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId } = req.params;
+
+    await db.collection('conversations').updateOne(
+      { _id: new ObjectId(conversationId) },
+      { $set: { status: 'active', updatedAt: new Date() } }
+    );
+
+    res.json({ success: true, message: 'Conversation unlocked' });
+  } catch (error) {
+    console.error('Error unlocking conversation:', error);
+    res.status(500).json({ error: 'Failed to unlock conversation' });
+  }
+});
+
+// POST /api/messages/:conversationId/hire
+// Stage 4: The "Hire" Checkpoint (Monetization & Release)
+router.post('/:conversationId/hire', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId } = req.params;
+    const { employerPhone, amount = 1 } = req.body;
+    
+    // Integrate with MPesa to fund the escrow.
+    if (employerPhone) {
+      // Amount is hardcoded or received from body. For now, testing with passing an amount.
+      const mpesaResult = await initiateSTKPush(
+        employerPhone,
+        amount, // KES amount
+        `GIG-${conversationId}`, // Reference
+        `Fund Escrow for Gig`
+      );
+
+      if (!mpesaResult.success) {
+        return res.status(400).json({ error: mpesaResult.error || 'M-PESA STK Push Failed' });
+      }
+    }
+
+    await db.collection('conversations').updateOne(
+      { _id: new ObjectId(conversationId) },
+      { $set: { status: 'hired', updatedAt: new Date() } }
+    );
+
+    res.json({ success: true, message: 'Gig funded and user hired! Chat uncensored.' });
+  } catch (error) {
+    console.error('Error hiring user:', error);
+    res.status(500).json({ error: 'Failed to hire user' });
+  }
+});
+
+export default router;

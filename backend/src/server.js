@@ -15,6 +15,7 @@ import analyticsRoutes from './routes/analytics.js';
 import adsRoutes from './routes/ads.js';
 import adminRoutes from './routes/admin.js';
 import publicRoutes from './routes/public.js';
+import messageRoutes from './routes/messages.js';
 
 dotenv.config();
 
@@ -112,6 +113,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ads', adsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

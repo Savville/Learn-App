@@ -345,39 +345,38 @@ export function PostWithUs() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-        <header className="flex flex-col items-start justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl flex items-center gap-3">
-              {viewMode === 'post' ? (editingPostId ? 'Edit Opportunity Request' : 'Post With Us') : 'Manage My Postings'}
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              {viewMode === 'post' 
-                ? (editingPostId ? 'Update your live opportunity parameters below and re-submit it for verification. The Admin team will approve changes shortly.' : 'Share an opportunity with thousands of students and change-makers across Kenya.') 
-                : 'Review your live and pending posts, and see who has applied.'
-              }
-            </p>
+    <div className="min-h-screen bg-gray-50 pb-16">
+      {/* Dynamic Header */}
+      <div className="bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-md rounded-b-3xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <p className="text-white mb-6 px-4 py-1 uppercase tracking-widest text-sm font-semibold opacity-90 block">For Organizations & Recruiters</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-6">
+            {viewMode === 'post' ? (editingPostId ? 'Edit Opportunity' : 'Post an Opportunity') : 'Your Dashboard'}
+          </h1>
+          <p className="text-blue-50 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+            {viewMode === 'post' 
+              ? (editingPostId ? 'Update your live opportunity instantly.' : 'Reach thousands of top-tier African students and young professionals instantly.')
+              : 'Manage your active opportunities and download applications.'}
+          </p>
+          <div className="mt-8 flex justify-center gap-4">
+            <button 
+              onClick={() => { setViewMode('post'); setEditingPostId(null); }}
+              className={`px-8 py-4 rounded-full font-bold transition-all text-lg ${viewMode === 'post' && !editingPostId ? 'bg-white text-gray-900 shadow-md' : 'bg-transparent text-white hover:bg-white/10'}`}
+            >
+              Post Opportunity
+            </button>
+            <button 
+               onClick={() => { setViewMode('manage'); setEditingPostId(null); }}
+              className={`px-8 py-4 flex items-center justify-center rounded-full font-bold transition-all text-lg ${viewMode === 'manage' ? 'bg-white text-gray-900 shadow-md' : 'bg-transparent text-white hover:bg-white/10'}`}
+            >
+              <LayoutDashboard className="w-5 h-5 mr-2" />
+              Manage Dashboard
+            </button>
           </div>
-          <div className="flex gap-3">
-             <Button 
-               variant={viewMode === 'post' ? 'default' : 'outline'}
-               onClick={() => setViewMode('post')}
-               className={viewMode === 'post' ? 'bg-[#0933ed] text-white hover:bg-blue-800' : 'text-slate-600'}
-             >
-               Post Opportunity
-             </Button>
-             <Button 
-               variant={viewMode === 'manage' ? 'default' : 'outline'}
-               onClick={() => setViewMode('manage')}
-               className={viewMode === 'manage' ? 'bg-[#0933ed] text-white hover:bg-blue-800' : 'text-slate-600 border-slate-300'}
-             >
-               <LayoutDashboard className="w-4 h-4 mr-2" />
-               View Dashboard
-             </Button>
-          </div>
-        </header>
+        </div>
+      </div>
 
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         {viewMode === 'manage' ? (
            <PosterDashboard />
         ) : (
@@ -393,84 +392,85 @@ export function PostWithUs() {
 
             {/* STEP 1: Details & Text Input (Hidden during Edit Mode) */}
             {!editingPostId && (
-            <Card className="border-slate-200 shadow-sm mt-4">
-          <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold text-slate-900">
-                1. Provide the Details
-              </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Full Name</label>
-                  <Input
-                    required
-                    placeholder="e.g. John Doe"
-                    value={reporter.name}
-                    onChange={(e) => setReporter({ ...reporter, name: e.target.value })}
-                  />
+            <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm relative overflow-hidden mt-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">1. Provide the Details</h2>
+              
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Full Name</label>
+                    <Input
+                      required
+                      placeholder="e.g. John Doe"
+                      value={reporter.name}
+                      onChange={(e) => setReporter({ ...reporter, name: e.target.value })}
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Organization</label>
+                    <Input
+                      required
+                      placeholder="e.g. IEEE Kenya"
+                      value={reporter.organization}
+                      onChange={(e) => setReporter({ ...reporter, organization: e.target.value })}
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Role / Position</label>
+                    <Input
+                      required
+                      placeholder="e.g. Communications Lead"
+                      value={reporter.role}
+                      onChange={(e) => setReporter({ ...reporter, role: e.target.value })}
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Phone Number</label>
+                    <Input
+                      required
+                      placeholder="e.g. +254 700 000 000"
+                      value={reporter.telephone}
+                      onChange={(e) => setReporter({ ...reporter, telephone: e.target.value })}
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Organization Email</label>
+                    <Input
+                      required
+                      type="email"
+                      placeholder="e.g. name@organization.org"
+                      value={reporter.email}
+                      onChange={(e) => setReporter({ ...reporter, email: e.target.value })}
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                    />
+                    <p className="text-[11px] text-gray-500 italic mt-1 font-medium">
+                      Use an organization-domain email if possible.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Website or Social Page</label>
+                    <Input
+                      required
+                      placeholder="e.g. https://linkedin.com/company/..."
+                      value={reporter.websiteOrSocial}
+                      onChange={(e) => setReporter({ ...reporter, websiteOrSocial: e.target.value })}
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Organization</label>
-                  <Input
-                    required
-                    placeholder="e.g. IEEE Kenya"
-                    value={reporter.organization}
-                    onChange={(e) => setReporter({ ...reporter, organization: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Role / Position</label>
-                  <Input
-                    required
-                    placeholder="e.g. Communications Lead"
-                    value={reporter.role}
-                    onChange={(e) => setReporter({ ...reporter, role: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Phone Number</label>
-                  <Input
-                    required
-                    placeholder="e.g. +254 700 000 000"
-                    value={reporter.telephone}
-                    onChange={(e) => setReporter({ ...reporter, telephone: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Organization Email</label>
-                  <Input
-                    required
-                    type="email"
-                    placeholder="e.g. name@organization.org"
-                    value={reporter.email}
-                    onChange={(e) => setReporter({ ...reporter, email: e.target.value })}
-                  />
-                  <p className="text-[10px] text-gray-500 italic">
-                    Use an organization-domain email if possible.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Website or Social Page</label>
-                  <Input
-                    required
-                    placeholder="e.g. https://linkedin.com/company/..."
-                    value={reporter.websiteOrSocial}
-                    onChange={(e) => setReporter({ ...reporter, websiteOrSocial: e.target.value })}
-                  />
-                </div>
-              </div>
 
-              <div className="pt-2 border-t mt-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                  onClick={() => setShowOrgRequest(!showOrgRequest)}
-                >
-                  Post as an Organization?
-                </Button>
+                <div className="pt-6 border-t border-gray-100 mt-6">
+                  <Button 
+                    variant="outline" 
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50 rounded-xl px-6 py-4 h-auto font-semibold"
+                    onClick={() => setShowOrgRequest(!showOrgRequest)}
+                  >
+                    Post as an Organization?
+                  </Button>
 
                 {showOrgRequest && (
                   <Card className="mt-4 border-blue-100 bg-blue-50/30">
@@ -532,72 +532,69 @@ export function PostWithUs() {
                 )}
               </div>
             </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                <div className="md:col-span-3">
-                  <Textarea
-                    className="h-64 w-full rounded-md border-slate-200 bg-white px-4 py-3 text-sm placeholder:text-slate-400 focus-visible:ring-primary cursor-pointer"
-                    placeholder="Paste the opportunity details here (e.g., from a poster, email, or website)... We will auto-extract the relevant parts."
-                    value={rawText}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRawText(e.target.value)}
-                  />
-                </div>
-                <div className="md:col-span-1 space-y-3 rounded-md bg-slate-50 p-3 flex flex-col justify-end">
+            </div>
+            )}
+
+            {/* STEP 2: Text / Details Dump */}
+            {!editingPostId && (
+            <div className="mt-8">
+              <label className="text-sm font-semibold text-gray-700 block mb-3 pl-1">Copy & Paste Opportunity Details Here</label>
+              <div className="flex flex-col gap-5">
+                <Textarea
+                  className="min-h-[280px] w-full rounded-2xl border border-gray-200 bg-white px-6 py-5 text-base placeholder:text-gray-400 focus-visible:ring-blue-500 shadow-inner"
+                  placeholder="Paste the opportunity details here (e.g., from a poster, email, or website)... We will auto-extract the relevant parts."
+                  value={rawText}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRawText(e.target.value)}
+                />
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
                     <Button
                       onClick={handleParse}
                       disabled={isParsing || !rawText}
                       size="lg"
-                      className="w-full"
+                      className="flex-1 rounded-2xl h-14 text-lg font-bold shadow hover:shadow-md transition-shadow"
                       style={{ backgroundColor: '#0933ed', color: '#ffffff' }}
                     >
                       {isParsing ? 'Extracting...' : 'AI Extract Data'}
                     </Button>
-                    <div className="relative flex items-center py-2">
-                      <div className="flex-grow border-t border-slate-300"></div>
-                      <span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-medium uppercase">OR</span>
-                      <div className="flex-grow border-t border-slate-300"></div>
+                    <div className="hidden sm:flex items-center justify-center px-4 self-center">
+                      <span className="text-gray-400 text-sm font-bold uppercase tracking-widest leading-none">OR</span>
                     </div>
                     <Button
                       onClick={handleManualEntry}
                       disabled={isParsing}
                       variant="outline"
                       size="lg"
-                      className="w-full border-slate-300 text-slate-700 hover:bg-slate-100"
+                      className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-2xl h-14 text-lg font-bold"
                     >
                       Enter Manually
                     </Button>
                 </div>
               </div>
               {error && !parsedData && (
-                <div className="mt-4">
-                  <p className="text-sm text-red-500 font-medium p-3 bg-red-50 border border-red-200 rounded-lg">{error}</p>
+                <div className="mt-6">
+                  <p className="text-base text-red-500 font-medium p-4 bg-red-50 border border-red-200 rounded-xl">{error}</p>
                 </div>
               )}
-          </CardContent>
-        </Card>
+          </div>
         )}
 
         {/* STEP 2: Review Table & Dictionary */}
         {parsedData && (
-          <div ref={reviewSectionRef}>
-          <Card className="animate-fade-in border-slate-200 shadow-sm mt-6">
-              <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold text-slate-900">
-                    2. Review & Submit
-                  </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 gap-4 rounded-md bg-slate-50 p-4 md:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                      Title
-                    </span>
+          <div ref={reviewSectionRef} className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm relative overflow-hidden mt-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">2. Review & Submit</h2>
+              
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 rounded-2xl bg-gray-50/50 p-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <span className="text-sm font-semibold text-gray-700">Title</span>
                     <Input
                       value={parsedData.basicInfo.title}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBasicInfoEdit('title', e.target.value)}
+                      className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <div className="space-y-2">
+                    <span className="text-sm font-semibold text-gray-700">
                       Provider
                     </span>
                     <Input
@@ -610,7 +607,7 @@ export function PostWithUs() {
                       Category
                     </span>
                     <select
-                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full h-10 px-5 py-5 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                       value={parsedData.basicInfo.category}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('category', e.target.value)}
                     >
@@ -645,7 +642,7 @@ export function PostWithUs() {
                       Funding type
                     </span>
                     <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-5 py-5 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       value={parsedData.basicInfo.fundingType || ''}
                       onChange={(e) => handleBasicInfoEdit('fundingType', e.target.value)}
                     >
@@ -662,7 +659,7 @@ export function PostWithUs() {
                       Compensation
                     </span>
                     <select 
-                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full h-10 px-5 py-5 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                       value={parsedData.basicInfo.compensationType || 'N/A'}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('compensationType', e.target.value)}
                     >
@@ -677,7 +674,7 @@ export function PostWithUs() {
                       Upfront Cost
                     </span>
                     <select 
-                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full h-10 px-5 py-5 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                       value={parsedData.basicInfo.upfrontCost || 'No Upfront Cost'}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('upfrontCost', e.target.value)}
                     >
@@ -757,21 +754,21 @@ export function PostWithUs() {
                       Edit any value before publishing.
                     </p>
                   </div>
-                  <div className="overflow-hidden rounded-md border border-slate-200 bg-white">
+                  <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-sm">
                         <thead>
-                          <tr className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                            <th className="border-b border-slate-200 px-3 py-2 font-medium">
+                          <tr className="bg-gray-50/50 text-xs uppercase tracking-wide text-slate-500">
+                            <th className="border-b border-gray-50 px-5 py-5 font-medium">
                               Feature
                             </th>
-                            <th className="border-b border-slate-200 px-3 py-2 font-medium">
+                            <th className="border-b border-gray-50 px-5 py-5 font-medium">
                               Extracted value
                             </th>
-                            <th className="border-b border-slate-200 px-3 py-2 font-medium">
+                            <th className="border-b border-gray-50 px-5 py-5 font-medium">
                               Importance
                             </th>
-                            <th className="border-b border-slate-200 px-3 py-2 font-medium">
+                            <th className="border-b border-gray-50 px-5 py-5 font-medium">
                               Quick actions
                             </th>
                           </tr>
@@ -782,10 +779,10 @@ export function PostWithUs() {
                               key={idx}
                               className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
                             >
-                              <td className="border-b border-slate-100 px-3 py-2 text-slate-900">
+                              <td className="border-b border-gray-50 px-5 py-5 text-slate-900">
                                 <span className="font-medium">{feat.feature}</span>
                               </td>
-                              <td className="border-b border-slate-100 px-3 py-2 align-top">
+                              <td className="border-b border-gray-50 px-5 py-5 align-top">
                                 {feat.feature === 'Deadline' ? (
                                   <div className="flex flex-col gap-2 sm:flex-row">
                                     <Input
@@ -817,7 +814,7 @@ export function PostWithUs() {
                                   />
                                 )}
                               </td>
-                              <td className="border-b border-slate-100 px-3 py-2 align-top">
+                              <td className="border-b border-gray-50 px-5 py-5 align-top">
                                   <Badge
                                     variant={
                                       feat.importance === 'High'
@@ -835,7 +832,7 @@ export function PostWithUs() {
                                     {feat.importance}
                                   </Badge>
                               </td>
-                              <td className="border-b border-slate-100 px-3 py-2 align-top">
+                              <td className="border-b border-gray-50 px-5 py-5 align-top">
                                 <div className="flex flex-wrap gap-2">
                                   {feat.feature === 'Application Link' && !feat.value && (
                                     <Button
@@ -924,7 +921,7 @@ export function PostWithUs() {
                                 newFields[idx].type = e.target.value as FormField['type'];
                                 setCustomForm({ ...customForm, fields: newFields });
                               }}
-                              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                              className="h-10 rounded-md border border-input bg-background px-5 py-5 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <option value="text">Short Text</option>
                               <option value="textarea">Paragraph</option>
@@ -1054,16 +1051,15 @@ export function PostWithUs() {
                 )}
 
                 <Button
-                  className="mt-4 w-full"
+                  className="mt-8 w-full rounded-2xl py-6 h-auto font-bold text-lg hover:shadow-lg transition-shadow"
                   size="lg"
                   style={{ backgroundColor: '#0933ed', color: '#ffffff' }}
                   onClick={handlePublish}
                   disabled={isPublishing || !parsedData}
                 >
-                  {isPublishing ? 'Submittingâ€¦' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
+                  {isPublishing ? 'Submitting...' : editingPostId ? 'Submit Edit Request' : 'Submit for verification'}
                 </Button>
-              </CardContent>
-          </Card>
+              </div>
           </div>
         )}
         </>

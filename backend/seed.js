@@ -115,6 +115,45 @@ const opportunities = [
     status: 'Verified'
   },
   {
+    id: 'mock-gig-test-chat',
+    title: 'Website Testing and Bug Hunting for New Platform',
+    provider: 'Tech Startup XYZ',
+    category: 'Gig',
+    description: 'Looking for a detail-oriented student to test our new platform and report bugs. Great for testing the new In-App Chat!',
+    fullDescription: 'We are launching a new educational platform and need 5 students to go through all the pages, click every link, and report any broken features. Please pitch yourself and tell us what devices you have (e.g., iPhone, Android, Windows Laptop).\\n\\n**Status:** Open for applications. Use the pitch box to apply!',
+    deadline: '2026-12-31',
+    location: 'Remote',
+    eligibility: {
+      educationLevel: 'UnderGrad',
+      fieldOfStudy: ['Any Field'],
+      requirements: [
+        'Good internet connection',
+        'Attention to detail',
+        'Ability to write clear bug reports'
+      ]
+    },
+    benefits: [
+      'Quick payment',
+      'Flexible hours'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: '#',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '1 day',
+    featured: true,
+    dateAdded: '2026-05-14',
+    logoUrl: '/images/opportunities/default-avatar.png',
+    postedBy: 'Startup Admin',
+    isEscrow: true,
+    isEscrowFunded: false,
+    escrowAmount: 1500,
+    status: 'Verified',
+    views: 0,
+    clicks: 0
+  },
+  {
     id: 'agea-startup-lab-2026',
     title: "AGEA Start-up Lab Call for Applications 2026",
     provider: "African German Entrepreneurship Academy (AGEA)",

@@ -1,8 +1,9 @@
 # Product Requirements Document (PRD)
+
 ## Learn Opportunities - Kenya University Student Focus
 
-**Document Version**: 2.0  
-**Date**: April 12, 2026  
+**Document Version**: 2.0
+**Date**: April 12, 2026
 **Status**: In Development (Escrow ATS Completed)
 
 ---
@@ -26,30 +27,31 @@ Refocus the Learn Opportunities platform to serve **Kenya University Students** 
 ### Categories to Include ✅
 
 1. **Call for Papers & Abstracts**
+
    - Academic conferences and journals seeking student submissions
    - Research publication opportunities
    - Thesis and dissertation showcases
    - Student-led research exhibitions
-
 2. **Internships**
+
    - Short-term (3-6 months) practical experience
    - Kenya-based organizations and international remote options
    - Paid and unpaid opportunities
    - Industry-specific placements
-
 3. **Grants**
+
    - Research grants for student projects
    - Travel grants for conferences
    - Project funding for student initiatives
    - Academic research support
-
 4. **Conferences**
+
    - Student-focused conferences
    - Networking events for young professionals
    - Workshops and seminars
    - Virtual and in-person events (Kenya-based priority)
-
 5. **Scholarships**
+
    - Full and partial scholarships
    - Tuition support
    - Postgraduate awards
@@ -67,6 +69,7 @@ Refocus the Learn Opportunities platform to serve **Kenya University Students** 
 ### 3.1 Core Opportunities Features
 
 **Search & Filter**
+
 - Filter by opportunity type (Call for Papers, Internship, Grant, Conference, Scholarship)
 - Filter by location (Kenya-based, East Africa, International)
 - Filter by level (Undergrad, Postgrad, All)
@@ -74,6 +77,7 @@ Refocus the Learn Opportunities platform to serve **Kenya University Students** 
 - Keyword search by field of study
 
 **Opportunity Cards** (`OpportunityCard.tsx`)
+
 - Display opportunity type with visual indicators
 - Show deadline with urgency color coding (Red: <7 days, Orange: <30 days, Green: >30 days)
 - Display location (priority badge for Kenya-based)
@@ -82,6 +86,7 @@ Refocus the Learn Opportunities platform to serve **Kenya University Students** 
 - Quick eligibility snapshot
 
 **Detailed View** (`OpportunityDetails.tsx`)
+
 - Full opportunity description
 - Eligibility requirements
 - Application deadline with countdown
@@ -93,14 +98,16 @@ Refocus the Learn Opportunities platform to serve **Kenya University Students** 
 ### 3.2 Navigation & Categorization
 
 **Categories Component** (`Categories.tsx`)
+
 - **New Categories Display**:
-  - 📝 Call for Papers & Abstracts
-  - 💼 Internships
-  - 💰 Grants
-  - 📅 Conferences
-  - 📚 Scholarships
+  - Call for Papers & Abstracts
+  - Internships
+  - Grants
+  - Conferences
+  - Scholarships
 
 **Color Scheme** (Updated)
+
 - Call for Papers: Indigo/Purple (#6366f1)
 - Internships: Teal (#14b8a6)
 - Grants: Gold (#eab308)
@@ -112,6 +119,7 @@ Refocus the Learn Opportunities platform to serve **Kenya University Students** 
 **Opportunities Data** (`src/data/opportunities.ts`)
 
 Each opportunity object should include:
+
 ```typescript
 {
   id: string;
@@ -144,12 +152,14 @@ Each opportunity object should include:
 ## 4. User Experience Enhancements
 
 ### 4.1 Home Page
+
 - Hero section highlighting Kenya opportunities
 - Feature "Trending This Week" with recently added opportunities
 - Quick category selection for students
 - Deadline urgency notifications
 
 ### 4.2 Opportunities Page
+
 - Default filter: Show all student opportunities
 - Sticky filter bar with active filters displayed
 - "Apply Soon" deadline alerts (remaining time visible)
@@ -157,6 +167,7 @@ Each opportunity object should include:
 - Share opportunity link feature
 
 ### 4.3 Notification System
+
 - Email newsletter for new Kenya-based opportunities
 - Deadline reminders (7 days, 3 days before deadline)
 - By-category subscriptions
@@ -166,6 +177,7 @@ Each opportunity object should include:
 ## 5. Content Guidelines
 
 ### Opportunity Curation Rules
+
 - ✅ Must be explicitly open to Kenya university students
 - ✅ Verify legitimacy and organizational credentials
 - ✅ Include clear deadline and application process
@@ -175,6 +187,7 @@ Each opportunity object should include:
 - ❌ Exclude full-time permanent positions
 
 ### Deadline Management
+
 - Review deadlines weekly
 - Archive opportunities 2 weeks post-deadline
 - Flag opportunities expiring within 7 days
@@ -185,28 +198,33 @@ Each opportunity object should include:
 ## 6. Implementation Phases
 
 ### Phase 1: Data Structure & Core Features
+
 - [ ] Update data model in `opportunities.ts`
 - [ ] Modify `Categories.tsx` to show 5 new categories
 - [ ] Update category color scheme
 - [ ] Implement new filter logic
 
 ### Phase 2: UI/UX Updates
+
 - [ ] Update `OpportunityCard.tsx` with new category badges
 - [ ] Enhance `OpportunityDetails.tsx` with Kenya-specific features
 - [ ] Add deadline countdown timer
 - [ ] Implement urgency color coding
 
 ### Phase 3: Content Management
-- [x] Populate system with initial 20-30 Kenya-focused opportunities
+
+- [X] Populate system with initial 20-30 Kenya-focused opportunities
 
 ### Phase 4: ATS & Escrow Integration (Completed)
-- [x] Implement Custom Form Builder for Posters to collect applications.
-- [x] Integrate URL/Link fields instead of complex file uploads.
-- [x] Build Applicant Status Management (Pending, Approved, Rejected, Paid).
-- [x] Implement Contact Unmasking (replaces in-app chat) for approved candidates.
-- [x] Build Admin Dispute / Resolution UI for escrowed jobs (Offline Hybrid Approach).
+
+- [X] Implement Custom Form Builder for Posters to collect applications.
+- [X] Integrate URL/Link fields instead of complex file uploads.
+- [X] Build Applicant Status Management (Pending, Approved, Rejected, Paid).
+- [X] Implement Contact Unmasking (replaces in-app chat) for approved candidates.
+- [X] Build Admin Dispute / Resolution UI for escrowed jobs (Offline Hybrid Approach).
 
 ### Phase 5: Production Payments Migration (Planned for Tomorrow)
+
 - [ ] Migrate M-PESA STK Push from Safaricom Daraja Sandbox to a Payment Aggregator (IntaSend/Paystack).
 - [ ] Bypass Safaricom's sole-proprietor business registration constraints (eCitizen CR12/Till requirements).
 - [ ] Implement live webhook handling for the chosen aggregator to automatically flip `isEscrowFunded` state.
@@ -215,14 +233,16 @@ Each opportunity object should include:
 - [ ] Create content validation checklist
 
 ### Phase 6: Core Infrastructure (Completed)
-- [x] Set up Node.js + Express backend server & MongoDB (Atlas cloud)
-- [x] Create admin API endpoints for content management
-- [x] Implement email subscription & notification system
-- [x] Integrate frontend with backend APIs
-- [x] Build admin dashboard for management
+
+- [X] Set up Node.js + Express backend server & MongoDB (Atlas cloud)
+- [X] Create admin API endpoints for content management
+- [X] Implement email subscription & notification system
+- [X] Integrate frontend with backend APIs
+- [X] Build admin dashboard for management
 - [ ] Deploy backend to production (Railway/Render)
 
 ### Phase 7: Future Enhancements (Post-MVP)
+
 - [ ] Automated matching engine based on student STEM footprint
 - [ ] Automated platform transaction fee deduction logic inside the Escrow payout
 - [ ] Partner organization profiles and public success stories
@@ -232,6 +252,7 @@ Each opportunity object should include:
 ## 7. Phase 4: Backend Architecture Details
 
 ### Backend Technology Stack
+
 - **Runtime**: Node.js (v18+)
 - **Framework**: Express.js
 - **Database**: MongoDB (Atlas cloud)
@@ -242,6 +263,7 @@ Each opportunity object should include:
 ### Database Schema (MongoDB Collections)
 
 #### Opportunities Collection
+
 ```
 {
   _id: ObjectId,
@@ -268,6 +290,7 @@ Each opportunity object should include:
 ```
 
 #### Subscribers Collection
+
 ```
 {
   _id: ObjectId,
@@ -280,6 +303,7 @@ Each opportunity object should include:
 ```
 
 #### Admin Collection
+
 ```
 {
   _id: ObjectId,
@@ -293,6 +317,7 @@ Each opportunity object should include:
 ### Core API Endpoints
 
 **Public Endpoints**:
+
 - `GET /api/opportunities` - Fetch all with filters (category, level, location)
 - `GET /api/opportunities/:id` - Fetch single opportunity detail
 - `POST /api/subscribe` - Email subscription (body: email, categories)
@@ -300,6 +325,7 @@ Each opportunity object should include:
 - `POST /api/public/payments/mpesa/callback` - Production Aggregator Webhook Endpoints
 
 **Admin Endpoints** (requires API key / JWT):
+
 - `GET /api/admin/disputes` - View Active Escrow Disputes
 - `PUT /api/admin/applications/:id/resolve` - Mediate/resolve disputes
 - `POST /api/admin/opportunities` - Content Management
@@ -309,18 +335,21 @@ Each opportunity object should include:
 ### Email Services
 
 **Automated Emails** (Nodemailer):
+
 1. **Welcome Email** - On subscription confirmation
 2. **New Opportunity Notification** - When new opportunity posted
 3. **7-Day Reminder** - "Apply in 7 days!"
 4. **3-Day Reminder** - "Last chance! Closes in 3 days"
 
 **Scheduled Jobs**:
+
 - Daily check for deadlines (7-day and 3-day reminders)
 - Weekly digest to all subscribers
 
 ### Frontend Integration
 
 **Changes to Frontend**:
+
 - Create `src/services/api.ts` for API calls (axios)
 - Update `Opportunities.tsx` to fetch from `/api/opportunities`
 - Add `Newsletter.tsx` component with `/api/subscribe` endpoint
@@ -330,12 +359,14 @@ Each opportunity object should include:
 - Add `.env` with `VITE_API_URL=http://localhost:5000/api`
 
 **New Dependencies**:
+
 - `axios` - HTTP client
 - `react-query` - Data fetching/caching (optional)
 
 ### Environment Configuration
 
 **Backend .env**:
+
 ```
 MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/learn_opportunities
 ADMIN_API_KEY=secure_key_here
@@ -348,6 +379,7 @@ PORT=5000
 ```
 
 **Frontend .env**:
+
 ```
 VITE_API_URL=http://localhost:5000/api
 ```
@@ -396,33 +428,37 @@ VITE_API_URL=http://localhost:5000/api
 ## Appendix: Opportunity Type Definitions
 
 ### Call for Papers & Abstracts
+
 Academic and professional events seeking student contributions. Includes research paper submissions, poster presentations, and thesis showcases.
 
 **Examples**: IEEE PowerAfrica Conference, Academic Journals, Thesis Expos
 
 ### Internships
+
 Structured work experience programs lasting 3-12 months. Includes skill development, mentorship, and potential compensation.
 
 **Examples**: Corporate internships, NGO programs, Research internships
 
 ### Grants
+
 Financial awards for student projects, research, or learning initiatives. Non-repayable funds.
 
 **Examples**: Research grants, Project funding, Travel grants
 
 ### Conferences
+
 Events where students can present, learn, and network. Includes virtual and in-person participation.
 
 **Examples**: Academic conferences, Professional networking events, Student summits
 
 ### Scholarships
+
 Financial awards to support education and living expenses. Merit and need-based options.
 
 **Examples**: Tuition scholarships, Postgraduate awards, Living stipends
 
 ---
 
-**Document Owner**: Learn Opportunities Team  
-**Last Updated**: February 20, 2026  
+**Document Owner**: Learn Opportunities Team
+**Last Updated**: February 20, 2026
 **Next Review**: March 20, 2026
-
