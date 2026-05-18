@@ -55,6 +55,14 @@ export function Header() {
               About
             </Link>
             <Link
+              to="/services"
+              className={`transition-colors ${
+                isActive('/services') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
+              Services
+            </Link>
+            <Link
               to="/contact"
               className={`transition-colors flex items-center h-full ${
                 isActive('/contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
@@ -113,6 +121,15 @@ export function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 About
+              </Link>
+              <Link
+                to="/services"
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  isActive('/services') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Services
               </Link>
               <Link
                 to="/contact"

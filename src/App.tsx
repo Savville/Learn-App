@@ -8,6 +8,7 @@ import { Opportunities } from './pages/Opportunities';
 import { OpportunityDetails } from './pages/OpportunityDetails';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
+import Services from './pages/Services';
 import { PostWithUs } from './pages/PostWithUs';
 import { Inbox } from './pages/Inbox';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -16,6 +17,7 @@ import { AdminDisputes } from './pages/AdminDisputes';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PageLoader } from './components/PageLoader';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Toaster } from './components/ui/sonner';
 
 function AppContent() {
   const location = useLocation();
@@ -65,6 +67,7 @@ function AppContent() {
           <Route path="/opportunity/:slug" element={<OpportunityDetails />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/services" element={<Services />} />
           <Route path="/post-with-us" element={<PostWithUs />} />
           <Route path="/inbox" element={<Inbox />} />
           
@@ -82,6 +85,7 @@ function AppContent() {
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}
+      <Toaster />
     </div>
   );
 }

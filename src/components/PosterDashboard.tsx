@@ -3,7 +3,7 @@ import { OTPLoginForm } from './OTPLoginForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toSlug } from '@/utils/dateUtils';
 
 interface Post {
@@ -17,6 +17,7 @@ interface Post {
   dateAdded?: string;
   submittedAt?: string;
   opportunity?: any; // for pending posts structure
+  originalOpportunity?: any; // tracking history and edits
   applicationForm?: any;
   isLive?: boolean;
   isEscrow?: boolean;
@@ -33,6 +34,7 @@ interface Applicant {
 }
 
 export function PosterDashboard() {
+  const navigate = useNavigate();
   const [token, setToken] = useState(localStorage.getItem('user_token'));
   const [email, setEmail] = useState(localStorage.getItem('user_email'));
   
@@ -60,6 +62,7 @@ export function PosterDashboard() {
   const [postToDelete, setPostToDelete] = useState<Post | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
   const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -177,7 +180,7 @@ export function PosterDashboard() {
       
       // Update local state
       setPendingPosts(prev => prev.filter(p => (p.opportunity?.id || p.id) !== exactId));
-      setPostToDelete(null);
+      setShowDeleteSuccess(true);
     } catch (err: any) {
       setDeleteError(`Failed to delete: ${err.message}`);
     } finally {
@@ -272,7 +275,8 @@ export function PosterDashboard() {
   ];
 
   return (
-    <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm relative overflow-hidden">
+    <>
+    <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm relative">
       <div className="flex items-center justify-between flex-wrap gap-4 border-b border-gray-100 pb-6 mb-8">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner flex-shrink-0">
@@ -310,9 +314,9 @@ export function PosterDashboard() {
           <div className="space-y-6">
             <h3 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-4">Your Opportunities ({allPosts.length})</h3>
             
-            <div className="space-y-5">
+            <div className="space-y-8 mt-6">
               {allPosts.map((post) => (
-                <div key={post._id} className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm transition-all hover:shadow-md hover:border-blue-100 group space-y-0">
+                <div key={post._id} className="rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm transition-all hover:shadow-md hover:border-blue-100 group space-y-0">
                   <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5 relative group-hover:bg-gray-50/30 transition-colors">
                     <div className="flex-1">
                       <div className="flex items-center flex-wrap gap-2 mb-3">
@@ -341,8 +345,8 @@ export function PosterDashboard() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-                       {post.isLive && (
-                         <Button asChild variant="outline" className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-gray-200 text-gray-700 hover:bg-gray-50">
+                       {(post.isLive || post.status === 'Verified') && (
+                         <Button asChild variant="outline" className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center">
                            <Link to={`/opportunity/${toSlug(post.title)}`} target="_blank">
                              View Live <ExternalLink className="w-4 h-4 ml-2 text-gray-400" />
                            </Link>
@@ -360,33 +364,52 @@ export function PosterDashboard() {
                          </Button>
                        )}
                        
-                       {!post.isLive && (
+                       <Button 
+                          onClick={() => navigate('/post-with-us', { state: { editPost: post.isLive ? post : post.opportunity || post.originalOpportunity || post } })}
+                          variant="outline"
+                          className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-blue-200 text-blue-700 hover:bg-blue-50"
+                        >
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                          Edit
+                        </Button>
+
+                       {!post.isLive && post.status !== 'Verified' && (
                          <Button 
-                           onClick={() => { setPostToDelete(post); setDeleteError(null); }}
+                           onClick={() => { 
+                             setPostToDelete(post); 
+                             setDeleteError(null); 
+                             setTimeout(() => {
+                               document.getElementById('delete-modal-dialog')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                             }, 50);
+                           }}
                            variant="outline"
-                           className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-red-100 text-red-600 hover:bg-red-50 hover:border-red-200"
+                           className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
                          >
                            <Trash2 className="w-4 h-4 mr-2" /> Delete
                          </Button>
                        )}
-
-                       {(post.applicationForm?.isEnabled || post.opportunity?.applicationForm?.isEnabled || true) && post.isLive && (
-                          <Button 
-                            onClick={() => fetchApplicants(post.id)}
-                            variant={expandedPostId === post.id ? 'default' : 'outline'} 
-                            className={`w-full sm:w-auto rounded-xl px-5 h-11 font-semibold transition-all ${expandedPostId === post.id ? 'bg-blue-600 text-white shadow hover:bg-blue-700' : 'border-blue-100 text-blue-600 bg-blue-50/50 hover:bg-blue-100 hover:border-blue-200'}`}
-                          >
-                            <Users className="w-4 h-4 mr-2 opacity-80" />
-                            Applicants
-                            {expandedPostId === post.id ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronDown className="w-4 h-4 ml-2" />}
-                          </Button>
-                       )}
                     </div>
                   </div>
 
+                  {/* New Inbox Action Area directly below the posting info */}
+                  {(post.applicationForm?.isEnabled || post.opportunity?.applicationForm?.isEnabled || true) && (post.isLive || post.status === 'Verified') && (
+                    <div className="bg-gray-50/50 border-t border-gray-100 p-4 shrink-0 shadow-inner flex justify-end">
+                      <Button 
+                        onClick={() => {
+                          if (expandedPostId !== post.id) fetchApplicants(post.id);
+                          else setExpandedPostId(null);
+                        }}
+                        className={`w-full sm:w-auto rounded-xl px-6 h-12 font-bold transition-all shadow hover:shadow-md flex items-center justify-center gap-2 ${expandedPostId === post.id ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'bg-white text-gray-800 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`}
+                      >
+                        <Mail className={`w-5 h-5 ${expandedPostId === post.id ? 'text-white' : 'text-blue-600'}`} />
+                        <span>{expandedPostId === post.id ? 'Close Inbox' : 'Open Inbox / Applicants'}</span>
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Applicants Expansion Area */}
                   {expandedPostId === post.id && (
-                    <div className="bg-slate-50 border-t border-slate-200 p-5">
+                    <div className="bg-white border-t-2 border-blue-500 p-6 md:p-8">
                        {loadingApplicants ? (
                          <div className="flex items-center justify-center py-8 text-blue-600">
                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2" /> Loading applicants...
@@ -548,56 +571,90 @@ export function PosterDashboard() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal Component */}
+      {/* Delete Confirmation & Success Modal Component */}
       {postToDelete && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col scale-100 animate-in zoom-in-95 duration-200">
-            <div className="p-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
-                <Trash2 className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">Delete Opportunity?</h3>
-              <p className="text-slate-500 text-sm mb-6">
-                Are you sure you want to delete <span className="font-semibold text-slate-800">"{postToDelete.title}"</span>? This action cannot be undone.
-              </p>
-
-              {deleteError && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-6 border border-red-100 text-left flex items-start gap-2">
-                  <div className="mt-0.5"><AlertCircle className="w-4 h-4" /></div>
-                  <div className="flex-1">{deleteError}</div>
+        <div 
+          id="delete-modal-dialog"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !deleteLoading) {
+              setPostToDelete(null);
+              setDeleteError(null);
+              setShowDeleteSuccess(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl relative flex flex-col scale-100 animate-in zoom-in-95 duration-200 transition-all">
+            {showDeleteSuccess ? (
+              <div className="text-center animate-in fade-in zoom-in duration-300">
+                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
-              )}
-
-              <div className="flex gap-3">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="flex-1 border-slate-200 hover:bg-slate-50 hover:text-slate-700" 
-                  onClick={() => { setPostToDelete(null); setDeleteError(null); }}
-                  disabled={deleteLoading}
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Deleted Successfully!</h3>
+                <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+                  The opportunity has been completely removed and will no longer appear on your dashboard.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowDeleteSuccess(false);
+                    setPostToDelete(null);
+                  }}
+                  className="w-full py-4 text-xl font-bold text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                  style={{ backgroundColor: '#0933ed', borderRadius: '10px' }}
                 >
-                  Cancel
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  className="flex-1 border-red-200 bg-white text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 font-medium shadow-sm transition-colors" 
-                  onClick={handleDeletePending}
-                  disabled={deleteLoading}
-                >
-                  {deleteLoading ? (
-                    <span className="flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-red-600/30 border-t-red-600 rounded-full animate-spin mr-2" />
-                      Deleting...
-                    </span>
-                  ) : 'Yes, Delete'}
-                </Button>
+                  Got it, thanks!
+                </button>
               </div>
-            </div>
+            ) : (
+              <div className="text-center">
+                <div className="w-20 h-20 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-6">
+                  <Trash2 className="w-10 h-10" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Delete Opportunity?</h3>
+                <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+                  Are you sure you want to delete <br/><br/><span className="font-bold text-gray-900">"{postToDelete.title}"</span>?<br/><br/>This action cannot be undone.
+                </p>
+
+                {deleteError && (
+                  <div className="bg-red-50 text-red-600 text-sm p-4 rounded-xl mb-6 border border-red-200 text-left flex items-start gap-2">
+                    <div className="mt-0.5"><AlertCircle className="w-5 h-5" /></div>
+                    <div className="flex-1 font-medium">{deleteError}</div>
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-3">
+                  <button 
+                    type="button" 
+                    className="w-full py-4 rounded-xl font-bold text-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed" 
+                    style={{ backgroundColor: '#dc2626', color: 'white' }}
+                    onClick={handleDeletePending}
+                    disabled={deleteLoading}
+                  >
+                    {deleteLoading ? (
+                      <span className="flex items-center justify-center">
+                        <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin mr-3" />
+                        Deleting...
+                      </span>
+                    ) : 'Yes, Delete it'}
+                  </button>
+                  <button 
+                    type="button" 
+                    className="w-full py-4 rounded-xl font-bold text-lg border-2 border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-70 disabled:cursor-not-allowed" 
+                    onClick={() => { setPostToDelete(null); setDeleteError(null); }}
+                    disabled={deleteLoading}
+                  >
+                    Cancel, keep it
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
     </div>
+    </>
   );
 }
