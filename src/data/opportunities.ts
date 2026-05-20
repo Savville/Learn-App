@@ -60,6 +60,44 @@ export interface Opportunity {
 
 export const opportunities: Opportunity[] = [
   {
+    id: 'safal-eye-in-the-wild-2026',
+    title: 'Safal Eye in the Wild Photography Competition 2026',
+    provider: 'Safal Group',
+    category: 'Challenge',
+    description: 'Photography competition rooted in care for community and environment under the theme "Frame Your Future". Top prize USD 3,000.',
+    fullDescription: 'Safal Eye in the Wild is a photography competition and Safal Group Corporate Social Investment initiative rooted in care for community and environment. In 2026, the campaign is anchored in education and conservation under the theme Frame Your Future, turning creative capital into human capital through photography, awareness, fundraising, exhibitions, calendars, and education support.',
+    deadline: '2026-06-20',
+    location: 'East and Southern Africa (Safal Group Operating Countries)',
+    eligibility: {
+      educationLevel: 'All',
+      requirements: [
+        'Must be a resident of Safal Group operating countries in East and Southern Africa.',
+        'Entrants under 18 years old must have prior written consent from a parent or legal guardian.',
+        'Images must feature nature, conservation, climate resilience, sustainable agriculture, community solutions, or positive environmental storytelling.',
+        'Images must be original, in JPEG/PNG format, landscape orientation, at least 1,600px wide, max 10MB.',
+        'Composite, synthetic, or AI-generated images are not permitted.'
+      ]
+    },
+    benefits: [
+      'Gold Award: USD 3,000',
+      'Silver Award: USD 2,000',
+      'Bronze Award: USD 1,000',
+      'Public Award: USD 500'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://safaleyeinthewild.safalgroup.com/#/',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: 'N/A',
+    featured: true,
+    dateAdded: '2026-05-20',
+    logoUrl: '/images/opportunities/safal_group2.jpg',
+    postedBy: 'Opportunities Kenya Admin',
+    isVerified: true,
+    status: 'Verified'
+  },
+  {
     id: 'mock-gig-student-project',
     title: 'Need help with React Native App UI for Final Year Project',
     provider: 'David Ochieng (Student, KU)',
