@@ -29,9 +29,9 @@ export function calculateUrgency(deadline?: string): UrgencyLevel {
     return {
       status: 'urgent',
       daysLeft: 0,
-      bgColor: 'bg-red-100',
-      textColor: 'text-red-700',
-      label: 'Closed'
+      bgColor: 'bg-gray-100',
+      textColor: 'text-gray-500',
+      label: 'Depleted'
     };
   } else if (daysLeft <= 7) {
     return {

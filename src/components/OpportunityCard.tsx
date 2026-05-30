@@ -30,7 +30,7 @@ export const getDynamicImageUrl = (category: string, id: string, providedUrl?: s
   if (providedUrl && !providedUrl.includes('Opportunities Kenya Logo')) {
     return providedUrl;
   }
-  
+
   let options = CATEGORY_IMAGES[category] || ['/images/opportunities/internship.avif'];
 
   // Override based on TITLE keywords for smarter image assignment!
@@ -81,7 +81,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
     <Link
       to={`/opportunity/${toSlug(opportunity.title)}`}
       onClick={handleCardClick}
-      className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className={`group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${urgency.label === 'Depleted' ? 'grayscale opacity-75' : ''}`}
     >
       <article className="h-full flex flex-col pt-0">
         {/* Header Image */}
@@ -94,6 +94,13 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
             onError={handleImageError}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          {urgency.label === 'Expired' && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 pointer-events-none">
+              <span className="bg-gray-800 text-white font-bold tracking-widest uppercase px-4 py-2 rounded shadow-lg transform -rotate-12 border-2 border-dashed border-gray-400">
+                Expired
+              </span>
+            </div>
+          )}
           <div className="absolute top-4 right-4">
             <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-gray-700 text-sm font-medium">
               {opportunity.category}
@@ -108,40 +115,40 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
           )}
         </div>
 
-      {/* Content */}
-      <div className="p-6">
-        <h3 className="text-gray-900 font-bold mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
-          {opportunity.title}
-        </h3>
+        {/* Content */}
+        <div className="p-6">
+          <h3 className="text-gray-900 font-bold mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
+            {opportunity.title}
+          </h3>
 
-        <div className="flex flex-col mb-3">
-          {opportunity.postedBy && (
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-xs uppercase tracking-widest text-gray-400 font-bold">
-                Posted by {opportunity.postedBy}
-              </span>
-              {verificationLabel === 'Verified' && (
-                <CheckCircle className="w-4 h-4 text-blue-500" />
-              )}
-            </div>
-          )}
-          <p className="text-blue-600 text-sm font-semibold">{opportunity.provider}</p>
+          <div className="flex flex-col mb-3">
+            {opportunity.postedBy && (
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-xs uppercase tracking-widest text-gray-400 font-bold">
+                  Posted by {opportunity.postedBy}
+                </span>
+                {verificationLabel === 'Verified' && (
+                  <CheckCircle className="w-4 h-4 text-blue-500" />
+                )}
+              </div>
+            )}
+            <p className="text-blue-600 text-sm font-semibold">{opportunity.provider}</p>
+          </div>
+
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">{opportunity.description}</p>
+
+          {/* Deadline */}
+          <div className={`flex items-center gap-1 text-sm font-medium mb-4 ${urgency.textColor}`}>
+            <Calendar className="w-4 h-4" />
+            <span>{urgency.label}</span>
+          </div>
+
+          {/* View Button */}
+          <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm group-hover:gap-3 transition-all mt-auto">
+            <span>View More</span>
+            <ArrowRight className="w-4 h-4" />
+          </div>
         </div>
-
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">{opportunity.description}</p>
-
-        {/* Deadline */}
-        <div className={`flex items-center gap-1 text-sm font-medium mb-4 ${urgency.textColor}`}>
-          <Calendar className="w-4 h-4" />
-          <span>{urgency.label}</span>
-        </div>
-
-        {/* View Button */}
-        <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm group-hover:gap-3 transition-all mt-auto">
-          <span>View More</span>
-          <ArrowRight className="w-4 h-4" />
-        </div>
-      </div>
       </article>
     </Link>
   );

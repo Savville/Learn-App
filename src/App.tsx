@@ -68,16 +68,16 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/post-with-us" element={<PostWithUs />} />
           <Route path="/inbox" element={<Inbox />} />
-          
+
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route 
-            path="/admin/dashboard" 
+          <Route
+            path="/admin/dashboard"
             element={
               <ProtectedRoute>
                 <AdminDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route path="/admin/disputes" element={<AdminDisputes />} />
         </Routes>

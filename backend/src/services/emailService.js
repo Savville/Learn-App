@@ -1,4 +1,4 @@
-﻿import { Resend } from 'resend';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -694,6 +694,7 @@ export async function sendOTPEmail(email, otp) {
 
     const data = await resend.emails.send({
       from: 'Opportunities Kenya Security <security@opportunitieskenya.live>',
+      reply_to: 'lead@opportunitieskenya.live',
       to: [email],
       subject: `Your Login Code: ${otp}`,
       html,

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck } from 'lucide-react';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -15,8 +15,10 @@ export default function AdminDashboard() {
   const [reports, setReports] = useState<any[]>([]);
   const [allOpps, setAllOpps] = useState<any[]>([]);
   const [escrowReleases, setEscrowReleases] = useState<any[]>([]);
+  const [disputes, setDisputes] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
   const [payDoerLoading, setPayDoerLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage' | 'escrow'>('opps');
+  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage' | 'escrow' | 'disputes'>('opps');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
@@ -32,12 +34,14 @@ export default function AdminDashboard() {
       const token = sessionStorage.getItem('adminToken');
       if (!token) return;
       
-      const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes] = await Promise.all([
+      const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes] = await Promise.all([
         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/opportunities`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/escrow-releases`, { headers: { Authorization: `Bearer ${token}` } })
+        fetch(`${API_BASE}/admin/escrow-releases`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/disputes`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (oppsRes.ok) setPending(await oppsRes.json());
@@ -45,6 +49,8 @@ export default function AdminDashboard() {
       if (orgsRes.ok) setOrgRequests(await orgsRes.json());
       if (allOppsRes.ok) setAllOpps(await allOppsRes.json());
       if (escrowRes.ok) setEscrowReleases(await escrowRes.json());
+      if (statsRes.ok) setStats(await statsRes.json());
+      if (disputesRes.ok) setDisputes(await disputesRes.json());
     } catch (e) {
       console.error(e);
     } finally {
@@ -293,35 +299,68 @@ export default function AdminDashboard() {
           </div>
         </header>
 
+        {/* ── KPI Stats Bar ───────────────────────────────────────────── */}
+        {stats && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {[
+              { label: 'Opportunities', value: stats.totalOpportunities, icon: <BarChart2 className="w-5 h-5 text-blue-500" />, color: 'bg-blue-50 border-blue-100' },
+              { label: 'Subscribers', value: stats.totalSubscribers, icon: <Users className="w-5 h-5 text-purple-500" />, color: 'bg-purple-50 border-purple-100' },
+              { label: 'Total Views', value: stats.totalViews?.toLocaleString(), icon: <Eye className="w-5 h-5 text-green-500" />, color: 'bg-green-50 border-green-100' },
+              { label: 'Total Clicks', value: stats.totalClicks?.toLocaleString(), icon: <TrendingUp className="w-5 h-5 text-emerald-500" />, color: 'bg-emerald-50 border-emerald-100' },
+              { label: 'Pending Review', value: pending.length, icon: <Clock className="w-5 h-5 text-amber-500" />, color: pending.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100' },
+              { label: 'Escrow Payouts', value: escrowReleases.length, icon: <DollarSign className="w-5 h-5 text-red-500" />, color: escrowReleases.length > 0 ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-100' },
+            ].map(({ label, value, icon, color }) => (
+              <div key={label} className={`rounded-xl border p-4 flex flex-col gap-1 ${color}`}>
+                <div className="flex items-center justify-between">{icon}<span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</span></div>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{value ?? '—'}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Tabs */}
-        <div className="flex gap-4 border-b border-slate-200">
+        <div className="flex flex-wrap gap-1 border-b border-slate-200">
           <button 
             onClick={() => setActiveTab('opps')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'opps' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'opps' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
           >
             <User className="w-4 h-4" />
-            Unverified Opportunities ({pending.length})
+            Inbox {pending.length > 0 && <span className="bg-amber-500 text-white text-xs rounded-full px-1.5 py-0.5">{pending.length}</span>}
+          </button>
+          <button 
+            onClick={() => setActiveTab('escrow')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'escrow' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <DollarSign className="w-4 h-4" />
+            Escrow Payouts {escrowReleases.length > 0 && <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{escrowReleases.length}</span>}
+          </button>
+          <button 
+            onClick={() => setActiveTab('disputes')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'disputes' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <Gavel className="w-4 h-4" />
+            Disputes {disputes.length > 0 && <span className="bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">{disputes.length}</span>}
           </button>
           <button 
             onClick={() => setActiveTab('reports')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'reports' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'reports' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
           >
             <Flag className="w-4 h-4" />
-            Reports ({reports.length})
+            Reports {reports.length > 0 && <span className="bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">{reports.length}</span>}
           </button>
           <button 
             onClick={() => setActiveTab('orgs')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'orgs' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'orgs' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
           >
             <Building2 className="w-4 h-4" />
-            Organization Requests ({orgRequests.length})
+            Org Requests {orgRequests.length > 0 && <span className="bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5">{orgRequests.length}</span>}
           </button>
           <button 
             onClick={() => setActiveTab('manage')}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'manage' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'manage' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
           >
             <Settings className="w-4 h-4" />
-            Manage Content ({allOpps.length})
+            Manage ({allOpps.length})
           </button>
         </div>
 
@@ -659,7 +698,7 @@ export default function AdminDashboard() {
                ))}
             </div>
           )
-        ) : (
+        ) : activeTab === 'manage' ? (
           /* Manage Content Tab */
           allOpps.length === 0 ? (
             <Card className="border-slate-200 shadow-sm">
@@ -847,7 +886,121 @@ export default function AdminDashboard() {
                ))}
             </div>
           )
-        )}
+        ) : activeTab === 'escrow' ? (
+          /* ── Escrow Payouts Tab ─────────────────────────────────────── */
+          escrowReleases.length === 0 ? (
+            <Card className="border-slate-200 shadow-sm">
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <DollarSign className="h-12 w-12 text-slate-300 mb-4" />
+                <h3 className="text-lg font-medium text-slate-900">No pending escrow releases</h3>
+                <p className="text-sm text-slate-500 max-w-sm mt-1">When a poster approves a job doer and requests payout, it will appear here.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {escrowReleases.map((release: any) => {
+                const escrow = Number(release.escrowAmount || 0);
+                const platformFee = Math.ceil(escrow * 0.05);
+                const mpesaFee = Math.ceil((escrow - platformFee) * 0.02);
+                const netPayable = escrow - platformFee - mpesaFee;
+                return (
+                  <Card key={release._id} className="border-slate-200 shadow-sm overflow-hidden">
+                    <CardContent className="p-5">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge className="bg-amber-100 text-amber-800 border-amber-200">Awaiting Payout</Badge>
+                            <span className="text-xs text-slate-400">{release.escrowReleaseRequestedAt ? new Date(release.escrowReleaseRequestedAt).toLocaleString() : ''}</span>
+                          </div>
+                          <h3 className="text-lg font-bold text-slate-900">{release.opportunityTitle || 'Job'}</h3>
+                          <p className="text-sm text-slate-600">Applicant: <span className="font-medium">{release.applicantEmail}</span></p>
+                          <p className="text-sm text-slate-600">M-PESA: <span className="font-mono font-bold text-green-700">{release.applicantData?.mpesa_number}</span></p>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg border border-slate-200 p-4 min-w-[220px]">
+                          <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Fee Breakdown</p>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between"><span className="text-slate-600">Escrow Total</span><span className="font-semibold">KES {escrow.toLocaleString()}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-600">Platform Fee (5%)</span><span className="text-red-600">− KES {platformFee}</span></div>
+                            <div className="flex justify-between"><span className="text-slate-600">M-PESA Fee (2%)</span><span className="text-red-600">− KES {mpesaFee}</span></div>
+                            <div className="flex justify-between border-t border-slate-200 pt-1 mt-1"><span className="font-bold">Applicant Receives</span><span className="font-bold text-green-700">KES {netPayable.toLocaleString()}</span></div>
+                          </div>
+                        </div>
+                        <Button
+                          className="bg-green-600 hover:bg-green-700 text-white shrink-0"
+                          disabled={payDoerLoading === release._id}
+                          onClick={() => handlePayDoer(release._id)}
+                        >
+                          <DollarSign className="w-4 h-4 mr-2" />
+                          {payDoerLoading === release._id ? 'Processing...' : 'Pay via M-PESA'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )
+        ) : activeTab === 'disputes' ? (
+          /* ── Disputes Tab ───────────────────────────────────────────── */
+          disputes.length === 0 ? (
+            <Card className="border-slate-200 shadow-sm">
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <Gavel className="h-12 w-12 text-slate-300 mb-4" />
+                <h3 className="text-lg font-medium text-slate-900">No active disputes</h3>
+                <p className="text-sm text-slate-500 max-w-sm mt-1">Disputed escrow jobs will appear here for your arbitration.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {disputes.map((dispute: any) => (
+                <Card key={dispute._id} className="border-red-200 shadow-sm overflow-hidden">
+                  <CardContent className="p-5">
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-red-100 text-red-700 border-red-200">Disputed</Badge>
+                          <span className="text-xs text-slate-400">{dispute.updatedAt ? new Date(dispute.updatedAt).toLocaleString() : ''}</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900">{dispute.opportunityTitle}</h3>
+                        <p className="text-sm text-slate-600">Applicant: <span className="font-medium">{dispute.applicantEmail}</span></p>
+                        <p className="text-sm text-slate-600">M-PESA: <span className="font-mono font-bold">{dispute.applicantData?.mpesa_number || 'N/A'}</span></p>
+                        {dispute.disputeReason && (
+                          <div className="bg-red-50 border border-red-100 rounded p-3 text-sm text-red-800">
+                            <span className="font-semibold">Dispute Reason: </span>{dispute.disputeReason}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-2 shrink-0">
+                        <Button
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => handlePayDoer(dispute._id)}
+                          disabled={payDoerLoading === dispute._id}
+                        >
+                          <ShieldCheck className="w-4 h-4 mr-2" /> Force Release to Applicant
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="border-slate-300 text-slate-700 hover:bg-slate-100"
+                          onClick={async () => {
+                            const token = sessionStorage.getItem('adminToken');
+                            await fetch(`${API_BASE}/admin/applications/${dispute._id}/resolve`, {
+                              method: 'POST',
+                              headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ resolution: 'resolved_refunded' })
+                            });
+                            setDisputes(prev => prev.filter(d => d._id !== dispute._id));
+                          }}
+                        >
+                          <XCircle className="w-4 h-4 mr-2" /> Refund Poster
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )
+        ) : null}
       </div>
     </div>
   );

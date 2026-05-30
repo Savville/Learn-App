@@ -157,6 +157,31 @@ export function About() {
           </div>
         </section>
 
+        {/* Terms of Usage */}
+        <section className="bg-white rounded-2xl p-8 shadow-sm mb-16">
+          <h2 className="text-gray-900 mb-6">Terms of Usage</h2>
+          <div className="space-y-4 text-gray-700 leading-relaxed text-sm">
+            <p>
+              By accessing and using Opportunities Kenya, you agree to comply with and be bound by the following terms of use. Please review these terms carefully. If you do not agree to these terms, you should not use this platform.
+            </p>
+            <p>
+              <strong>1. User Conduct:</strong> Users must provide accurate, current, and complete information when creating accounts, posting opportunities, or applying. Any fraudulent, abusive, or otherwise illegal activity may be grounds for termination of your account, at our sole discretion.
+            </p>
+            <p>
+              <strong>2. Opportunity Postings:</strong> Organizations and individuals posting opportunities are solely responsible for the accuracy and legitimacy of their postings. Opportunities Kenya reserves the right to review, reject, or remove any posting that violates our guidelines or is deemed inappropriate, without prior notice.
+            </p>
+            <p>
+              <strong>3. Subcontracting and Escrow:</strong> For gig and subcontracting opportunities involving escrow or direct payments, Opportunities Kenya acts as a facilitator. We are not liable for disputes over deliverable quality. Users must resolve disputes through our provided mediation channels in good faith.
+            </p>
+            <p>
+              <strong>4. Intellectual Property:</strong> All content, logos, and materials provided by Opportunities Kenya are protected by intellectual property laws. Users may not copy, reproduce, or distribute any platform content without explicit permission.
+            </p>
+            <p>
+              <strong>5. Privacy & Data Use:</strong> We respect your privacy. User data is collected and used strictly to improve platform matchmaking, facilitate applications, and track analytics. We do not sell your personal data to third parties.
+            </p>
+          </div>
+        </section>
+
         {/* Call to Action */}
         <section className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-center text-white">
           <h2 className="text-white mb-4">Join Our Community</h2>

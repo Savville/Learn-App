@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { OTPLoginForm } from './OTPLoginForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -330,11 +330,19 @@ export function PosterDashboard() {
                            {post.category}
                          </span>
                          
-                         {/* Escrow Label */}
+                         {/* Escrow Label + Funded Badge */}
                            {(post.isEscrow || post.opportunity?.isEscrow || (post.escrowAmount ?? 0) > 0 || (post.opportunity?.escrowAmount ?? 0) > 0) && (
-                            <span className="flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold leading-none border border-blue-200">
-                              <ShieldCheck className="w-3 h-3" /> Escrow
-                            </span>
+                            <>
+                              {(post.isEscrowFunded || post.opportunity?.isEscrowFunded) ? (
+                                <span className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold leading-none border border-green-200">
+                                  <Lock className="w-3 h-3" /> 🔒 Escrow Funded — KES {(post.escrowAmount || post.opportunity?.escrowAmount || 0).toLocaleString()}
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold leading-none border border-blue-200">
+                                  <ShieldCheck className="w-3 h-3" /> Escrow Required
+                                </span>
+                              )}
+                            </>
                          )}
                       </div>
                       <h4 className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">{post.title}</h4>
@@ -353,15 +361,21 @@ export function PosterDashboard() {
                          </Button>
                        )}
                        
-                       {/* Deposit Escrow Button (for pending jobs that requested escrow) */}
-                       {((post.isEscrow || post.opportunity?.isEscrow) && !(post.isEscrowFunded || post.opportunity?.isEscrowFunded)) && (
-                         <Button 
-                           onClick={() => setEscrowJob(post)}
-                           variant="default"
-                           className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow"
-                         >
-                           Deposit KES {post.escrowAmount || post.opportunity?.escrowAmount || 0}
-                         </Button>
+                       {/* Deposit Escrow Button — only if not yet funded */}
+                       {(post.isEscrow || post.opportunity?.isEscrow) && (
+                         (post.isEscrowFunded || post.opportunity?.isEscrowFunded) ? (
+                           <span className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-50 text-green-700 border border-green-200 flex items-center justify-center gap-1.5 text-sm">
+                             <Lock className="w-4 h-4" /> Escrow Active
+                           </span>
+                         ) : (
+                           <Button
+                             onClick={() => setEscrowJob(post)}
+                             variant="default"
+                             className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow"
+                           >
+                             Deposit KES {post.escrowAmount || post.opportunity?.escrowAmount || 0}
+                           </Button>
+                         )
                        )}
                        
                        <Button 
@@ -487,9 +501,53 @@ export function PosterDashboard() {
                                       </>
                                     )}
                                     {app.status === 'approved' && (
-                                      <p className="text-xs text-green-600 font-medium my-auto text-right w-full">
-                                        Approved! Candidate can now see your contact info.
-                                      </p>
+                                      <>
+                                        {/* If this is an escrow job, show release payment button */}
+                                        {(post.isEscrow || post.opportunity?.isEscrow || (post.escrowAmount ?? 0) > 0 || (post.opportunity?.escrowAmount ?? 0) > 0) ? (
+                                          <div className="w-full space-y-2">
+                                            {/* Fee Breakdown */}
+                                            {(() => {
+                                              const escrow = Number(post.escrowAmount || post.opportunity?.escrowAmount || 0);
+                                              const platformFee = Math.ceil(escrow * 0.05);
+                                              const mpesaFee = Math.ceil((escrow - platformFee) * 0.02);
+                                              const netPayable = escrow - platformFee - mpesaFee;
+                                              return (
+                                                <div className="bg-green-50 rounded-lg border border-green-100 p-3 text-xs space-y-1">
+                                                  <p className="font-bold text-green-800 mb-2 flex items-center gap-1"><Lock className="w-3 h-3"/>Escrow Release Preview</p>
+                                                  <div className="flex justify-between text-slate-600"><span>Escrow Total</span><span className="font-semibold">KES {escrow.toLocaleString()}</span></div>
+                                                  <div className="flex justify-between text-slate-500"><span>Platform Fee (5%)</span><span className="text-red-500">− KES {platformFee}</span></div>
+                                                  <div className="flex justify-between text-slate-500"><span>M-PESA Fee (2%)</span><span className="text-red-500">− KES {mpesaFee}</span></div>
+                                                  <div className="flex justify-between border-t border-green-200 pt-1 font-bold text-green-700"><span>They Receive</span><span>KES {netPayable.toLocaleString()}</span></div>
+                                                </div>
+                                              );
+                                            })()}
+                                            {(app as any).escrowReleaseRequested ? (
+                                              <p className="text-xs text-amber-600 font-semibold text-center bg-amber-50 border border-amber-100 rounded-lg p-2">
+                                                ⏳ Release requested — awaiting admin payout
+                                              </p>
+                                            ) : (
+                                              <Button
+                                                size="sm"
+                                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
+                                                disabled={releaseLoading}
+                                                onClick={() => handleReleaseEscrow(post, app)}
+                                              >
+                                                <DollarSign className="w-3.5 h-3.5 mr-1" />
+                                                {releaseLoading ? 'Processing...' : 'Release Payment to Worker'}
+                                              </Button>
+                                            )}
+                                            {releaseMessage && (
+                                              <p className={`text-xs font-medium text-center ${releaseMessage.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>
+                                                {releaseMessage}
+                                              </p>
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <p className="text-xs text-green-600 font-medium my-auto text-right w-full">
+                                            ✅ Approved! Candidate can now see your contact info.
+                                          </p>
+                                        )}
+                                      </>
                                     )}
                                     {app.status === 'rejected' && (
                                       <p className="text-xs text-red-500 font-medium my-auto text-right w-full">

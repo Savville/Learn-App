@@ -69,12 +69,43 @@ function interestMatchesOpportunity(opp, interests) {
   return false;
 }
 
+// A simple helper to verify image magic bytes
+async function verifyImageMagicBytes(filePath) {
+  return new Promise((resolve) => {
+    const stream = fs.createReadStream(filePath, { start: 0, end: 11 });
+    stream.on('data', (chunk) => {
+      stream.destroy();
+      const hex = chunk.toString('hex').toUpperCase();
+      // JPEG: FFD8FF
+      if (hex.startsWith('FFD8FF')) return resolve(true);
+      // PNG: 89504E47
+      if (hex.startsWith('89504E47')) return resolve(true);
+      // GIF: 47494638 (GIF8)
+      if (hex.startsWith('47494638')) return resolve(true);
+      // WEBP: starts with 52494646 (RIFF), chars 8-11 are 57454250 (WEBP)
+      if (hex.startsWith('52494646') && hex.substring(16, 24) === '57454250') return resolve(true);
+      // AVIF: ftypavif at offset 4 (hex chars 8-23: 6674797061766966)
+      if (hex.includes('6674797061766966')) return resolve(true);
+
+      resolve(false);
+    });
+    stream.on('error', () => resolve(false));
+  });
+}
+
 const router = express.Router();
 
 // POST /api/admin/upload-image
-router.post('/upload-image', verifyAdminKey, upload.single('coverImage'), (req, res) => {
+router.post('/upload-image', verifyAdminKey, upload.single('coverImage'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded.' });
+  }
+
+  // Verify magic bytes to prevent script uploads masquerading as images
+  const isValidMagic = await verifyImageMagicBytes(req.file.path);
+  if (!isValidMagic) {
+    fs.unlinkSync(req.file.path); // Delete the malicious/invalid file
+    return res.status(400).json({ error: 'Invalid file signature. Only authentic images are allowed.' });
   }
 
   // Construct the public URL path
