@@ -3,6 +3,55 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const opportunities = [
+{
+    id: 'canva-madaraka-day-challenge-2026',
+    title: 'Canva Africa Madaraka Day Design Challenge 2026',
+    provider: 'Canva Africa, KNEC, Microsoft Elevate & STEAM Labs',
+    category: 'Challenge',
+    description: 'Use Canva to create a poster, social media campaign, or presentation showing what Madaraka means to you for a chance to win prizes and national recognition.',
+    fullDescription: `Canva Africa presents the Madaraka Day Design Challenge 2026 in partnership with the Kenya National Examinations Council (KNEC), Microsoft Elevate, and STEAM Labs Africa.
+
+The Madaraka Day Design Challenge invites you to show what Madaraka means to you. Use Canva to create a poster, social media campaign pack, or short presentation, then submit your entry for a chance to win prizes and national recognition. First-time designers are welcome.
+
+**2 Ways To Enter:**
+
+**1. Schools:** All Junior and Senior school students in Kenya (Grades 7-10 and Form 3-4 only). A teacher champion registers the school, facilitates collaboration, and submits on behalf of the class.
+**2. General Public (18+):** Individual entries for Kenyan nationals aged 18+.
+
+Start with Canva's free Madaraka Day templates. Use tools like Magic Write and AI image generation to bring your ideas to life. To ensure you're equipped to submit a winning entry, Canva is hosting a series of weekly digital training sessions with STEAMLabs & Microsoft.`,
+    deadline: '2026-06-12',
+    location: 'Kenya / Remote',
+    eligibility: {
+      educationLevel: 'All',
+      fieldOfStudy: ['Design', 'Creative Arts', 'Any Field'],
+      requirements: [
+        'Schools Category: Junior and Senior school students in Kenya (Grades 7-10 and Form 3-4 only).',
+        'General Public Category: Kenya nationals aged 18+ years.',
+        'Must have an active Canva account (teachers can register on behalf of a class).',
+        'Designs must celebrate Kenyan pride, history, and the future.',
+        'Must include a short statement (100–150 words) about the design, what Madaraka Day means to you, and which Canva AI tools were used.',
+        'Multiple entries are permitted (no cap).'
+      ]
+    },
+    benefits: [
+      'Schools: Top 5 entries plus one overall winner receive KNEC certificates, Canva merchandise, and a national showcase feature.',
+      'General Public: Top 5 entries plus one overall winner receive 1 Year Canva Pro or Teams subscriptions, Canva merch, and a showcase feature.',
+      'Access to weekly digital design training sessions.'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.canva.com/africa-design-challenge',
+    fundingType: 'N/A', 
+    compensationType: 'N/A', 
+    upfrontCost: 'No Upfront Cost',
+    duration: 'April 22 - June 12, 2026',
+    featured: true,
+    dateAdded: '2026-05-30',
+    logoUrl: '/images/opportunities/CanvaAfricaDesignChallenge-Madaraka-Day.avif', 
+    isVerified: true,
+    status: 'Verified',
+    views: 0,
+    clicks: 0
+  },
   {
     id: 'safal-eye-in-the-wild-2026',
     title: 'Safal Eye in the Wild Photography Competition 2026',
@@ -39,7 +88,9 @@ const opportunities = [
     logoUrl: '/images/opportunities/safal_group2.jpg',
     postedBy: 'Opportunities Kenya Admin',
     isVerified: true,
-    status: 'Verified'
+    status: 'Verified',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'mock-gig-student-project',
@@ -76,7 +127,9 @@ const opportunities = [
     isEscrow: true,
     isEscrowFunded: false,
     escrowAmount: 3000,
-    status: 'Verified'
+    status: 'Verified',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'mock-gig-lecturer-ppt',
@@ -113,7 +166,9 @@ const opportunities = [
     isEscrow: true,
     isEscrowFunded: true,
     escrowAmount: 5000,
-    status: 'Verified'
+    status: 'Verified',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'mock-gig-grad-research',
@@ -150,7 +205,9 @@ const opportunities = [
     isEscrow: true,
     isEscrowFunded: false,
     escrowAmount: 2500,
-    status: 'Verified'
+    status: 'Verified',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'mock-gig-test-chat',
@@ -187,7 +244,9 @@ const opportunities = [
     isEscrow: true,
     isEscrowFunded: false,
     escrowAmount: 1500,
-    status: 'Verified'
+    status: 'Verified',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'agea-startup-lab-2026',
@@ -244,7 +303,9 @@ Extended, tailored support for top-performing start-ups to help secure funding a
     featured: true,
     dateAdded: '2026-04-24',
     logoUrl: '/images/opportunities/agea.png',
-    postedBy: 'Opportunities Kenya Admin'
+    postedBy: 'Opportunities Kenya Admin',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'bishops-university-admissions-2026-2027',
@@ -310,6 +371,8 @@ Incoming International Exchange students (one or two semesters) have separate fo
     featured: true,
     dateAdded: '2026-04-07',
     logoUrl: '/images/opportunities/ubishops_canada.jpeg',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'science-scilifelab-prize-for-young-scientists-2026',
@@ -359,6 +422,8 @@ The grand winner will get a prize money of $30,000 USD, and the other three cate
     featured: true,
     dateAdded: '2026-03-29',
     logoUrl: '/images/opportunities/Scilifelab.png',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'aces-civexpo-2026-incubation',
@@ -429,7 +494,9 @@ Registered projects will present at ACES meet-ups leading up to the CivExpo in S
         heading: 'Innovation & Business (Phase 3)',
         topics: ['Sustainable construction materials', 'Network leakage solutions (Nairobi Water)', 'Decentralized rainwater purification', 'Structural biofuel briquettes & business models']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: '37',
@@ -551,7 +618,9 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
         heading: 'Wastewater Reuse',
         topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: 'worldquant-brain-iqc-2026',
@@ -622,7 +691,9 @@ HOW TO PARTICIPATE
         heading: 'Quant Finance Career',
         topics: ['BRAIN Research Consultant positions', 'Quantitative Researcher networking', 'Global finals in Singapore']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: '29',
@@ -663,7 +734,9 @@ HOW TO PARTICIPATE
     duration: '3 to 6 months',
     featured: false,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/european-union.jpg'
+    logoUrl: '/images/opportunities/european-union.jpg',
+    views: 0,
+    clicks: 0
   },
   {
     id: '30',
@@ -703,7 +776,9 @@ HOW TO PARTICIPATE
     duration: '2 to 8 months',
     featured: false,
     dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/wfp.png'
+    logoUrl: '/images/opportunities/wfp.png',
+    views: 0,
+    clicks: 0
   },
   {
     id: '36',
@@ -804,7 +879,9 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
         heading: 'General',
         topics: ['All academic fields (excluding aviation, nuclear technology, and military training)']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: '38',
@@ -890,7 +967,9 @@ No Japanese language skills required. All interns with outstanding performance m
         heading: 'Front-End Software Engineering',
         topics: ['React & Vue in TypeScript', 'Modern UI/UX development', 'Component-driven architecture', 'Web performance optimisation']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   },
   {
     id: '40',
@@ -931,7 +1010,9 @@ No Japanese language skills required. All interns with outstanding performance m
     upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-13',
-    logoUrl: '/images/opportunities/german.jpg'
+    logoUrl: '/images/opportunities/german.jpg',
+    views: 0,
+    clicks: 0
   },
   {
     id: 'google-student-researcher-internship-2026',
@@ -976,7 +1057,9 @@ No Japanese language skills required. All interns with outstanding performance m
         heading: 'Software Engineering',
         topics: ['Algorithmic Foundations', 'Infrastructure Engineering', 'Performance Optimization']
       }
-    ]
+    ],
+    views: 0,
+    clicks: 0
   }
 ];
 

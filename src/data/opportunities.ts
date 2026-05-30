@@ -60,6 +60,53 @@ export interface Opportunity {
 
 export const opportunities: Opportunity[] = [
   {
+    id: 'canva-madaraka-day-challenge-2026',
+    title: 'Canva Africa Madaraka Day Design Challenge 2026',
+    provider: 'Canva Africa, KNEC, Microsoft Elevate & STEAM Labs',
+    category: 'Challenge',
+    description: 'Use Canva to create a poster, social media campaign, or presentation showing what Madaraka means to you for a chance to win prizes and national recognition.',
+    fullDescription: `Canva Africa presents the Madaraka Day Design Challenge 2026 in partnership with the Kenya National Examinations Council (KNEC), Microsoft Elevate, and STEAM Labs Africa.
+
+The Madaraka Day Design Challenge invites you to show what Madaraka means to you. Use Canva to create a poster, social media campaign pack, or short presentation, then submit your entry for a chance to win prizes and national recognition. First-time designers are welcome.
+
+**2 Ways To Enter:**
+
+**1. Schools:** All Junior and Senior school students in Kenya (Grades 7-10 and Form 3-4 only). A teacher champion registers the school, facilitates collaboration, and submits on behalf of the class.
+**2. General Public (18+):** Individual entries for Kenyan nationals aged 18+.
+
+Start with Canva's free Madaraka Day templates. Use tools like Magic Write and AI image generation to bring your ideas to life. To ensure you're equipped to submit a winning entry, Canva is hosting a series of weekly digital training sessions with STEAMLabs & Microsoft.`,
+    deadline: '2026-06-12',
+    location: 'Kenya / Remote',
+    eligibility: {
+      educationLevel: 'All',
+      fieldOfStudy: ['Design', 'Creative Arts', 'Any Field'],
+      requirements: [
+        'Schools Category: Junior and Senior school students in Kenya (Grades 7-10 and Form 3-4 only).',
+        'General Public Category: Kenya nationals aged 18+ years.',
+        'Must have an active Canva account (teachers can register on behalf of a class).',
+        'Designs must celebrate Kenyan pride, history, and the future.',
+        'Must include a short statement (100–150 words) about the design, what Madaraka Day means to you, and which Canva AI tools were used.',
+        'Multiple entries are permitted (no cap).'
+      ]
+    },
+    benefits: [
+      'Schools: Top 5 entries plus one overall winner receive KNEC certificates, Canva merchandise, and a national showcase feature.',
+      'General Public: Top 5 entries plus one overall winner receive 1 Year Canva Pro or Teams subscriptions, Canva merch, and a showcase feature.',
+      'Access to weekly digital design training sessions.'
+    ],
+    applicationType: 'Platform Link',
+    applicationLink: 'https://www.canva.com/africa-design-challenge',
+    fundingType: 'N/A', 
+    compensationType: 'N/A', 
+    upfrontCost: 'No Upfront Cost',
+    duration: 'April 22 - June 12, 2026',
+    featured: true,
+    dateAdded: '2026-05-30',
+    logoUrl: '/images/opportunities/CanvaAfricaDesignChallenge-Madaraka-Day.avif', 
+    isVerified: true,
+    status: 'Verified'
+  },
+  {
     id: 'safal-eye-in-the-wild-2026',
     title: 'Safal Eye in the Wild Photography Competition 2026',
     provider: 'Safal Group',
