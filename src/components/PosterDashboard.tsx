@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { OTPLoginForm } from './OTPLoginForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock } from 'lucide-react';
+import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock, Clock, CheckCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toSlug } from '@/utils/dateUtils';
 
@@ -334,11 +334,11 @@ export function PosterDashboard() {
                            {(post.isEscrow || post.opportunity?.isEscrow || (post.escrowAmount ?? 0) > 0 || (post.opportunity?.escrowAmount ?? 0) > 0) && (
                             <>
                               {(post.isEscrowFunded || post.opportunity?.isEscrowFunded) ? (
-                                <span className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold leading-none border border-green-200">
-                                  <Lock className="w-3 h-3" /> 🔒 Escrow Funded — KES {(post.escrowAmount || post.opportunity?.escrowAmount || 0).toLocaleString()}
+                                <span className="flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold leading-none border border-green-200">
+                                  <Lock className="w-3 h-3" /> Escrow Funded — KES {(post.escrowAmount || post.opportunity?.escrowAmount || 0).toLocaleString()}
                                 </span>
                               ) : (
-                                <span className="flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold leading-none border border-blue-200">
+                                <span className="flex items-center gap-1 bg-slate-50 text-slate-700 px-3 py-1 rounded-full text-xs font-bold leading-none border border-slate-200">
                                   <ShieldCheck className="w-3 h-3" /> Escrow Required
                                 </span>
                               )}
@@ -407,16 +407,17 @@ export function PosterDashboard() {
 
                   {/* New Inbox Action Area directly below the posting info */}
                   {(post.applicationForm?.isEnabled || post.opportunity?.applicationForm?.isEnabled || true) && (post.isLive || post.status === 'Verified') && (
-                    <div className="bg-gray-50/50 border-t border-gray-100 p-4 shrink-0 shadow-inner flex justify-end">
+                    <div className="bg-slate-50/50 border-t border-slate-100 p-4 shrink-0 flex justify-end">
                       <Button 
                         onClick={() => {
                           if (expandedPostId !== post.id) fetchApplicants(post.id);
                           else setExpandedPostId(null);
                         }}
-                        className={`w-full sm:w-auto rounded-xl px-6 h-12 font-bold transition-all shadow hover:shadow-md flex items-center justify-center gap-2 ${expandedPostId === post.id ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' : 'bg-white text-gray-800 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`}
+                        variant={expandedPostId === post.id ? "default" : "outline"}
+                        className={`w-full sm:w-auto rounded-xl px-6 h-12 font-medium transition-all ${expandedPostId === post.id ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
                       >
-                        <Mail className={`w-5 h-5 ${expandedPostId === post.id ? 'text-white' : 'text-blue-600'}`} />
-                        <span>{expandedPostId === post.id ? 'Close Inbox' : 'Open Inbox / Applicants'}</span>
+                        <Mail className={`w-4 h-4 mr-2 ${expandedPostId === post.id ? 'text-white' : 'text-slate-500'}`} />
+                        <span>{expandedPostId === post.id ? 'Close Inbox' : 'Open Inbox'}</span>
                       </Button>
                     </div>
                   )}
@@ -522,13 +523,14 @@ export function PosterDashboard() {
                                               );
                                             })()}
                                             {(app as any).escrowReleaseRequested ? (
-                                              <p className="text-xs text-amber-600 font-semibold text-center bg-amber-50 border border-amber-100 rounded-lg p-2">
-                                                ⏳ Release requested — awaiting admin payout
+                                              <p className="text-xs text-amber-600 font-medium text-center bg-amber-50 border border-amber-100 rounded-lg p-2 flex items-center justify-center gap-1.5">
+                                                <Clock className="w-3.5 h-3.5" /> Release requested — awaiting admin payout
                                               </p>
                                             ) : (
                                               <Button
                                                 size="sm"
-                                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold"
+                                                variant="default"
+                                                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium"
                                                 disabled={releaseLoading}
                                                 onClick={() => handleReleaseEscrow(post, app)}
                                               >
@@ -537,14 +539,14 @@ export function PosterDashboard() {
                                               </Button>
                                             )}
                                             {releaseMessage && (
-                                              <p className={`text-xs font-medium text-center ${releaseMessage.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>
-                                                {releaseMessage}
+                                              <p className={`text-xs font-medium text-center flex items-center justify-center gap-1 ${releaseMessage.includes('✅') || releaseMessage.includes('Net payout') ? 'text-green-600' : 'text-red-500'}`}>
+                                                {releaseMessage.replace('✅ ', '').replace('❌ ', '')}
                                               </p>
                                             )}
                                           </div>
                                         ) : (
-                                          <p className="text-xs text-green-600 font-medium my-auto text-right w-full">
-                                            ✅ Approved! Candidate can now see your contact info.
+                                          <p className="text-xs text-green-600 font-medium my-auto text-right w-full flex items-center justify-end gap-1">
+                                            <CheckCircle className="w-3.5 h-3.5" /> Approved! Candidate can now see your contact info.
                                           </p>
                                         )}
                                       </>
@@ -685,21 +687,20 @@ export function PosterDashboard() {
                 <div className="flex flex-col gap-3">
                   <button 
                     type="button" 
-                    className="w-full py-4 rounded-xl font-bold text-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed" 
-                    style={{ backgroundColor: '#dc2626', color: 'white' }}
+                    className="w-full py-3.5 rounded-xl font-medium text-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed shadow-sm" 
                     onClick={handleDeletePending}
                     disabled={deleteLoading}
                   >
                     {deleteLoading ? (
                       <span className="flex items-center justify-center">
-                        <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin mr-3" />
+                        <div className="w-5 h-5 border-2 border-red-600/30 border-t-red-600 rounded-full animate-spin mr-3" />
                         Deleting...
                       </span>
                     ) : 'Yes, Delete it'}
                   </button>
                   <button 
                     type="button" 
-                    className="w-full py-4 rounded-xl font-bold text-lg border-2 border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-70 disabled:cursor-not-allowed" 
+                    className="w-full py-3.5 rounded-xl font-medium text-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-sm" 
                     onClick={() => { setPostToDelete(null); setDeleteError(null); }}
                     disabled={deleteLoading}
                   >

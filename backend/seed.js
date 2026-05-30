@@ -1075,7 +1075,11 @@ async function seedDatabase() {
     await collection.deleteMany({});
 
     console.log(`📥 Inserting ${opportunities.length} opportunities into MongoDB...`);
-    const result = await collection.insertMany(opportunities);
+    const docsToInsert = opportunities.map((opp, index) => ({
+      ...opp,
+      dateAdded: new Date(Date.now() - index * 1000 * 60 * 60)
+    }));
+    const result = await collection.insertMany(docsToInsert);
 
     console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
   } catch (error) {

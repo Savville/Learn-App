@@ -18,7 +18,7 @@ export default function AdminDashboard() {
   const [disputes, setDisputes] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [payDoerLoading, setPayDoerLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage' | 'escrow' | 'disputes'>('opps');
+  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms'>('opps');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
@@ -361,6 +361,13 @@ export default function AdminDashboard() {
           >
             <Settings className="w-4 h-4" />
             Manage ({allOpps.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab('comms')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'comms' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <Mail className="w-4 h-4" />
+            Comms
           </button>
         </div>
 
@@ -1000,6 +1007,83 @@ export default function AdminDashboard() {
               ))}
             </div>
           )
+        ) : activeTab === 'comms' ? (
+          /* Comms Tab */
+          <div className="space-y-6 max-w-4xl">
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="bg-slate-50 border-b border-slate-100 rounded-t-xl">
+                <CardTitle className="text-xl text-slate-800">Email Center</CardTitle>
+                <CardDescription>Send opportunity digests to your active subscribers.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6 space-y-8">
+                {/* General Digest */}
+                <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b border-slate-100 pb-8">
+                  <div className="space-y-2 flex-1">
+                    <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-blue-500" />
+                      General Digest
+                    </h3>
+                    <p className="text-slate-600 text-sm leading-relaxed">
+                      Send an email containing the latest general opportunities to all subscribers. 
+                      Subscribers who haven't set their preferences will receive this.
+                    </p>
+                  </div>
+                  <Button 
+                    className="shrink-0 font-semibold"
+                    onClick={async () => {
+                      if (!window.confirm('Send the general digest to all subscribers?')) return;
+                      const token = sessionStorage.getItem('adminToken');
+                      try {
+                        const res = await fetch(`${API_BASE}/admin/send-digest`, {
+                          method: 'POST',
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        const data = await res.json();
+                        alert(res.ok ? data.message : 'Error: ' + data.error);
+                      } catch (e: any) {
+                        alert('Failed: ' + e.message);
+                      }
+                    }}
+                  >
+                    Send General Digest
+                  </Button>
+                </div>
+
+                {/* Personalized Digest */}
+                <div className="flex flex-col md:flex-row gap-6 items-start justify-between pt-2">
+                  <div className="space-y-2 flex-1">
+                    <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-purple-500" />
+                      Personalized Digest
+                    </h3>
+                    <p className="text-slate-600 text-sm leading-relaxed">
+                      Runs the AI-matching engine. Each subscriber gets a custom email containing only the opportunities that match their saved interests and field of study.
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline"
+                    className="shrink-0 border-purple-200 text-purple-700 hover:bg-purple-50 font-semibold"
+                    onClick={async () => {
+                      if (!window.confirm('Run the matching engine and send personalized digests? This may take a moment.')) return;
+                      const token = sessionStorage.getItem('adminToken');
+                      try {
+                        const res = await fetch(`${API_BASE}/admin/send-personalized-digest`, {
+                          method: 'POST',
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        const data = await res.json();
+                        alert(res.ok ? data.message : 'Error: ' + data.error);
+                      } catch (e: any) {
+                        alert('Failed: ' + e.message);
+                      }
+                    }}
+                  >
+                    Run & Send Personalized
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         ) : null}
       </div>
     </div>
