@@ -8,6 +8,7 @@ import { verifyAdminKey } from '../middleware/auth.js';
 import {
   sendDigestEmail,
   sendPersonalizedDigestEmail,
+  sendCustomDigestEmail,
   sendBroadcastEmail,
   sendNewOpportunityEmail,
   sendPosterApprovalEmail,
@@ -189,6 +190,53 @@ router.post('/send-digest', verifyAdminKey, async (req, res) => {
     });
   } catch (error) {
     console.error('âŒ send-digest error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/send-custom-digest
+// Sends a custom digest to subscribers using explicitly selected opportunity IDs.
+router.post('/send-custom-digest', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { opportunityIds, customSubject, customMessage } = req.body;
+
+    if (!opportunityIds || opportunityIds.length === 0) {
+      return res.status(400).json({ error: 'No opportunity IDs provided.' });
+    }
+
+    const subscribers = await db
+      .collection('subscribers')
+      .find({ unsubscribed: { $ne: true } })
+      .project({ email: 1, name: 1 })
+      .toArray();
+
+    if (subscribers.length === 0) {
+      return res.status(400).json({ error: 'No active subscribers found.' });
+    }
+
+    const opportunities = await db
+      .collection('opportunities')
+      .find({ id: { $in: opportunityIds } })
+      .toArray();
+
+    if (opportunities.length === 0) {
+      return res.status(400).json({ error: 'No opportunities matched the selection.' });
+    }
+
+    // Reorder opportunities to match the order of IDs passed
+    const orderedOpportunities = opportunityIds.map(id => opportunities.find(o => o.id === id)).filter(Boolean);
+
+    const results = await sendCustomDigestEmail(subscribers, orderedOpportunities, customSubject, customMessage);
+
+    res.json({
+      message: 'Custom Digest sent successfully.',
+      subscriberCount: subscribers.length,
+      opportunityCount: orderedOpportunities.length,
+      ...results,
+    });
+  } catch (error) {
+    console.error('â Œ send-custom-digest error:', error);
     res.status(500).json({ error: error.message });
   }
 });

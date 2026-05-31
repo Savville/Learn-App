@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar } from 'lucide-react';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -37,6 +37,9 @@ export default function AdminDashboard() {
   // Comms State
   const [lastN, setLastN] = useState<number>(5);
   const [lastDigestSent, setLastDigestSent] = useState<string | null>(localStorage.getItem('lastDigestSent') || null);
+  const [customSubject, setCustomSubject] = useState('');
+  const [customMessage, setCustomMessage] = useState('');
+  const [selectedOpps, setSelectedOpps] = useState<string[]>([]);
 
   const handleGenerateReport = async (oppId: string) => {
     setReportLoading(true);
@@ -1169,6 +1172,98 @@ export default function AdminDashboard() {
                   >
                     Run & Send Personalized
                   </Button>
+                </div>
+
+                {/* Custom Digest */}
+                <div className="flex flex-col gap-6 items-start justify-between pt-8 border-t border-slate-100">
+                  <div className="space-y-2 w-full">
+                    <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                      <Send className="w-5 h-5 text-indigo-500" />
+                      Custom Selection Digest
+                    </h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-4">
+                      Handpick specific opportunities, add a custom subject and intro message, and address subscribers by their name.
+                    </p>
+                    
+                    <div className="space-y-4 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Custom Subject Line (Optional)</label>
+                        <Input 
+                          placeholder="e.g. 3 Fully Funded Scholarships You Must See"
+                          value={customSubject}
+                          onChange={e => setCustomSubject(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Custom Intro Message (Optional)</label>
+                        <textarea 
+                          placeholder="Write a custom introductory message... (Hello [Name] is added automatically)"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm outline-none focus:border-indigo-500 resize-none"
+                          rows={3}
+                          value={customMessage}
+                          onChange={e => setCustomMessage(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Select Opportunities to Include ({selectedOpps.length} selected)</label>
+                        <div className="max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-md p-2 space-y-1">
+                          {allOpps.map(opp => (
+                            <label key={opp.id} className="flex items-start gap-3 p-2 hover:bg-slate-50 rounded cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                className="mt-1"
+                                checked={selectedOpps.includes(opp.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) setSelectedOpps([...selectedOpps, opp.id]);
+                                  else setSelectedOpps(selectedOpps.filter(id => id !== opp.id));
+                                }}
+                              />
+                              <div>
+                                <p className="text-sm font-medium text-slate-800 line-clamp-1">{opp.title}</p>
+                                <p className="text-xs text-slate-500">{opp.provider} • {opp.category}</p>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Button 
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold mt-4"
+                        disabled={selectedOpps.length === 0}
+                        onClick={async () => {
+                          if (!window.confirm(`Send custom digest with ${selectedOpps.length} opportunities to all subscribers?`)) return;
+                          const token = sessionStorage.getItem('adminToken');
+                          try {
+                            const res = await fetch(`${API_BASE}/admin/send-custom-digest`, {
+                              method: 'POST',
+                              headers: { 
+                                Authorization: `Bearer ${token}`,
+                                'Content-Type': 'application/json' 
+                              },
+                              body: JSON.stringify({ opportunityIds: selectedOpps, customSubject, customMessage })
+                            });
+                            const data = await res.json();
+                            if (res.ok) {
+                              alert(data.message);
+                              const now = new Date().toLocaleString();
+                              setLastDigestSent(now);
+                              localStorage.setItem('lastDigestSent', now);
+                              setSelectedOpps([]);
+                              setCustomSubject('');
+                              setCustomMessage('');
+                            } else {
+                              alert('Error: ' + data.error);
+                            }
+                          } catch (e: any) {
+                            alert('Failed: ' + e.message);
+                          }
+                        }}
+                      >
+                        Send Custom Digest
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

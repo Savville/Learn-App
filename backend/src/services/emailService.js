@@ -106,6 +106,17 @@ const digestTemplate = (opportunities) => wrapEmail(`
     ${ctaButton('See All Opportunities', `${FRONTEND_URL}/opportunities`)}
   </div>`);
 
+const customDigestTemplate = (opportunities, customSubject, customMessage, subscriberName) => wrapEmail(`
+  <div style="padding:32px 28px;">
+    ${subscriberName ? `<p style="color:#0f2744;font-size:16px;margin:0 0 16px;font-family:Arial,sans-serif;">Hello ${subscriberName},</p>` : ''}
+    <h2 style="color:#0f2744;font-size:20px;margin:0 0 6px;">${customSubject || 'Specially Selected Opportunities'}</h2>
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0 0 24px;font-family:Arial,sans-serif;">
+      ${customMessage ? customMessage.replace(/\n/g, '<br/>') : `Here are ${opportunities.length} opportunities we think you should see.`}
+    </p>
+    ${opportunities.map(opportunityCard).join('')}
+    ${ctaButton('See All Opportunities', `${FRONTEND_URL}/opportunities`)}
+  </div>`);
+
 const deadlineReminderTemplate = (opportunity, daysLeft) => wrapEmail(`
   <div style="padding:32px 28px;">
     <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
@@ -801,6 +812,26 @@ export async function sendOrganizationApprovalEmail(request) {
   } catch (error) {
     console.error('Error sending org approval email:', error);
   }
+}
+
+export async function sendCustomDigestEmail(subscribers, opportunities, customSubject, customMessage) {
+  const results = { success: 0, failed: 0 };
+  for (const sub of subscribers) {
+    try {
+      await sendEmail({
+        to: sub.email,
+        subject: customSubject || 'New Selected Opportunities',
+        html: customDigestTemplate(opportunities, customSubject, customMessage, sub.name || ''),
+      });
+      results.success++;
+      await new Promise(r => setTimeout(r, 200));
+    } catch (error) {
+      console.error(`Custom Digest failed for ${sub.email}:`, error.message);
+      results.failed++;
+    }
+  }
+  console.log(`Custom Digest: ${results.success} sent, ${results.failed} failed`);
+  return results;
 }
 
 // â”€â”€ ACES Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
