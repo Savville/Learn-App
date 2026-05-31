@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText } from 'lucide-react';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -449,6 +449,11 @@ export default function AdminDashboard() {
                           {item.isOrganizationPost && (
                             <Badge className="mt-2 mr-2 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100">
                               Verified Org Post
+                            </Badge>
+                          )}
+                          {item.opportunity.editOf && (
+                            <Badge className="mt-2 bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">
+                              📝 Edit Request
                             </Badge>
                           )}
                           {item.isEscrowFunded && (
@@ -914,6 +919,11 @@ export default function AdminDashboard() {
                           <p className="text-sm text-slate-600 truncate">{opp.provider} · {opp.category}</p>
                           <Badge variant="outline" className="text-[10px] h-5 bg-blue-50 text-blue-700 border-blue-100">{opp.compensationType || 'N/A'}</Badge>
                           <Badge variant="outline" className={`text-[10px] h-5 ${opp.upfrontCost === 'Has Upfront Cost' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>{opp.upfrontCost || 'No Upfront Cost'}</Badge>
+                          {opp.deadline && (
+                            <Badge variant="outline" className="text-[10px] h-5 bg-slate-100 text-slate-700 border-slate-200 flex items-center gap-1">
+                               <Calendar className="w-3 h-3" /> {new Date(opp.deadline).toLocaleDateString()}
+                            </Badge>
+                          )}
                         </div>
                      </div>
                     <div className="flex gap-2 shrink-0 flex-wrap justify-end mt-2 sm:mt-0">
