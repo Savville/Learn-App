@@ -122,7 +122,7 @@ async function sendEmail({ to, subject, html }) {
   return resend.emails.send({
     from: FROM,
     to,
-    reply_to: 'lead@opportunitieskenya.live',
+    reply_to: 'opportunitieskenyalive@gmail.com',
     subject,
     html,
   });
@@ -138,7 +138,7 @@ export async function sendWelcomeEmail(email) {
 }
 
 export async function sendAdminSubmissionNotification(reporter, opportunity) {
-  const adminEmails = ['lead@opportunitieskenya.live', 'opportunitieskenyalive@gmail.com'];
+  const adminEmails = ['opportunitieskenyalive@gmail.com'];
   try {
     const html = wrapEmail(`
       <div style="padding:32px 28px;">
@@ -271,7 +271,7 @@ export async function sendNewOpportunityEmail(subscribers, opportunity) {
       from: FROM,
       to: FROM,
       bcc,
-      reply_to: 'lead@opportunitieskenya.live',
+      reply_to: 'opportunitieskenyalive@gmail.com',
       subject: `New ${opportunity.category}: ${opportunity.title}`,
       html: digestTemplate([opportunity]),
     });
@@ -464,7 +464,7 @@ const yesistTemplate = () => wrapEmail(`
         ðŸ“¸ <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
         ðŸ’¬ <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
         ðŸ“ž <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
-        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:opportunitieskenyalive@gmail.com" style="color:#1a4a7a;text-decoration:none;">opportunitieskenyalive@gmail.com</a>
       </p>
     </div>
 
@@ -576,7 +576,7 @@ const seangapoTemplate = () => wrapEmail(`
         ðŸ“¸ <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
         ðŸ’¬ <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
         ðŸ“ž <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
-        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:opportunitieskenyalive@gmail.com" style="color:#1a4a7a;text-decoration:none;">opportunitieskenyalive@gmail.com</a>
       </p>
     </div>
 
@@ -669,7 +669,7 @@ const eepTemplate = (name = 'Innovator') => wrapEmail(`
         ðŸ“¸ <a href="https://www.instagram.com/opportunitieskenyalive/" style="color:#1a4a7a;text-decoration:none;">@opportunitieskenyalive</a> on Instagram<br/>
         ðŸ’¬ <a href="https://whatsapp.com/channel/0029Vb7NnTREVccCzjHtYz07" style="color:#1a4a7a;text-decoration:none;">Join our WhatsApp Channel</a><br/>
         ðŸ“ž <a href="tel:+254108176677" style="color:#1a4a7a;text-decoration:none;">0108 176 677</a>
-        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;text-decoration:none;">lead@opportunitieskenya.live</a>
+        &nbsp;&nbsp;âœ‰ï¸ <a href="mailto:opportunitieskenyalive@gmail.com" style="color:#1a4a7a;text-decoration:none;">opportunitieskenyalive@gmail.com</a>
       </p>
     </div>
 
@@ -694,7 +694,7 @@ export async function sendOTPEmail(email, otp) {
 
     const data = await resend.emails.send({
       from: 'Opportunities Kenya Security <security@opportunitieskenya.live>',
-      reply_to: 'lead@opportunitieskenya.live',
+      reply_to: 'opportunitieskenyalive@gmail.com',
       to: [email],
       subject: `Your Login Code: ${otp}`,
       html,
@@ -706,7 +706,7 @@ export async function sendOTPEmail(email, otp) {
 }
 
 export async function sendOrganizationVerificationRequest(request) {
-  const adminEmails = ['lead@opportunitieskenya.live', 'opportunitieskenyalive@gmail.com'];
+  const adminEmails = ['opportunitieskenyalive@gmail.com'];
   try {
     const html = wrapEmail(`
       <div style="padding:32px 28px;">
@@ -871,7 +871,7 @@ export async function sendAcesEmail(email, name, cc = []) {
       from: FROM,
       to: email,
       cc: cc,
-      reply_to: 'lead@opportunitieskenya.live',
+      reply_to: 'opportunitieskenyalive@gmail.com',
       subject,
       html: acesTemplate(name),
     });
@@ -942,7 +942,7 @@ export async function sendWorldQuantEmail(email, name, cc = []) {
       from: FROM,
       to: email,
       cc: cc,
-      reply_to: 'lead@opportunitieskenya.live',
+      reply_to: 'opportunitieskenyalive@gmail.com',
       subject,
       html: worldQuantTemplate(name),
     });
@@ -1002,7 +1002,7 @@ export async function sendPowerAfricaEmail(email, name, cc = []) {
       from: FROM,
       to: email,
       cc: cc,
-      reply_to: 'lead@opportunitieskenya.live',
+      reply_to: 'opportunitieskenyalive@gmail.com',
       subject,
       html: powerAfricaTemplate(name),
     });
@@ -1020,7 +1020,7 @@ export { seangapoTemplate, yesistTemplate, eepTemplate, acesTemplate, worldQuant
 
 // --- Escrow & Payment Email Functions --------------------------------------
 
-const ADMIN_EMAILS = ['lead@opportunitieskenya.live', 'opportunitieskenyalive@gmail.com'];
+const ADMIN_EMAILS = ['opportunitieskenyalive@gmail.com'];
 
 // Admin notification when poster requests escrow release
 export async function sendEscrowReleaseRequestEmail(data) {
@@ -1082,7 +1082,7 @@ export async function sendPaymentConfirmationEmail({ applicantEmail, posterEmail
       </div>
       <p style="color:#475569;font-size:14px;line-height:1.7;">
         Please check your M-PESA for the STK push prompt and enter your PIN to complete the transaction.
-        If you do not receive it within 5 minutes, contact us at <a href="mailto:lead@opportunitieskenya.live" style="color:#1a4a7a;">lead@opportunitieskenya.live</a>.
+        If you do not receive it within 5 minutes, contact us at <a href="mailto:opportunitieskenyalive@gmail.com" style="color:#1a4a7a;">opportunitieskenyalive@gmail.com</a>.
       </p>
     </div>
   `);

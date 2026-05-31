@@ -451,19 +451,14 @@ export default function AdminDashboard() {
                               Verified Org Post
                             </Badge>
                           )}
-                          {item.opportunity.editOf && (
-                            <Badge className="mt-2 bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">
+                          {item.opportunity?.editOf && (
+                            <Badge className="mt-2 mr-2 bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">
                               📝 Edit Request
                             </Badge>
                           )}
                           {item.isEscrowFunded && (
                             <Badge className="mt-2 bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
                               <DollarSign className="w-3 h-3 mr-1" /> Escrow Funded (KES {item.escrowAmount})
-                            </Badge>
-                          )}
-                          {item.opportunity.editOf && (
-                            <Badge className="mt-2 bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100">
-                              Edit Update Request
                             </Badge>
                           )}
                           <p className="text-xs text-slate-400 mt-2 mb-4">{new Date(item.submittedAt).toLocaleDateString()}</p>

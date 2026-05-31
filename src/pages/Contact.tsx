@@ -138,8 +138,8 @@ export function Contact() {
                 <div>
                   <h3 className="text-gray-900 mb-2">Email Us</h3>
                   <p className="text-gray-600 mb-2">Send us an email anytime</p>
-                  <a href="mailto:lead@opportunitieskenya.live" className="text-blue-600 hover:text-blue-700">
-                    lead@opportunitieskenya.live
+                  <a href="mailto:opportunitieskenyalive@gmail.com" className="text-blue-600 hover:text-blue-700">
+                    opportunitieskenyalive@gmail.com
                   </a>
                 </div>
               </div>
