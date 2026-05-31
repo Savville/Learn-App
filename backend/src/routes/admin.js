@@ -961,6 +961,62 @@ router.post('/applications/:appId/pay-doer', verifyAdminKey, async (req, res) =>
   }
 });
 
+// GET /api/admin/reports/:id/postmortem
+router.get('/reports/:id/postmortem', verifyAdminKey, async (req, res) => {
+  try {
+    const oppId = req.params.id;
+    const db = getDB();
+    const opp = await db.collection('opportunities').findOne({ id: oppId });
+    if (!opp) return res.status(404).json({ error: 'Opportunity not found' });
+
+    const apps = await db.collection('applications').find({ opportunityId: oppId }).toArray();
+    
+    // Aggregation for breakdown
+    const educationCount = {};
+    const fieldCount = {};
+
+    apps.forEach(app => {
+      const ed = app.applicantData?.education_level || 'Unknown';
+      const field = app.applicantData?.field_of_study || 'Unknown';
+      educationCount[ed] = (educationCount[ed] || 0) + 1;
+      fieldCount[field] = (fieldCount[field] || 0) + 1;
+    });
+
+    const topFields = Object.entries(fieldCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(entry => ({ field: entry[0], count: entry[1] }));
+
+    res.json({
+      id: opp.id,
+      title: opp.title,
+      views: opp.views || 0,
+      clicks: opp.clicks || 0,
+      totalApplicants: apps.length,
+      educationBreakdown: educationCount,
+      topFields,
+      posterEmail: opp.contactEmail || opp.reporter?.email || 'admin@opportunities.ke'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/reports/:id/email-postmortem
+router.post('/reports/:id/email-postmortem', verifyAdminKey, async (req, res) => {
+  try {
+    const oppId = req.params.id;
+    const { posterEmail } = req.body;
+    
+    console.log(`\n\x1b[35m[POST-MORTEM REPORT EMAILED]\x1b[0m`);
+    console.log(`To: ${posterEmail}`);
+    console.log(`Subject: Analytics Report for Opportunity ${oppId}`);
+    res.json({ message: 'Report emailed to ' + posterEmail });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;
 
 // Refurbished

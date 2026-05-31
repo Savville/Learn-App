@@ -10,6 +10,7 @@ import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { PostWithUs } from './pages/PostWithUs';
 import { Inbox } from './pages/Inbox';
+import { Subscribe } from './pages/Subscribe';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDisputes } from './pages/AdminDisputes';
@@ -68,6 +69,7 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/post-with-us" element={<PostWithUs />} />
           <Route path="/inbox" element={<Inbox />} />
+          <Route path="/subscribe" element={<Subscribe />} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />

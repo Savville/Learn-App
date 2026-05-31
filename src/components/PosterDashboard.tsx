@@ -41,17 +41,20 @@ export function PosterDashboard() {
   const [livePosts, setLivePosts] = useState<Post[]>([]);
   const [pendingPosts, setPendingPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [escrowMessage, setEscrowMessage] = useState<string | null>(null);
+  const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
+  const [escrowStatus, setEscrowStatus] = useState<'idle' | 'waiting' | 'success' | 'failed'>('idle');
 
+  // Expanded post for applicants
   const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loadingApplicants, setLoadingApplicants] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Escrow Deposit State
   const [escrowJob, setEscrowJob] = useState<Post | null>(null);
   const [escrowPhone, setEscrowPhone] = useState('');
   const [escrowLoading, setEscrowLoading] = useState(false);
-  const [escrowMessage, setEscrowMessage] = useState<string | null>(null);
 
   // Escrow Release State
   const [releaseJob, setReleaseJob] = useState<{ post: Post; app: Applicant } | null>(null);
@@ -212,21 +215,63 @@ export function PosterDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to initiate deposit');
       
-      setEscrowMessage(data.message || 'Check your phone for the M-PESA prompt.');
-      
-      // Auto close after 5 seconds if successful
-      setTimeout(() => {
-         setEscrowJob(null);
-         setEscrowMessage(null);
-         setEscrowPhone('');
-      }, 5000);
+      if (data.checkoutRequestId) {
+        setCheckoutRequestId(data.checkoutRequestId);
+        setEscrowStatus('waiting');
+      } else {
+        setEscrowMessage(data.message || 'Check your phone for the M-PESA prompt.');
+      }
       
     } catch (err: any) {
       setEscrowMessage(err.message);
+      setEscrowStatus('failed');
     } finally {
       setEscrowLoading(false);
     }
   };
+
+  useEffect(() => {
+    let interval: any;
+    if (checkoutRequestId && escrowStatus === 'waiting') {
+      let attempts = 0;
+      interval = setInterval(async () => {
+        attempts++;
+        if (attempts > 12) { // 60 seconds (5s interval)
+          setEscrowStatus('failed');
+          setEscrowMessage('Request timed out. Please try again.');
+          clearInterval(interval);
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/public/payments/status/${checkoutRequestId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (res.ok) {
+            if (data.status === 'completed') {
+              setEscrowStatus('success');
+              setEscrowMessage(`Escrow funded! KES ${data.amountPaid} is securely held. Receipt: ${data.receiptNo}`);
+              clearInterval(interval);
+              // Update post locally to reflect funded
+              setPendingPosts(prev => prev.map(p => 
+                (p.opportunity?.id || p.id) === escrowJob?.id ? { ...p, isEscrowFunded: true } : p
+              ));
+              setLivePosts(prev => prev.map(p => 
+                p.id === escrowJob?.id ? { ...p, isEscrowFunded: true } : p
+              ));
+            } else if (data.status === 'failed' || data.status === 'cancelled') {
+              setEscrowStatus('failed');
+              setEscrowMessage(`Payment failed or cancelled: ${data.resultDesc || 'User cancelled'}`);
+              clearInterval(interval);
+            }
+          }
+        } catch (e) {
+          // Keep polling unless network completely fails
+        }
+      }, 5000);
+    }
+    return () => clearInterval(interval);
+  }, [checkoutRequestId, escrowStatus, escrowJob, token]);
 
 
   const handleReleaseEscrow = async (post: Post, app: Applicant) => {
@@ -438,138 +483,199 @@ export function PosterDashboard() {
                            <h5 className="font-bold text-slate-800 flex items-center gap-2">
                              <Users className="w-4 h-4" /> Received Applications ({applicants.length})
                            </h5>
-                           <div className="grid gap-4 md:grid-cols-2">
-                             {applicants.map((app, idx) => (
-                               <div key={app._id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative flex flex-col h-full">
-                                  <div className="flex items-center justify-between mb-3 border-b border-slate-50 pb-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-semibold text-slate-700 text-sm">Applicant {idx + 1}</span>
-                                      {app.status && (
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                                          app.status === 'approved' || app.status === 'paid' ? 'bg-green-100 text-green-700' :
-                                          app.status === 'rejected' ? 'bg-red-100 text-red-700' : 
-                                          app.status === 'disputed' ? 'bg-red-600 text-white' :
-                                          app.status.startsWith('resolved_') ? 'bg-blue-600 text-white' :
-                                          'bg-yellow-100 text-yellow-700'
-                                        }`}>
-                                          {app.status.toUpperCase()}
-                                        </span>
+                           <div className="mt-4">
+                             {(() => {
+                               const isJobOrGig = post.category === 'Job' || post.category === 'Gig' || post.opportunity?.category === 'Job' || post.opportunity?.category === 'Gig';
+                               
+                               const renderApplicantCard = (app: Applicant, idx: number) => (
+                                 <div key={app._id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative flex flex-col h-full shrink-0">
+                                    <div className="flex items-center justify-between mb-3 border-b border-slate-50 pb-2">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-semibold text-slate-700 text-sm">Applicant {idx + 1}</span>
+                                        {app.status && (
+                                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                            app.status === 'approved' || app.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                            app.status === 'rejected' ? 'bg-red-100 text-red-700' : 
+                                            app.status === 'disputed' ? 'bg-red-600 text-white' :
+                                            app.status === 'shortlisted' ? 'bg-purple-100 text-purple-700' :
+                                            app.status === 'interviewing' ? 'bg-blue-100 text-blue-700' :
+                                            app.status.startsWith('resolved_') ? 'bg-blue-600 text-white' :
+                                            'bg-yellow-100 text-yellow-700'
+                                          }`}>
+                                            {app.status.toUpperCase()}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className="text-xs text-slate-400">{new Date(app.appliedAt).toLocaleString()}</span>
+                                    </div>
+                                    <div className="space-y-2 text-sm flex-1">
+                                       <div className="grid grid-cols-[100px_1fr] gap-2">
+                                         <span className="text-slate-500 font-medium">Email:</span>
+                                         <span className="text-slate-900 break-all">
+                                            <a href={`mailto:${app.applicantEmail}`} className="text-blue-600 hover:underline">{app.applicantEmail}</a>
+                                         </span>
+                                       </div>
+                                       {Object.entries(app.applicantData).map(([key, value]) => {
+                                          if (key === 'email') return null; // skip redundant email
+                                          const isUrl = String(value).startsWith('http');
+                                          return (
+                                            <div key={key} className="grid grid-cols-[100px_1fr] gap-2">
+                                              <span className="text-slate-500 font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
+                                              <span className="text-slate-900 break-words">
+                                                {isUrl ? <a href={value as string} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center">View Link <ExternalLink className="w-3 h-3 ml-1"/></a> : value as React.ReactNode}
+                                              </span>
+                                            </div>
+                                          );
+                                       })}
+                                    </div>
+                                    
+                                    {/* Actions */}
+                                    <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-2 justify-end">
+                                      {(app.status === 'pending' || !app.status) && (
+                                        <>
+                                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
+                                          {isJobOrGig && <Button variant="outline" size="sm" className="text-purple-600 hover:bg-purple-50 border-purple-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'shortlisted')}>Shortlist</Button>}
+                                          <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                        </>
+                                      )}
+                                      {app.status === 'shortlisted' && (
+                                        <>
+                                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
+                                          <Button variant="outline" size="sm" className="text-blue-600 hover:bg-blue-50 border-blue-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'interviewing')}>Interview</Button>
+                                          <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                        </>
+                                      )}
+                                      {app.status === 'interviewing' && (
+                                        <>
+                                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
+                                          <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                        </>
+                                      )}
+                                      {app.status === 'approved' && (
+                                        <>
+                                          {/* Escrow release logic */}
+                                          {(post.isEscrow || post.opportunity?.isEscrow || (post.escrowAmount ?? 0) > 0 || (post.opportunity?.escrowAmount ?? 0) > 0) ? (
+                                            <div className="w-full space-y-2">
+                                              {(() => {
+                                                const escrow = Number(post.escrowAmount || post.opportunity?.escrowAmount || 0);
+                                                const platformFee = Math.ceil(escrow * 0.05);
+                                                const mpesaFee = Math.ceil((escrow - platformFee) * 0.02);
+                                                const netPayable = escrow - platformFee - mpesaFee;
+                                                return (
+                                                  <div className="bg-green-50 rounded-lg border border-green-100 p-3 text-xs space-y-1">
+                                                    <p className="font-bold text-green-800 mb-2 flex items-center gap-1"><Lock className="w-3 h-3"/>Escrow Release Preview</p>
+                                                    <div className="flex justify-between text-slate-600"><span>Escrow Total</span><span className="font-semibold">KES {escrow.toLocaleString()}</span></div>
+                                                    <div className="flex justify-between text-slate-500"><span>Platform Fee (5%)</span><span className="text-red-500">− KES {platformFee}</span></div>
+                                                    <div className="flex justify-between text-slate-500"><span>M-PESA Fee (2%)</span><span className="text-red-500">− KES {mpesaFee}</span></div>
+                                                    <div className="flex justify-between border-t border-green-200 pt-1 font-bold text-green-700"><span>They Receive</span><span>KES {netPayable.toLocaleString()}</span></div>
+                                                  </div>
+                                                );
+                                              })()}
+                                              {(app as any).escrowReleaseRequested ? (
+                                                <p className="text-xs text-amber-600 font-medium text-center bg-amber-50 border border-amber-100 rounded-lg p-2 flex items-center justify-center gap-1.5">
+                                                  <Clock className="w-3.5 h-3.5" /> Release requested
+                                                </p>
+                                              ) : (
+                                                <Button size="sm" variant="default" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium" disabled={releaseLoading} onClick={() => handleReleaseEscrow(post, app)}>
+                                                  <DollarSign className="w-3.5 h-3.5 mr-1" />
+                                                  {releaseLoading ? 'Processing...' : 'Release Payment'}
+                                                </Button>
+                                              )}
+                                              {releaseMessage && (
+                                                <p className={`text-xs font-medium text-center ${releaseMessage.includes('✅') || releaseMessage.includes('Net payout') ? 'text-green-600' : 'text-red-500'}`}>
+                                                  {releaseMessage.replace('✅ ', '').replace('❌ ', '')}
+                                                </p>
+                                              )}
+                                            </div>
+                                          ) : (
+                                            <p className="text-xs text-green-600 font-medium my-auto text-right w-full flex items-center justify-end gap-1">
+                                              <CheckCircle className="w-3.5 h-3.5" /> Approved
+                                            </p>
+                                          )}
+                                        </>
+                                      )}
+                                      {app.status === 'rejected' && (
+                                        <p className="text-xs text-red-500 font-medium my-auto text-right w-full">Rejected.</p>
+                                      )}
+                                      {app.status === 'disputed' && (
+                                        <div className="w-full flex items-center justify-between bg-red-50 p-2 rounded border border-red-100">
+                                          <p className="text-xs text-red-700 font-bold">Dispute in Progress</p>
+                                          <p className="text-[10px] text-red-600 text-right max-w-[150px]">Admins are reviewing.</p>
+                                        </div>
+                                      )}
+                                      {app.status.startsWith('resolved_') && (
+                                        <p className="text-xs text-blue-600 font-medium my-auto text-right w-full">Dispute Resolved ({app.status.split('_')[1]})</p>
+                                      )}
+                                      {app.status === 'paid' && (
+                                        <p className="text-xs text-green-600 font-medium my-auto text-right w-full flex items-center justify-end gap-1">
+                                          <CheckCircle className="w-3.5 h-3.5" /> Paid
+                                        </p>
                                       )}
                                     </div>
-                                    <span className="text-xs text-slate-400">{new Date(app.appliedAt).toLocaleString()}</span>
-                                  </div>
-                                  <div className="space-y-2 text-sm flex-1">
-                                     <div className="grid grid-cols-[100px_1fr] gap-2">
-                                       <span className="text-slate-500 font-medium">Email:</span>
-                                       <span className="text-slate-900 break-all">
-                                          <a href={`mailto:${app.applicantEmail}`} className="text-blue-600 hover:underline">{app.applicantEmail}</a>
-                                       </span>
+                                 </div>
+                               );
+
+                               if (!isJobOrGig) {
+                                 // Standard list/grid for non-jobs
+                                 return (
+                                   <div className="grid gap-4 md:grid-cols-2">
+                                     {applicants.map((app, idx) => renderApplicantCard(app, idx))}
+                                   </div>
+                                 );
+                               }
+
+                               // Kanban layout for Jobs/Gigs
+                               const columns = ['Applied', 'Shortlisted', 'Interviewing', 'Approved', 'Rejected'];
+                               const getColumnForApp = (app: Applicant) => {
+                                 const s = app.status || 'pending';
+                                 if (s === 'pending') return 'Applied';
+                                 if (s === 'shortlisted') return 'Shortlisted';
+                                 if (s === 'interviewing') return 'Interviewing';
+                                 if (s === 'rejected') return 'Rejected';
+                                 return 'Approved'; // handles approved, paid, disputed, resolved_*
+                               };
+
+                               const grouped = columns.reduce((acc, col) => {
+                                 acc[col] = applicants.filter(a => getColumnForApp(a) === col);
+                                 return acc;
+                               }, {} as Record<string, Applicant[]>);
+
+                               return (
+                                 <div className="flex gap-4 overflow-x-auto pb-4 snap-x pt-2">
+                                   {columns.map(col => (
+                                     <div key={col} className="min-w-[320px] w-[320px] flex-shrink-0 bg-slate-50/70 rounded-xl border border-slate-200 p-3 snap-start flex flex-col max-h-[600px]">
+                                       <div className="flex justify-between items-center mb-3 px-1">
+                                         <h6 className="font-bold text-slate-700 capitalize flex items-center gap-2">
+                                           {col}
+                                           <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-full">{grouped[col].length}</span>
+                                         </h6>
+                                         {col === 'Applied' && grouped[col].length > 0 && (
+                                           <Button 
+                                             variant="ghost" 
+                                             size="sm" 
+                                             onClick={() => {
+                                               if(window.confirm('Reject all pending applicants?')) {
+                                                 grouped[col].forEach(a => handleUpdateApplicantStatus(a._id, 'rejected'));
+                                               }
+                                             }}
+                                             className="h-6 text-[10px] text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
+                                           >
+                                             Reject All
+                                           </Button>
+                                         )}
+                                       </div>
+                                       <div className="flex-1 overflow-y-auto space-y-3 pr-1 pb-1">
+                                          {grouped[col].length === 0 ? (
+                                            <div className="text-center py-6 text-slate-400 text-sm border border-dashed border-slate-300 rounded-lg bg-white/50">No applicants</div>
+                                          ) : (
+                                            grouped[col].map((app, idx) => renderApplicantCard(app, idx))
+                                          )}
+                                       </div>
                                      </div>
-                                     {Object.entries(app.applicantData).map(([key, value]) => {
-                                        if (key === 'email') return null; // skip redundant email
-                                        const isUrl = String(value).startsWith('http');
-                                        return (
-                                          <div key={key} className="grid grid-cols-[100px_1fr] gap-2">
-                                            <span className="text-slate-500 font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
-                                            <span className="text-slate-900 break-words">
-                                              {isUrl ? <a href={value as string} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center">View Link <ExternalLink className="w-3 h-3 ml-1"/></a> : value as React.ReactNode}
-                                            </span>
-                                          </div>
-                                        );
-                                     })}
-                                  </div>
-                                  
-                                  {/* Actions */}
-                                  <div className="mt-4 pt-3 border-t border-slate-100 flex gap-2 justify-end">
-                                    {(app.status === 'pending' || !app.status) && (
-                                      <>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                                          onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}
-                                        >
-                                          Reject
-                                        </Button>
-                                        <Button 
-                                          variant="default" 
-                                          size="sm" 
-                                          className="bg-green-600 hover:bg-green-700"
-                                          onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}
-                                        >
-                                          Approve for Work
-                                        </Button>
-                                      </>
-                                    )}
-                                    {app.status === 'approved' && (
-                                      <>
-                                        {/* If this is an escrow job, show release payment button */}
-                                        {(post.isEscrow || post.opportunity?.isEscrow || (post.escrowAmount ?? 0) > 0 || (post.opportunity?.escrowAmount ?? 0) > 0) ? (
-                                          <div className="w-full space-y-2">
-                                            {/* Fee Breakdown */}
-                                            {(() => {
-                                              const escrow = Number(post.escrowAmount || post.opportunity?.escrowAmount || 0);
-                                              const platformFee = Math.ceil(escrow * 0.05);
-                                              const mpesaFee = Math.ceil((escrow - platformFee) * 0.02);
-                                              const netPayable = escrow - platformFee - mpesaFee;
-                                              return (
-                                                <div className="bg-green-50 rounded-lg border border-green-100 p-3 text-xs space-y-1">
-                                                  <p className="font-bold text-green-800 mb-2 flex items-center gap-1"><Lock className="w-3 h-3"/>Escrow Release Preview</p>
-                                                  <div className="flex justify-between text-slate-600"><span>Escrow Total</span><span className="font-semibold">KES {escrow.toLocaleString()}</span></div>
-                                                  <div className="flex justify-between text-slate-500"><span>Platform Fee (5%)</span><span className="text-red-500">− KES {platformFee}</span></div>
-                                                  <div className="flex justify-between text-slate-500"><span>M-PESA Fee (2%)</span><span className="text-red-500">− KES {mpesaFee}</span></div>
-                                                  <div className="flex justify-between border-t border-green-200 pt-1 font-bold text-green-700"><span>They Receive</span><span>KES {netPayable.toLocaleString()}</span></div>
-                                                </div>
-                                              );
-                                            })()}
-                                            {(app as any).escrowReleaseRequested ? (
-                                              <p className="text-xs text-amber-600 font-medium text-center bg-amber-50 border border-amber-100 rounded-lg p-2 flex items-center justify-center gap-1.5">
-                                                <Clock className="w-3.5 h-3.5" /> Release requested — awaiting admin payout
-                                              </p>
-                                            ) : (
-                                              <Button
-                                                size="sm"
-                                                variant="default"
-                                                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium"
-                                                disabled={releaseLoading}
-                                                onClick={() => handleReleaseEscrow(post, app)}
-                                              >
-                                                <DollarSign className="w-3.5 h-3.5 mr-1" />
-                                                {releaseLoading ? 'Processing...' : 'Release Payment to Worker'}
-                                              </Button>
-                                            )}
-                                            {releaseMessage && (
-                                              <p className={`text-xs font-medium text-center flex items-center justify-center gap-1 ${releaseMessage.includes('✅') || releaseMessage.includes('Net payout') ? 'text-green-600' : 'text-red-500'}`}>
-                                                {releaseMessage.replace('✅ ', '').replace('❌ ', '')}
-                                              </p>
-                                            )}
-                                          </div>
-                                        ) : (
-                                          <p className="text-xs text-green-600 font-medium my-auto text-right w-full flex items-center justify-end gap-1">
-                                            <CheckCircle className="w-3.5 h-3.5" /> Approved! Candidate can now see your contact info.
-                                          </p>
-                                        )}
-                                      </>
-                                    )}
-                                    {app.status === 'rejected' && (
-                                      <p className="text-xs text-red-500 font-medium my-auto text-right w-full">
-                                        Rejected.
-                                      </p>
-                                    )}
-                                    {app.status === 'disputed' && (
-                                      <div className="w-full flex items-center justify-between bg-red-50 p-2 rounded border border-red-100">
-                                        <p className="text-xs text-red-700 font-bold">Dispute in Progress</p>
-                                        <p className="text-[10px] text-red-600 text-right max-w-[150px]">Admins are reviewing this offline. Check your email.</p>
-                                      </div>
-                                    )}
-                                    {app.status.startsWith('resolved_') && (
-                                      <p className="text-xs text-blue-600 font-medium my-auto text-right w-full">
-                                        Dispute Resolved ({app.status.split('_')[1]})
-                                      </p>
-                                    )}
-                                  </div>
-                               </div>
-                             ))}
+                                   ))}
+                                 </div>
+                               );
+                             })()}
                            </div>
                          </div>
                        )}
@@ -593,39 +699,72 @@ export function PosterDashboard() {
             </div>
             
             <div className="p-6">
-               <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6 text-center">
-                 <p className="text-sm text-slate-500 mb-1">Amount to deposit</p>
-                 <p className="text-3xl font-bold text-slate-800">KES {escrowJob.opportunity?.escrowAmount || 1000}</p>
-                 <p className="text-xs text-slate-500 mt-2 font-medium">via M-PESA STK Push (Sandbox)</p>
-               </div>
-
-               {escrowMessage && (
-                 <div className={`p-3 rounded-lg text-sm mb-4 border ${escrowMessage.includes('Check your phone') ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                    {escrowMessage}
+               {escrowStatus === 'waiting' ? (
+                 <div className="text-center py-8 animate-in fade-in zoom-in duration-300">
+                   <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6 relative">
+                     <div className="absolute inset-0 rounded-full border-4 border-green-500 opacity-20 animate-ping"></div>
+                     <Lock className="w-8 h-8 text-green-600 relative z-10" />
+                   </div>
+                   <h4 className="text-xl font-bold text-slate-800 mb-2">Waiting for PIN...</h4>
+                   <p className="text-slate-600 mb-6">Check your phone. Enter your M-PESA PIN to complete the KES {escrowJob.opportunity?.escrowAmount || 1000} deposit.</p>
+                   <Button variant="outline" onClick={() => setEscrowStatus('idle')} className="text-slate-500">Cancel & Go Back</Button>
                  </div>
+               ) : escrowStatus === 'success' ? (
+                 <div className="text-center py-8 animate-in fade-in zoom-in duration-300">
+                   <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                     <CheckCircle className="w-10 h-10" />
+                   </div>
+                   <h4 className="text-xl font-bold text-slate-800 mb-2">Escrow Funded!</h4>
+                   <p className="text-slate-600 mb-6 font-medium">{escrowMessage}</p>
+                   <Button onClick={() => { setEscrowJob(null); setEscrowStatus('idle'); setCheckoutRequestId(null); }} className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold">Done</Button>
+                 </div>
+               ) : escrowStatus === 'failed' ? (
+                 <div className="text-center py-8 animate-in fade-in zoom-in duration-300">
+                   <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                     <AlertCircle className="w-10 h-10" />
+                   </div>
+                   <h4 className="text-xl font-bold text-slate-800 mb-2">Payment Failed</h4>
+                   <p className="text-slate-600 mb-6 font-medium text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">{escrowMessage}</p>
+                   <Button onClick={() => setEscrowStatus('idle')} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold mb-2">Try Again</Button>
+                   <Button variant="ghost" onClick={() => { setEscrowJob(null); setEscrowStatus('idle'); setCheckoutRequestId(null); }} className="w-full">Cancel</Button>
+                 </div>
+               ) : (
+                 <>
+                   <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6 text-center">
+                     <p className="text-sm text-slate-500 mb-1">Amount to deposit</p>
+                     <p className="text-3xl font-bold text-slate-800">KES {escrowJob.opportunity?.escrowAmount || 1000}</p>
+                     <p className="text-xs text-slate-500 mt-2 font-medium">via M-PESA STK Push (Sandbox)</p>
+                   </div>
+
+                   {escrowMessage && (
+                     <div className={`p-3 rounded-lg text-sm mb-4 border ${escrowMessage.includes('Check your phone') ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                        {escrowMessage}
+                     </div>
+                   )}
+                   
+                   <form onSubmit={handleEscrowDeposit} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">M-PESA Phone Number</label>
+                        <Input 
+                          type="text" 
+                          placeholder="e.g. 254712345678" 
+                          required
+                          value={escrowPhone}
+                          onChange={(e) => setEscrowPhone(e.target.value)}
+                          className="border-slate-300"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">Use the format 2547... Note this is a Sandbox simulation.</p>
+                      </div>
+                      
+                      <div className="flex gap-3 pt-2">
+                        <Button type="button" variant="outline" className="flex-1" onClick={() => { setEscrowJob(null); setEscrowMessage(null); setEscrowStatus('idle'); }}>Cancel</Button>
+                        <Button type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white" disabled={escrowLoading || !escrowPhone}>
+                          {escrowLoading ? 'Initiating...' : 'Send M-PESA Prompt'}
+                        </Button>
+                      </div>
+                   </form>
+                 </>
                )}
-               
-               <form onSubmit={handleEscrowDeposit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">M-PESA Phone Number</label>
-                    <Input 
-                      type="text" 
-                      placeholder="e.g. 254712345678" 
-                      required
-                      value={escrowPhone}
-                      onChange={(e) => setEscrowPhone(e.target.value)}
-                      className="border-slate-300"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">Use the format 2547... Note this is a Sandbox simulation.</p>
-                  </div>
-                  
-                  <div className="flex gap-3 pt-2">
-                    <Button type="button" variant="outline" className="flex-1" onClick={() => { setEscrowJob(null); setEscrowMessage(null); }}>Cancel</Button>
-                    <Button type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white" disabled={escrowLoading || !escrowPhone}>
-                      {escrowLoading ? 'Initiating...' : 'Send M-PESA Prompt'}
-                    </Button>
-                  </div>
-               </form>
             </div>
           </div>
         </div>

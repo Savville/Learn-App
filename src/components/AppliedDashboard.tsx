@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { OTPLoginForm } from './OTPLoginForm';
 import { Button } from '@/components/ui/button';
-import { LogOut, FolderHeart, Calendar, ChevronRight } from 'lucide-react';
+import { LogOut, FolderHeart, Calendar, ChevronRight, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toSlug } from '@/utils/dateUtils';
 
@@ -153,59 +153,113 @@ export function AppliedDashboard() {
             {applications.map((app) => (
               <div key={app._id} className="flex flex-col p-6 bg-white border border-transparent shadow-sm hover:shadow-md hover:border-blue-100 rounded-2xl transition-all group">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors mb-3">
-                      {app.opportunityTitle}
-                    </h3>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                      <span className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                        <Calendar className="w-4 h-4 text-gray-400" /> 
+                  <div className="w-full">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-gray-900 text-xl group-hover:text-blue-600 transition-colors">
+                        {app.opportunityTitle}
+                      </h3>
+                      <span className="flex items-center gap-1.5 text-sm text-gray-500 bg-slate-50 px-3 py-1 rounded-md border border-slate-100">
+                        <Calendar className="w-4 h-4" /> 
                         {new Date(app.appliedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
-                      <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide border ${
-                        app.status === 'pending' || app.status === 'Pending' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                        app.status === 'approved' || app.status === 'paid' ? 'bg-green-50 text-green-700 border-green-100' :
-                        app.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-100' :
-                        app.status === 'disputed' ? 'bg-red-600 text-white border-red-700' :
-                        app.status.startsWith('resolved_') ? 'bg-blue-600 text-white border-blue-700' :
-                        'bg-gray-50 text-gray-600 border-gray-200'
-                      }`}>
-                        {app.status}
-                      </span>
+                    </div>
+                    
+                    {/* Visual Stepper */}
+                    {app.status !== 'rejected' && !app.status.startsWith('resolved_') && app.status !== 'disputed' && (
+                      <div className="flex items-center w-full max-w-2xl my-6">
+                        {[
+                          { label: 'Applied', step: 1 },
+                          { label: 'Shortlisted', step: 2 },
+                          { label: 'Approved', step: 3 },
+                          { label: 'Paid', step: 4 }
+                        ].map((s, i) => {
+                          const currentStep = 
+                            app.status.toLowerCase() === 'paid' ? 4 : 
+                            app.status.toLowerCase() === 'approved' ? 3 : 
+                            app.status.toLowerCase() === 'shortlisted' ? 2 : 1;
+                          
+                          const isActive = currentStep >= s.step;
+                          const isLast = i === 3;
+                          
+                          return (
+                            <div key={s.label} className={`flex items-center ${isLast ? '' : 'flex-1'}`}>
+                              <div className="flex flex-col items-center relative">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-colors ${isActive ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-200 text-slate-400'}`}>
+                                  {isActive && currentStep > s.step ? <CheckCircle className="w-5 h-5" /> : s.step}
+                                </div>
+                                <span className={`absolute top-10 text-xs font-medium whitespace-nowrap ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>{s.label}</span>
+                              </div>
+                              {!isLast && (
+                                <div className={`flex-1 h-1 mx-2 rounded-full transition-colors ${currentStep > s.step ? 'bg-blue-600' : 'bg-slate-100'}`}></div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Status Alerts */}
+                    <div className="mt-10 space-y-3">
+                      {app.status === 'rejected' && (
+                        <div className="p-4 bg-red-50 text-red-700 border border-red-100 rounded-lg flex items-start gap-3">
+                          <LogOut className="w-5 h-5 mt-0.5 text-red-500" />
+                          <div>
+                            <p className="font-semibold">Application Not Selected</p>
+                            <p className="text-sm mt-1">Unfortunately, your application was not moved forward. Keep applying to other opportunities!</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {app.status === 'approved' && (
+                        <div className="p-4 bg-green-50 text-green-800 border border-green-200 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-start gap-3">
+                            <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
+                            <div>
+                              <p className="font-bold">You've been selected!</p>
+                              <p className="text-sm mt-1">The poster is processing your payment. Employer contact: <a href={`mailto:${app.posterContactEmail}`} className="underline text-blue-700">{app.posterContactEmail}</a></p>
+                            </div>
+                          </div>
+                          {app.isEscrowFunded && (
+                            <Button 
+                              onClick={() => setDisputeAppId(app._id)}
+                              variant="outline" size="sm" className="shrink-0 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+                              Raise Dispute
+                            </Button>
+                          )}
+                        </div>
+                      )}
+
+                      {app.status === 'paid' && (
+                        <div className="p-4 bg-blue-50 text-blue-800 border border-blue-200 rounded-lg flex items-start gap-3">
+                          <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
+                          <div>
+                            <p className="font-bold">Payment released!</p>
+                            <p className="text-sm mt-1">Check your M-PESA. The funds have been successfully transferred to your account.</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {app.status === 'disputed' && (
+                        <div className="p-4 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg flex items-start gap-3">
+                          <div className="w-5 h-5 mt-0.5 text-amber-600">⚠️</div>
+                          <div>
+                            <p className="font-bold">Dispute raised.</p>
+                            <p className="text-sm mt-1">Admin is reviewing. We will contact you within 48 hours to mediate the transaction.</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {app.status.startsWith('resolved_') && (
+                        <div className="p-4 bg-slate-50 text-slate-800 border border-slate-200 rounded-lg flex items-start gap-3">
+                          <CheckCircle className="w-5 h-5 mt-0.5 text-slate-500" />
+                          <div>
+                            <p className="font-bold">Dispute Resolved</p>
+                            <p className="text-sm mt-1">{app.status === 'resolved_paid' ? 'Funds have been released to you.' : 'Funds were refunded to the poster.'}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Phase 2: Contact Unmasking for Approved Applicants */}
-                  {(app.status === 'approved' || app.status === 'paid' || app.status === 'disputed') && app.posterContactEmail && (
-                    <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-100 flex flex-col sm:flex-row sm:items-center gap-2">
-                       <span className="text-xs font-semibold text-green-800">You've been approved for work!</span>
-                       <span className="text-sm text-green-900 border-l border-green-200 pl-3">
-                         Employer email: <a href={`mailto:${app.posterContactEmail}`} className="font-bold underline text-blue-700">{app.posterContactEmail}</a>
-                       </span>
-                    </div>
-                  )}
-
-                  {/* Phase 4: Raise a Dispute for Approved Escrow Apps */}
-                  {app.status === 'approved' && app.isEscrowFunded && (
-                     <div className="mt-4 border-t border-slate-100 pt-3 flex flex-col md:flex-row md:items-center justify-between">
-                        <p className="text-xs text-slate-500">Is this employer unresponsive or refusing to pay via Escrow?</p>
-                        <Button 
-                          onClick={() => setDisputeAppId(app._id)}
-                          variant="destructive" size="sm" className="mt-2 md:mt-0 text-xs">
-                          Raise a Dispute
-                        </Button>
-                     </div>
-                  )}
-                  {app.status === 'disputed' && (
-                    <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm border border-red-100 rounded-md font-medium">
-                      Dispute Active: Admins have been notified and will email you directly to mediate this transaction.
-                    </div>
-                  )}
-                  {app.status.startsWith('resolved_') && (
-                    <div className="mt-4 p-3 bg-blue-50 text-blue-700 text-sm border border-blue-100 rounded-md font-medium">
-                      Dispute Resolved: {app.status === 'resolved_paid' ? 'Funds released to you.' : 'Funds refunded to poster.'}
-                    </div>
-                  )}
                 </div>
                 <div className="flex items-center">
                   <Link 

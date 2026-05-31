@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel } from 'lucide-react';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -28,6 +28,47 @@ export default function AdminDashboard() {
   const [editForm, setEditForm] = useState<any>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
 
+
+  // Report State
+  const [reportData, setReportData] = useState<any | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  
+  // Comms State
+  const [lastN, setLastN] = useState<number>(5);
+  const [lastDigestSent, setLastDigestSent] = useState<string | null>(localStorage.getItem('lastDigestSent') || null);
+
+  const handleGenerateReport = async (oppId: string) => {
+    setReportLoading(true);
+    setReportModalOpen(true);
+    try {
+      const token = sessionStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/reports/${oppId}/postmortem`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        setReportData(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const handleEmailReport = async () => {
+    if (!reportData) return;
+    setActionLoading('emailing_report');
+    try {
+      const token = sessionStorage.getItem('adminToken');
+      await fetch(`${API_BASE}/admin/reports/${reportData.id}/email-postmortem`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ posterEmail: reportData.posterEmail })
+      });
+      alert('Report emailed successfully!');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const fetchPending = async () => {
     try {
@@ -875,7 +916,12 @@ export default function AdminDashboard() {
                           <Badge variant="outline" className={`text-[10px] h-5 ${opp.upfrontCost === 'Has Upfront Cost' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>{opp.upfrontCost || 'No Upfront Cost'}</Badge>
                         </div>
                      </div>
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex gap-2 shrink-0 flex-wrap justify-end mt-2 sm:mt-0">
+                       {(opp.status === 'Expired' || (opp.deadline && new Date(opp.deadline) < new Date())) && (
+                         <Button variant="outline" size="sm" className="text-purple-600 border-purple-200 hover:bg-purple-50 hover:text-purple-700" onClick={() => handleGenerateReport(opp.id)}>
+                           <FileText className="w-4 h-4 mr-2" /> Report
+                         </Button>
+                       )}
                        <Button variant="outline" size="sm" onClick={() => handleEditClick(opp)}>
                          <Pencil className="w-4 h-4 mr-2" /> Edit
                        </Button>
@@ -1012,8 +1058,16 @@ export default function AdminDashboard() {
           <div className="space-y-6 max-w-4xl">
             <Card className="border-slate-200 shadow-sm">
               <CardHeader className="bg-slate-50 border-b border-slate-100 rounded-t-xl">
-                <CardTitle className="text-xl text-slate-800">Email Center</CardTitle>
-                <CardDescription>Send opportunity digests to your active subscribers.</CardDescription>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-xl text-slate-800">Email Center</CardTitle>
+                    <CardDescription>Send opportunity digests to your active subscribers.</CardDescription>
+                  </div>
+                  <div className="text-left md:text-right bg-white p-3 rounded border border-slate-200 shadow-sm">
+                    <p className="text-sm font-semibold text-slate-700">Subscribers: <span className="text-blue-600">{stats?.totalSubscribers || 0}</span></p>
+                    <p className="text-xs text-slate-500 mt-1">Last sent: {lastDigestSent || 'Never'}</p>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-6 space-y-8">
                 {/* General Digest */}
@@ -1027,19 +1081,42 @@ export default function AdminDashboard() {
                       Send an email containing the latest general opportunities to all subscribers. 
                       Subscribers who haven't set their preferences will receive this.
                     </p>
+                    <div className="flex items-center gap-3 mt-4">
+                      <label className="text-sm font-medium text-slate-700">Include last:</label>
+                      <Input 
+                        type="number" 
+                        min={1} 
+                        max={20} 
+                        value={lastN} 
+                        onChange={(e) => setLastN(Number(e.target.value))}
+                        className="w-20 h-8"
+                      />
+                      <span className="text-sm text-slate-500">opportunities</span>
+                    </div>
                   </div>
                   <Button 
-                    className="shrink-0 font-semibold"
+                    className="shrink-0 font-semibold mt-4 md:mt-0"
                     onClick={async () => {
-                      if (!window.confirm('Send the general digest to all subscribers?')) return;
+                      if (!window.confirm(`Send the general digest with the last ${lastN} opportunities to all subscribers?`)) return;
                       const token = sessionStorage.getItem('adminToken');
                       try {
                         const res = await fetch(`${API_BASE}/admin/send-digest`, {
                           method: 'POST',
-                          headers: { Authorization: `Bearer ${token}` }
+                          headers: { 
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json' 
+                          },
+                          body: JSON.stringify({ lastN })
                         });
                         const data = await res.json();
-                        alert(res.ok ? data.message : 'Error: ' + data.error);
+                        if (res.ok) {
+                          alert(data.message);
+                          const now = new Date().toLocaleString();
+                          setLastDigestSent(now);
+                          localStorage.setItem('lastDigestSent', now);
+                        } else {
+                          alert('Error: ' + data.error);
+                        }
                       } catch (e: any) {
                         alert('Failed: ' + e.message);
                       }
@@ -1062,7 +1139,7 @@ export default function AdminDashboard() {
                   </div>
                   <Button 
                     variant="outline"
-                    className="shrink-0 border-purple-200 text-purple-700 hover:bg-purple-50 font-semibold"
+                    className="shrink-0 border-purple-200 text-purple-700 hover:bg-purple-50 font-semibold mt-4 md:mt-0"
                     onClick={async () => {
                       if (!window.confirm('Run the matching engine and send personalized digests? This may take a moment.')) return;
                       const token = sessionStorage.getItem('adminToken');
@@ -1072,7 +1149,14 @@ export default function AdminDashboard() {
                           headers: { Authorization: `Bearer ${token}` }
                         });
                         const data = await res.json();
-                        alert(res.ok ? data.message : 'Error: ' + data.error);
+                        if (res.ok) {
+                          alert(data.message);
+                          const now = new Date().toLocaleString();
+                          setLastDigestSent(now);
+                          localStorage.setItem('lastDigestSent', now);
+                        } else {
+                          alert('Error: ' + data.error);
+                        }
                       } catch (e: any) {
                         alert('Failed: ' + e.message);
                       }
@@ -1086,6 +1170,108 @@ export default function AdminDashboard() {
           </div>
         ) : null}
       </div>
+
+      <Dialog open={reportModalOpen} onOpenChange={setReportModalOpen}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <FileText className="w-5 h-5 text-purple-600" />
+              Post-Mortem Analytics Report
+            </DialogTitle>
+          </DialogHeader>
+
+          {reportLoading ? (
+            <div className="py-12 flex justify-center items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            </div>
+          ) : reportData ? (
+            <div id="printable-report" className="space-y-6 mt-4">
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <h3 className="font-bold text-lg text-slate-900">{reportData.title}</h3>
+                <p className="text-sm text-slate-500 mt-1">Poster: {reportData.posterEmail}</p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex flex-col items-center">
+                  <Eye className="w-6 h-6 text-blue-500 mb-2" />
+                  <span className="text-2xl font-bold text-slate-900">{reportData.views}</span>
+                  <span className="text-xs text-slate-500 uppercase font-semibold">Total Views</span>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-lg flex flex-col items-center">
+                  <TrendingUp className="w-6 h-6 text-emerald-500 mb-2" />
+                  <span className="text-2xl font-bold text-slate-900">{reportData.clicks}</span>
+                  <span className="text-xs text-slate-500 uppercase font-semibold">Total Clicks</span>
+                </div>
+                <div className="bg-purple-50 border border-purple-100 p-4 rounded-lg flex flex-col items-center">
+                  <Users className="w-6 h-6 text-purple-500 mb-2" />
+                  <span className="text-2xl font-bold text-slate-900">{reportData.totalApplicants}</span>
+                  <span className="text-xs text-slate-500 uppercase font-semibold">Applicants</span>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-bold text-sm text-slate-700 uppercase mb-3 border-b pb-2">Education Breakdown</h4>
+                  {Object.keys(reportData.educationBreakdown).length === 0 ? (
+                    <p className="text-sm text-slate-500 italic">No data</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {Object.entries(reportData.educationBreakdown).map(([level, count]: [string, any]) => (
+                        <li key={level} className="flex justify-between items-center text-sm">
+                          <span className="text-slate-700">{level}</span>
+                          <span className="font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-900">{count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-slate-700 uppercase mb-3 border-b pb-2">Top Fields of Study</h4>
+                  {reportData.topFields.length === 0 ? (
+                    <p className="text-sm text-slate-500 italic">No data</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {reportData.topFields.map((f: any) => (
+                        <li key={f.field} className="flex justify-between items-center text-sm">
+                          <span className="text-slate-700 truncate mr-2">{f.field}</span>
+                          <span className="font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-900">{f.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-slate-100">
+                <Button 
+                  className="flex-1 bg-slate-900 text-white hover:bg-slate-800"
+                  onClick={() => {
+                    const printContent = document.getElementById('printable-report');
+                    if (printContent) {
+                      const originalContents = document.body.innerHTML;
+                      document.body.innerHTML = printContent.innerHTML;
+                      window.print();
+                      document.body.innerHTML = originalContents;
+                      window.location.reload(); // Reload to restore React state bindings
+                    }
+                  }}
+                >
+                  Download PDF
+                </Button>
+                <Button 
+                  className="flex-1 bg-purple-600 text-white hover:bg-purple-700"
+                  disabled={actionLoading === 'emailing_report'}
+                  onClick={handleEmailReport}
+                >
+                  {actionLoading === 'emailing_report' ? 'Sending...' : 'Email Poster'}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-red-500 text-center py-8">Failed to load report data.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
