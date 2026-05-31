@@ -1,6 +1,5 @@
 import { Hero } from '../components/Hero';
 import { OpportunityCard } from '../components/OpportunityCard';
-import { Newsletter } from '../components/Newsletter';
 import { opportunities } from '../data/opportunities';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -58,9 +57,6 @@ export function Home() {
             ))}
           </div>
         </div>
-      </section>
-
-      <Newsletter />
     </div>
   );
 }
