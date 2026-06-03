@@ -822,7 +822,7 @@ export function PostWithUs() {
                                   )}
                                 </td>
                                 <td className="border-y border-gray-100 px-5 py-5 align-top group-hover:border-blue-100">
-                                  {feat.importance && feat.importance !== 'Low' && feat.importance !== 'Normal' ? (
+                                  {feat.importance === 'High' || feat.importance === 'Medium' ? (
                                     <span className={`flex items-center gap-1.5 font-bold ${feat.importance === 'High' ? 'text-red-600' : 'text-amber-500'}`}>
                                       {feat.importance === 'High' && <AlertCircle className="h-4 w-4" />}
                                       {feat.importance === 'Medium' && <Info className="h-4 w-4" />}
