@@ -760,21 +760,21 @@ export function PostWithUs() {
                         Edit any value before publishing.
                       </p>
                     </div>
-                    <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white">
+                    <div className="">
                       <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
+                        <table className="w-full text-left text-sm border-separate border-spacing-y-4">
                           <thead>
-                            <tr className="bg-gray-50/50 text-xs uppercase tracking-wide text-slate-500">
-                              <th className="border-b border-gray-50 px-5 py-5 font-medium">
+                            <tr className="text-xs uppercase tracking-wide text-slate-500">
+                              <th className="px-5 py-3 font-medium">
                                 Feature
                               </th>
-                              <th className="border-b border-gray-50 px-5 py-5 font-medium">
+                              <th className="px-5 py-3 font-medium">
                                 Extracted value
                               </th>
-                              <th className="border-b border-gray-50 px-5 py-5 font-medium">
+                              <th className="px-5 py-3 font-medium text-center">
                                 Importance
                               </th>
-                              <th className="border-b border-gray-50 px-5 py-5 font-medium">
+                              <th className="px-5 py-3 font-medium">
                                 Quick actions
                               </th>
                             </tr>
@@ -783,12 +783,12 @@ export function PostWithUs() {
                             {parsedData.extractedFeatures.map((feat, idx) => (
                               <tr
                                 key={idx}
-                                className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}
+                                className="bg-white shadow-sm hover:shadow-md transition-shadow group"
                               >
-                                <td className="border-b border-gray-50 px-5 py-5 text-slate-900">
+                                <td className="border-y border-l border-gray-100 px-5 py-5 text-slate-900 rounded-l-2xl group-hover:border-blue-100">
                                   <span className="font-medium">{feat.feature}</span>
                                 </td>
-                                <td className="border-b border-gray-50 px-5 py-5 align-top">
+                                <td className="border-y border-gray-100 px-5 py-5 align-top group-hover:border-blue-100">
                                   {feat.feature === 'Deadline' ? (
                                     <div className="flex flex-col gap-2 sm:flex-row">
                                       <Input
@@ -820,25 +820,16 @@ export function PostWithUs() {
                                     />
                                   )}
                                 </td>
-                                <td className="border-b border-gray-50 px-5 py-5 align-top">
-                                  <Badge
-                                    variant={
-                                      feat.importance === 'High'
-                                        ? 'destructive'
-                                        : 'secondary'
-                                    }
-                                    className={`flex items-center gap-1 font-bold ${feat.importance === 'High' ? 'bg-red-600 text-white hover:bg-red-700 animate-pulse' : feat.importance === 'Medium' ? 'bg-amber-400 text-slate-900 hover:bg-amber-500' : ''}`}
-                                  >
-                                    {feat.importance === 'High' && (
-                                      <AlertCircle className="h-3 w-3" />
-                                    )}
-                                    {feat.importance === 'Medium' && (
-                                      <Info className="h-3 w-3" />
-                                    )}
-                                    {feat.importance}
-                                  </Badge>
+                                <td className="border-y border-gray-100 px-5 py-5 align-top group-hover:border-blue-100">
+                                  {feat.importance && feat.importance !== 'Low' && feat.importance !== 'Normal' ? (
+                                    <span className={`flex items-center gap-1.5 font-bold ${feat.importance === 'High' ? 'text-red-600' : 'text-amber-500'}`}>
+                                      {feat.importance === 'High' && <AlertCircle className="h-4 w-4" />}
+                                      {feat.importance === 'Medium' && <Info className="h-4 w-4" />}
+                                      {feat.importance}
+                                    </span>
+                                  ) : null}
                                 </td>
-                                <td className="border-b border-gray-50 px-5 py-5 align-top">
+                                <td className="border-y border-r border-gray-100 px-5 py-5 align-top rounded-r-2xl group-hover:border-blue-100">
                                   <div className="flex flex-wrap gap-2">
                                     {feat.feature === 'Application Link' && !feat.value && (
                                       <Button
