@@ -59,6 +59,11 @@ export function PostWithUs() {
   const [orgRequest, setOrgRequest] = useState({ name: '', organization: '', email: '', telephone: '', description: '' });
   const [requestStatus, setRequestStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  // OTP Verification State
+  const [showOTP, setShowOTP] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
 
   // Custom Form Builder State
   const [customForm, setCustomForm] = useState<ApplicationForm>({ isEnabled: false, fields: [] });
@@ -253,7 +258,7 @@ export function PostWithUs() {
     }
   };
 
-  const handlePublish = async () => {
+  const executePublish = async () => {
     if (!parsedData) {
       setError('Cannot publish without parsed data.');
       return;
@@ -376,6 +381,69 @@ export function PostWithUs() {
       setError(`Publishing failed: ${error.message}`);
     }
     setIsPublishing(false);
+  };
+
+  const handlePublishClick = async () => {
+    if (!parsedData) {
+      setError('Cannot publish without parsed data.');
+      return;
+    }
+    if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email || !reporter.websiteOrSocial) {
+      setError('Identity details are required to submit.');
+      return;
+    }
+    
+    // Check if the typed email is already verified in this session
+    const verifiedEmail = localStorage.getItem('user_email');
+    if (verifiedEmail && verifiedEmail.toLowerCase() === reporter.email.toLowerCase()) {
+      // Already verified, proceed to actual publish
+      await executePublish();
+    } else {
+      // Send OTP and show modal
+      setAuthLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`${API_BASE}/public/auth/send-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: reporter.email })
+        });
+        if (res.ok) {
+          setShowOTP(true);
+        } else {
+          const data = await res.json();
+          setError(data.error || 'Failed to send verification code');
+        }
+      } catch (err) {
+        setError('Network error sending verification code');
+      }
+      setAuthLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/public/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: reporter.email, otp })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('user_token', data.token);
+        localStorage.setItem('user_email', data.email);
+        setShowOTP(false);
+        await executePublish();
+      } else {
+        setError(data.error || 'Invalid verification code');
+      }
+    } catch (err) {
+      setError('Network error verifying code');
+    }
+    setAuthLoading(false);
   };
 
   return (
@@ -1096,7 +1164,7 @@ export function PostWithUs() {
                     <Button
                       className="px-12 py-4 h-auto rounded-md min-w-[280px] font-bold text-xl hover:shadow-xl transition-all hover:-translate-y-1 shadow-md"
                       style={{ backgroundColor: '#0933ed', color: '#ffffff', borderRadius: '10px' }}
-                      onClick={handlePublish}
+                      onClick={handlePublishClick}
                       disabled={isPublishing || !parsedData}
                     >
                       {isPublishing ? 'Submitting...' : editingPostId ? 'Submit Edit Request' : 'Submit for Verification'}
@@ -1108,6 +1176,50 @@ export function PostWithUs() {
           </>
         )}
       </div>
+
+      {/* OTP Verification Modal */}
+      {showOTP && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl transform scale-100 animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Verify Your Email</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              To prevent spam and impersonation, we've sent a 4-digit code to <span className="font-bold">{reporter.email}</span>.
+            </p>
+            <form onSubmit={handleVerifyOTP} className="space-y-4">
+              <div>
+                <label className="block text-sm font-extrabold text-slate-800 mb-2">Enter Access Code</label>
+                <Input
+                  required
+                  type="text"
+                  maxLength={4}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="e.g. 1234"
+                  className="w-full px-5 py-3 rounded-xl border border-gray-200 text-center tracking-[0.5em] font-mono text-xl outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                />
+              </div>
+              <div className="flex gap-3 mt-8">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => { setShowOTP(false); setAuthLoading(false); }} 
+                  className="flex-1 py-3 h-auto rounded-xl font-bold"
+                  disabled={authLoading}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="flex-1 py-3 h-auto rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={authLoading || otp.length < 4}
+                >
+                  {authLoading ? 'Verifying...' : 'Verify & Submit'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Success Modal */}
       {showSuccessModal && (
