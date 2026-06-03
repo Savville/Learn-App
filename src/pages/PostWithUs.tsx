@@ -881,16 +881,15 @@ export function PostWithUs() {
                           Toggle this to collect applications directly on our platform instead of an external website.
                         </p>
                       </div>
-                      <label className="relative inline-flex cursor-pointer items-center">
+                      <label className="flex items-center gap-2 cursor-pointer group">
                         <input
                           type="checkbox"
-                          className="peer sr-only"
+                          className="h-5 w-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors cursor-pointer"
                           checked={customForm.isEnabled}
                           onChange={(e) => setCustomForm(prev => ({ ...prev, isEnabled: e.target.checked }))}
                         />
-                        <div className="peer h-6 w-11 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rtl:peer-checked:after:-translate-x-full dark:border-slate-600 dark:bg-slate-700"></div>
-                        <span className="ml-3 text-sm font-medium text-slate-900">
-                          {customForm.isEnabled ? 'Enabled' : 'Disabled'}
+                        <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900 transition-colors">
+                          {customForm.isEnabled ? 'Enabled' : 'Enable'}
                         </span>
                       </label>
                     </div>
@@ -989,33 +988,35 @@ export function PostWithUs() {
                   </div>
 
                   {/* Optional Escrow Security Field */}
-                  <div className="mt-6 border border-blue-200 bg-blue-50 rounded-xl p-5 space-y-4">
-                    <div className="flex items-start gap-4">
-                      <input
-                        type="checkbox"
-                        className="mt-1"
-                        checked={!!parsedData.isEscrow}
-                        onChange={(e) => setParsedData({ ...parsedData, isEscrow: e.target.checked, escrowAmount: e.target.checked ? 1000 : undefined })}
-                      />
-                      <div>
-                        <h4 className="font-semibold text-blue-900 text-base">Protect this job with Escrow?</h4>
-                        <p className="text-sm text-blue-700">We will hold the payment securely via M-PESA until the work is approved. You will deposit the funds via your Dashboard after submitting the job.</p>
+                  {(parsedData.basicInfo.category === 'Gig' || parsedData.basicInfo.category === 'Job') && (
+                    <div className="mt-6 border border-blue-200 bg-blue-50 rounded-xl p-5 space-y-4">
+                      <div className="flex items-start gap-4">
+                        <input
+                          type="checkbox"
+                          className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          checked={!!parsedData.isEscrow}
+                          onChange={(e) => setParsedData({ ...parsedData, isEscrow: e.target.checked, escrowAmount: e.target.checked ? 1000 : undefined })}
+                        />
+                        <div>
+                          <h4 className="font-semibold text-blue-900 text-base">Protect this job with Escrow?</h4>
+                          <p className="text-sm text-blue-700">We will hold the payment securely via M-PESA until the work is approved. You will deposit the funds via your Dashboard after submitting the job.</p>
 
-                        {parsedData.isEscrow && (
-                          <div className="mt-4 flex items-center gap-3">
-                            <label className="text-sm font-semibold text-blue-900 whitespace-nowrap">Amount to lock (KES):</label>
-                            <Input
-                              type="number"
-                              className="bg-white border-blue-200 text-blue-900 font-bold max-w-[200px]"
-                              min="100"
-                              value={parsedData.escrowAmount || 1000}
-                              onChange={(e) => setParsedData({ ...parsedData, escrowAmount: Number(e.target.value) })}
-                            />
-                          </div>
-                        )}
+                          {parsedData.isEscrow && (
+                            <div className="mt-4 flex items-center gap-3">
+                              <label className="text-sm font-semibold text-blue-900 whitespace-nowrap">Amount to lock (KES):</label>
+                              <Input
+                                type="number"
+                                className="bg-white border-blue-200 text-blue-900 font-bold max-w-[200px]"
+                                min="100"
+                                value={parsedData.escrowAmount || 1000}
+                                onChange={(e) => setParsedData({ ...parsedData, escrowAmount: Number(e.target.value) })}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* STEP 4: Desktop Wide Image Upload */}
                   <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
