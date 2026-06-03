@@ -793,14 +793,14 @@ export function PostWithUs() {
                                     <div className="flex flex-col gap-2 sm:flex-row">
                                       <Input
                                         type="date"
-                                        className="w-full sm:w-40 text-sm"
+                                        className="w-full sm:w-40 px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 transition-colors h-auto text-sm bg-gray-50/50"
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                           handleFeatureEdit(idx, 'value', e.target.value)
                                         }
                                       />
                                       <Input
                                         type="text"
-                                        className="w-full text-sm"
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 transition-colors h-auto text-sm bg-gray-50/50"
                                         value={feat.value}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                           handleFeatureEdit(idx, 'value', e.target.value)
@@ -811,7 +811,7 @@ export function PostWithUs() {
                                   ) : (
                                     <Input
                                       type="text"
-                                      className="w-full text-sm"
+                                      className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 transition-colors h-auto text-sm bg-gray-50/50"
                                       value={feat.value}
                                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                         handleFeatureEdit(idx, 'value', e.target.value)
@@ -850,6 +850,7 @@ export function PostWithUs() {
                                         }
                                         variant="outline"
                                         size="sm"
+                                        className="rounded-lg border-blue-200 text-blue-700 hover:bg-blue-50 bg-blue-50/30"
                                       >
                                         Use â€œVisit main pageâ€
                                       </Button>
@@ -864,6 +865,7 @@ export function PostWithUs() {
                                         }
                                         variant="outline"
                                         size="sm"
+                                        className="rounded-lg border-blue-200 text-blue-700 hover:bg-blue-50 bg-blue-50/30"
                                       >
                                         Use â€œRollingâ€ template
                                       </Button>
@@ -918,7 +920,7 @@ export function PostWithUs() {
                                   setCustomForm({ ...customForm, fields: newFields });
                                 }}
                                 placeholder="Field Label (e.g. Portfolio Link)"
-                                className="w-48 text-sm"
+                                className="w-full md:w-48 px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 transition-colors h-auto text-sm bg-white"
                               />
                               <select
                                 value={field.type}
@@ -927,7 +929,7 @@ export function PostWithUs() {
                                   newFields[idx].type = e.target.value as FormField['type'];
                                   setCustomForm({ ...customForm, fields: newFields });
                                 }}
-                                className="h-10 rounded-md border border-input bg-background px-5 py-5 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                className="w-full md:w-auto px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 transition-colors h-auto text-sm bg-white"
                               >
                                 <option value="text">Short Text</option>
                                 <option value="textarea">Paragraph</option>
@@ -946,7 +948,7 @@ export function PostWithUs() {
                                     newFields[idx].validation = { ...newFields[idx].validation, maxLength: parseInt(e.target.value) || undefined };
                                     setCustomForm({ ...customForm, fields: newFields });
                                   }}
-                                  className="w-40 text-sm"
+                                  className="w-full md:w-32 px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 transition-colors h-auto text-sm bg-white"
                                 />
                               )}
 
@@ -959,14 +961,14 @@ export function PostWithUs() {
                                     newFields[idx].required = e.target.checked;
                                     setCustomForm({ ...customForm, fields: newFields });
                                   }}
-                                  className="rounded border-slate-300 text-primary focus:ring-primary"
+                                  className="h-5 w-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors"
                                 />
                                 Required
                               </label>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-xl h-auto"
                                 onClick={() => {
                                   const newFields = customForm.fields.filter((_, i) => i !== idx);
                                   setCustomForm({ ...customForm, fields: newFields });
