@@ -902,7 +902,7 @@ export function PostWithUs() {
                   <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-bold text-slate-900">Application Form Builder</h3>
+                        <h3 className="text-xl font-extrabold text-slate-900">Application Form Builder</h3>
                         <p className="text-sm text-slate-500">
                           Toggle this to collect applications directly on our platform instead of an external website.
                         </p>
@@ -1046,7 +1046,7 @@ export function PostWithUs() {
 
                   {/* STEP 4: Desktop Wide Image Upload */}
                   <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
-                    <label className="block text-sm font-semibold text-slate-900">
+                    <label className="block text-xl font-extrabold text-slate-900">
                       Upload cover image (desktop / wide)
                     </label>
                     <p className="text-xs text-slate-500">
