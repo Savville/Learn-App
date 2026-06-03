@@ -271,20 +271,35 @@ export function PostWithUs() {
       let imageUrl = '/Opportunities Kenya Logo 2.png'; // default fallback
 
       if (coverImage) {
-        const formData = new FormData();
-        formData.append('coverImage', coverImage);
-
-        const uploadResponse = await fetch(`${API_BASE}/public/upload-image`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        const uploadData = await uploadResponse.json();
-        if (!uploadResponse.ok) {
-          // Don't block publish on image failure â€” just warn and use default
-          console.warn('Image upload failed, using default logo:', uploadData.error);
-        } else {
-          imageUrl = uploadData.imageUrl;
+        try {
+          // 1. Get upload signature from backend
+          const sigRes = await fetch(`${API_BASE}/messages/upload-signature`);
+          if (sigRes.ok) {
+             const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
+             
+             // 2. Upload to Cloudinary
+             const formData = new FormData();
+             formData.append("file", coverImage);
+             formData.append("api_key", apiKey);
+             formData.append("timestamp", timestamp.toString());
+             formData.append("signature", signature);
+             
+             const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+               method: "POST",
+               body: formData,
+             });
+             
+             if (uploadRes.ok) {
+               const data = await uploadRes.json();
+               imageUrl = data.secure_url;
+             } else {
+               console.warn("Cloudinary upload failed, falling back to default.");
+             }
+          } else {
+             console.warn("Signature fetch failed, falling back to default.");
+          }
+        } catch (err) {
+          console.warn("Upload process failed:", err);
         }
       }
 
