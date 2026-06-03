@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -671,6 +671,7 @@ export function PostWithUs() {
                         <option value="Paid">Paid (Salary/Wage)</option>
                         <option value="Stipend">Stipend / Allowance</option>
                         <option value="Unpaid">Unpaid</option>
+                        <option value="Equity">Equity / Profit Sharing</option>
                         <option value="N/A">Not Applicable</option>
                       </select>
                     </div>

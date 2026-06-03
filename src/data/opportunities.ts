@@ -38,7 +38,7 @@ export interface Opportunity {
   contactEmail?: string;
   contactLink?: string;
   fundingType?: 'Fully Funded' | 'Partially Funded' | 'Paid Internship' | 'Unpaid Internship' | 'N/A';
-  compensationType: 'Paid' | 'Stipend' | 'Unpaid' | 'N/A';
+  compensationType: 'Paid' | 'Stipend' | 'Unpaid' | 'Equity' | 'N/A';
   upfrontCost: 'No Upfront Cost' | 'Has Upfront Cost';
   duration?: string;
   featured: boolean;
@@ -87,7 +87,7 @@ export const opportunities: Opportunity[] = [
     ],
     contactEmail: 'ochiwilliamotieno@gmail.com',
     fundingType: 'N/A',
-    compensationType: 'Paid',
+    compensationType: 'Equity',
     upfrontCost: 'No Upfront Cost',
     duration: 'Project-Based (with long-term partnership potential)',
     featured: true,

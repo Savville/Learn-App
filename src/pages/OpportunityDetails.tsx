@@ -497,13 +497,13 @@ export function OpportunityDetails() {
             {/* Financial Summary - New Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <div className={`p-4 rounded-xl border flex flex-col justify-center ${
-                opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend'
+                opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend' || opportunity.compensationType === 'Equity'
                   ? 'bg-blue-50 border-blue-100'
                   : 'bg-slate-50 border-slate-200'
               }`}>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Compensation</p>
                 <p className={`text-lg font-bold ${
-                  opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend'
+                  opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend' || opportunity.compensationType === 'Equity'
                     ? 'text-blue-700'
                     : 'text-slate-700'
                 }`}>
