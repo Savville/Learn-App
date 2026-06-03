@@ -1199,7 +1199,7 @@ export function PostWithUs() {
                 />
               </div>
               <div className="flex items-start gap-2 mt-4 pb-2">
-                <input type="checkbox" id="termsPost" required className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
+                <input type="checkbox" id="termsPost" required defaultChecked className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
                 <label htmlFor="termsPost" className="text-sm text-gray-600">
                   I agree to the <Link to="/about#terms" target="_blank" className="text-blue-600 hover:underline font-medium">Terms and Conditions</Link>
                 </label>
