@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText } from 'lucide-react';
+import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2 } from 'lucide-react';
 
 export function Inbox() {
   const [email, setEmail] = useState('');
@@ -19,6 +19,8 @@ export function Inbox() {
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const fetchConversations = async (userEmail: string) => {
@@ -32,6 +34,64 @@ export function Inbox() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File is too large. Max 10MB allowed.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      // 1. Get signature from backend
+      const sigRes = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/upload-signature`);
+      if (!sigRes.ok) throw new Error("Could not get upload signature.");
+      const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
+
+      // 2. Upload to Cloudinary
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", apiKey);
+      formData.append("timestamp", timestamp.toString());
+      formData.append("signature", signature);
+
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error("Upload failed.");
+      const data = await uploadRes.json();
+
+      // 3. Send message with the file URL
+      const newContent = `[Attachment]: ${data.secure_url}`;
+      const payload = {
+        conversationId: activeConv._id,
+        gigId: activeConv.gigId,
+        senderEmail: email,
+        receiverEmail: activeConv.participants.find((p: string) => p !== email) || '',
+        content: newContent,
+        isPartnership: activeConv.status === 'partnership'
+      };
+
+      const msgRes = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (msgRes.ok) {
+        await fetchMessages(activeConv._id);
+      }
+    } catch (err: any) {
+      alert("File upload error: " + err.message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -493,7 +553,22 @@ export function Inbox() {
                   <p className="text-sm text-center text-gray-500 italic py-2">Waiting for the employer to unlock this conversation before you can reply.</p>
                 ) : (
                   <form onSubmit={handleSendReply} className="flex flex-col gap-2">
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 items-center">
+                      <button 
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="rounded-full w-12 h-12 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 shrink-0 transition-colors"
+                      >
+                        {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Paperclip className="w-5 h-5" />}
+                      </button>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleFileUpload} 
+                        className="hidden" 
+                        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip"
+                      />
                       <input 
                         type="text"
                         value={replyContent} 

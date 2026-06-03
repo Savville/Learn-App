@@ -3,6 +3,7 @@ import { getDB } from '../config/database.js';
 import { ObjectId } from 'mongodb';
 import { sendNewMessageNotification } from '../services/emailService.js';
 import { initiateSTKPush } from '../services/mpesaService.js';
+import { v2 as cloudinary } from 'cloudinary';
 
 const router = express.Router();
 
@@ -35,6 +36,34 @@ const applyAutoCensor = (text) => {
 
   return censored;
 };
+
+// GET /api/messages/upload-signature
+// Generate a secure Cloudinary upload signature for direct frontend uploads
+router.get('/upload-signature', async (req, res) => {
+  try {
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    
+    // Check if Cloudinary is configured
+    if (!process.env.CLOUDINARY_API_SECRET) {
+      return res.status(500).json({ error: 'Cloudinary is not configured on the server.' });
+    }
+
+    const signature = cloudinary.utils.api_sign_request(
+      { timestamp: timestamp },
+      process.env.CLOUDINARY_API_SECRET
+    );
+    
+    res.json({
+      signature,
+      timestamp,
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      apiKey: process.env.CLOUDINARY_API_KEY
+    });
+  } catch (error) {
+    console.error('Error generating signature:', error);
+    res.status(500).json({ error: 'Failed to generate signature' });
+  }
+});
 
 // GET /api/messages/:conversationId
 // Get messages for a specific conversation
