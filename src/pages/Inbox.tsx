@@ -402,7 +402,9 @@ export function Inbox() {
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   </div>
-                  <span className="font-semibold text-center sm:text-left">Escrow Funded! The job is now officially active. Communication remains strictly on-platform for your protection.</span>
+                  <span className="font-semibold text-center sm:text-left">
+                    Escrow Funded! The job is now officially active. For your security and to guarantee arbitration, keep all communication and files on this platform. Sharing external contact details or moving offline violates our terms and voids your Escrow protection. GitHub and LinkedIn links are allowed.
+                  </span>
                 </div>
               )}
               {activeConv.status === 'partnership' && (
@@ -588,16 +590,7 @@ export function Inbox() {
                     )}
                   </form>
                  )}
-                {activeConv.status !== 'partnership' && (
-                  <div className="mt-4 text-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                    <p className="text-xs text-black font-bold flex items-center justify-center gap-1 mb-1">
-                      <AlertTriangle className="w-3 h-3 text-amber-500" /> Safety & Payment Protection
-                    </p>
-                    <p className="text-[11px] text-gray-800 italic leading-relaxed">
-                      For your security and to guarantee arbitration, keep all communication and files on this platform. Sharing external contact details or moving offline violates our terms and voids your Escrow protection. GitHub and LinkedIn links are allowed.
-                    </p>
-                  </div>
-                )}
+
                 
                 {/* Action Controls Moved to Bottom */}
                 <div className="flex flex-wrap justify-center gap-3 mt-4 border-t border-gray-100 pt-4">
