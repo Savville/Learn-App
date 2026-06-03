@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare } from 'lucide-react';
+import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText } from 'lucide-react';
 
 export function Inbox() {
   const [email, setEmail] = useState('');
@@ -363,11 +363,85 @@ export function Inbox() {
                 </div>
               )}
               {activeConv.status === 'approved' && (
-                <div className="bg-teal-50/50 p-4 text-sm text-teal-800 border-b border-teal-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                    <Handshake className="w-4 h-4 text-teal-600" />
+                <div className="bg-teal-50/50 p-4 text-sm text-teal-800 border-b border-teal-100/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+                      <Handshake className="w-4 h-4 text-teal-600" />
+                    </div>
+                    <span className="font-semibold text-center sm:text-left">Job Approved! Funds released. This project is now closed.</span>
                   </div>
-                  <span className="font-semibold text-center sm:text-left">Job Approved! Funds released. This project is now closed.</span>
+                  <button 
+                    onClick={() => {
+                      const printWindow = window.open('', '_blank');
+                      if (printWindow) {
+                        printWindow.document.write(`
+                          <html>
+                            <head>
+                              <title>Receipt - Learn Opportunities</title>
+                              <style>
+                                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #111827; }
+                                .header { display: flex; justify-content: space-between; border-bottom: 2px solid #E5E7EB; padding-bottom: 20px; margin-bottom: 30px; }
+                                .logo { font-size: 24px; font-weight: 900; color: #2563EB; }
+                                .title { font-size: 20px; font-weight: bold; color: #374151; text-transform: uppercase; }
+                                .details { display: flex; justify-content: space-between; margin-bottom: 40px; }
+                                .col { display: flex; flex-direction: column; gap: 8px; }
+                                .label { font-size: 12px; color: #6B7280; text-transform: uppercase; font-weight: bold; }
+                                .value { font-size: 16px; font-weight: 500; }
+                                .table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+                                .table th { text-align: left; padding: 12px; border-bottom: 2px solid #E5E7EB; color: #6B7280; font-size: 12px; text-transform: uppercase; }
+                                .table td { padding: 16px 12px; border-bottom: 1px solid #E5E7EB; }
+                                .total { text-align: right; font-size: 20px; font-weight: bold; margin-top: 20px; color: #059669; }
+                                .footer { text-align: center; color: #6B7280; font-size: 14px; margin-top: 60px; border-top: 1px solid #E5E7EB; padding-top: 20px; }
+                              </style>
+                            </head>
+                            <body>
+                              <div class="header">
+                                <div class="logo">Learn Opportunities</div>
+                                <div class="title">Official Receipt</div>
+                              </div>
+                              <div class="details">
+                                <div class="col">
+                                  <span class="label">Date</span>
+                                  <span class="value">${new Date().toLocaleDateString()}</span>
+                                </div>
+                                <div class="col">
+                                  <span class="label">Reference ID</span>
+                                  <span class="value">ESC-${activeConv._id.substring(0,8).toUpperCase()}</span>
+                                </div>
+                                <div class="col">
+                                  <span class="label">Status</span>
+                                  <span class="value" style="color: #059669; font-weight: bold;">PAID (ESCROW CLEARED)</span>
+                                </div>
+                              </div>
+                              <table class="table">
+                                <thead>
+                                  <tr>
+                                    <th>Description</th>
+                                    <th>Applicant Name</th>
+                                    <th>Amount</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td>Contract Payment for ${activeConv.opportunityTitle || 'Job/Gig'}</td>
+                                    <td>${activeConv.applicantName || 'Freelancer'}</td>
+                                    <td>KES 10,000</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <div class="total">Total Paid: KES 10,000</div>
+                              <div class="footer">Thank you for using Learn Opportunities Secure Escrow. This is a computer-generated receipt.</div>
+                              <script>window.print();</script>
+                            </body>
+                          </html>
+                        `);
+                        printWindow.document.close();
+                      }
+                    }}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-teal-200 text-teal-700 rounded-lg hover:bg-teal-50 font-bold text-sm shadow-sm transition-colors mt-3 sm:mt-0"
+                  >
+                    <FileText className="w-4 h-4" /> Download Receipt
+                  </button>
                 </div>
               )}
               {activeConv.status === 'disputed' && (
