@@ -605,6 +605,7 @@ export function PostWithUs() {
                       <Input
                         value={parsedData.basicInfo.provider}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBasicInfoEdit('provider', e.target.value)}
+                        className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -612,7 +613,7 @@ export function PostWithUs() {
                         Category
                       </span>
                       <select
-                        className="w-full h-10 px-5 py-5 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
                         value={parsedData.basicInfo.category}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('category', e.target.value)}
                       >
@@ -647,7 +648,7 @@ export function PostWithUs() {
                         Funding type
                       </span>
                       <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-5 py-5 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
                         value={parsedData.basicInfo.fundingType || ''}
                         onChange={(e) => handleBasicInfoEdit('fundingType', e.target.value)}
                       >
@@ -664,7 +665,7 @@ export function PostWithUs() {
                         Compensation
                       </span>
                       <select
-                        className="w-full h-10 px-5 py-5 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
                         value={parsedData.basicInfo.compensationType || 'N/A'}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('compensationType', e.target.value)}
                       >
@@ -680,7 +681,7 @@ export function PostWithUs() {
                         Upfront Cost
                       </span>
                       <select
-                        className="w-full h-10 px-5 py-5 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
                         value={parsedData.basicInfo.upfrontCost || 'No Upfront Cost'}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('upfrontCost', e.target.value)}
                       >
@@ -695,7 +696,7 @@ export function PostWithUs() {
                       <Textarea
                         value={parsedData.basicInfo.description}
                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleBasicInfoEdit('description', e.target.value)}
-                        className="min-h-[80px]"
+                        className="min-h-[80px] w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
                       />
                     </div>
                   </div>
@@ -709,7 +710,7 @@ export function PostWithUs() {
                       <Textarea
                         value={parsedData.basicInfo.fullDescription || ''}
                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleBasicInfoEdit('fullDescription', e.target.value)}
-                        className="min-h-[120px]"
+                        className="min-h-[120px] w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
                         placeholder="The comprehensive detail of the opportunity..."
                       />
                     </div>
@@ -727,7 +728,7 @@ export function PostWithUs() {
                               benefits: e.target.value.split('\n').filter(Boolean)
                             })
                           }
-                          className="min-h-[80px]"
+                          className="min-h-[80px] w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
                           placeholder="e.g. Fully funded travel\nMonthly stipend..."
                         />
                       </div>
@@ -744,7 +745,7 @@ export function PostWithUs() {
                               eligibilityRequirements: e.target.value.split('\n').filter(Boolean)
                             })
                           }
-                          className="min-h-[80px]"
+                          className="min-h-[80px] w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
                           placeholder="e.g. Undergraduates only\nMust be Kenyan citizen..."
                         />
                       </div>
