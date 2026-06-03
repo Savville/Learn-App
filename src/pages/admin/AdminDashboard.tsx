@@ -782,38 +782,42 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-semibold mb-1 block">Title</label>
+                    <label className="text-sm font-semibold mb-1.5 block text-slate-700">Title</label>
                     <Input 
                       value={editForm.title || ''} 
                       onChange={e => setEditForm({...editForm, title: e.target.value})} 
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto"
                     />
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-5">
                     <div>
-                      <label className="text-sm font-semibold mb-1 block">Provider</label>
+                      <label className="text-sm font-semibold mb-1.5 block text-slate-700">Provider</label>
                       <Input 
                         value={editForm.provider || ''} 
                         onChange={e => setEditForm({...editForm, provider: e.target.value})} 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-semibold mb-1 block">Category</label>
+                      <label className="text-sm font-semibold mb-1.5 block text-slate-700">Category</label>
                       <Input 
                         value={editForm.category || ''} 
                         onChange={e => setEditForm({...editForm, category: e.target.value})} 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-semibold mb-1 block">Funding Type</label>
+                      <label className="text-sm font-semibold mb-1.5 block text-slate-700">Funding Type</label>
                       <Input 
                         value={editForm.fundingType || ''} 
                         onChange={e => setEditForm({...editForm, fundingType: e.target.value})} 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-semibold mb-1 block">Compensation</label>
+                      <label className="text-sm font-semibold mb-1.5 block text-slate-700">Compensation</label>
                       <select 
-                        className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto appearance-none"
                         value={editForm.compensationType || 'N/A'}
                         onChange={e => setEditForm({...editForm, compensationType: e.target.value})} 
                       >
@@ -824,9 +828,9 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-sm font-semibold mb-1 block">Upfront Cost</label>
+                      <label className="text-sm font-semibold mb-1.5 block text-slate-700">Upfront Cost</label>
                       <select 
-                        className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto appearance-none"
                         value={editForm.upfrontCost || 'No Upfront Cost'}
                         onChange={e => setEditForm({...editForm, upfrontCost: e.target.value})} 
                       >
@@ -835,41 +839,46 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-sm font-semibold mb-1 block">Deadline</label>
+                      <label className="text-sm font-semibold mb-1.5 block text-slate-700">Deadline</label>
                       <Input 
                         value={editForm.deadline || ''} 
                         onChange={e => setEditForm({...editForm, deadline: e.target.value})} 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto"
                       />
                     </div>
                     <div className="lg:col-span-3">
-                      <label className="text-sm font-semibold mb-1 block">Location</label>
+                      <label className="text-sm font-semibold mb-1.5 block text-slate-700">Location</label>
                       <Input 
                         value={editForm.location || ''} 
                         onChange={e => setEditForm({...editForm, location: e.target.value})} 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1 block">Application Link</label>
+                    <label className="text-sm font-semibold mb-1.5 block text-slate-700">Application Link</label>
                     <Input 
                       value={editForm.applicationLink || ''} 
                       onChange={e => setEditForm({...editForm, applicationLink: e.target.value})} 
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1 block">Short Description</label>
+                    <label className="text-sm font-semibold mb-1.5 block text-slate-700">Short Description</label>
                     <Textarea 
                       rows={3}
                       value={editForm.description || ''} 
                       onChange={e => setEditForm({...editForm, description: e.target.value})} 
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-semibold mb-1 block">Full Description</label>
+                    <label className="text-sm font-semibold mb-1.5 block text-slate-700">Full Description</label>
                     <Textarea 
                       rows={6}
                       value={editForm.fullDescription || ''} 
                       onChange={e => setEditForm({...editForm, fullDescription: e.target.value})} 
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white"
                     />
                   </div>
                   <div className="bg-slate-50 p-4 border rounded-md">
