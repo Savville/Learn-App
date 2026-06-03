@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send } from 'lucide-react';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send, MessageCircle } from 'lucide-react';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -22,6 +22,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
+  const [disputeChat, setDisputeChat] = useState<any[]>([]);
+  const [disputeChatLoading, setDisputeChatLoading] = useState(false);
   
   // Edit State
   const [editingOpp, setEditingOpp] = useState<any | null>(null);
@@ -1034,8 +1036,16 @@ export default function AdminDashboard() {
                       <div className="flex flex-col gap-2 shrink-0">
                         <Button
                           className="bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => handlePayDoer(dispute._id)}
-                          disabled={payDoerLoading === dispute._id}
+                          onClick={async () => {
+                            if (!window.confirm("Force release funds to the applicant?")) return;
+                            const token = sessionStorage.getItem('adminToken');
+                            await fetch(`${API_BASE}/admin/conversations/${dispute._id}/resolve`, {
+                              method: 'PUT',
+                              headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ resolution: 'resolved_paid' })
+                            });
+                            setDisputes(prev => prev.filter(d => d._id !== dispute._id));
+                          }}
                         >
                           <ShieldCheck className="w-4 h-4 mr-2" /> Force Release to Applicant
                         </Button>
@@ -1044,8 +1054,8 @@ export default function AdminDashboard() {
                           className="border-slate-300 text-slate-700 hover:bg-slate-100"
                           onClick={async () => {
                             const token = sessionStorage.getItem('adminToken');
-                            await fetch(`${API_BASE}/admin/applications/${dispute._id}/resolve`, {
-                              method: 'POST',
+                            await fetch(`${API_BASE}/admin/conversations/${dispute._id}/resolve`, {
+                              method: 'PUT',
                               headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                               body: JSON.stringify({ resolution: 'resolved_refunded' })
                             });
@@ -1054,6 +1064,56 @@ export default function AdminDashboard() {
                         >
                           <XCircle className="w-4 h-4 mr-2" /> Refund Poster
                         </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="secondary" 
+                              className="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200"
+                              onClick={async () => {
+                                setDisputeChatLoading(true);
+                                setDisputeChat([]);
+                                try {
+                                  const res = await fetch(`${API_BASE}/messages/${dispute._id}`);
+                                  if (res.ok) {
+                                    setDisputeChat(await res.json());
+                                  }
+                                } catch (e) {
+                                  console.error(e);
+                                }
+                                setDisputeChatLoading(false);
+                              }}
+                            >
+                              <MessageCircle className="w-4 h-4 mr-2" /> Review Chat Log
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle>Chat History Arbitration</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4 mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                              {disputeChatLoading ? (
+                                <p className="text-center text-slate-500 py-10">Loading chat history...</p>
+                              ) : disputeChat.length === 0 ? (
+                                <p className="text-center text-slate-500 py-10">No messages found in this conversation.</p>
+                              ) : (
+                                disputeChat.map((msg, idx) => (
+                                  <div key={idx} className={`flex flex-col ${msg.senderEmail === dispute.applicantEmail ? 'items-end' : 'items-start'}`}>
+                                    <span className="text-[10px] text-slate-400 font-medium mb-1 px-1">
+                                      {msg.senderEmail === dispute.applicantEmail ? 'Job Doer' : 'Poster'} ({msg.senderEmail})
+                                    </span>
+                                    <div className={`px-4 py-3 rounded-2xl max-w-[85%] whitespace-pre-wrap break-words text-sm ${
+                                      msg.senderEmail === dispute.applicantEmail 
+                                        ? 'bg-blue-600 text-white rounded-br-none shadow-sm' 
+                                        : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-sm'
+                                    }`}>
+                                      {msg.originalContent || msg.content}
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   </CardContent>

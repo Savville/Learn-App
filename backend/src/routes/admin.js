@@ -880,39 +880,29 @@ router.delete('/opportunities/:id', verifyAdminKey, async (req, res) => {
 router.get('/disputes', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
-    const disputes = await db.collection('applications')
+    const disputes = await db.collection('conversations')
       .find({ status: 'disputed' })
       .sort({ updatedAt: -1 })
       .toArray();
 
-    // Attach opportunity data for better context on the admin UI
-    const oppIds = [...new Set(disputes.map(d => d.opportunityId))];
+    const oppIds = [...new Set(disputes.map(d => d.gigId))];
     const opportunities = await db.collection('opportunities')
-      .find({ id: { $in: oppIds } })
+      .find({ $or: [{ id: { $in: oppIds } }, { _id: { $in: oppIds } }] })
       .toArray();
 
-    const pendingOpps = await db.collection('pending_opportunities')
-      .find({ 'opportunity.id': { $in: oppIds } })
-      .toArray();
-
-    // Map opportunities so they are easy to look up
     const oppMap = {};
-    opportunities.forEach(o => { oppMap[o.id] = o; });
-    pendingOpps.forEach(po => {
-      if (!oppMap[po.opportunity.id]) {
-        oppMap[po.opportunity.id] = {
-          ...po.opportunity,
-          posterEmail: po.reporter?.email
-        };
-      }
-    });
+    opportunities.forEach(o => { oppMap[o.id] = o; oppMap[o._id] = o; });
 
-    const enrichedDisputes = disputes.map(d => ({
-      ...d,
-      opportunityTitle: oppMap[d.opportunityId]?.title || 'Unknown Title',
-      escrowAmount: oppMap[d.opportunityId]?.escrowAmount || 0,
-      posterEmailFallback: oppMap[d.opportunityId]?.posterEmail || oppMap[d.opportunityId]?.contactEmail
-    }));
+    const enrichedDisputes = disputes.map(d => {
+      const opp = oppMap[d.gigId] || {};
+      return {
+        ...d,
+        opportunityTitle: opp.title || 'Unknown Title',
+        escrowAmount: opp.escrowAmount || 0,
+        applicantEmail: d.participants[0],
+        posterEmailFallback: opp.contactEmail || d.participants[1]
+      };
+    });
 
     res.json(enrichedDisputes);
   } catch (error) {
@@ -920,9 +910,9 @@ router.get('/disputes', verifyAdminKey, async (req, res) => {
   }
 });
 
-router.put('/applications/:appId/resolve', verifyAdminKey, async (req, res) => {
+router.put('/conversations/:convId/resolve', verifyAdminKey, async (req, res) => {
   try {
-    const { appId } = req.params;
+    const { convId } = req.params;
     const { resolution } = req.body; // 'resolved_paid' or 'resolved_refunded'
 
     if (!['resolved_paid', 'resolved_refunded'].includes(resolution)) {
@@ -931,13 +921,13 @@ router.put('/applications/:appId/resolve', verifyAdminKey, async (req, res) => {
 
     const { ObjectId } = await import('mongodb');
     const db = getDB();
-    const result = await db.collection('applications').updateOne(
-      { _id: new ObjectId(appId), status: 'disputed' }, // Ensure we only resolve disputed apps
+    const result = await db.collection('conversations').updateOne(
+      { _id: new ObjectId(convId), status: 'disputed' },
       { $set: { status: resolution, updatedAt: new Date(), resolvedAt: new Date() } }
     );
 
     if (result.matchedCount === 0) {
-      return res.status(404).json({ error: "Disputed application not found." });
+      return res.status(404).json({ error: "Disputed conversation not found." });
     }
 
     res.json({ message: `Dispute resolved as ${resolution}` });

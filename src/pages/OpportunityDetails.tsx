@@ -224,7 +224,8 @@ export function OpportunityDetails() {
           gigId: opportunity.id,
           senderEmail: pitchEmail,
           receiverEmail: opportunity.contactEmail || 'admin@l-earn.co',
-          content: pitchMessage
+          content: pitchMessage,
+          isPartnership: opportunity.category === 'Partnership'
         })
       });
 
@@ -624,7 +625,7 @@ export function OpportunityDetails() {
                     Closed
                   </Button>
                 </>
-              ) : (opportunity.category === 'Gig' || opportunity.category === 'Job') && !opportunity.applicationLink ? (
+              ) : (opportunity.category === 'Gig' || opportunity.category === 'Job' || opportunity.category === 'Partnership') && !opportunity.applicationLink ? (
                 <>
                   <h3 className="text-gray-900 mb-6 text-xl font-bold">Pitch for this {opportunity.category}</h3>
                   {!pitchSuccess ? (

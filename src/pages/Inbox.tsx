@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Unlock, CheckCircle, Send, MessageCircle } from 'lucide-react';
+import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare } from 'lucide-react';
 
 export function Inbox() {
   const [email, setEmail] = useState('');
@@ -67,7 +67,8 @@ export function Inbox() {
           conversationId: activeConv._id,
           senderEmail: email,
           receiverEmail,
-          content: replyContent
+          content: replyContent,
+          isPartnership: activeConv.status === 'partnership'
         })
       });
 
@@ -95,6 +96,45 @@ export function Inbox() {
     try {
       await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/hire`, { method: 'POST' });
       activeConv.status = 'hired';
+      setActiveConv({ ...activeConv });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeliver = async () => {
+    if (!activeConv) return;
+    try {
+      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/deliver`, { method: 'POST' });
+      activeConv.status = 'completed';
+      setActiveConv({ ...activeConv });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!activeConv) return;
+    try {
+      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/approve`, { method: 'POST' });
+      activeConv.status = 'approved';
+      setActiveConv({ ...activeConv });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDispute = async () => {
+    if (!activeConv) return;
+    const reason = prompt("Please provide a reason for the dispute. An admin will review the chat history.");
+    if (!reason) return;
+    try {
+      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/dispute`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason, initiatorEmail: email })
+      });
+      activeConv.status = 'disputed';
       setActiveConv({ ...activeConv });
     } catch (err) {
       console.error(err);
@@ -164,6 +204,10 @@ export function Inbox() {
                     {conv.status === 'pending' && <span className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-100">Locked</span>}
                     {conv.status === 'active' && <span className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100">Active</span>}
                     {conv.status === 'hired' && <span className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider bg-green-50 text-green-700 border border-green-100">Hired</span>}
+                    {conv.status === 'partnership' && <span className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-100">Open</span>}
+                    {conv.status === 'completed' && <span className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-100">Review</span>}
+                    {conv.status === 'approved' && <span className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider bg-teal-50 text-teal-700 border border-teal-100">Closed</span>}
+                    {conv.status === 'disputed' && <span className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider bg-red-50 text-red-700 border border-red-100">Dispute</span>}
                   </div>
                 </button>
               ))
@@ -181,17 +225,51 @@ export function Inbox() {
                   <h3 className="text-xl font-bold text-gray-900 mb-1">{activeConv.gigTitle}</h3>
                   <p className="text-sm text-gray-500">Chat with <span className="text-gray-700 font-medium">{activeConv.participants.find((p: string) => p !== email)}</span></p>
                 </div>
-                {/* Employer Controls */}
-                {isEmployer && activeConv.status === 'pending' && (
-                  <button onClick={handleUnlock} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors font-semibold text-sm">
-                    <Unlock className="w-4 h-4" /> Unlock to Reply
-                  </button>
-                )}
-                {isEmployer && activeConv.status === 'active' && (
-                  <button onClick={handleHire} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm animate-pulse">
-                    <CheckCircle className="w-4 h-4" /> Fund Escrow & Hire
-                  </button>
-                )}
+                {/* Controls */}
+                <div className="flex flex-wrap gap-2">
+                  {isEmployer && activeConv.status === 'pending' && (
+                    <button onClick={handleUnlock} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors font-semibold text-sm">
+                      <Unlock className="w-4 h-4" /> Unlock to Reply
+                    </button>
+                  )}
+                  {isEmployer && activeConv.status === 'active' && (
+                    <button onClick={handleHire} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm animate-pulse">
+                      <CheckCircle className="w-4 h-4" /> Fund Escrow & Hire
+                    </button>
+                  )}
+                  {isEmployer && activeConv.status === 'completed' && (
+                    <>
+                      <button onClick={handleApprove} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm">
+                        <Handshake className="w-4 h-4" /> Approve & Release
+                      </button>
+                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm">
+                        <AlertTriangle className="w-4 h-4" /> Dispute
+                      </button>
+                    </>
+                  )}
+                  {isEmployer && activeConv.status === 'hired' && (
+                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm">
+                      <AlertTriangle className="w-4 h-4" /> Dispute
+                    </button>
+                  )}
+                  
+                  {/* Applicant Controls */}
+                  {!isEmployer && activeConv.status === 'hired' && (
+                    <>
+                      <button onClick={handleDeliver} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 hover:shadow-lg transition-all font-semibold text-sm">
+                        <CheckSquare className="w-4 h-4" /> Deliver Job
+                      </button>
+                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm">
+                        <AlertTriangle className="w-4 h-4" /> Dispute
+                      </button>
+                    </>
+                  )}
+                  {!isEmployer && activeConv.status === 'completed' && (
+                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm">
+                      <AlertTriangle className="w-4 h-4" /> Dispute Employer
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Status Banner */}
@@ -208,7 +286,40 @@ export function Inbox() {
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   </div>
-                  <span className="font-semibold text-center sm:text-left">Escrow Funded! You can safely share contact details now.</span>
+                  <span className="font-semibold text-center sm:text-left">Escrow Funded! The job is now officially active. Communication remains strictly on-platform for your protection.</span>
+                </div>
+              )}
+              {activeConv.status === 'partnership' && (
+                <div className="bg-purple-50/50 p-4 text-sm text-purple-800 border-b border-purple-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <span className="font-semibold text-center sm:text-left">Partnership Collaboration: Chat is fully unlocked and unredacted. Escrow is not required.</span>
+                </div>
+              )}
+
+              {activeConv.status === 'completed' && (
+                <div className="bg-indigo-50/50 p-4 text-sm text-indigo-800 border-b border-indigo-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <UploadCloud className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <span className="font-semibold text-center sm:text-left">Job Delivered! Waiting for Employer to approve and release funds.</span>
+                </div>
+              )}
+              {activeConv.status === 'approved' && (
+                <div className="bg-teal-50/50 p-4 text-sm text-teal-800 border-b border-teal-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+                    <Handshake className="w-4 h-4 text-teal-600" />
+                  </div>
+                  <span className="font-semibold text-center sm:text-left">Job Approved! Funds released. This project is now closed.</span>
+                </div>
+              )}
+              {activeConv.status === 'disputed' && (
+                <div className="bg-red-50/50 p-4 text-sm text-red-800 border-b border-red-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                  </div>
+                  <span className="font-semibold text-center sm:text-left">Dispute Opened. An admin is reviewing the chat history to arbitrate.</span>
                 </div>
               )}
 
@@ -216,13 +327,13 @@ export function Inbox() {
               <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50">
                 {messages.map((msg, i) => {
                   const isMe = msg.senderEmail === email;
-                  const displayContent = activeConv.status === 'hired' ? msg.originalContent : msg.content;
+                  const displayContent = (activeConv.status === 'partnership') ? msg.originalContent : msg.content;
                   
                   return (
                     <div key={i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                       <div className={`px-4 py-3 rounded-2xl max-w-[80%] whitespace-pre-wrap break-words ${isMe ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'}`}>
                         {/* Render content. If it's uncensored, show original. Else style redacted parts differently. */}
-                        {activeConv.status === 'hired' ? (
+                        {(activeConv.status === 'partnership') ? (
                           <span>{displayContent}</span>
                         ) : (
                           displayContent.split(/(\[REDACTED.*?\])/).map((part: string, idx: number) => 
@@ -246,7 +357,9 @@ export function Inbox() {
 
               {/* Reply Box */}
               <div className="p-6 bg-white border-t border-gray-50 flex flex-col gap-3">
-                {activeConv.status === 'pending' && !isEmployer ? (
+                {(activeConv.status === 'approved' || activeConv.status === 'disputed') ? (
+                  <p className="text-sm text-center text-gray-500 italic py-2">Conversation is closed.</p>
+                ) : activeConv.status === 'pending' && !isEmployer ? (
                   <p className="text-sm text-center text-gray-500 italic py-2">Waiting for the employer to unlock this conversation before you can reply.</p>
                 ) : (
                   <form onSubmit={handleSendReply} className="flex gap-3">
@@ -261,10 +374,15 @@ export function Inbox() {
                       <Send className="w-5 h-5 ml-1" />
                     </button>
                   </form>
+                 )}
+                {activeConv.status !== 'partnership' && (
+                  <div className="mt-2 text-center p-2 bg-red-50 border border-red-100 rounded-lg">
+                    <p className="text-xs text-red-600 font-bold mb-1">⚠️ Safety & Payment Protection</p>
+                    <p className="text-[10px] text-red-500 font-medium leading-tight">
+                      For your security and to guarantee arbitration, keep all communication and files on this platform. Sharing external contact details or moving offline violates our terms and voids your Escrow protection. GitHub and LinkedIn links are allowed.
+                    </p>
+                  </div>
                 )}
-                <p className="text-xs text-center text-gray-400 font-medium">
-                  Auto-Censor is active. Emails, phone numbers, and links will be redacted until Escrow is funded.
-                </p>
               </div>
             </>
           ) : (

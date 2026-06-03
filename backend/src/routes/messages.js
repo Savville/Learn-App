@@ -26,7 +26,12 @@ const applyAutoCensor = (text) => {
 
   // 4. General link detection (outside links to prevent 'linktr.ee/mycontact' or personal portfolios)
   const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|(\b[a-zA-Z0-9-]+\.(com|org|net|io|co|me|ee|ke)\b(\/[^\s]*)?)/ig;
-  censored = censored.replace(urlRegex, '[REDACTED LINK]');
+  censored = censored.replace(urlRegex, (match) => {
+    if (/github\.com|linkedin\.com/i.test(match)) {
+      return match;
+    }
+    return '[REDACTED LINK]';
+  });
 
   return censored;
 };
@@ -73,7 +78,8 @@ router.get('/user/:email', async (req, res) => {
         
         return {
           ...conv,
-          gigTitle: gig ? gig.title : 'Unknown Gig'
+          gigTitle: gig ? gig.title : 'Unknown Gig',
+          gigCategory: gig ? gig.category : 'Unknown'
         };
       })
     );
@@ -90,14 +96,14 @@ router.get('/user/:email', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const db = getDB();
-    const { conversationId, gigId, senderEmail, receiverEmail, content } = req.body;
+    const { conversationId, gigId, senderEmail, receiverEmail, content, isPartnership } = req.body;
 
     if (!content) {
       return res.status(400).json({ error: 'Message content is required' });
     }
 
-    // Apply the auto-censor!
-    const censoredContent = applyAutoCensor(content);
+    // Apply the auto-censor! (Skip censorship if it's a partnership)
+    const censoredContent = isPartnership ? content : applyAutoCensor(content);
 
     let convId = conversationId ? new ObjectId(conversationId) : null;
 
@@ -108,7 +114,7 @@ router.post('/', async (req, res) => {
         participants: [senderEmail, receiverEmail],
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: 'pending', // 'pending' = locked, 'active' = unlocked, 'hired' = escrow funded
+        status: isPartnership ? 'partnership' : 'pending', // 'pending' = locked, 'active' = unlocked, 'hired' = escrow funded, 'partnership' = open collaboration
       };
       const convResult = await db.collection('conversations').insertOne(newConversation);
       convId = convResult.insertedId;
@@ -195,6 +201,67 @@ router.post('/:conversationId/hire', async (req, res) => {
   } catch (error) {
     console.error('Error hiring user:', error);
     res.status(500).json({ error: 'Failed to hire user' });
+  }
+});
+
+// POST /api/messages/:conversationId/deliver
+// Job Doer marks job as delivered
+router.post('/:conversationId/deliver', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId } = req.params;
+    await db.collection('conversations').updateOne(
+      { _id: new ObjectId(conversationId) },
+      { $set: { status: 'completed', updatedAt: new Date() } }
+    );
+    res.json({ success: true, message: 'Job delivered. Waiting for employer approval.' });
+  } catch (error) {
+    console.error('Error delivering job:', error);
+    res.status(500).json({ error: 'Failed to deliver job' });
+  }
+});
+
+// POST /api/messages/:conversationId/approve
+// Employer approves the delivery and releases funds
+router.post('/:conversationId/approve', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId } = req.params;
+    await db.collection('conversations').updateOne(
+      { _id: new ObjectId(conversationId) },
+      { $set: { status: 'approved', updatedAt: new Date() } }
+    );
+    // TODO: In a real system, this triggers actual M-PESA B2C payout
+    res.json({ success: true, message: 'Job approved! Funds have been released.' });
+  } catch (error) {
+    console.error('Error approving job:', error);
+    res.status(500).json({ error: 'Failed to approve job' });
+  }
+});
+
+// POST /api/messages/:conversationId/dispute
+// Either party opens a dispute
+router.post('/:conversationId/dispute', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId } = req.params;
+    const { reason, initiatorEmail } = req.body;
+    
+    await db.collection('conversations').updateOne(
+      { _id: new ObjectId(conversationId) },
+      { 
+        $set: { 
+          status: 'disputed', 
+          disputeReason: reason,
+          disputeInitiator: initiatorEmail,
+          updatedAt: new Date() 
+        } 
+      }
+    );
+    res.json({ success: true, message: 'Dispute opened. Admin will review the case.' });
+  } catch (error) {
+    console.error('Error opening dispute:', error);
+    res.status(500).json({ error: 'Failed to open dispute' });
   }
 });
 

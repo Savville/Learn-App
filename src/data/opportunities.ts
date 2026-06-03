@@ -22,7 +22,7 @@ export interface Opportunity {
   escrowAmount?: number;
   isEscrowFunded?: boolean;
   provider: string;
-  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'Gig' | 'Job' | 'Other';
+  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'Gig' | 'Job' | 'Partnership' | 'Other';
   description: string;
   fullDescription: string;
   deadline?: string;
@@ -63,7 +63,7 @@ export const opportunities: Opportunity[] = [
     id: 'engineering-automation-developer-2026',
     title: 'Software Developer for Engineering Automation (Equity Opportunity)',
     provider: 'Detailing Automation Project',
-    category: 'Gig',
+    category: 'Partnership',
     description: 'Finish the development of a fully automated CAD structural detailing system, aimed at commercial sale to civil engineering drafting companies.',
     fullDescription: 'We are seeking a talented programming student to finalize the creation of core automation scripts and build out the full system architecture for a structural detailing tool. The system will fully automate tedious drafting tasks, including drawing generation, annotation, dimensioning, and customized detailing. The final product is intended to be sold as a premium tool to civil engineering drafting companies, contractors, and design offices.\n\nWe have already started building the foundation. We will provide all the necessary civil engineering logic, workflows, and CAD usage details. Interested candidates should pitch for this gig below for specific details on the existing codebase and required tech stack. We are offering a unique opportunity where the developer will have stakes/equity in the product upon an agreed plan, making you a partner in the product\'s success.',
     deadline: '2026-08-31',
