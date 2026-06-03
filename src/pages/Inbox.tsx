@@ -418,17 +418,25 @@ export function Inbox() {
                 ) : activeConv.status === 'pending' && !isEmployer ? (
                   <p className="text-sm text-center text-gray-500 italic py-2">Waiting for the employer to unlock this conversation before you can reply.</p>
                 ) : (
-                  <form onSubmit={handleSendReply} className="flex gap-3">
-                    <input 
-                      type="text"
-                      value={replyContent} 
-                      onChange={e => setReplyContent(e.target.value)} 
-                      placeholder="Type a message..." 
-                      className="flex-1 px-5 py-3 rounded-full border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors"
-                    />
-                    <button type="submit" disabled={!replyContent.trim()} className="rounded-full w-12 h-12 flex items-center justify-center bg-blue-600 hover:bg-blue-700 hover:shadow-md transition-all text-white shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                      <Send className="w-5 h-5 ml-1" />
-                    </button>
+                  <form onSubmit={handleSendReply} className="flex flex-col gap-2">
+                    <div className="flex gap-3">
+                      <input 
+                        type="text"
+                        value={replyContent} 
+                        onChange={e => setReplyContent(e.target.value)} 
+                        placeholder="Type a message..." 
+                        className="flex-1 px-5 py-3 rounded-full border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors"
+                      />
+                      <button type="submit" disabled={!replyContent.trim()} className="rounded-full w-12 h-12 flex items-center justify-center bg-blue-600 hover:bg-blue-700 hover:shadow-md transition-all text-white shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <Send className="w-5 h-5 ml-1" />
+                      </button>
+                    </div>
+                    {/(mpesa|pay me directly|07\d{8}|\+254\d{9}|send money|off-platform|off platform)/i.test(replyContent) && (
+                      <div className="px-3 py-2 bg-red-50 text-red-700 text-[11px] font-bold rounded-lg flex items-center gap-2 animate-in slide-in-from-top-1">
+                        <AlertTriangle className="w-4 h-4 shrink-0" />
+                        Warning: Asking for off-platform payments or sharing M-PESA numbers violates our Terms of Service. You will lose Escrow protection and risk an account ban.
+                      </div>
+                    )}
                   </form>
                  )}
                 {activeConv.status !== 'partnership' && (
