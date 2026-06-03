@@ -30,7 +30,7 @@ export function Hero() {
             className="text-blue-200 mb-12 max-w-2xl mx-auto font-bold"
             style={{ fontSize: '1.5rem' }}
           >
-            Internships, scholarships, grants, conferences & more—updated daily
+            Internships, scholarships, grants, conferences, partnerships & more—updated frequently
           </p>
         </div>
 
