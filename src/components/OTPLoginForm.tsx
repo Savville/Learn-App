@@ -77,65 +77,76 @@ export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitl
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center animate-in fade-in zoom-in duration-300">
-      <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600">
-        <Mail className="w-8 h-8" />
+    <div className="py-16 flex items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-2xl shadow-sm max-w-md w-full border border-slate-100 text-left">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
+        
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
+            {error}
+          </div>
+        )}
+
+        {step === 1 ? (
+          <>
+            <p className="text-gray-600 mb-8 text-sm leading-relaxed">{subtitle}</p>
+            <form onSubmit={handleSendCode} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <input 
+                  type="email" 
+                  required 
+                  value={email} 
+                  onChange={e => setEmail(e.target.value)} 
+                  placeholder="your.email@example.com" 
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors"
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Access Code'}
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+              We've sent a 4-digit code to <span className="font-bold text-gray-900">{email}</span>.
+            </p>
+            <form onSubmit={handleVerifyCode} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Access Code (OTP)</label>
+                <input 
+                  type="text" 
+                  required 
+                  maxLength={4}
+                  value={otp} 
+                  onChange={e => setOtp(e.target.value.replace(/\D/g, ''))} 
+                  placeholder="1234" 
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors text-center text-xl tracking-widest"
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={loading || otp.length !== 4}
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify & Access'}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setStep(1)}
+                className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700"
+              >
+                Change Email
+              </button>
+            </form>
+          </>
+        )}
       </div>
-      <h2 className="text-2xl font-bold text-slate-900 mb-2">{title}</h2>
-      <p className="text-slate-600 text-sm mb-8">{subtitle}</p>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
-          {error}
-        </div>
-      )}
-
-      {step === 1 ? (
-        <form onSubmit={handleSendCode} className="space-y-4">
-          <Input 
-            type="email" 
-            required 
-            placeholder="Enter your email address" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full py-6 text-center text-lg rounded-xl bg-slate-50 border-slate-200"
-          />
-          <Button 
-            type="submit" 
-            disabled={loading}
-            className="w-full py-6 text-lg bg-gradient-to-r from-blue-600 to-purple-600 shadow-md hover:shadow-lg transition-all rounded-xl"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Access Code'}
-          </Button>
-        </form>
-      ) : (
-        <form onSubmit={handleVerifyCode} className="space-y-4">
-          <p className="text-sm text-slate-500 mb-4">We sent a 4-digit code to <strong className="text-slate-800">{email}</strong></p>
-          <Input 
-            type="text" 
-            required 
-            placeholder="0 0 0 0" 
-            maxLength={4}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-            className="w-full py-6 text-center text-3xl tracking-[1em] font-mono rounded-xl bg-slate-50 border-slate-200 focus:bg-white"
-          />
-          <Button 
-            type="submit" 
-            disabled={loading || otp.length !== 4}
-            className="w-full py-6 text-lg bg-gradient-to-r from-blue-600 to-purple-600 shadow-md hover:shadow-lg transition-all rounded-xl mb-4"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify & Access'}
-          </Button>
-          <button 
-            type="button" 
-            onClick={() => setStep(1)}
-            className="text-sm text-blue-600 hover:text-blue-800 underline underline-offset-4"
-          >
-            Wrong email? Go back.
-          </button>
-        </form>
-      )}
     </div>
   );
 }
