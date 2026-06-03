@@ -158,7 +158,7 @@ export function About() {
         </section>
 
         {/* Terms of Usage */}
-        <section className="bg-white rounded-2xl p-8 shadow-sm mb-16">
+        <section id="terms" className="bg-white rounded-2xl p-8 shadow-sm mb-16 scroll-mt-24">
           <h2 className="text-gray-900 mb-6">Terms of Usage</h2>
           <div className="space-y-4 text-gray-700 leading-relaxed text-sm">
             <p>

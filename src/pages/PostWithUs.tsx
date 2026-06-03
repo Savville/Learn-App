@@ -1198,6 +1198,12 @@ export function PostWithUs() {
                   className="w-full px-5 py-3 rounded-xl border border-gray-200 text-center tracking-[0.5em] font-mono text-xl outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
                 />
               </div>
+              <div className="flex items-start gap-2 mt-4 pb-2">
+                <input type="checkbox" id="termsPost" required className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
+                <label htmlFor="termsPost" className="text-sm text-gray-600">
+                  I agree to the <Link to="/about#terms" target="_blank" className="text-blue-600 hover:underline font-medium">Terms and Conditions</Link>
+                </label>
+              </div>
               <div className="flex gap-3 mt-8">
                 <Button 
                   type="button" 

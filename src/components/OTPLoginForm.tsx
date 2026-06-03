@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Mail } from 'lucide-react';
@@ -101,6 +102,12 @@ export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitl
                   placeholder="your.email@example.com" 
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors"
                 />
+              </div>
+              <div className="flex items-start gap-2 pb-2">
+                <input type="checkbox" id="termsLogin" required className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
+                <label htmlFor="termsLogin" className="text-sm text-gray-600">
+                  I agree to the <Link to="/about#terms" target="_blank" className="text-blue-600 hover:underline font-medium">Terms and Conditions</Link>
+                </label>
               </div>
               <button 
                 type="submit" 
