@@ -168,6 +168,9 @@ export default function AdminDashboard() {
       });
       if (res.ok) {
         setAllOpps(prev => prev.filter(o => o.id !== id));
+        if (editingOpp && editingOpp.id === id) {
+          setEditingOpp(null);
+        }
       } else {
         const errorData = await res.json();
         alert('Error deleting: ' + errorData.error);
@@ -753,202 +756,211 @@ export default function AdminDashboard() {
           )
         ) : activeTab === 'manage' ? (
           /* Manage Content Tab */
-          allOpps.length === 0 ? (
-            <Card className="border-slate-200 shadow-sm">
-               <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                  <Settings className="h-12 w-12 text-slate-300 mb-4" />
-                  <h3 className="text-lg font-medium text-slate-900">No content available</h3>
-                  <p className="text-sm text-slate-500 max-w-sm mt-1">There are no published opportunities to manage yet.</p>
-               </CardContent>
-            </Card>
-          ) : editingOpp ? (
-            <Card className="border-slate-200 shadow-sm p-6 max-w-3xl mx-auto w-full">
-              <div className="flex justify-between items-center mb-6 border-b pb-4">
-                 <h3 className="text-xl font-bold">Edit Opportunity</h3>
-                 <Button variant="ghost" className="text-slate-500" onClick={() => setEditingOpp(null)}>
-                   Cancel
-                 </Button>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-semibold mb-1 block">Title</label>
-                  <Input 
-                    value={editForm.title || ''} 
-                    onChange={e => setEditForm({...editForm, title: e.target.value})} 
-                  />
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-sm font-semibold mb-1 block">Provider</label>
-                    <Input 
-                      value={editForm.provider || ''} 
-                      onChange={e => setEditForm({...editForm, provider: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold mb-1 block">Category</label>
-                    <Input 
-                      value={editForm.category || ''} 
-                      onChange={e => setEditForm({...editForm, category: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold mb-1 block">Funding Type</label>
-                    <Input 
-                      value={editForm.fundingType || ''} 
-                      onChange={e => setEditForm({...editForm, fundingType: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold mb-1 block">Compensation</label>
-                    <select 
-                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      value={editForm.compensationType || 'N/A'}
-                      onChange={e => setEditForm({...editForm, compensationType: e.target.value})} 
-                    >
-                      <option value="Paid">Paid</option>
-                      <option value="Stipend">Stipend</option>
-                      <option value="Unpaid">Unpaid</option>
-                      <option value="N/A">N/A</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold mb-1 block">Upfront Cost</label>
-                    <select 
-                      className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      value={editForm.upfrontCost || 'No Upfront Cost'}
-                      onChange={e => setEditForm({...editForm, upfrontCost: e.target.value})} 
-                    >
-                      <option value="No Upfront Cost">No Upfront Cost</option>
-                      <option value="Has Upfront Cost">Has Upfront Cost</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-semibold mb-1 block">Deadline</label>
-                    <Input 
-                      value={editForm.deadline || ''} 
-                      onChange={e => setEditForm({...editForm, deadline: e.target.value})} 
-                    />
-                  </div>
-                  <div className="lg:col-span-3">
-                    <label className="text-sm font-semibold mb-1 block">Location</label>
-                    <Input 
-                      value={editForm.location || ''} 
-                      onChange={e => setEditForm({...editForm, location: e.target.value})} 
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-semibold mb-1 block">Application Link</label>
-                  <Input 
-                    value={editForm.applicationLink || ''} 
-                    onChange={e => setEditForm({...editForm, applicationLink: e.target.value})} 
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold mb-1 block">Short Description</label>
-                  <Textarea 
-                    rows={3}
-                    value={editForm.description || ''} 
-                    onChange={e => setEditForm({...editForm, description: e.target.value})} 
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold mb-1 block">Full Description</label>
-                  <Textarea 
-                    rows={6}
-                    value={editForm.fullDescription || ''} 
-                    onChange={e => setEditForm({...editForm, fullDescription: e.target.value})} 
-                  />
-                </div>
-                <div className="bg-slate-50 p-4 border rounded-md">
-                  <label className="text-sm font-semibold mb-2 block">Update Logo (Optional)</label>
-                  <Input 
-                    type="file" 
-                    accept="image/*"
-                    onChange={e => setImageFile(e.target.files?.[0] || null)}
-                    className="mb-2 bg-white"
-                  />
-                  {editForm.logoUrl && !imageFile && (
-                    <div className="flex items-center gap-3 mt-2">
-                       <img 
-                          src={editForm.logoUrl?.startsWith('/images/') ? (API_BASE.replace('/api', '') + editForm.logoUrl) : editForm.logoUrl} 
-                          alt="Current Logo" 
-                          className="w-12 h-12 object-contain bg-white border p-1 rounded" 
-                       />
-                       <p className="text-xs text-slate-500">Current logo remains unchanged.</p>
-                    </div>
-                  )}
-                </div>
-                <div className="pt-4 flex gap-4">
-                   <Button 
-                     onClick={handleSaveEdit} 
-                     disabled={actionLoading === 'saving'}
-                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                   >
-                     {actionLoading === 'saving' ? 'Saving...' : 'Save Changes'}
-                   </Button>
-                   <Button 
-                     onClick={() => handleDeleteOpp(editingOpp.id, editingOpp.title)}
-                     disabled={actionLoading === `delete_${editingOpp.id}`}
-                     className="flex-1 font-semibold flex items-center justify-center border-none hover:opacity-90 transition-opacity whitespace-nowrap"
-                     style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
-                   >
-                     <Trash2 className="w-4 h-4 mr-2" /> Delete Opportunity
-                   </Button>
-                </div>
-              </div>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-               {allOpps.map(opp => (
-                 <Card key={opp.id} className="border-slate-200 shadow-sm overflow-hidden flex flex-col sm:flex-row items-center p-4 gap-4">
-                    <div className="w-16 h-16 shrink-0 bg-slate-100 rounded-md border border-slate-200 relative">
-                       <img 
-                          src={opp.logoUrl?.startsWith('/images/') 
-                            ? (API_BASE.replace('/api', '') + opp.logoUrl) 
-                            : (opp.logoUrl || "/Opportunities Kenya Logo 2.png")} 
-                          alt="Logo" 
-                          className="absolute inset-0 w-full h-full object-contain p-1"
-                          onError={(e: any) => { e.target.src = "/Opportunities Kenya Logo 2.png"; }}
-                       />
-                    </div>
-                     <div className="flex-1 min-w-0">
-                        <h4 className="text-lg font-semibold text-slate-900 truncate">{opp.title}</h4>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <p className="text-sm text-slate-600 truncate">{opp.provider} · {opp.category}</p>
-                          <Badge variant="outline" className="text-[10px] h-5 bg-blue-50 text-blue-700 border-blue-100">{opp.compensationType || 'N/A'}</Badge>
-                          <Badge variant="outline" className={`text-[10px] h-5 ${opp.upfrontCost === 'Has Upfront Cost' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>{opp.upfrontCost || 'No Upfront Cost'}</Badge>
-                          {opp.deadline && (
-                            <Badge variant="outline" className="text-[10px] h-5 bg-slate-100 text-slate-700 border-slate-200 flex items-center gap-1">
-                               <Calendar className="w-3 h-3" /> {new Date(opp.deadline).toLocaleDateString()}
-                            </Badge>
-                          )}
-                        </div>
-                     </div>
-                    <div className="flex gap-2 shrink-0 flex-wrap justify-end mt-2 sm:mt-0">
-                       {(opp.status === 'Expired' || (opp.deadline && new Date(opp.deadline) < new Date())) && (
-                         <Button variant="outline" size="sm" className="text-purple-600 border-purple-200 hover:bg-purple-50 hover:text-purple-700" onClick={() => handleGenerateReport(opp.id)}>
-                           <FileText className="w-4 h-4 mr-2" /> Report
-                         </Button>
-                       )}
-                       <Button variant="outline" size="sm" onClick={() => handleEditClick(opp)}>
-                         <Pencil className="w-4 h-4 mr-2" /> Edit
-                       </Button>
-                       <Button 
-                         variant="destructive"
-                         size="sm" 
-                         disabled={actionLoading === `delete_${opp.id}`}
-                         onClick={() => handleDeleteOpp(opp.id, opp.title)}
-                         className="font-semibold flex items-center justify-center"
-                       >
-                         <Trash2 className="w-4 h-4 mr-2 py-0 my-0" /> Delete
-                       </Button>
-                    </div>
-                 </Card>
-               ))}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-900">Manage Published Content</h2>
+              <Button variant="outline" className="border-slate-300" onClick={() => setActiveTab('opps')}>
+                &larr; Back to Dashboard
+              </Button>
             </div>
-          )
+            
+            {allOpps.length === 0 ? (
+              <Card className="border-slate-200 shadow-sm">
+                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                    <Settings className="h-12 w-12 text-slate-300 mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900">No content available</h3>
+                    <p className="text-sm text-slate-500 max-w-sm mt-1">There are no published opportunities to manage yet.</p>
+                 </CardContent>
+              </Card>
+            ) : editingOpp ? (
+              <Card className="border-slate-200 shadow-sm p-6 max-w-3xl mx-auto w-full">
+                <div className="flex justify-between items-center mb-6 border-b pb-4">
+                   <h3 className="text-xl font-bold">Edit Opportunity</h3>
+                   <Button variant="ghost" className="text-slate-500" onClick={() => setEditingOpp(null)}>
+                     Cancel
+                   </Button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Title</label>
+                    <Input 
+                      value={editForm.title || ''} 
+                      onChange={e => setEditForm({...editForm, title: e.target.value})} 
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-semibold mb-1 block">Provider</label>
+                      <Input 
+                        value={editForm.provider || ''} 
+                        onChange={e => setEditForm({...editForm, provider: e.target.value})} 
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold mb-1 block">Category</label>
+                      <Input 
+                        value={editForm.category || ''} 
+                        onChange={e => setEditForm({...editForm, category: e.target.value})} 
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold mb-1 block">Funding Type</label>
+                      <Input 
+                        value={editForm.fundingType || ''} 
+                        onChange={e => setEditForm({...editForm, fundingType: e.target.value})} 
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold mb-1 block">Compensation</label>
+                      <select 
+                        className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        value={editForm.compensationType || 'N/A'}
+                        onChange={e => setEditForm({...editForm, compensationType: e.target.value})} 
+                      >
+                        <option value="Paid">Paid</option>
+                        <option value="Stipend">Stipend</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="N/A">N/A</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold mb-1 block">Upfront Cost</label>
+                      <select 
+                        className="w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        value={editForm.upfrontCost || 'No Upfront Cost'}
+                        onChange={e => setEditForm({...editForm, upfrontCost: e.target.value})} 
+                      >
+                        <option value="No Upfront Cost">No Upfront Cost</option>
+                        <option value="Has Upfront Cost">Has Upfront Cost</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold mb-1 block">Deadline</label>
+                      <Input 
+                        value={editForm.deadline || ''} 
+                        onChange={e => setEditForm({...editForm, deadline: e.target.value})} 
+                      />
+                    </div>
+                    <div className="lg:col-span-3">
+                      <label className="text-sm font-semibold mb-1 block">Location</label>
+                      <Input 
+                        value={editForm.location || ''} 
+                        onChange={e => setEditForm({...editForm, location: e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Application Link</label>
+                    <Input 
+                      value={editForm.applicationLink || ''} 
+                      onChange={e => setEditForm({...editForm, applicationLink: e.target.value})} 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Short Description</label>
+                    <Textarea 
+                      rows={3}
+                      value={editForm.description || ''} 
+                      onChange={e => setEditForm({...editForm, description: e.target.value})} 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold mb-1 block">Full Description</label>
+                    <Textarea 
+                      rows={6}
+                      value={editForm.fullDescription || ''} 
+                      onChange={e => setEditForm({...editForm, fullDescription: e.target.value})} 
+                    />
+                  </div>
+                  <div className="bg-slate-50 p-4 border rounded-md">
+                    <label className="text-sm font-semibold mb-2 block">Update Logo (Optional)</label>
+                    <Input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={e => setImageFile(e.target.files?.[0] || null)}
+                      className="mb-2 bg-white"
+                    />
+                    {editForm.logoUrl && !imageFile && (
+                      <div className="flex items-center gap-3 mt-2">
+                         <img 
+                            src={editForm.logoUrl?.startsWith('/images/') ? (API_BASE.replace('/api', '') + editForm.logoUrl) : editForm.logoUrl} 
+                            alt="Current Logo" 
+                            className="w-12 h-12 object-contain bg-white border p-1 rounded" 
+                         />
+                         <p className="text-xs text-slate-500">Current logo remains unchanged.</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="pt-4 flex gap-4">
+                     <Button 
+                       onClick={handleSaveEdit} 
+                       disabled={actionLoading === 'saving'}
+                       className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                     >
+                       {actionLoading === 'saving' ? 'Saving...' : 'Save Changes'}
+                     </Button>
+                     <Button 
+                       onClick={() => handleDeleteOpp(editingOpp.id, editingOpp.title)}
+                       disabled={actionLoading === `delete_${editingOpp.id}`}
+                       className="flex-1 font-semibold flex items-center justify-center border-none hover:opacity-90 transition-opacity whitespace-nowrap"
+                       style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
+                     >
+                       <Trash2 className="w-4 h-4 mr-2" /> Delete Opportunity
+                     </Button>
+                  </div>
+                </div>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                 {allOpps.map(opp => (
+                   <Card key={opp.id} className="border-slate-200 shadow-sm overflow-hidden flex flex-col sm:flex-row items-center p-4 gap-4">
+                      <div className="w-16 h-16 shrink-0 bg-slate-100 rounded-md border border-slate-200 relative">
+                         <img 
+                            src={opp.logoUrl?.startsWith('/images/') 
+                              ? (API_BASE.replace('/api', '') + opp.logoUrl) 
+                              : (opp.logoUrl || "/Opportunities Kenya Logo 2.png")} 
+                            alt="Logo" 
+                            className="absolute inset-0 w-full h-full object-contain p-1"
+                            onError={(e: any) => { e.target.src = "/Opportunities Kenya Logo 2.png"; }}
+                         />
+                      </div>
+                       <div className="flex-1 min-w-0">
+                          <h4 className="text-lg font-semibold text-slate-900 truncate">{opp.title}</h4>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <p className="text-sm text-slate-600 truncate">{opp.provider} · {opp.category}</p>
+                            <Badge variant="outline" className="text-[10px] h-5 bg-blue-50 text-blue-700 border-blue-100">{opp.compensationType || 'N/A'}</Badge>
+                            <Badge variant="outline" className={`text-[10px] h-5 ${opp.upfrontCost === 'Has Upfront Cost' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-green-50 text-green-700 border-green-100'}`}>{opp.upfrontCost || 'No Upfront Cost'}</Badge>
+                            {opp.deadline && (
+                              <Badge variant="outline" className="text-[10px] h-5 bg-slate-100 text-slate-700 border-slate-200 flex items-center gap-1">
+                                 <Calendar className="w-3 h-3" /> {new Date(opp.deadline).toLocaleDateString()}
+                              </Badge>
+                            )}
+                          </div>
+                       </div>
+                      <div className="flex gap-2 shrink-0 flex-wrap justify-end mt-2 sm:mt-0">
+                         {(opp.status === 'Expired' || (opp.deadline && new Date(opp.deadline) < new Date())) && (
+                           <Button variant="outline" size="sm" className="text-purple-600 border-purple-200 hover:bg-purple-50 hover:text-purple-700" onClick={() => handleGenerateReport(opp.id)}>
+                             <FileText className="w-4 h-4 mr-2" /> Report
+                           </Button>
+                         )}
+                         <Button variant="outline" size="sm" onClick={() => handleEditClick(opp)}>
+                           <Pencil className="w-4 h-4 mr-2" /> Edit
+                         </Button>
+                         <Button 
+                           variant="destructive"
+                           size="sm" 
+                           disabled={actionLoading === `delete_${opp.id}`}
+                           onClick={() => handleDeleteOpp(opp.id, opp.title)}
+                           className="font-semibold flex items-center justify-center"
+                         >
+                           <Trash2 className="w-4 h-4 mr-2 py-0 my-0" /> Delete
+                         </Button>
+                      </div>
+                   </Card>
+                 ))}
+              </div>
+            )}
+          </div>
         ) : activeTab === 'escrow' ? (
           /* ── Escrow Payouts Tab ─────────────────────────────────────── */
           escrowReleases.length === 0 ? (
