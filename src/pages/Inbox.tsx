@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,9 @@ export function Inbox() {
   const [replyContent, setReplyContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDisputeForm, setShowDisputeForm] = useState(false);
+  const [disputeReason, setDisputeReason] = useState('');
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   const fetchConversations = async (userEmail: string) => {
     setLoading(true);
@@ -126,15 +129,26 @@ export function Inbox() {
 
   const handleDispute = async () => {
     if (!activeConv) return;
-    const reason = prompt("Please provide a reason for the dispute. An admin will review the chat history.");
-    if (!reason) return;
+    if (!showDisputeForm) {
+      setShowDisputeForm(true);
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      return;
+    }
+    
+    if (!disputeReason.trim()) {
+      alert("Please provide a reason for the dispute.");
+      return;
+    }
+    
     try {
       await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/dispute`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, initiatorEmail: email })
+        body: JSON.stringify({ reason: disputeReason, initiatorEmail: email })
       });
       activeConv.status = 'disputed';
+      setShowDisputeForm(false);
+      setDisputeReason('');
       setActiveConv({ ...activeConv });
     } catch (err) {
       console.error(err);
@@ -224,51 +238,6 @@ export function Inbox() {
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-1">{activeConv.gigTitle}</h3>
                   <p className="text-sm text-gray-500">Chat with <span className="text-gray-700 font-medium">{activeConv.participants.find((p: string) => p !== email)}</span></p>
-                </div>
-                {/* Controls */}
-                <div className="flex flex-wrap gap-2">
-                  {isEmployer && activeConv.status === 'pending' && (
-                    <button onClick={handleUnlock} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors font-semibold text-sm">
-                      <Unlock className="w-4 h-4" /> Unlock to Reply
-                    </button>
-                  )}
-                  {isEmployer && activeConv.status === 'active' && (
-                    <button onClick={handleHire} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm animate-pulse">
-                      <CheckCircle className="w-4 h-4" /> Fund Escrow & Hire
-                    </button>
-                  )}
-                  {isEmployer && activeConv.status === 'completed' && (
-                    <>
-                      <button onClick={handleApprove} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm">
-                        <Handshake className="w-4 h-4" /> Approve & Release
-                      </button>
-                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm">
-                        <AlertTriangle className="w-4 h-4" /> Dispute
-                      </button>
-                    </>
-                  )}
-                  {isEmployer && activeConv.status === 'hired' && (
-                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm">
-                      <AlertTriangle className="w-4 h-4" /> Dispute
-                    </button>
-                  )}
-                  
-                  {/* Applicant Controls */}
-                  {!isEmployer && activeConv.status === 'hired' && (
-                    <>
-                      <button onClick={handleDeliver} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 hover:shadow-lg transition-all font-semibold text-sm">
-                        <CheckSquare className="w-4 h-4" /> Deliver Job
-                      </button>
-                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm">
-                        <AlertTriangle className="w-4 h-4" /> Dispute
-                      </button>
-                    </>
-                  )}
-                  {!isEmployer && activeConv.status === 'completed' && (
-                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm">
-                      <AlertTriangle className="w-4 h-4" /> Dispute Employer
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -376,13 +345,80 @@ export function Inbox() {
                   </form>
                  )}
                 {activeConv.status !== 'partnership' && (
-                  <div className="mt-2 text-center p-2 bg-red-50 border border-red-100 rounded-lg">
-                    <p className="text-xs text-red-600 font-bold mb-1">⚠️ Safety & Payment Protection</p>
-                    <p className="text-[10px] text-red-500 font-medium leading-tight">
+                  <div className="mt-4 text-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    <p className="text-xs text-black font-bold flex items-center justify-center gap-1 mb-1">
+                      <AlertTriangle className="w-3 h-3 text-amber-500" /> Safety & Payment Protection
+                    </p>
+                    <p className="text-[11px] text-gray-800 italic leading-relaxed">
                       For your security and to guarantee arbitration, keep all communication and files on this platform. Sharing external contact details or moving offline violates our terms and voids your Escrow protection. GitHub and LinkedIn links are allowed.
                     </p>
                   </div>
                 )}
+                
+                {/* Action Controls Moved to Bottom */}
+                <div className="flex flex-wrap justify-center gap-3 mt-4 border-t border-gray-100 pt-4">
+                  {isEmployer && activeConv.status === 'pending' && (
+                    <button onClick={handleUnlock} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                      <Unlock className="w-4 h-4" /> Unlock to Reply
+                    </button>
+                  )}
+                  {isEmployer && activeConv.status === 'active' && (
+                    <button onClick={handleHire} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm animate-pulse w-full sm:w-auto">
+                      <CheckCircle className="w-4 h-4" /> Fund Escrow & Hire
+                    </button>
+                  )}
+                  {isEmployer && activeConv.status === 'completed' && (
+                    <>
+                      <button onClick={handleApprove} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm w-full sm:w-auto">
+                        <Handshake className="w-4 h-4" /> Approve & Release
+                      </button>
+                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                        <AlertTriangle className="w-4 h-4" /> Dispute
+                      </button>
+                    </>
+                  )}
+                  {isEmployer && activeConv.status === 'hired' && (
+                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                      <AlertTriangle className="w-4 h-4" /> Dispute
+                    </button>
+                  )}
+                  
+                  {/* Applicant Controls */}
+                  {!isEmployer && activeConv.status === 'hired' && (
+                    <>
+                      <button onClick={handleDeliver} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 hover:shadow-lg transition-all font-semibold text-sm w-full sm:w-auto">
+                        <CheckSquare className="w-4 h-4" /> Deliver Job
+                      </button>
+                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                        <AlertTriangle className="w-4 h-4" /> Dispute
+                      </button>
+                    </>
+                  )}
+                  {!isEmployer && activeConv.status === 'completed' && (
+                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                      <AlertTriangle className="w-4 h-4" /> Dispute Employer
+                    </button>
+                  )}
+                </div>
+
+                {/* Sliding Dispute Form */}
+                {showDisputeForm && (
+                  <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100 flex flex-col gap-3 animate-in slide-in-from-top-2 duration-300">
+                    <p className="text-sm font-bold text-red-800">Open a Dispute</p>
+                    <p className="text-xs text-red-600">Please provide a clear reason for the dispute. An admin will review the chat history.</p>
+                    <textarea 
+                      value={disputeReason}
+                      onChange={(e) => setDisputeReason(e.target.value)}
+                      placeholder="Explain what went wrong..."
+                      className="w-full p-3 rounded-lg border border-red-200 outline-none focus:border-red-500 text-sm h-24 resize-none bg-white"
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => setShowDisputeForm(false)} className="px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 rounded-lg">Cancel</button>
+                      <button onClick={handleDispute} className="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-sm">Submit Dispute</button>
+                    </div>
+                  </div>
+                )}
+                <div ref={bottomRef} />
               </div>
             </>
           ) : (
