@@ -418,7 +418,7 @@ export function PostWithUs() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Full Name <span className="text-red-500">*</span></label>
+                      <label className="text-[15px] font-extrabold text-slate-800">Full Name <span className="text-red-500">*</span></label>
                       <Input
                         required
                         placeholder="e.g. John Doe"
@@ -428,7 +428,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Organization <span className="text-red-500">*</span></label>
+                      <label className="text-[15px] font-extrabold text-slate-800">Organization <span className="text-red-500">*</span></label>
                       <Input
                         required
                         placeholder="e.g. IEEE Kenya"
@@ -438,7 +438,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Role / Position <span className="text-red-500">*</span></label>
+                      <label className="text-[15px] font-extrabold text-slate-800">Role / Position <span className="text-red-500">*</span></label>
                       <Input
                         required
                         placeholder="e.g. Communications Lead"
@@ -448,7 +448,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Phone Number <span className="text-red-500">*</span></label>
+                      <label className="text-[15px] font-extrabold text-slate-800">Phone Number <span className="text-red-500">*</span></label>
                       <Input
                         required
                         placeholder="e.g. +254 700 000 000"
@@ -458,7 +458,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Email <span className="text-red-500">*</span></label>
+                      <label className="text-[15px] font-extrabold text-slate-800">Email <span className="text-red-500">*</span></label>
                       <Input
                         required
                         type="email"
@@ -472,7 +472,7 @@ export function PostWithUs() {
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Website or Social Page <span className="text-gray-400 font-normal">(Optional)</span></label>
+                      <label className="text-[15px] font-extrabold text-slate-800">Website or Social Page <span className="text-gray-400 font-normal">(Optional)</span></label>
                       <Input
                         placeholder="e.g. https://linkedin.com/company/..."
                         value={reporter.websiteOrSocial}
@@ -607,7 +607,7 @@ export function PostWithUs() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 gap-6 rounded-2xl bg-gray-50/50 p-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <span className="text-sm font-semibold text-gray-700">Title</span>
+                      <span className="text-[15px] font-extrabold text-slate-800">Title</span>
                       <Input
                         value={parsedData.basicInfo.title}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBasicInfoEdit('title', e.target.value)}
@@ -615,7 +615,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <span className="text-sm font-semibold text-gray-700">
+                      <span className="text-[15px] font-extrabold text-slate-800">
                         Provider or Institution
                       </span>
                       <Input
@@ -625,7 +625,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Category
                       </span>
                       <select
@@ -660,7 +660,7 @@ export function PostWithUs() {
                       </select>
                     </div>
                     <div className="space-y-1.5">
-                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Funding type
                       </span>
                       <select
@@ -682,7 +682,7 @@ export function PostWithUs() {
                       </select>
                     </div>
                     <div className="space-y-1.5">
-                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Compensation
                       </span>
                       <select
@@ -703,7 +703,7 @@ export function PostWithUs() {
                       </select>
                     </div>
                     <div className="space-y-1.5">
-                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Upfront Cost
                       </span>
                       <select
@@ -716,7 +716,7 @@ export function PostWithUs() {
                       </select>
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
-                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Short description
                       </span>
                       <Textarea
@@ -730,7 +730,7 @@ export function PostWithUs() {
                   {/* Intelligent Discretized Zones added here */}
                   <div className="grid grid-cols-1 gap-4 rounded-md bg-slate-50 p-4 mt-4">
                     <div className="space-y-1.5">
-                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         About This Opportunity (Full Description)
                       </span>
                       <Textarea
@@ -743,7 +743,7 @@ export function PostWithUs() {
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className="space-y-1.5">
-                        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                           Benefits (One per line)
                         </span>
                         <Textarea
@@ -760,7 +760,7 @@ export function PostWithUs() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                           Eligibility Requirements (One per line)
                         </span>
                         <Textarea
