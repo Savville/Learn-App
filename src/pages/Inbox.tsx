@@ -3,11 +3,12 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2 } from 'lucide-react';
+import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2, LogOut } from 'lucide-react';
+import { OTPLoginForm } from '../components/OTPLoginForm';
 
 export function Inbox() {
-  const [email, setEmail] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [email, setEmail] = useState<string>(localStorage.getItem('user_email') || '');
+  const [token, setToken] = useState<string | null>(localStorage.getItem('user_token'));
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeConv, setActiveConv] = useState<any | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -16,9 +17,6 @@ export function Inbox() {
   const [error, setError] = useState<string | null>(null);
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [disputeReason, setDisputeReason] = useState('');
-  const [showOTP, setShowOTP] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -106,53 +104,24 @@ export function Inbox() {
     }
   };
 
-  const handleSendOTP = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    
-    setAuthLoading(true);
-    try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/auth/send-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() })
-      });
-      if (res.ok) {
-        setShowOTP(true);
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Failed to send OTP');
-      }
-    } catch (err) {
-      alert('Error sending OTP');
+  useEffect(() => {
+    if (token && email) {
+      fetchConversations(email.trim().toLowerCase());
     }
-    setAuthLoading(false);
+  }, [token, email]);
+
+  const handleLoginSuccess = (newToken: string, newEmail: string) => {
+    setToken(newToken);
+    setEmail(newEmail);
   };
 
-  const handleVerifyOTP = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!otp.trim()) return;
-    
-    setAuthLoading(true);
-    try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/auth/verify-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), otp })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.token) sessionStorage.setItem('authToken', data.token);
-        setLoggedIn(true);
-        fetchConversations(email.trim().toLowerCase());
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Invalid OTP');
-      }
-    } catch (err) {
-      alert('Error verifying OTP');
-    }
-    setAuthLoading(false);
+  const handleLogout = () => {
+    localStorage.removeItem('user_token');
+    localStorage.removeItem('user_email');
+    setToken(null);
+    setEmail('');
+    setConversations([]);
+    setActiveConv(null);
   };
 
   const handleSelectConv = (conv: any) => {
@@ -259,73 +228,13 @@ export function Inbox() {
     }
   };
 
-  if (!loggedIn) {
+  if (!token) {
     return (
-      <div className="py-16 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-sm max-w-md w-full">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Inbox Login</h2>
-          
-          {!showOTP ? (
-            <>
-              <p className="text-gray-600 mb-8 text-sm leading-relaxed">Enter your email to receive an access code and view your conversations.</p>
-              <form onSubmit={handleSendOTP} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                  <input 
-                    type="email" 
-                    required 
-                    value={email} 
-                    onChange={e => setEmail(e.target.value)} 
-                    placeholder="your.email@example.com" 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  disabled={authLoading}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
-                >
-                  {authLoading ? 'Sending...' : 'Send Access Code'}
-                </button>
-              </form>
-            </>
-          ) : (
-            <>
-              <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                We've sent a 4-digit code to <span className="font-bold text-gray-900">{email}</span>.
-              </p>
-              <form onSubmit={handleVerifyOTP} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Access Code (OTP)</label>
-                  <input 
-                    type="text" 
-                    required 
-                    maxLength={4}
-                    value={otp} 
-                    onChange={e => setOtp(e.target.value)} 
-                    placeholder="1234" 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors text-center text-xl tracking-widest"
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  disabled={authLoading}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
-                >
-                  {authLoading ? 'Verifying...' : 'Access Inbox'}
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => setShowOTP(false)}
-                  className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Change Email
-                </button>
-              </form>
-            </>
-          )}
-        </div>
-      </div>
+      <OTPLoginForm 
+        onSuccess={handleLoginSuccess} 
+        title="Inbox Login" 
+        subtitle="Enter your email to receive an access code and view your conversations."
+      />
     );
   }
 

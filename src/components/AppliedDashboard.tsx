@@ -112,8 +112,11 @@ export function AppliedDashboard() {
 
   return (
     <div className="bg-white shadow-sm rounded-2xl overflow-hidden mb-8">
-      <div className="px-8 py-6 bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" asChild className="mr-2 text-slate-500 hover:text-blue-600">
+             <Link to="/opportunities">← Back</Link>
+          </Button>
           <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shadow-sm flex-shrink-0">
             <FolderHeart className="w-6 h-6" />
           </div>
@@ -155,9 +158,11 @@ export function AppliedDashboard() {
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="w-full">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold text-gray-900 text-xl group-hover:text-blue-600 transition-colors">
-                        {app.opportunityTitle}
-                      </h3>
+                      <Link to={`/opportunity/${toSlug(app.opportunityTitle)}`} state={{ from: '/applied' }}>
+                        <h3 className="font-bold text-gray-900 text-xl group-hover:text-blue-600 transition-colors">
+                          {app.opportunityTitle}
+                        </h3>
+                      </Link>
                       <span className="flex items-center gap-1.5 text-sm text-gray-500 bg-slate-50 px-3 py-1 rounded-md border border-slate-100">
                         <Calendar className="w-4 h-4" /> 
                         {new Date(app.appliedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -166,7 +171,7 @@ export function AppliedDashboard() {
                     
                     {/* Visual Stepper */}
                     {app.status !== 'rejected' && !app.status.startsWith('resolved_') && app.status !== 'disputed' && (
-                      <div className="flex items-center w-full max-w-2xl my-6">
+                      <div className="flex items-start w-full max-w-2xl my-6">
                         {[
                           { label: 'Applied', step: 1 },
                           { label: 'Shortlisted', step: 2 },
@@ -182,16 +187,18 @@ export function AppliedDashboard() {
                           const isLast = i === 3;
                           
                           return (
-                            <div key={s.label} className={`flex items-center ${isLast ? '' : 'flex-1'}`}>
-                              <div className="flex flex-col items-center relative">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-colors ${isActive ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-200 text-slate-400'}`}>
+                            <div key={s.label} className={`flex flex-col items-center relative ${isLast ? '' : 'flex-1'}`}>
+                              <div className="flex w-full items-center">
+                                {/* Left line */}
+                                <div className={`h-1 flex-1 ${i === 0 ? 'bg-transparent' : isActive ? 'bg-blue-600' : 'bg-slate-100'}`}></div>
+                                {/* Circle */}
+                                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-colors z-10 ${isActive ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-200 text-slate-400'}`}>
                                   {isActive && currentStep > s.step ? <CheckCircle className="w-5 h-5" /> : s.step}
                                 </div>
-                                <span className={`absolute top-10 text-xs font-medium whitespace-nowrap ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>{s.label}</span>
+                                {/* Right line */}
+                                <div className={`h-1 flex-1 ${isLast ? 'bg-transparent' : currentStep > s.step ? 'bg-blue-600' : 'bg-slate-100'}`}></div>
                               </div>
-                              {!isLast && (
-                                <div className={`flex-1 h-1 mx-2 rounded-full transition-colors ${currentStep > s.step ? 'bg-blue-600' : 'bg-slate-100'}`}></div>
-                              )}
+                              <span className={`text-xs font-medium mt-2 text-center ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>{s.label}</span>
                             </div>
                           );
                         })}

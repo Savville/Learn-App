@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useEffect, useState, type JSX, type FormEvent, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -153,6 +153,9 @@ export function OpportunityDetails() {
   };
 
   const { slug } = useParams();
+  const location = useLocation();
+  const backPath = location.state?.from || '/opportunities';
+  const backText = location.state?.from === '/applied' ? 'Back to Dashboard' : 'Back to Opportunities';
   const localMatch = localOpportunities.find(l => toSlug(l.title) === slug);
   const id = localMatch?.id;
   // Pre-populate with local data instantly — no spinner for known opportunities
@@ -389,11 +392,11 @@ export function OpportunityDetails() {
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link
-            to="/opportunities"
+            to={backPath}
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Opportunities</span>
+            <span>{backText}</span>
           </Link>
         </div>
       </div>
