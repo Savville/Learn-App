@@ -113,7 +113,7 @@ export function PostWithUs() {
   const [viewMode, setViewMode] = useState<'post' | 'manage'>('post');
 
   const handleManualEntry = () => {
-    if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email || !reporter.websiteOrSocial) {
+    if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email) {
       setError('Please provide your full identity details first.');
       return;
     }
@@ -145,7 +145,7 @@ export function PostWithUs() {
   };
 
   const handleParse = async () => {
-    if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email || !reporter.websiteOrSocial) {
+    if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email) {
       setError('Please provide your full identity details first.');
       return;
     }
@@ -396,12 +396,13 @@ export function PostWithUs() {
             {/* STEP 1: Details & Text Input (Hidden during Edit Mode) */}
             {!editingPostId && (
               <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm relative overflow-hidden mt-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-8">1. Provide the Details</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">1. Provide the Details</h2>
+                <p className="text-xs text-gray-500 mb-8"><span className="text-red-500 font-bold">*</span> Indicates required fields</p>
 
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Full Name</label>
+                      <label className="text-sm font-semibold text-gray-700">Full Name <span className="text-red-500">*</span></label>
                       <Input
                         required
                         placeholder="e.g. John Doe"
@@ -411,7 +412,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Organization</label>
+                      <label className="text-sm font-semibold text-gray-700">Organization <span className="text-red-500">*</span></label>
                       <Input
                         required
                         placeholder="e.g. IEEE Kenya"
@@ -421,7 +422,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Role / Position</label>
+                      <label className="text-sm font-semibold text-gray-700">Role / Position <span className="text-red-500">*</span></label>
                       <Input
                         required
                         placeholder="e.g. Communications Lead"
@@ -431,7 +432,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Phone Number</label>
+                      <label className="text-sm font-semibold text-gray-700">Phone Number <span className="text-red-500">*</span></label>
                       <Input
                         required
                         placeholder="e.g. +254 700 000 000"
@@ -441,7 +442,7 @@ export function PostWithUs() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Email</label>
+                      <label className="text-sm font-semibold text-gray-700">Email <span className="text-red-500">*</span></label>
                       <Input
                         required
                         type="email"
@@ -455,9 +456,8 @@ export function PostWithUs() {
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Website or Social Page</label>
+                      <label className="text-sm font-semibold text-gray-700">Website or Social Page <span className="text-gray-400 font-normal">(Optional)</span></label>
                       <Input
-                        required
                         placeholder="e.g. https://linkedin.com/company/..."
                         value={reporter.websiteOrSocial}
                         onChange={(e) => setReporter({ ...reporter, websiteOrSocial: e.target.value })}
@@ -600,7 +600,7 @@ export function PostWithUs() {
                     </div>
                     <div className="space-y-2">
                       <span className="text-sm font-semibold text-gray-700">
-                        Provider
+                        Provider or Institution
                       </span>
                       <Input
                         value={parsedData.basicInfo.provider}
