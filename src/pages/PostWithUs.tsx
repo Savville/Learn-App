@@ -207,9 +207,25 @@ export function PostWithUs() {
 
   const handleBasicInfoEdit = (key: string, newValue: string) => {
     if (!parsedData) return;
+    
+    const newBasicInfo = { ...parsedData.basicInfo, [key]: newValue };
+
+    // Dynamic field logic based on category
+    if (key === 'category') {
+      const disableFunding = ['Gig', 'Job', 'Internship', 'Attachment', 'Volunteer'].includes(newValue);
+      const disableCompensation = ['Scholarship', 'Grant', 'CallForPapers', 'Conference'].includes(newValue);
+      
+      if (disableFunding) {
+        newBasicInfo.fundingType = 'Not Applicable';
+      }
+      if (disableCompensation) {
+        newBasicInfo.compensationType = 'N/A';
+      }
+    }
+
     setParsedData({
       ...parsedData,
-      basicInfo: { ...parsedData.basicInfo, [key]: newValue },
+      basicInfo: newBasicInfo,
     });
   };
 
@@ -648,7 +664,12 @@ export function PostWithUs() {
                         Funding type
                       </span>
                       <select
-                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
+                        className={`w-full px-5 py-3 text-sm border rounded-xl transition-colors h-auto focus:outline-none ${
+                          ['Gig', 'Job', 'Internship', 'Attachment', 'Volunteer'].includes(parsedData.basicInfo.category)
+                            ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed opacity-70'
+                            : 'bg-white border-gray-200 focus:border-blue-500 text-gray-900'
+                        }`}
+                        disabled={['Gig', 'Job', 'Internship', 'Attachment', 'Volunteer'].includes(parsedData.basicInfo.category)}
                         value={parsedData.basicInfo.fundingType || ''}
                         onChange={(e) => handleBasicInfoEdit('fundingType', e.target.value)}
                       >
@@ -665,7 +686,12 @@ export function PostWithUs() {
                         Compensation
                       </span>
                       <select
-                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
+                        className={`w-full px-5 py-3 text-sm border rounded-xl transition-colors h-auto focus:outline-none ${
+                          ['Scholarship', 'Grant', 'CallForPapers', 'Conference'].includes(parsedData.basicInfo.category)
+                            ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed opacity-70'
+                            : 'bg-white border-gray-200 focus:border-blue-500 text-gray-900'
+                        }`}
+                        disabled={['Scholarship', 'Grant', 'CallForPapers', 'Conference'].includes(parsedData.basicInfo.category)}
                         value={parsedData.basicInfo.compensationType || 'N/A'}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('compensationType', e.target.value)}
                       >
