@@ -609,13 +609,13 @@ export function Inbox() {
                       <button onClick={handleApprove} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm w-full sm:w-auto">
                         <Handshake className="w-4 h-4" /> Approve & Release
                       </button>
-                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-rose-300 text-rose-600 rounded-xl hover:bg-rose-50 hover:border-rose-400 transition-colors font-bold text-sm w-full sm:w-auto shadow-sm">
                         <AlertTriangle className="w-4 h-4" /> Dispute
                       </button>
                     </>
                   )}
                   {isEmployer && activeConv.status === 'hired' && (
-                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-rose-300 text-rose-600 rounded-xl hover:bg-rose-50 hover:border-rose-400 transition-colors font-bold text-sm w-full sm:w-auto shadow-sm">
                       <AlertTriangle className="w-4 h-4" /> Dispute
                     </button>
                   )}
@@ -626,13 +626,13 @@ export function Inbox() {
                       <button onClick={handleDeliver} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 hover:shadow-lg transition-all font-semibold text-sm w-full sm:w-auto">
                         <CheckSquare className="w-4 h-4" /> Deliver Job
                       </button>
-                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-rose-300 text-rose-600 rounded-xl hover:bg-rose-50 hover:border-rose-400 transition-colors font-bold text-sm w-full sm:w-auto shadow-sm">
                         <AlertTriangle className="w-4 h-4" /> Dispute
                       </button>
                     </>
                   )}
                   {!isEmployer && activeConv.status === 'completed' && (
-                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition-colors font-semibold text-sm w-full sm:w-auto">
+                    <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-rose-300 text-rose-600 rounded-xl hover:bg-rose-50 hover:border-rose-400 transition-colors font-bold text-sm w-full sm:w-auto shadow-sm">
                       <AlertTriangle className="w-4 h-4" /> Dispute Employer
                     </button>
                   )}
