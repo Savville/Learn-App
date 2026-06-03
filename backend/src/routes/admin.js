@@ -136,6 +136,50 @@ router.get('/stats', verifyAdminKey, async (req, res) => {
   }
 });
 
+// GET /api/admin/chat-oversight
+router.get('/chat-oversight', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+
+    // Get all conversations
+    const conversations = await db.collection('conversations').find({}).toArray();
+
+    // Group by opportunityId to get active chats per opportunity
+    const oppMap = {};
+    let totalMessages = 0;
+
+    for (const conv of conversations) {
+      const oppId = conv.opportunityId;
+      if (!oppMap[oppId]) {
+        oppMap[oppId] = { count: 0, title: conv.opportunityTitle || oppId, posterEmail: conv.posterEmail };
+      }
+      oppMap[oppId].count += 1;
+
+      // Count messages in this conversation
+      const msgCount = await db.collection('messages').countDocuments({ conversationId: conv._id.toString() });
+      totalMessages += msgCount;
+    }
+
+    const activeChatsByOpportunity = Object.values(oppMap).sort((a, b) => b.count - a.count);
+
+    res.json({
+      totalConversations: conversations.length,
+      totalMessages,
+      activeChatsByOpportunity,
+      allConversations: conversations.map(c => ({
+        id: c._id,
+        opportunityTitle: c.opportunityTitle,
+        posterEmail: c.posterEmail,
+        applicantEmail: c.applicantEmail,
+        status: c.status,
+        createdAt: c.createdAt
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /api/admin/send-digest  â€” send branded digest to all active subscribers
 // Body (all optional):
 //   { opportunityIds: ["id1","id2",...] }  â†’ specific opps

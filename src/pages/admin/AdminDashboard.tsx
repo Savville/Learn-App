@@ -17,8 +17,9 @@ export default function AdminDashboard() {
   const [escrowReleases, setEscrowReleases] = useState<any[]>([]);
   const [disputes, setDisputes] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
+  const [chatOversight, setChatOversight] = useState<any>(null);
   const [payDoerLoading, setPayDoerLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms'>('opps');
+  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats'>('opps');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
@@ -80,7 +81,7 @@ export default function AdminDashboard() {
       const token = sessionStorage.getItem('adminToken');
       if (!token) return;
       
-      const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes] = await Promise.all([
+      const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes] = await Promise.all([
         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
@@ -88,6 +89,7 @@ export default function AdminDashboard() {
         fetch(`${API_BASE}/admin/escrow-releases`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/disputes`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/chat-oversight`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (oppsRes.ok) setPending(await oppsRes.json());
@@ -97,6 +99,7 @@ export default function AdminDashboard() {
       if (escrowRes.ok) setEscrowReleases(await escrowRes.json());
       if (statsRes.ok) setStats(await statsRes.json());
       if (disputesRes.ok) setDisputes(await disputesRes.json());
+      if (oversightRes.ok) setChatOversight(await oversightRes.json());
     } catch (e) {
       console.error(e);
     } finally {
@@ -417,6 +420,13 @@ export default function AdminDashboard() {
           >
             <Mail className="w-4 h-4" />
             Comms
+          </button>
+          <button 
+            onClick={() => setActiveTab('chats')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'chats' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <MessageCircle className="w-4 h-4" />
+            Chats Oversight
           </button>
         </div>
 
@@ -1349,6 +1359,99 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : activeTab === 'chats' ? (
+          /* Chats Oversight Tab */
+          <div className="space-y-6 max-w-5xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <Card className="border-slate-200 shadow-sm bg-blue-50/50">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-blue-600 uppercase tracking-widest mb-1">Total Active Chats</p>
+                    <p className="text-4xl font-black text-slate-900">{chatOversight?.totalConversations || 0}</p>
+                  </div>
+                  <MessageCircle className="w-12 h-12 text-blue-200" />
+                </CardContent>
+              </Card>
+              <Card className="border-slate-200 shadow-sm bg-purple-50/50">
+                <CardContent className="p-6 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-1">Total Messages Exchanged</p>
+                    <p className="text-4xl font-black text-slate-900">{chatOversight?.totalMessages || 0}</p>
+                  </div>
+                  <Send className="w-12 h-12 text-purple-200" />
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="bg-slate-50 border-b pb-4">
+                <CardTitle className="text-lg">Most Active Opportunities</CardTitle>
+                <CardDescription>Opportunities with the highest number of ongoing applicant conversations.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                {(!chatOversight?.activeChatsByOpportunity || chatOversight.activeChatsByOpportunity.length === 0) ? (
+                  <p className="text-center text-slate-500 py-8">No chat activity recorded yet.</p>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {chatOversight.activeChatsByOpportunity.map((item: any, idx: number) => (
+                      <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
+                        <div>
+                          <p className="font-semibold text-slate-900">{item.title}</p>
+                          <p className="text-xs text-slate-500">Posted by: {item.posterEmail}</p>
+                        </div>
+                        <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold px-3 py-1 text-sm border-none">
+                          {item.count} Active {item.count === 1 ? 'Chat' : 'Chats'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 shadow-sm mt-6">
+              <CardHeader className="bg-slate-50 border-b pb-4">
+                <CardTitle className="text-lg">All Ongoing Conversations Overview</CardTitle>
+                <CardDescription>A list of who is talking to who (message contents are private and encrypted).</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0 overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="text-xs text-slate-500 uppercase bg-slate-50/80">
+                    <tr>
+                      <th className="px-6 py-3 font-semibold">Opportunity</th>
+                      <th className="px-6 py-3 font-semibold">Poster</th>
+                      <th className="px-6 py-3 font-semibold">Applicant (Doer)</th>
+                      <th className="px-6 py-3 font-semibold">Status</th>
+                      <th className="px-6 py-3 font-semibold">Started</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {chatOversight?.allConversations?.map((conv: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50/50">
+                        <td className="px-6 py-4 font-medium text-slate-900 max-w-[200px] truncate" title={conv.opportunityTitle}>
+                          {conv.opportunityTitle || 'Unknown'}
+                        </td>
+                        <td className="px-6 py-4 text-slate-600">{conv.posterEmail}</td>
+                        <td className="px-6 py-4 text-slate-600">{conv.applicantEmail}</td>
+                        <td className="px-6 py-4">
+                          <Badge variant="outline" className={`
+                            ${conv.status === 'completed' ? 'text-green-600 border-green-200 bg-green-50' : ''}
+                            ${conv.status === 'active' ? 'text-blue-600 border-blue-200 bg-blue-50' : ''}
+                            ${conv.status === 'disputed' ? 'text-red-600 border-red-200 bg-red-50' : ''}
+                          `}>
+                            {conv.status || 'active'}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-slate-500 text-xs">
+                          {new Date(conv.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </CardContent>
             </Card>
           </div>
