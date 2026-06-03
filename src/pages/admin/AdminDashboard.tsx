@@ -881,37 +881,40 @@ export default function AdminDashboard() {
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white"
                     />
                   </div>
-                  <div className="bg-slate-50 p-4 border rounded-md">
-                    <label className="text-sm font-semibold mb-2 block">Update Logo (Optional)</label>
+                  <div className="bg-slate-50 p-6 border border-gray-200 rounded-xl">
+                    <label className="text-sm font-semibold mb-2 block text-slate-700">Update Logo (Optional)</label>
                     <Input 
                       type="file" 
                       accept="image/*"
                       onChange={e => setImageFile(e.target.files?.[0] || null)}
-                      className="mb-2 bg-white"
+                      className="mb-4 bg-white rounded-xl w-full"
                     />
                     {editForm.logoUrl && !imageFile && (
-                      <div className="flex items-center gap-3 mt-2">
-                         <img 
-                            src={editForm.logoUrl?.startsWith('/images/') ? (API_BASE.replace('/api', '') + editForm.logoUrl) : editForm.logoUrl} 
-                            alt="Current Logo" 
-                            className="w-12 h-12 object-contain bg-white border p-1 rounded" 
-                         />
-                         <p className="text-xs text-slate-500">Current logo remains unchanged.</p>
+                      <div className="flex items-center gap-4 mt-2">
+                         <div className="w-16 h-16 bg-white border border-gray-200 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                           <img 
+                              src={editForm.logoUrl?.startsWith('/images/') ? (API_BASE.replace('/api', '') + editForm.logoUrl) : (editForm.logoUrl || "/Opportunities Kenya Logo 2.png")} 
+                              alt="Current Logo" 
+                              className="w-full h-full object-contain p-1.5" 
+                              onError={(e: any) => { e.target.src = "/Opportunities Kenya Logo 2.png"; }}
+                           />
+                         </div>
+                         <p className="text-sm font-medium text-slate-600">Current logo remains unchanged.</p>
                       </div>
                     )}
                   </div>
-                  <div className="pt-4 flex gap-4">
+                  <div className="pt-6 flex gap-4">
                      <Button 
                        onClick={handleSaveEdit} 
                        disabled={actionLoading === 'saving'}
-                       className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                       className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 h-auto text-base font-bold shadow-sm"
                      >
                        {actionLoading === 'saving' ? 'Saving...' : 'Save Changes'}
                      </Button>
                      <Button 
                        onClick={() => handleDeleteOpp(editingOpp.id, editingOpp.title)}
                        disabled={actionLoading === `delete_${editingOpp.id}`}
-                       className="flex-1 font-semibold flex items-center justify-center border-none hover:opacity-90 transition-opacity whitespace-nowrap"
+                       className="flex-1 font-bold flex items-center justify-center border-none hover:opacity-90 transition-opacity whitespace-nowrap rounded-xl py-3 h-auto text-base shadow-sm"
                        style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
                      >
                        <Trash2 className="w-4 h-4 mr-2" /> Delete Opportunity
