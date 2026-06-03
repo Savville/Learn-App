@@ -60,6 +60,96 @@ export interface Opportunity {
 
 export const opportunities: Opportunity[] = [
   {
+    id: 'engineering-automation-developer-2026',
+    title: 'Software Developer for Engineering Automation (Equity Opportunity)',
+    provider: 'Detailing Automation Project',
+    category: 'Gig',
+    description: 'Finish the development of a fully automated CAD structural detailing system, aimed at commercial sale to civil engineering drafting companies.',
+    fullDescription: 'We are seeking a talented programming student to finalize the creation of core automation scripts and build out the full system architecture for a structural detailing tool. The system will fully automate tedious drafting tasks, including drawing generation, annotation, dimensioning, and customized detailing. The final product is intended to be sold as a premium tool to civil engineering drafting companies, contractors, and design offices.\n\nWe have already started building the foundation. We will provide all the necessary civil engineering logic, workflows, and CAD usage details. Interested candidates should pitch for this gig below for specific details on the existing codebase and required tech stack. We are offering a unique opportunity where the developer will have stakes/equity in the product upon an agreed plan, making you a partner in the product\'s success.',
+    deadline: '2026-08-31',
+    location: 'Remote',
+    eligibility: {
+      educationLevel: 'All',
+      fieldOfStudy: ['Computer Science', 'Software Engineering', 'Civil/Structural Engineering', 'Any Field'],
+      requirements: [
+        'Strong general programming skills and the ability to adapt to specific CAD scripting environments.',
+        'Ability to design and implement full system architectures for software tools.',
+        'Capacity to translate provided engineering rules into automated logic.',
+        'Self-driven with a strong interest in building commercially viable automation products.',
+        'Open to an equity/profit-sharing partnership agreement.'
+      ]
+    },
+    benefits: [
+      'Equity/Stakes in the final product based on agreed development milestones.',
+      'Flexible, fully remote working arrangement.',
+      'Opportunity to co-create a commercial software product targeting a lucrative niche (Civil Engineering).',
+      'Real-world experience in software architecture and industry-specific automation.'
+    ],
+    contactEmail: 'ochiwilliamotieno@gmail.com',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: 'Project-Based (with long-term partnership potential)',
+    featured: true,
+    dateAdded: '2026-06-03',
+    logoUrl: '/images/opportunities/autocad_automation.jpeg',
+    postedBy: 'Williams Savville',
+    isVerified: true,
+    status: 'Verified'
+  },
+  {
+    id: 'safal-sbs-sales-agent',
+    title: 'Safal Building Systems (SBS) Independent Sales Agent',
+    provider: 'Safal Building Systems Limited',
+    category: 'Gig',
+    description: 'Holiday Gig Alert: Earn massive commissions by connecting real estate developers with Safal Building Systems\' premium steel and solar solutions.',
+    fullDescription: `Are you a university student looking to make serious money during the long holiday? Safal Building Systems Limited (SBS), a proud member of the Safal Group (the makers of Mabati Rolling Mills - MRM), is looking for aggressive, independent sales agents to drive their revolutionary building solutions across Kenya.
+
+As an independent sales agent, your primary job is to look for customers, generate leads, and forward them to the SBS Division Sales Personnel. You don't need an office or inventory—you just need to connect buyers with the best building technology in the country.
+
+You will be selling four main premium solutions:
+1. ULTRASPAN®: Pre-engineered light gauge steel roof trusses.
+2. SAFBUILD®: Complete pre-engineered steel buildings and warehouses.
+3. SAFCOOL®: Insulated panels and cold room solutions.
+4. SAFSOLAR®: Advanced solar energy and water heating systems.
+
+Your Earnings:
+Real estate and construction deal values are massive. There is highly competitive remuneration for successful referrals, which will be agreed upon individually when you sign your contract. Because you are dealing with high-value construction materials, just one or two successful referrals a month can translate into life-changing income.
+
+What You Get From SBS:
+- Full training programs to give you the exact product knowledge you need.
+- Authorized marketing and technical support materials to share with your clients.`,
+    deadline: '2026-12-31',
+    location: 'Nationwide (Kenya)',
+    eligibility: {
+      educationLevel: 'All',
+      fieldOfStudy: ['Any Field', 'Business', 'Marketing', 'Engineering'],
+      requirements: [
+        'Open to all university students (Business, Engineering, Marketing, or any other field).',
+        'Must operate as an independent contractor.',
+        'Must utilize only marketing materials generated and authorized by SBS.',
+        'Commitment to a 1-year renewable term.'
+      ]
+    },
+    benefits: [
+      'Highly competitive commission-based earnings on high-value real estate deals.',
+      'Flexible working hours perfect for students on holiday.',
+      'Free technical and marketing training directly from a top corporate brand.',
+      'No upfront capital or inventory required.'
+    ],
+    applicationType: 'Online Form',
+    applicationLink: 'https://docs.google.com/forms/d/1Qj3l69tihyCa9msliS7RqVRLKplfdI_jNfvwxXdNvhE/viewform',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '1 Year (Renewable)',
+    featured: true,
+    dateAdded: '2026-06-03',
+    logoUrl: '/images/opportunities/safbuild.png',
+    isVerified: true,
+    status: 'Verified'
+  },
+  {
     id: 'canva-madaraka-day-challenge-2026',
     title: 'Canva Africa Madaraka Day Design Challenge 2026',
     provider: 'Canva Africa, KNEC, Microsoft Elevate & STEAM Labs',

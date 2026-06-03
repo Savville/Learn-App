@@ -3,7 +3,97 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const opportunities = [
-{
+  {
+    id: 'engineering-automation-developer-2026',
+    title: 'Software Developer for Engineering Automation (Equity Opportunity)',
+    provider: 'Detailing Automation Project',
+    category: 'Gig',
+    description: 'Finish the development of a fully automated CAD structural detailing system, aimed at commercial sale to civil engineering drafting companies.',
+    fullDescription: 'We are seeking a talented programming student to finalize the creation of core automation scripts and build out the full system architecture for a structural detailing tool. The system will fully automate tedious drafting tasks, including drawing generation, annotation, dimensioning, and customized detailing. The final product is intended to be sold as a premium tool to civil engineering drafting companies, contractors, and design offices.\n\nWe have already started building the foundation. We will provide all the necessary civil engineering logic, workflows, and CAD usage details. Interested candidates should pitch for this gig below for specific details on the existing codebase and required tech stack. We are offering a unique opportunity where the developer will have stakes/equity in the product upon an agreed plan, making you a partner in the product\'s success.',
+    deadline: '2026-08-31',
+    location: 'Remote',
+    eligibility: {
+      educationLevel: 'All',
+      fieldOfStudy: ['Computer Science', 'Software Engineering', 'Civil/Structural Engineering', 'Any Field'],
+      requirements: [
+        'Strong general programming skills and the ability to adapt to specific CAD scripting environments.',
+        'Ability to design and implement full system architectures for software tools.',
+        'Capacity to translate provided engineering rules into automated logic.',
+        'Self-driven with a strong interest in building commercially viable automation products.',
+        'Open to an equity/profit-sharing partnership agreement.'
+      ]
+    },
+    benefits: [
+      'Equity/Stakes in the final product based on agreed development milestones.',
+      'Flexible, fully remote working arrangement.',
+      'Opportunity to co-create a commercial software product targeting a lucrative niche (Civil Engineering).',
+      'Real-world experience in software architecture and industry-specific automation.'
+    ],
+    contactEmail: 'ochiwilliamotieno@gmail.com',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: 'Project-Based (with long-term partnership potential)',
+    featured: true,
+    dateAdded: '2026-06-03',
+    logoUrl: '/images/opportunities/autocad_automation.jpeg',
+    postedBy: 'Williams Savville',
+    isVerified: true,
+    status: 'Verified'
+  },
+  {
+    id: 'safal-sbs-sales-agent',
+    title: 'Safal Building Systems (SBS) Independent Sales Agent',
+    provider: 'Safal Building Systems Limited',
+    category: 'Gig',
+    description: 'Holiday Gig Alert: Earn massive commissions by connecting real estate developers with Safal Building Systems\' premium steel and solar solutions.',
+    fullDescription: `Are you a university student looking to make serious money during the long holiday? Safal Building Systems Limited (SBS), a proud member of the Safal Group (the makers of Mabati Rolling Mills - MRM), is looking for aggressive, independent sales agents to drive their revolutionary building solutions across Kenya.
+
+As an independent sales agent, your primary job is to look for customers, generate leads, and forward them to the SBS Division Sales Personnel. You don't need an office or inventory—you just need to connect buyers with the best building technology in the country.
+
+You will be selling four main premium solutions:
+1. ULTRASPAN®: Pre-engineered light gauge steel roof trusses.
+2. SAFBUILD®: Complete pre-engineered steel buildings and warehouses.
+3. SAFCOOL®: Insulated panels and cold room solutions.
+4. SAFSOLAR®: Advanced solar energy and water heating systems.
+
+Your Earnings:
+Real estate and construction deal values are massive. There is highly competitive remuneration for successful referrals, which will be agreed upon individually when you sign your contract. Because you are dealing with high-value construction materials, just one or two successful referrals a month can translate into life-changing income.
+
+What You Get From SBS:
+- Full training programs to give you the exact product knowledge you need.
+- Authorized marketing and technical support materials to share with your clients.`,
+    deadline: '2026-12-31',
+    location: 'Nationwide (Kenya)',
+    eligibility: {
+      educationLevel: 'All',
+      fieldOfStudy: ['Any Field', 'Business', 'Marketing', 'Engineering'],
+      requirements: [
+        'Open to all university students (Business, Engineering, Marketing, or any other field).',
+        'Must operate as an independent contractor.',
+        'Must utilize only marketing materials generated and authorized by SBS.',
+        'Commitment to a 1-year renewable term.'
+      ]
+    },
+    benefits: [
+      'Highly competitive commission-based earnings on high-value real estate deals.',
+      'Flexible working hours perfect for students on holiday.',
+      'Free technical and marketing training directly from a top corporate brand.',
+      'No upfront capital or inventory required.'
+    ],
+    applicationType: 'Online Form',
+    applicationLink: 'https://docs.google.com/forms/d/1Qj3l69tihyCa9msliS7RqVRLKplfdI_jNfvwxXdNvhE/viewform',
+    fundingType: 'N/A',
+    compensationType: 'Paid',
+    upfrontCost: 'No Upfront Cost',
+    duration: '1 Year (Renewable)',
+    featured: true,
+    dateAdded: '2026-06-03',
+    logoUrl: '/images/opportunities/safbuild.png',
+    isVerified: true,
+    status: 'Verified'
+  },
+  {
     id: 'canva-madaraka-day-challenge-2026',
     title: 'Canva Africa Madaraka Day Design Challenge 2026',
     provider: 'Canva Africa, KNEC, Microsoft Elevate & STEAM Labs',
@@ -48,9 +138,7 @@ Start with Canva's free Madaraka Day templates. Use tools like Magic Write and A
     dateAdded: '2026-05-30',
     logoUrl: '/images/opportunities/CanvaAfricaDesignChallenge-Madaraka-Day.avif', 
     isVerified: true,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
+    status: 'Verified'
   },
   {
     id: 'safal-eye-in-the-wild-2026',
@@ -88,9 +176,7 @@ Start with Canva's free Madaraka Day templates. Use tools like Magic Write and A
     logoUrl: '/images/opportunities/safal_group2.jpg',
     postedBy: 'Opportunities Kenya Admin',
     isVerified: true,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
+    status: 'Verified'
   },
   {
     id: 'mock-gig-student-project',
@@ -127,9 +213,7 @@ Start with Canva's free Madaraka Day templates. Use tools like Magic Write and A
     isEscrow: true,
     isEscrowFunded: false,
     escrowAmount: 3000,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
+    status: 'Verified'
   },
   {
     id: 'mock-gig-lecturer-ppt',
@@ -166,9 +250,7 @@ Start with Canva's free Madaraka Day templates. Use tools like Magic Write and A
     isEscrow: true,
     isEscrowFunded: true,
     escrowAmount: 5000,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
+    status: 'Verified'
   },
   {
     id: 'mock-gig-grad-research',
@@ -205,48 +287,7 @@ Start with Canva's free Madaraka Day templates. Use tools like Magic Write and A
     isEscrow: true,
     isEscrowFunded: false,
     escrowAmount: 2500,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: 'mock-gig-test-chat',
-    title: 'Website Testing and Bug Hunting for New Platform',
-    provider: 'Tech Startup XYZ',
-    category: 'Gig',
-    description: 'Looking for a detail-oriented student to test our new platform and report bugs. Great for testing the new In-App Chat!',
-    fullDescription: 'We are launching a new educational platform and need 5 students to go through all the pages, click every link, and report any broken features. Please pitch yourself and tell us what devices you have (e.g., iPhone, Android, Windows Laptop).\\n\\n**Status:** Open for applications. Use the pitch box to apply!',
-    deadline: '2026-12-31',
-    location: 'Remote',
-    eligibility: {
-      educationLevel: 'UnderGrad',
-      fieldOfStudy: ['Any Field'],
-      requirements: [
-        'Good internet connection',
-        'Attention to detail',
-        'Ability to write clear bug reports'
-      ]
-    },
-    benefits: [
-      'Quick payment',
-      'Flexible hours'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: '#',
-    fundingType: 'N/A',
-    compensationType: 'Paid',
-    upfrontCost: 'No Upfront Cost',
-    duration: '1 day',
-    featured: true,
-    dateAdded: '2026-05-14',
-    logoUrl: '/images/opportunities/default-avatar.png',
-    postedBy: 'Startup Admin',
-    isEscrow: true,
-    isEscrowFunded: false,
-    escrowAmount: 1500,
-    status: 'Verified',
-    views: 0,
-    clicks: 0
+    status: 'Verified'
   },
   {
     id: 'agea-startup-lab-2026',
@@ -303,76 +344,7 @@ Extended, tailored support for top-performing start-ups to help secure funding a
     featured: true,
     dateAdded: '2026-04-24',
     logoUrl: '/images/opportunities/agea.png',
-    postedBy: 'Opportunities Kenya Admin',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: 'bishops-university-admissions-2026-2027',
-    title: "Bishop's University Undergraduate & Graduate Admissions 2026-2027",
-    provider: "Bishop's University",
-    category: 'Scholarship',
-    description: "Applications are open for Fall 2026 and Winter 2027 at Bishop's University, Canada. Includes opportunities for B.A., B.Sc., B.B.A., B.Ed., M.A., M.Sc., and M.Ed. programs.",
-    fullDescription: `Bishop's University welcomes applications for the 2026-2027 academic year. For anyone looking to apply to a Bachelor of Arts (B.A.), Bachelor of Science (B.Sc.), Bachelor of Business Administration (B.B.A.), Bachelor of Education (B.Ed.), Master of Arts (M.A.), Master of Science (M.Sc.), or Master of Education (M.Ed.) degree.
-
-────────────────────────────────────
- FALL 2026 SEMESTER DEADLINES
-────────────────────────────────────
-
-• August 4, 2025: Application opens
-• March 31, 2026:
-  - Deadline for international students (except USA) to submit an application.
-  - Deadline for all applicants to apply for Competitive Entrance Scholarships.
-  - Deadline for all applicants to submit Entrance Awards and Bursaries application.
-• April 15, 2026: Deadline for international students (except USA) to submit supporting documentation.
-• May 1, 2026: Deadline for Canadian and USA Citizens to submit an application.
-• May 15, 2026: Deadline for Canadian and USA Citizens to submit supporting documentation.
-
-────────────────────────────────────
- WINTER 2027 SEMESTER DEADLINES
-────────────────────────────────────
-
-• Spring 2026: Admissions evaluation begins.
-• September 1, 2026: Deadline for international students to submit an application.
-• September 15, 2026: Deadline for international students to submit supporting documentation.
-• November 1, 2026: Deadline for Canadian students to submit an application.
-• November 15, 2026: Deadline for Canadian students to submit supporting documentation.
-
-* Canadian and USA Citizens: Please check the programs dropdown list on the corresponding form to see what programs remain open for admission consideration after May 1.
-
-** Applications to the School of Education’s Bachelor of Education programs are subject to different timelines and deadlines.
-
-Incoming International Exchange students (one or two semesters) have separate forms for Fall 2026 and Winter 2027. Contact exchange@ubishops.ca for any questions.`,
-    deadline: '2026-03-31',
-    location: 'Sherbrooke, Quebec, Canada',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Arts', 'Science', 'Business Administration', 'Education'],
-      requirements: [
-        'Open to Undergraduate (B.A., B.Sc., B.B.A., B.Ed.) and Graduate (M.A., M.Sc., M.Ed.) applicants',
-        'International students must apply by March 31 for Fall entry to be considered for scholarships',
-        'Canadian and USA citizens must apply by May 1 for Fall entry',
-        'International students must apply by September 1 for Winter entry',
-        'Canadian students must apply by November 1 for Winter entry'
-      ]
-    },
-    benefits: [
-      'Competitive Entrance Scholarships (Apply by March 31)',
-      'Entrance Awards and Bursaries (Apply by March 31)',
-      'Access to a wide range of undergraduate and graduate programs',
-      'International exchange opportunities',
-      'Vibrant campus life in Sherbrooke, Quebec'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://www.ubishops.ca/future-students/bishops-university-online-application/',
-    fundingType: 'Partially Funded',
-    compensationType: 'N/A',
-    upfrontCost: 'Has Upfront Cost',
-    featured: true,
-    dateAdded: '2026-04-07',
-    logoUrl: '/images/opportunities/ubishops_canada.jpeg',
-    views: 0,
-    clicks: 0
+    postedBy: 'Opportunities Kenya Admin'
   },
   {
     id: 'science-scilifelab-prize-for-young-scientists-2026',
@@ -422,8 +394,6 @@ The grand winner will get a prize money of $30,000 USD, and the other three cate
     featured: true,
     dateAdded: '2026-03-29',
     logoUrl: '/images/opportunities/Scilifelab.png',
-    views: 0,
-    clicks: 0
   },
   {
     id: 'aces-civexpo-2026-incubation',
@@ -494,9 +464,7 @@ Registered projects will present at ACES meet-ups leading up to the CivExpo in S
         heading: 'Innovation & Business (Phase 3)',
         topics: ['Sustainable construction materials', 'Network leakage solutions (Nairobi Water)', 'Decentralized rainwater purification', 'Structural biofuel briquettes & business models']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: '37',
@@ -618,9 +586,7 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
         heading: 'Wastewater Reuse',
         topics: ['Treated wastewater for urban irrigation', 'Industrial grey water reuse systems', 'Urban aquifer recharge strategies']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: 'worldquant-brain-iqc-2026',
@@ -691,94 +657,7 @@ HOW TO PARTICIPATE
         heading: 'Quant Finance Career',
         topics: ['BRAIN Research Consultant positions', 'Quantitative Researcher networking', 'Global finals in Singapore']
       }
-    ],
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '29',
-    title: 'ESO Science Communication Internship 2026',
-    provider: 'European Southern Observatory',
-    category: 'Internship',
-    description: 'A fully funded science communication internship at ESO headquarters in Germany. Covers monthly living allowance, accommodation, and a return flight from your home country. Open to applicants worldwide.',
-    fullDescription: 'The European Southern Observatory (ESO) Science Communication Internship offers students and recent graduates the chance to work with ESO\'s Department of Communication in Garching, Germany. Interns contribute to news articles, press releases, web content, video scripts, exhibition materials, and other public outreach products for one of the world\'s leading astronomical organisations. The internship runs for 3–6 months on a rolling basis, meaning applications are reviewed every 4–6 months year-round. ESO provides a monthly allowance for living expenses, accommodation, and covers the cost of a return ticket from the intern\'s home country, making it a genuinely fully funded opportunity.',
-    deadline: 'Rolling',
-    location: 'Germany',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Science Communication', 'Science Journalism', 'Natural Sciences', 'Astronomy'],
-      requirements: [
-        'Open to candidates from all countries',
-        'Degree in Science, Science Communication, or Science Journalism preferred',
-        'Proficiency in written and spoken English',
-        'Experience in written science communication or journalism',
-        'Understanding of astronomy and science outreach',
-        'Ability to work independently and in multicultural teams',
-        'Ability to work under time pressure and meet deadlines'
-      ]
-    },
-    benefits: [
-      'Monthly allowance to cover living expenses',
-      'Accommodation provided',
-      'Return flight from/to home country covered',
-      'Work with world-renowned scientists and communicators',
-      'Access to state-of-the-art astronomical facilities',
-      'International and multicultural work environment',
-      'Strong addition to a science communication career'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://recruitment.eso.org/',
-    fundingType: 'Paid Internship',
-    compensationType: 'Paid',
-    upfrontCost: 'No Upfront Cost',
-    duration: '3 to 6 months',
-    featured: false,
-    dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/european-union.jpg',
-    views: 0,
-    clicks: 0
-  },
-  {
-    id: '30',
-    title: 'WFP Internship Program 2026',
-    provider: 'World Food Programme',
-    category: 'Internship',
-    description: 'A paid internship with the UN World Food Programme open to students in any field. Offers a stipend of up to $1,000/month, medical insurance, and a flexible duration of 2–8 months across global WFP offices.',
-    fullDescription: 'The World Food Programme (WFP) Internship Program is a short-term learning opportunity for outstanding undergraduate and graduate students from across the world. Interns work in WFP offices globally across fields such as logistics, communications, data, nutrition, and more — directly contributing to efforts to achieve zero hunger. The programme runs for 2 to 8 months depending on the position, with different openings having different deadlines. WFP provides a stipend of up to US$1,000 per month based on duty station, medical and accident insurance for interns from developing countries, certified sick leave, and potential visa support. Applicants must be enrolled in a recognised university or have graduated within the last six months.',
-    deadline: 'Rolling',
-    location: 'International',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Any Field'],
-      requirements: [
-        'Currently enrolled in a recognised university (attended classes in last 12 months) or graduated within the last 6 months',
-        'Completed at least two years of an undergraduate degree',
-        'Fluency in English is compulsory',
-        'Knowledge of another UN language is an advantage',
-        'Strong teamwork skills and willingness to take on challenges',
-        'Apply only for positions relevant to your field of study'
-      ]
-    },
-    benefits: [
-      'Stipend of up to $1,000 per month (based on duty station)',
-      'Medical and accident insurance for interns from developing countries',
-      'Certified sick leave',
-      'Visa support may be available',
-      'Training and e-learning resources',
-      'Exposure to international humanitarian work',
-      'Real-world experience contributing to zero hunger goals'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://wd3.myworkdaysite.com/recruiting/wfp/job_openings?workerSubType=59387fe40123101e856f1834e09b0002',
-    fundingType: 'Paid Internship',
-    compensationType: 'Stipend',
-    upfrontCost: 'Has Upfront Cost',
-    duration: '2 to 8 months',
-    featured: false,
-    dateAdded: '2026-02-27',
-    logoUrl: '/images/opportunities/wfp.png',
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: '36',
@@ -879,9 +758,7 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
         heading: 'General',
         topics: ['All academic fields (excluding aviation, nuclear technology, and military training)']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: '38',
@@ -967,9 +844,7 @@ No Japanese language skills required. All interns with outstanding performance m
         heading: 'Front-End Software Engineering',
         topics: ['React & Vue in TypeScript', 'Modern UI/UX development', 'Component-driven architecture', 'Web performance optimisation']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   },
   {
     id: '40',
@@ -1010,9 +885,7 @@ No Japanese language skills required. All interns with outstanding performance m
     upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-13',
-    logoUrl: '/images/opportunities/german.jpg',
-    views: 0,
-    clicks: 0
+    logoUrl: '/images/opportunities/german.jpg'
   },
   {
     id: 'google-student-researcher-internship-2026',
@@ -1057,9 +930,7 @@ No Japanese language skills required. All interns with outstanding performance m
         heading: 'Software Engineering',
         topics: ['Algorithmic Foundations', 'Infrastructure Engineering', 'Performance Optimization']
       }
-    ],
-    views: 0,
-    clicks: 0
+    ]
   }
 ];
 
@@ -1075,11 +946,7 @@ async function seedDatabase() {
     await collection.deleteMany({});
 
     console.log(`📥 Inserting ${opportunities.length} opportunities into MongoDB...`);
-    const docsToInsert = opportunities.map((opp, index) => ({
-      ...opp,
-      dateAdded: new Date(Date.now() - index * 1000 * 60 * 60)
-    }));
-    const result = await collection.insertMany(docsToInsert);
+    const result = await collection.insertMany(opportunities);
 
     console.log(`✅ Successfully inserted ${result.insertedCount} opportunities!`);
   } catch (error) {
@@ -1092,5 +959,3 @@ async function seedDatabase() {
 }
 
 seedDatabase();
-
-// Refurbished
