@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
-import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, Flag, Share2, Link as LinkIcon } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, Flag, Share2, Link as LinkIcon, Linkedin, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -841,79 +841,109 @@ export function OpportunityDetails() {
               )}
             </div>
 
-            {/* Report + Verification audit */}
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="text-gray-900 text-lg font-bold">See something suspicious?</h3>
-                  <p className="text-sm text-gray-600">Report it and we will remove or review it quickly.</p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="inline-flex items-center gap-2 self-start border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                  onClick={() => setReportOpen(prev => !prev)}
-                >
-                  <Flag className="w-4 h-4" />
-                  Report Suspicious Post
-                </Button>
+            {/* Action Buttons: Share & Subscribe */}
+            </div>{/* end p-8 content */}
+
+          {/* Share & Subscribe — full-width, outside p-8 */}
+          <div className="border-t border-slate-100 px-8 py-8">
+            <p className="text-sm text-slate-500 font-medium mb-4 text-center tracking-wide uppercase">Know someone who'd be a great fit?</p>
+            <div className="flex flex-row gap-5 w-full">
+              {/* Share Button — solid blue */}
+              <Button 
+                onClick={() => {
+                  const deadline = opportunity?.deadline
+                    ? `📅 Deadline: ${new Date(opportunity.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                    : '📅 Deadline: Open / Ongoing';
+                  const location = opportunity?.location ? `📍 Location: ${opportunity.location}` : '';
+                  const compensation = opportunity?.compensationType ? `💰 Compensation: ${opportunity.compensationType}` : '';
+                  const cost = opportunity?.upfrontCost === 'No Upfront Cost' ? '✅ Free to Apply' : opportunity?.upfrontCost ? `⚠️ ${opportunity.upfrontCost}` : '';
+                  const snippet = opportunity?.description ? opportunity.description.slice(0, 180).trim() + '…' : '';
+                  const metaLines = [deadline, location, compensation, cost].filter(Boolean).join('\n');
+                  const shareText = `🌍 *${opportunity?.title}*\nby ${opportunity?.provider} · ${opportunity?.category}\n\n${metaLines}\n\n${snippet}\n\n🔗 Apply or learn more on Opportunities Kenya — your go-to hub for scholarships, fellowships, internships & grants across Africa.\n\n${window.location.href}`;
+                  if (navigator.share) {
+                    navigator.share({
+                      title: opportunity?.title,
+                      text: shareText,
+                      url: window.location.href,
+                    }).catch(console.error);
+                  } else {
+                    navigator.clipboard.writeText(shareText);
+                    toast.success("Copied! Paste it anywhere to share.");
+                  }
+                }}
+                className="flex-1 h-auto py-6 px-6 bg-blue-600 hover:bg-blue-700 text-white gap-3 rounded-2xl text-lg font-semibold shadow-md flex items-center justify-center transition-colors"
+              >
+                <Share2 className="w-6 h-6" />
+                Share Opportunity
+              </Button>
+
+              {/* Subscribe Button — outlined dark */}
+              <Link
+                to="/#newsletter"
+                className="flex-1 inline-flex items-center justify-center gap-3 py-6 px-6 bg-white border-2 border-slate-800 hover:bg-slate-50 text-slate-800 rounded-2xl text-lg font-semibold shadow-sm transition-colors"
+              >
+                <Bell className="w-6 h-6" />
+                Subscribe for more
+              </Link>
+            </div>
+          </div>
+
+          {/* Report — full-width, outside p-8 */}
+          <div className="border-t border-slate-100 px-8 py-6 bg-slate-50">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-gray-900 text-lg font-bold">See something suspicious?</h3>
+                <p className="text-sm text-gray-600">Report it and we will remove or review it quickly.</p>
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="inline-flex items-center gap-2 self-start border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setReportOpen(prev => !prev)}
+              >
+                <Flag className="w-4 h-4" />
+                Report Suspicious Post
+              </Button>
+            </div>
 
-              {reportMessage && (
-                <p className="mt-3 text-sm font-medium text-slate-700">{reportMessage}</p>
-              )}
+            {reportMessage && (
+              <p className="mt-3 text-sm font-medium text-slate-700">{reportMessage}</p>
+            )}
 
-              {reportOpen && (
-                <form onSubmit={handleReportSubmit} className="mt-4 grid grid-cols-1 gap-4 rounded-xl bg-white p-4 border border-slate-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      required
-                      placeholder="Your name"
-                      value={reportForm.name}
-                      onChange={(e) => setReportForm({ ...reportForm, name: e.target.value })}
-                    />
-                    <Input
-                      required
-                      type="email"
-                      placeholder="Your email"
-                      value={reportForm.email}
-                      onChange={(e) => setReportForm({ ...reportForm, email: e.target.value })}
-                    />
-                  </div>
+            {reportOpen && (
+              <form onSubmit={handleReportSubmit} className="mt-4 grid grid-cols-1 gap-4 rounded-xl bg-white p-4 border border-slate-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     required
-                    placeholder="Reason for report"
-                    value={reportForm.reason}
-                    onChange={(e) => setReportForm({ ...reportForm, reason: e.target.value })}
+                    placeholder="Your name"
+                    value={reportForm.name}
+                    onChange={(e) => setReportForm({ ...reportForm, name: e.target.value })}
                   />
-                  <Textarea
-                    placeholder="Add any details, screenshots, or context"
-                    className="min-h-[100px]"
-                    value={reportForm.details}
-                    onChange={(e) => setReportForm({ ...reportForm, details: e.target.value })}
+                  <Input
+                    required
+                    type="email"
+                    placeholder="Your email"
+                    value={reportForm.email}
+                    onChange={(e) => setReportForm({ ...reportForm, email: e.target.value })}
                   />
-                  <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white" disabled={reportSubmitting}>
-                    {reportSubmitting ? 'Sending report...' : 'Send Report'}
-                  </Button>
-                </form>
-              )}
-            </div>
-
-            {/* Action Footer: Share & Subscribe */}
-            <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-              {/* Share Button Removed */}
-
-              {/* Subscribe for more */}
-              <div className="w-full sm:w-auto text-left sm:text-right">
-                <Link
-                  to="/#newsletter"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2 w-full sm:w-auto rounded-full border border-blue-200 text-sm font-semibold text-blue-600 hover:text-blue-800 hover:border-blue-400 hover:bg-blue-50 transition-all"
-                >
-                  <Bell className="w-4 h-4" />
-                  Subscribe for more like this
-                </Link>
-              </div>
-            </div>
+                </div>
+                <Input
+                  required
+                  placeholder="Reason for report"
+                  value={reportForm.reason}
+                  onChange={(e) => setReportForm({ ...reportForm, reason: e.target.value })}
+                />
+                <Textarea
+                  placeholder="Add any details, screenshots, or context"
+                  className="min-h-[100px]"
+                  value={reportForm.details}
+                  onChange={(e) => setReportForm({ ...reportForm, details: e.target.value })}
+                />
+                <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white" disabled={reportSubmitting}>
+                  {reportSubmitting ? 'Sending report...' : 'Send Report'}
+                </Button>
+              </form>
+            )}
           </div>
         </article>
 
