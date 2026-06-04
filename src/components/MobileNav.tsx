@@ -1,37 +1,72 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Briefcase, PlusCircle, Inbox, User } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Home, Briefcase, PlusCircle, Inbox, Search } from 'lucide-react';
+
+const links = [
+  { name: 'Home',    path: '/',             icon: Home },
+  { name: 'Browse',  path: '/opportunities', icon: Briefcase },
+  { name: 'Post',    path: '/post-with-us',  icon: PlusCircle },
+  { name: 'Search',  path: '/opportunities', icon: Search },
+  { name: 'Inbox',   path: '/inbox',         icon: Inbox },
+];
 
 export function MobileNav() {
   const location = useLocation();
 
-  const links = [
-    { name: 'Home', path: '/', icon: <Home className="w-6 h-6" /> },
-    { name: 'Find', path: '/opportunities', icon: <Briefcase className="w-6 h-6" /> },
-    { name: 'Post', path: '/post-with-us', icon: <PlusCircle className="w-6 h-6" /> },
-    { name: 'Inbox', path: '/inbox', icon: <Inbox className="w-6 h-6" /> },
-    { name: 'Admin', path: '/admin/login', icon: <User className="w-6 h-6" /> },
-  ];
+  // Never show on admin pages
+  if (location.pathname.startsWith('/admin')) return null;
 
-  return (
-    <div 
-      className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 px-2 py-2 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]" 
-      style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+  const nav = (
+    <nav
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        backgroundColor: '#ffffff',
+        borderTop: '1px solid #e2e8f0',
+        boxShadow: '0 -2px 12px rgba(0,0,0,0.08)',
+        display: 'flex',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+        paddingTop: '8px',
+      }}
+      className="md:hidden"
     >
       {links.map((link) => {
-        const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+        const Icon = link.icon;
+        const isActive =
+          link.path === '/'
+            ? location.pathname === '/'
+            : location.pathname.startsWith(link.path);
         return (
           <Link
             key={link.name}
             to={link.path}
-            className={`flex flex-col items-center justify-center w-16 gap-1 ${
-              isActive ? 'text-blue-600' : 'text-slate-500 hover:text-slate-900'
-            }`}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '3px',
+              color: isActive ? '#2563eb' : '#64748b',
+              textDecoration: 'none',
+              minWidth: '56px',
+              padding: '4px 8px',
+              borderRadius: '10px',
+              transition: 'color 0.15s',
+            }}
           >
-            {link.icon}
-            <span className="text-[10px] font-medium">{link.name}</span>
+            <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+            <span style={{ fontSize: '10px', fontWeight: isActive ? 700 : 500 }}>
+              {link.name}
+            </span>
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
+
+  return createPortal(nav, document.body);
 }

@@ -74,18 +74,18 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button — hidden on phones, bottom nav used instead */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            className="hidden sm:flex md:hidden p-2 rounded-lg hover:bg-gray-100"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation (tablet only, bottom nav handles phones) */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t">
+          <div className="hidden sm:block md:hidden py-4 border-t">
             <div className="flex flex-col gap-4">
               <Link
                 to="/"
