@@ -1,10 +1,37 @@
 
   import { defineConfig } from 'vite';
   import react from '@vitejs/plugin-react-swc';
+  import { VitePWA } from 'vite-plugin-pwa';
   import path from 'path';
 
   export default defineConfig({
-    plugins: [react()],
+    plugins: [
+      react(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+        manifest: {
+          name: 'Opportunities Kenya',
+          short_name: 'OppKE',
+          description: 'Discover and share the best opportunities in Kenya',
+          theme_color: '#ffffff',
+          background_color: '#ffffff',
+          display: 'standalone',
+          icons: [
+            {
+              src: '/Opportunities Kenya Logo 2.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: '/Opportunities Kenya Logo 2.png',
+              sizes: '512x512',
+              type: 'image/png'
+            }
+          ]
+        }
+      })
+    ],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {

@@ -11,6 +11,7 @@ import { Contact } from './pages/Contact';
 import { PostWithUs } from './pages/PostWithUs';
 import { Inbox } from './pages/Inbox';
 import { Subscribe } from './pages/Subscribe';
+import { MobileNav } from './components/MobileNav';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDisputes } from './pages/AdminDisputes';
@@ -57,7 +58,7 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       {loading && <PageLoader />}
       {!isAdminRoute && <Header />}
       <main className="flex-1">
@@ -85,6 +86,7 @@ function AppContent() {
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <MobileNav />}
       <Toaster />
     </div>
   );

@@ -34,10 +34,10 @@ app.use(helmet());
 // Gzip compression
 app.use(compression());
 
-// Rate limiting — 100 requests per IP per 15 min (global)
+// Rate limiting — 1000 requests per IP per 15 min (global)
 app.use('/api/', rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests. Please slow down.' }

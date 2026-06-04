@@ -6,7 +6,7 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const isAuthenticated = !!sessionStorage.getItem('adminToken');
+  const isAuthenticated = !!localStorage.getItem('adminToken');
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;

@@ -22,7 +22,7 @@ export function AdminLogin() {
       
       const { token } = response.data;
       if (token) {
-        sessionStorage.setItem('adminToken', token);
+        localStorage.setItem('adminToken', token);
         navigate('/admin/dashboard');
       } else {
         setError('Invalid server response: no token received.');

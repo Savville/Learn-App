@@ -703,14 +703,14 @@ export async function sendOTPEmail(email, otp) {
       </div>
     `);
 
-    const data = await resend.emails.send({
+    const response = await resend.emails.send({
       from: 'Opportunities Kenya Security <security@opportunitieskenya.live>',
       reply_to: 'opportunitieskenyalive@gmail.com',
       to: [email],
       subject: `Your Login Code: ${otp}`,
       html,
     });
-    console.log(`[Email] OTP sent to ${email}`, data.id);
+    console.log(`[Email] OTP sent to ${email}`, response.data ? response.data.id : '');
   } catch (error) {
     console.error(`[Email Error] Failed to send OTP to ${email}:`, error);
   }

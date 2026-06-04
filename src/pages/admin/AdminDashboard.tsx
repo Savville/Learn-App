@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send, MessageCircle } from 'lucide-react';
@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   // Report State
   const [reportData, setReportData] = useState<any | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
-  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [expandedReportId, setExpandedReportId] = useState<string | null>(null);
   
   // Comms State
   const [lastN, setLastN] = useState<number>(5);
@@ -45,18 +45,28 @@ export default function AdminDashboard() {
   const [selectedOpps, setSelectedOpps] = useState<string[]>([]);
   const [subscriberCategories, setSubscriberCategories] = useState<any[]>([]);
   const [targetFilter, setTargetFilter] = useState('All');
+  const [reportError, setReportError] = useState<string | null>(null);
 
   const handleGenerateReport = async (oppId: string) => {
+    if (expandedReportId === oppId) {
+      setExpandedReportId(null);
+      return;
+    }
+    setExpandedReportId(oppId);
     setReportLoading(true);
-    setReportModalOpen(true);
+    setReportError(null);
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/reports/${oppId}/postmortem`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
       if (res.ok) {
-        setReportData(await res.json());
+        setReportData(data);
+      } else {
+        setReportError(data.error || 'Failed to generate report.');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setReportError(e.message || 'An unexpected error occurred.');
     } finally {
       setReportLoading(false);
     }
@@ -66,7 +76,7 @@ export default function AdminDashboard() {
     if (!reportData) return;
     setActionLoading('emailing_report');
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       await fetch(`${API_BASE}/admin/reports/${reportData.id}/email-postmortem`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -80,7 +90,7 @@ export default function AdminDashboard() {
 
   const fetchPending = async () => {
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       if (!token) return;
       
       const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes, categoriesRes] = await Promise.all([
@@ -124,7 +134,7 @@ export default function AdminDashboard() {
     if (!editingOpp) return;
     setActionLoading('saving');
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       let finalLogoUrl = editForm.logoUrl;
 
       // Upload new image if selected
@@ -171,7 +181,7 @@ export default function AdminDashboard() {
     if (!window.confirm(`Are you sure you want to completely delete "${title}"?`)) return;
     setActionLoading(`delete_${id}`);
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/opportunities/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
@@ -213,7 +223,7 @@ export default function AdminDashboard() {
   const handleApproveOrg = async (objId: string) => {
     setActionLoading(objId);
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/organization-requests/approve/${objId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
@@ -232,7 +242,7 @@ export default function AdminDashboard() {
     if (!window.confirm('Reject this request?')) return;
     setActionLoading(objId);
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/organization-requests/reject/${objId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
@@ -258,7 +268,7 @@ export default function AdminDashboard() {
 
     setActionLoading(objId);
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/approve/${objId}`, {
         method: 'POST',
         headers: {
@@ -289,7 +299,7 @@ export default function AdminDashboard() {
     if (!window.confirm('Are you sure you want to reject and delete this submission?')) return;
     setActionLoading(objId);
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/reject/${objId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
@@ -309,7 +319,7 @@ export default function AdminDashboard() {
   const handleResolveReport = async (objId: string) => {
     setActionLoading(`resolve_${objId}`);
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/reports/${objId}/resolve`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
@@ -327,7 +337,7 @@ export default function AdminDashboard() {
     if (!window.confirm('Send M-PESA payment to this job doer? This action cannot be undone.')) return;
     setPayDoerLoading(appId);
     try {
-      const token = sessionStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/admin/applications/${appId}/pay-doer`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
@@ -353,8 +363,21 @@ export default function AdminDashboard() {
               Manage website submissions and verified organizations.
             </p>
           </div>
-          <div className="rounded-full bg-primary/5 px-4 py-1 text-xs font-medium text-primary">
-            Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'reports' ? 'Reports Inbox' : activeTab === 'manage' ? 'Manage Content' : activeTab === 'escrow' ? 'Escrow Payouts' : 'Organization Management'}
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block rounded-full bg-primary/5 px-4 py-1 text-xs font-medium text-primary">
+              Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'reports' ? 'Reports Inbox' : activeTab === 'manage' ? 'Manage Content' : activeTab === 'escrow' ? 'Escrow Payouts' : 'Organization Management'}
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-slate-600 border-slate-300 hover:bg-slate-100"
+              onClick={() => {
+                localStorage.removeItem('adminToken');
+                window.location.href = '/admin/login';
+              }}
+            >
+              Sign Out
+            </Button>
           </div>
         </header>
 
@@ -942,7 +965,8 @@ export default function AdminDashboard() {
             ) : (
               <div className="space-y-4">
                  {allOpps.map(opp => (
-                   <Card key={opp.id} className="border-slate-200 shadow-sm overflow-hidden flex flex-col sm:flex-row items-center p-4 gap-4">
+                   <Card key={opp.id} className="border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                     <div className="flex flex-col sm:flex-row items-center p-4 gap-4">
                       <div className="w-16 h-16 shrink-0 bg-slate-100 rounded-md border border-slate-200 relative">
                          <img 
                             src={opp.logoUrl?.startsWith('/images/') 
@@ -975,16 +999,121 @@ export default function AdminDashboard() {
                          <Button variant="outline" size="sm" onClick={() => handleEditClick(opp)}>
                            <Pencil className="w-4 h-4 mr-2" /> Edit
                          </Button>
-                         <Button 
-                           variant="destructive"
-                           size="sm" 
-                           disabled={actionLoading === `delete_${opp.id}`}
-                           onClick={() => handleDeleteOpp(opp.id, opp.title)}
-                           className="font-semibold flex items-center justify-center"
-                         >
-                           <Trash2 className="w-4 h-4 mr-2 py-0 my-0" /> Delete
+                          <Button 
+                            variant="destructive"
+                            size="sm" 
+                            disabled={actionLoading === `delete_${opp.id}`}
+                            onClick={() => handleDeleteOpp(opp.id, opp.title)}
+                            className="font-semibold flex items-center justify-center"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2 py-0 my-0" /> Delete
                          </Button>
                       </div>
+                    </div>
+                    {/* Inline Report Toggle Section */}
+                    {expandedReportId === opp.id && (
+                      <div className="border-t border-slate-100 bg-slate-50/50 p-4 sm:p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                          <FileText className="w-5 h-5 text-purple-600" />
+                          <h3 className="font-bold text-lg text-slate-900">Post-Mortem Analytics Report</h3>
+                        </div>
+                        {reportLoading ? (
+                          <div className="py-8 flex justify-center items-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                          </div>
+                        ) : reportError ? (
+                          <div className="py-8 flex flex-col justify-center items-center text-center">
+                            <AlertTriangle className="h-10 w-10 text-red-400 mb-3" />
+                            <p className="text-base font-semibold text-slate-800">Error Loading Report</p>
+                            <p className="text-sm text-slate-500 mt-1">{reportError}</p>
+                          </div>
+                        ) : reportData ? (
+                          <div id={`printable-report-${opp.id}`} className="space-y-6">
+                            <div className="bg-white p-4 rounded-lg border border-slate-200">
+                              <h3 className="font-bold text-lg text-slate-900">{reportData.title}</h3>
+                              <p className="text-sm text-slate-500 mt-1">Poster: {reportData.posterEmail}</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                              <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex flex-col items-center text-center">
+                                <Eye className="w-6 h-6 text-blue-500 mb-2" />
+                                <span className="text-2xl font-bold text-slate-900">{reportData.views}</span>
+                                <span className="text-xs text-slate-500 uppercase font-semibold">Total Views</span>
+                              </div>
+                              <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-lg flex flex-col items-center text-center">
+                                <TrendingUp className="w-6 h-6 text-emerald-500 mb-2" />
+                                <span className="text-2xl font-bold text-slate-900">{reportData.clicks}</span>
+                                <span className="text-xs text-slate-500 uppercase font-semibold">Total Clicks</span>
+                              </div>
+                              <div className="bg-purple-50 border border-purple-100 p-4 rounded-lg flex flex-col items-center text-center">
+                                <Users className="w-6 h-6 text-purple-500 mb-2" />
+                                <span className="text-2xl font-bold text-slate-900">{reportData.totalApplicants}</span>
+                                <span className="text-xs text-slate-500 uppercase font-semibold">Applicants</span>
+                              </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6 bg-white p-5 rounded-xl border border-slate-200">
+                              <div>
+                                <h4 className="font-bold text-sm text-slate-700 uppercase mb-3 border-b pb-2">Education Breakdown</h4>
+                                {Object.keys(reportData.educationBreakdown).length === 0 ? (
+                                  <p className="text-sm text-slate-500 italic">No data</p>
+                                ) : (
+                                  <ul className="space-y-2">
+                                    {Object.entries(reportData.educationBreakdown).map(([level, count]: [string, any]) => (
+                                      <li key={level} className="flex justify-between items-center text-sm">
+                                        <span className="text-slate-700">{level}</span>
+                                        <span className="font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-900">{count}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-sm text-slate-700 uppercase mb-3 border-b pb-2">Top Fields of Study</h4>
+                                {reportData.topFields.length === 0 ? (
+                                  <p className="text-sm text-slate-500 italic">No data</p>
+                                ) : (
+                                  <ul className="space-y-2">
+                                    {reportData.topFields.map((f: any) => (
+                                      <li key={f.field} className="flex justify-between items-center text-sm">
+                                        <span className="text-slate-700 truncate mr-2">{f.field}</span>
+                                        <span className="font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-900">{f.count}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                              <Button 
+                                className="flex-1 bg-slate-900 text-white hover:bg-slate-800"
+                                onClick={() => {
+                                  const printContent = document.getElementById(`printable-report-${opp.id}`);
+                                  if (printContent) {
+                                    const originalContents = document.body.innerHTML;
+                                    document.body.innerHTML = printContent.innerHTML;
+                                    window.print();
+                                    document.body.innerHTML = originalContents;
+                                    window.location.reload(); 
+                                  }
+                                }}
+                              >
+                                Download PDF
+                              </Button>
+                              <Button 
+                                className="flex-1"
+                                variant="outline"
+                                onClick={handleEmailReport}
+                                disabled={actionLoading === 'emailing_report'}
+                              >
+                                {actionLoading === 'emailing_report' ? 'Emailing...' : 'Email Report to Poster'}
+                              </Button>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                    </Card>
                  ))}
               </div>
@@ -1079,7 +1208,7 @@ export default function AdminDashboard() {
                           className="bg-green-600 hover:bg-green-700 text-white"
                           onClick={async () => {
                             if (!window.confirm("Force release funds to the applicant?")) return;
-                            const token = sessionStorage.getItem('adminToken');
+                            const token = localStorage.getItem('adminToken');
                             await fetch(`${API_BASE}/admin/conversations/${dispute._id}/resolve`, {
                               method: 'PUT',
                               headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -1094,7 +1223,7 @@ export default function AdminDashboard() {
                           variant="outline"
                           className="border-slate-300 text-slate-700 hover:bg-slate-100"
                           onClick={async () => {
-                            const token = sessionStorage.getItem('adminToken');
+                            const token = localStorage.getItem('adminToken');
                             await fetch(`${API_BASE}/admin/conversations/${dispute._id}/resolve`, {
                               method: 'PUT',
                               headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -1130,6 +1259,7 @@ export default function AdminDashboard() {
                           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle>Chat History Arbitration</DialogTitle>
+                              <DialogDescription className="sr-only">Review the messages exchanged in this dispute.</DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                               {disputeChatLoading ? (
@@ -1207,7 +1337,7 @@ export default function AdminDashboard() {
                     className="shrink-0 font-bold mt-4 md:mt-0 py-3 px-6 h-auto rounded-xl shadow-sm text-base bg-blue-600 hover:bg-blue-700 text-white"
                     onClick={async () => {
                       if (!window.confirm(`Send the general digest with the last ${lastN} opportunities to all subscribers?`)) return;
-                      const token = sessionStorage.getItem('adminToken');
+                      const token = localStorage.getItem('adminToken');
                       try {
                         const res = await fetch(`${API_BASE}/admin/send-digest`, {
                           method: 'POST',
@@ -1251,7 +1381,7 @@ export default function AdminDashboard() {
                     className="shrink-0 border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 font-bold mt-4 md:mt-0 py-3 px-6 h-auto rounded-xl shadow-sm text-base bg-white"
                     onClick={async () => {
                       if (!window.confirm('Run the matching engine and send personalized digests? This may take a moment.')) return;
-                      const token = sessionStorage.getItem('adminToken');
+                      const token = localStorage.getItem('adminToken');
                       try {
                         const res = await fetch(`${API_BASE}/admin/send-personalized-digest`, {
                           method: 'POST',
@@ -1353,7 +1483,7 @@ export default function AdminDashboard() {
                         onClick={async () => {
                           const targetText = targetFilter === 'All' ? 'all subscribers' : `subscribers interested in ${targetFilter}`;
                           if (!window.confirm(`Send custom digest with ${selectedOpps.length} opportunities to ${targetText}?`)) return;
-                          const token = sessionStorage.getItem('adminToken');
+                          const token = localStorage.getItem('adminToken');
                           try {
                             const res = await fetch(`${API_BASE}/admin/send-custom-digest`, {
                               method: 'POST',
@@ -1484,107 +1614,6 @@ export default function AdminDashboard() {
         ) : null}
       </div>
 
-      <Dialog open={reportModalOpen} onOpenChange={setReportModalOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <FileText className="w-5 h-5 text-purple-600" />
-              Post-Mortem Analytics Report
-            </DialogTitle>
-          </DialogHeader>
-
-          {reportLoading ? (
-            <div className="py-12 flex justify-center items-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-            </div>
-          ) : reportData ? (
-            <div id="printable-report" className="space-y-6 mt-4">
-              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <h3 className="font-bold text-lg text-slate-900">{reportData.title}</h3>
-                <p className="text-sm text-slate-500 mt-1">Poster: {reportData.posterEmail}</p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex flex-col items-center">
-                  <Eye className="w-6 h-6 text-blue-500 mb-2" />
-                  <span className="text-2xl font-bold text-slate-900">{reportData.views}</span>
-                  <span className="text-xs text-slate-500 uppercase font-semibold">Total Views</span>
-                </div>
-                <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-lg flex flex-col items-center">
-                  <TrendingUp className="w-6 h-6 text-emerald-500 mb-2" />
-                  <span className="text-2xl font-bold text-slate-900">{reportData.clicks}</span>
-                  <span className="text-xs text-slate-500 uppercase font-semibold">Total Clicks</span>
-                </div>
-                <div className="bg-purple-50 border border-purple-100 p-4 rounded-lg flex flex-col items-center">
-                  <Users className="w-6 h-6 text-purple-500 mb-2" />
-                  <span className="text-2xl font-bold text-slate-900">{reportData.totalApplicants}</span>
-                  <span className="text-xs text-slate-500 uppercase font-semibold">Applicants</span>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-bold text-sm text-slate-700 uppercase mb-3 border-b pb-2">Education Breakdown</h4>
-                  {Object.keys(reportData.educationBreakdown).length === 0 ? (
-                    <p className="text-sm text-slate-500 italic">No data</p>
-                  ) : (
-                    <ul className="space-y-2">
-                      {Object.entries(reportData.educationBreakdown).map(([level, count]: [string, any]) => (
-                        <li key={level} className="flex justify-between items-center text-sm">
-                          <span className="text-slate-700">{level}</span>
-                          <span className="font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-900">{count}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-slate-700 uppercase mb-3 border-b pb-2">Top Fields of Study</h4>
-                  {reportData.topFields.length === 0 ? (
-                    <p className="text-sm text-slate-500 italic">No data</p>
-                  ) : (
-                    <ul className="space-y-2">
-                      {reportData.topFields.map((f: any) => (
-                        <li key={f.field} className="flex justify-between items-center text-sm">
-                          <span className="text-slate-700 truncate mr-2">{f.field}</span>
-                          <span className="font-bold bg-slate-100 px-2 py-0.5 rounded text-slate-900">{f.count}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-slate-100">
-                <Button 
-                  className="flex-1 bg-slate-900 text-white hover:bg-slate-800"
-                  onClick={() => {
-                    const printContent = document.getElementById('printable-report');
-                    if (printContent) {
-                      const originalContents = document.body.innerHTML;
-                      document.body.innerHTML = printContent.innerHTML;
-                      window.print();
-                      document.body.innerHTML = originalContents;
-                      window.location.reload(); // Reload to restore React state bindings
-                    }
-                  }}
-                >
-                  Download PDF
-                </Button>
-                <Button 
-                  className="flex-1 bg-purple-600 text-white hover:bg-purple-700"
-                  disabled={actionLoading === 'emailing_report'}
-                  onClick={handleEmailReport}
-                >
-                  {actionLoading === 'emailing_report' ? 'Sending...' : 'Email Poster'}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <p className="text-red-500 text-center py-8">Failed to load report data.</p>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

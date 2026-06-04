@@ -161,10 +161,12 @@
     font-feature-settings: var(--default-font-feature-settings, normal);
     font-variation-settings: var(--default-font-variation-settings, normal);
     -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
   }
 
   body {
     line-height: inherit;
+    overscroll-behavior-y: none;
   }
 
   hr {
@@ -1928,5 +1930,3 @@ html {
   inherits: false;
   initial-value: 0;
 }
-
-// Refurbished
