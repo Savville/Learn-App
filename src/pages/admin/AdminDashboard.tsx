@@ -41,7 +41,6 @@ export default function AdminDashboard() {
   const [lastN, setLastN] = useState<number>(5);
   const [lastDigestSent, setLastDigestSent] = useState<string | null>(localStorage.getItem('lastDigestSent') || null);
   const [customSubject, setCustomSubject] = useState('');
-  const [customSubject, setCustomSubject] = useState('');
   const [customMessage, setCustomMessage] = useState('');
   const [selectedOpps, setSelectedOpps] = useState<string[]>([]);
   const [subscriberCategories, setSubscriberCategories] = useState<any[]>([]);
