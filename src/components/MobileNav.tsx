@@ -27,13 +27,12 @@ export function MobileNav() {
         backgroundColor: '#ffffff',
         borderTop: '1px solid #e2e8f0',
         boxShadow: '0 -2px 12px rgba(0,0,0,0.08)',
-        display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
         paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
         paddingTop: '8px',
       }}
-      className="md:hidden"
+      className="flex md:hidden"
     >
       {links.map((link) => {
         const Icon = link.icon;

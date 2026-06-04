@@ -3,17 +3,21 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-let db;
+let db = null;
 
 export async function connectDB() {
   try {
     const client = new MongoClient(process.env.MONGODB_URI, {
       tls: true,
       tlsAllowInvalidCertificates: false,
-      serverSelectionTimeoutMS: 5000,
-      connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 15000,
+      connectTimeoutMS: 20000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      retryWrites: true,
+      retryReads: true,
     });
-    
+
     await client.connect();
     db = client.db('learn_opportunities');
     console.log('✅ Connected to MongoDB');
@@ -28,7 +32,6 @@ export async function connectDB() {
       { title: 'text', description: 'text', provider: 'text' },
       { weights: { title: 10, provider: 5, description: 1 } }
     );
-    // Organizations collection for verified posters
     const orgs = db.collection('organizations');
     await orgs.createIndex({ email: 1 }, { unique: true });
 
@@ -46,20 +49,22 @@ export async function connectDB() {
 
     const authOtps = db.collection('auth_otps');
     await authOtps.createIndex({ email: 1 });
-    await authOtps.createIndex({ createdAt: 1 }, { expireAfterSeconds: 600 }); // Expires after 10 mins
+    await authOtps.createIndex({ createdAt: 1 }, { expireAfterSeconds: 600 });
 
     console.log('✅ Indexes ensured');
-
     return db;
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
-    process.exit(1);
+    console.log('🔄 Retrying in 5 seconds...');
+    // Retry instead of crashing the whole server
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    return connectDB();
   }
 }
 
 export function getDB() {
   if (!db) {
-    throw new Error('Database not initialized');
+    throw new Error('Database not ready yet — please retry in a moment.');
   }
   return db;
 }
