@@ -1,12 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { Home, Briefcase, PlusCircle, Inbox, Search } from 'lucide-react';
+import { Home, Briefcase, PlusCircle, Inbox, ClipboardList } from 'lucide-react';
 
 const links = [
   { name: 'Home',    path: '/',             icon: Home },
   { name: 'Browse',  path: '/opportunities', icon: Briefcase },
   { name: 'Post',    path: '/post-with-us',  icon: PlusCircle },
-  { name: 'Search',  path: '/opportunities', icon: Search },
+  { name: 'Applied', path: '/inbox',         icon: ClipboardList },
   { name: 'Inbox',   path: '/inbox',         icon: Inbox },
 ];
 
