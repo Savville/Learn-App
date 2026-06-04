@@ -41,8 +41,11 @@ export default function AdminDashboard() {
   const [lastN, setLastN] = useState<number>(5);
   const [lastDigestSent, setLastDigestSent] = useState<string | null>(localStorage.getItem('lastDigestSent') || null);
   const [customSubject, setCustomSubject] = useState('');
+  const [customSubject, setCustomSubject] = useState('');
   const [customMessage, setCustomMessage] = useState('');
   const [selectedOpps, setSelectedOpps] = useState<string[]>([]);
+  const [subscriberCategories, setSubscriberCategories] = useState<any[]>([]);
+  const [targetFilter, setTargetFilter] = useState('All');
 
   const handleGenerateReport = async (oppId: string) => {
     setReportLoading(true);
@@ -81,7 +84,7 @@ export default function AdminDashboard() {
       const token = sessionStorage.getItem('adminToken');
       if (!token) return;
       
-      const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes] = await Promise.all([
+      const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes, categoriesRes] = await Promise.all([
         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
@@ -90,6 +93,7 @@ export default function AdminDashboard() {
         fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/disputes`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/chat-oversight`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/subscriber-categories`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (oppsRes.ok) setPending(await oppsRes.json());
@@ -100,6 +104,10 @@ export default function AdminDashboard() {
       if (statsRes.ok) setStats(await statsRes.json());
       if (disputesRes.ok) setDisputes(await disputesRes.json());
       if (oversightRes.ok) setChatOversight(await oversightRes.json());
+      if (categoriesRes.ok) {
+        const catData = await categoriesRes.json();
+        setSubscriberCategories(catData.breakdown || []);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -1197,7 +1205,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <Button 
-                    className="shrink-0 font-semibold mt-4 md:mt-0"
+                    className="shrink-0 font-bold mt-4 md:mt-0 py-3 px-6 h-auto rounded-xl shadow-sm text-base bg-blue-600 hover:bg-blue-700 text-white"
                     onClick={async () => {
                       if (!window.confirm(`Send the general digest with the last ${lastN} opportunities to all subscribers?`)) return;
                       const token = sessionStorage.getItem('adminToken');
@@ -1224,7 +1232,7 @@ export default function AdminDashboard() {
                       }
                     }}
                   >
-                    Send General Digest
+                    <Mail className="w-5 h-5 mr-2" /> Send General Digest
                   </Button>
                 </div>
 
@@ -1241,7 +1249,7 @@ export default function AdminDashboard() {
                   </div>
                   <Button 
                     variant="outline"
-                    className="shrink-0 border-purple-200 text-purple-700 hover:bg-purple-50 font-semibold mt-4 md:mt-0"
+                    className="shrink-0 border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 font-bold mt-4 md:mt-0 py-3 px-6 h-auto rounded-xl shadow-sm text-base bg-white"
                     onClick={async () => {
                       if (!window.confirm('Run the matching engine and send personalized digests? This may take a moment.')) return;
                       const token = sessionStorage.getItem('adminToken');
@@ -1264,7 +1272,7 @@ export default function AdminDashboard() {
                       }
                     }}
                   >
-                    Run & Send Personalized
+                    <Users className="w-5 h-5 mr-2" /> Run & Send Personalized
                   </Button>
                 </div>
 
@@ -1275,24 +1283,42 @@ export default function AdminDashboard() {
                       <Send className="w-5 h-5 text-indigo-500" />
                       Custom Selection Digest
                     </h3>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                      Handpick specific opportunities, add a custom subject and intro message, and address subscribers by their name.
-                    </p>
+                    <div className="flex flex-col md:flex-row gap-4 items-center mb-4 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 w-full">
+                      <div className="flex-1">
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Target Audience Filter</label>
+                        <select 
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto appearance-none cursor-pointer"
+                          value={targetFilter}
+                          onChange={(e) => setTargetFilter(e.target.value)}
+                        >
+                          <option value="All">All Subscribers ({stats?.totalSubscribers || 0})</option>
+                          {subscriberCategories.map(cat => (
+                            <option key={cat.name} value={cat.name}>
+                              {cat.name} ({cat.count})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="text-xs text-slate-500 max-w-[200px]">
+                        Select a specific category to send this digest only to users interested in that field.
+                      </div>
+                    </div>
                     
-                    <div className="space-y-4 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <div className="space-y-4 bg-slate-50 p-6 rounded-xl border border-slate-200 mt-6">
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Custom Subject Line (Optional)</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Custom Subject Line (Optional)</label>
                         <Input 
                           placeholder="e.g. 3 Fully Funded Scholarships You Must See"
                           value={customSubject}
                           onChange={e => setCustomSubject(e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white h-auto"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Custom Intro Message (Optional)</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Custom Intro Message (Optional)</label>
                         <textarea 
                           placeholder="Write a custom introductory message... (Hello [Name] is added automatically)"
-                          className="w-full px-3 py-2 border border-slate-200 rounded-md text-sm outline-none focus:border-indigo-500 resize-none"
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors bg-white resize-none"
                           rows={3}
                           value={customMessage}
                           onChange={e => setCustomMessage(e.target.value)}
@@ -1300,13 +1326,13 @@ export default function AdminDashboard() {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">Select Opportunities to Include ({selectedOpps.length} selected)</label>
-                        <div className="max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-md p-2 space-y-1">
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Select Opportunities to Include ({selectedOpps.length} selected)</label>
+                        <div className="max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-xl p-2 space-y-1">
                           {allOpps.map(opp => (
-                            <label key={opp.id} className="flex items-start gap-3 p-2 hover:bg-slate-50 rounded cursor-pointer">
+                            <label key={opp.id} className="flex items-start gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
                               <input 
                                 type="checkbox" 
-                                className="mt-1"
+                                className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                                 checked={selectedOpps.includes(opp.id)}
                                 onChange={(e) => {
                                   if (e.target.checked) setSelectedOpps([...selectedOpps, opp.id]);
@@ -1323,10 +1349,11 @@ export default function AdminDashboard() {
                       </div>
 
                       <Button 
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold mt-4"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold mt-4 py-4 h-auto rounded-xl shadow-sm text-base"
                         disabled={selectedOpps.length === 0}
                         onClick={async () => {
-                          if (!window.confirm(`Send custom digest with ${selectedOpps.length} opportunities to all subscribers?`)) return;
+                          const targetText = targetFilter === 'All' ? 'all subscribers' : `subscribers interested in ${targetFilter}`;
+                          if (!window.confirm(`Send custom digest with ${selectedOpps.length} opportunities to ${targetText}?`)) return;
                           const token = sessionStorage.getItem('adminToken');
                           try {
                             const res = await fetch(`${API_BASE}/admin/send-custom-digest`, {
@@ -1335,11 +1362,11 @@ export default function AdminDashboard() {
                                 Authorization: `Bearer ${token}`,
                                 'Content-Type': 'application/json' 
                               },
-                              body: JSON.stringify({ opportunityIds: selectedOpps, customSubject, customMessage })
+                              body: JSON.stringify({ opportunityIds: selectedOpps, customSubject, customMessage, targetFilter })
                             });
                             const data = await res.json();
                             if (res.ok) {
-                              alert(data.message);
+                              alert(`${data.message} (${data.subscriberCount} emails sent)`);
                               const now = new Date().toLocaleString();
                               setLastDigestSent(now);
                               localStorage.setItem('lastDigestSent', now);
@@ -1354,7 +1381,7 @@ export default function AdminDashboard() {
                           }
                         }}
                       >
-                        Send Custom Digest
+                        <Send className="w-5 h-5 mr-2" /> Send Custom Digest
                       </Button>
                     </div>
                   </div>

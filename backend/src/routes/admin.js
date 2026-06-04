@@ -180,6 +180,36 @@ router.get('/chat-oversight', verifyAdminKey, async (req, res) => {
   }
 });
 
+// GET /api/admin/subscriber-categories
+router.get('/subscriber-categories', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const subscribers = await db.collection('subscribers').find({ unsubscribed: { $ne: true } }).toArray();
+    
+    let totalActive = subscribers.length;
+    let categories = {};
+
+    subscribers.forEach(sub => {
+      if (Array.isArray(sub.interests) && sub.interests.length > 0) {
+        sub.interests.forEach(interest => {
+          if (interest && interest.category) {
+            const cat = interest.category;
+            categories[cat] = (categories[cat] || 0) + 1;
+          }
+        });
+      } else {
+        categories['General (No Preferences)'] = (categories['General (No Preferences)'] || 0) + 1;
+      }
+    });
+
+    const breakdown = Object.keys(categories).map(cat => ({ name: cat, count: categories[cat] })).sort((a, b) => b.count - a.count);
+
+    res.json({ totalActive, breakdown });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /api/admin/send-digest  â€” send branded digest to all active subscribers
 // Body (all optional):
 //   { opportunityIds: ["id1","id2",...] }  â†’ specific opps
@@ -243,15 +273,28 @@ router.post('/send-digest', verifyAdminKey, async (req, res) => {
 router.post('/send-custom-digest', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
-    const { opportunityIds, customSubject, customMessage } = req.body;
+    const { opportunityIds, customSubject, customMessage, targetFilter } = req.body;
 
     if (!opportunityIds || opportunityIds.length === 0) {
       return res.status(400).json({ error: 'No opportunity IDs provided.' });
     }
 
+    // Build subscriber query
+    const subQuery = { unsubscribed: { $ne: true } };
+    if (targetFilter && targetFilter !== 'All') {
+      if (targetFilter === 'General (No Preferences)') {
+        subQuery.$or = [
+          { interests: { $exists: false } },
+          { interests: { $size: 0 } }
+        ];
+      } else {
+        subQuery['interests.category'] = targetFilter;
+      }
+    }
+
     const subscribers = await db
       .collection('subscribers')
-      .find({ unsubscribed: { $ne: true } })
+      .find(subQuery)
       .project({ email: 1, name: 1 })
       .toArray();
 
