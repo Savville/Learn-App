@@ -3,11 +3,11 @@ import { createPortal } from 'react-dom';
 import { Home, Briefcase, PlusCircle, Inbox, ClipboardList } from 'lucide-react';
 
 const links = [
-  { name: 'Home',    path: '/',             icon: Home },
-  { name: 'Browse',  path: '/opportunities', icon: Briefcase },
-  { name: 'Post',    path: '/post-with-us',  icon: PlusCircle },
-  { name: 'Applied', path: '/inbox',         icon: ClipboardList },
-  { name: 'Inbox',   path: '/inbox',         icon: Inbox },
+  { name: 'Home',    path: '/',         icon: Home,          exact: true  },
+  { name: 'Browse',  path: '/opportunities', icon: Briefcase, exact: false },
+  { name: 'Post',    path: '/post-with-us',  icon: PlusCircle, exact: false },
+  { name: 'Applied', path: '/applied',       icon: ClipboardList, exact: false },
+  { name: 'Inbox',   path: '/inbox',         icon: Inbox,     exact: false },
 ];
 
 export function MobileNav() {
@@ -37,10 +37,11 @@ export function MobileNav() {
     >
       {links.map((link) => {
         const Icon = link.icon;
-        const isActive =
-          link.path === '/'
-            ? location.pathname === '/'
-            : location.pathname.startsWith(link.path);
+        // exact match for home, startsWith for others — but only against THIS link's path
+        const isActive = link.exact
+          ? location.pathname === link.path
+          : location.pathname === link.path || location.pathname.startsWith(link.path + '/');
+
         return (
           <Link
             key={link.name}
