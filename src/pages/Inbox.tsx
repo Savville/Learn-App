@@ -110,6 +110,10 @@ export function Inbox() {
     }
   }, [token, email]);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const handleLoginSuccess = (newToken: string, newEmail: string) => {
     setToken(newToken);
     setEmail(newEmail);
@@ -464,7 +468,7 @@ export function Inbox() {
                   <p className="text-sm text-center text-gray-500 italic py-2">Waiting for the employer to unlock this conversation before you can reply.</p>
                 ) : (
                   <form onSubmit={handleSendReply} className="flex flex-col gap-2">
-                    <div className="flex gap-3 items-center">
+                    <div className="flex gap-3 items-end">
                       <button 
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
@@ -480,12 +484,26 @@ export function Inbox() {
                         className="hidden" 
                         accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip"
                       />
-                      <input 
-                        type="text"
+                      <textarea 
                         value={replyContent} 
-                        onChange={e => setReplyContent(e.target.value)} 
-                        placeholder="Type a message..." 
-                        className="flex-1 px-5 py-3 rounded-full border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors"
+                        onChange={e => {
+                          setReplyContent(e.target.value);
+                          // Auto-adjust height logic
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+                        }} 
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            if (replyContent.trim()) {
+                              handleSendReply(e as any);
+                            }
+                          }
+                        }}
+                        placeholder="Type a message... (Shift+Enter for new line)" 
+                        className="flex-1 px-5 py-3 rounded-2xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors resize-none overflow-y-auto"
+                        rows={1}
+                        style={{ minHeight: '48px', maxHeight: '150px' }}
                       />
                       <button type="submit" disabled={!replyContent.trim()} className="rounded-full w-12 h-12 flex items-center justify-center bg-blue-600 hover:bg-blue-700 hover:shadow-md transition-all text-white shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
                         <Send className="w-5 h-5 ml-1" />

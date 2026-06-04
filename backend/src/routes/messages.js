@@ -105,10 +105,17 @@ router.get('/user/:email', async (req, res) => {
         
         const gig = await db.collection('opportunities').findOne(query);
         
+        let status = conv.status;
+        if (gig && (gig.category === 'Partnership' || gig.compensationType === 'Equity')) {
+          status = 'partnership';
+        }
+
         return {
           ...conv,
+          status, // Override status dynamically for equity gigs
           gigTitle: gig ? gig.title : 'Unknown Gig',
-          gigCategory: gig ? gig.category : 'Unknown'
+          gigCategory: gig ? gig.category : 'Unknown',
+          gigCompensationType: gig ? gig.compensationType : 'Unknown'
         };
       })
     );
@@ -131,8 +138,15 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Message content is required' });
     }
 
+    // Look up the gig to double check its type
+    const gigQuery = (typeof gigId === 'string' && gigId.length !== 24) ? { id: gigId } : { _id: new ObjectId(gigId) };
+    const gig = await db.collection('opportunities').findOne(gigQuery);
+    
+    // Force partnership mode if gig is Partnership or Equity
+    const isActuallyPartnership = isPartnership || (gig && (gig.category === 'Partnership' || gig.compensationType === 'Equity'));
+
     // Apply the auto-censor! (Skip censorship if it's a partnership)
-    const censoredContent = isPartnership ? content : applyAutoCensor(content);
+    const censoredContent = isActuallyPartnership ? content : applyAutoCensor(content);
 
     let convId = conversationId ? new ObjectId(conversationId) : null;
 
@@ -143,7 +157,7 @@ router.post('/', async (req, res) => {
         participants: [senderEmail, receiverEmail],
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: isPartnership ? 'partnership' : 'pending', // 'pending' = locked, 'active' = unlocked, 'hired' = escrow funded, 'partnership' = open collaboration
+        status: isActuallyPartnership ? 'partnership' : 'pending', // 'pending' = locked, 'active' = unlocked, 'hired' = escrow funded, 'partnership' = open collaboration
       };
       const convResult = await db.collection('conversations').insertOne(newConversation);
       convId = convResult.insertedId;
