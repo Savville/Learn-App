@@ -216,6 +216,31 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/messages/:id
+// Delete a message
+router.delete('/:id', async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const senderEmail = req.headers['x-user-email'];
+
+    if (!senderEmail) return res.status(401).json({ error: 'Unauthorized' });
+
+    const message = await db.collection('messages').findOne({ _id: new ObjectId(id) });
+    if (!message) return res.status(404).json({ error: 'Message not found' });
+    if (message.senderEmail.toLowerCase() !== senderEmail.toLowerCase()) {
+      return res.status(403).json({ error: 'Not authorized to delete' });
+    }
+
+    await db.collection('messages').deleteOne({ _id: new ObjectId(id) });
+
+    res.json({ success: true, message: 'Message deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    res.status(500).json({ error: 'Failed to delete message' });
+  }
+});
+
 // POST /api/messages/:conversationId/unlock
 // Stage 4 prep: Employer unlocks the conversation to reply
 router.post('/:conversationId/unlock', async (req, res) => {

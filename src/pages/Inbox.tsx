@@ -186,6 +186,26 @@ export function Inbox() {
     }
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!activeConv || !confirm("Are you sure you want to delete this message?")) return;
+    try {
+      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${messageId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-user-email': email
+        }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete message');
+      
+      // Update local state immediately for better UX
+      setMessages(messages.filter(m => m._id !== messageId));
+    } catch (err: any) {
+      alert(err.message);
+      console.error(err);
+    }
+  };
+
   const handleUnlock = async () => {
     if (!activeConv) return;
     try {
@@ -336,17 +356,30 @@ export function Inbox() {
           >
             Copy Text
           </button>
-          {contextMenu.message.senderEmail?.toLowerCase() === email?.toLowerCase() && (Date.now() - new Date(contextMenu.message.createdAt).getTime() <= 5 * 60 * 1000) && (
-            <button 
-              className="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-200 hover:bg-blue-600 hover:text-white transition-colors"
-              onClick={() => { 
-                setEditingMessage({ _id: contextMenu.message._id, content: contextMenu.message.content, createdAt: contextMenu.message.createdAt }); 
-                setReplyContent(contextMenu.message.content); 
-                setContextMenu(null); 
-              }}
-            >
-              Edit Message
-            </button>
+          {contextMenu.message.senderEmail?.toLowerCase() === email?.toLowerCase() && (
+            <>
+              {Date.now() - new Date(contextMenu.message.createdAt).getTime() <= 5 * 60 * 1000 && (
+                <button 
+                  className="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-200 hover:bg-blue-600 hover:text-white transition-colors"
+                  onClick={() => { 
+                    setEditingMessage({ _id: contextMenu.message._id, content: contextMenu.message.content, createdAt: contextMenu.message.createdAt }); 
+                    setReplyContent(contextMenu.message.content); 
+                    setContextMenu(null); 
+                  }}
+                >
+                  Edit Message
+                </button>
+              )}
+              <button 
+                className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-300 hover:bg-red-600 hover:text-white transition-colors"
+                onClick={() => { 
+                  handleDeleteMessage(contextMenu.message._id);
+                  setContextMenu(null); 
+                }}
+              >
+                Delete Message
+              </button>
+            </>
           )}
         </div>,
         document.body
