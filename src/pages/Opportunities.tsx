@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { OpportunityCard } from '../components/OpportunityCard';
-import { AppliedDashboard } from '../components/AppliedDashboard';
 import { opportunitiesAPI } from '../services/api';
 import { Search, Filter } from 'lucide-react';
-import { Inbox } from './Inbox';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 import { useSEO } from '../hooks/useSEO';
@@ -14,7 +12,7 @@ const GIG_CATEGORIES      = ['Gig', 'Job'];
 const CAREER_CATEGORIES   = ['Internship', 'Attachment', 'Project', 'Hackathon', 'Challenge'];
 const ACADEMIC_CATEGORIES = ['Scholarship', 'Fellowship', 'Conference', 'Grant', 'CallForPapers', 'Event', 'Volunteer'];
 
-type TabId = 'all' | 'gigs' | 'career' | 'academic' | 'applied' | 'inbox';
+type TabId = 'all' | 'gigs' | 'career' | 'academic';
 
 // Category options tagged to their tab
 const ALL_CATEGORY_OPTIONS: { value: string; label: string; tab: TabId }[] = [
@@ -72,7 +70,7 @@ const TABS: { id: TabId; label: string; description: string }[] = [
   { id: 'academic', label: 'Academic & Learning',   description: 'Academic & Learning' },
 ];
 
-const RIGHT_TABS: { id: TabId; label: string; description: string }[] = [
+const RIGHT_TABS: { id: string; label: string; description: string }[] = [
   { id: 'applied',  label: 'Applied',               description: 'Applied' },
   { id: 'inbox',    label: 'Inbox',                 description: 'Inbox' },
 ];
@@ -305,35 +303,33 @@ export function Opportunities() {
           </h1>
 
           {/* Search Bar */}
-          {activeTab !== 'inbox' && (
-            <form onSubmit={handleSearch} className="mb-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-white/20 rounded-md border border-white/30 backdrop-blur-sm">
-                  <Search className="w-5 h-5 text-white/70 shrink-0" />
-                  <input
-                    type="text"
-                    placeholder={searchPlaceholder}
-                    className="flex-1 outline-none bg-transparent text-white placeholder-white/60"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="md:hidden flex items-center gap-2 px-6 py-3 bg-white/20 border border-white/30 rounded-md hover:bg-white/30 transition-colors text-white"
-                >
-                  <Filter className="w-5 h-5" />
-                  <span>Filters</span>
-                </button>
+          <form onSubmit={handleSearch} className="mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-white/20 rounded-md border border-white/30 backdrop-blur-sm">
+                <Search className="w-5 h-5 text-white/70 shrink-0" />
+                <input
+                  type="text"
+                  placeholder={searchPlaceholder}
+                  className="flex-1 outline-none bg-transparent text-white placeholder-white/60"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-            </form>
-          )}
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className="md:hidden flex items-center gap-2 px-6 py-3 bg-white/20 border border-white/30 rounded-md hover:bg-white/30 transition-colors text-white"
+              >
+                <Filter className="w-5 h-5" />
+                <span>Filters</span>
+              </button>
+            </div>
+          </form>
 
           {/* Filters & Secondary Tabs Row */}
           <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
             {/* Filters */}
-            <div className={`flex-1 ${activeTab === 'applied' || activeTab === 'inbox' ? 'hidden' : showFilters ? 'block' : 'hidden'} md:block`}>
+            <div className={`flex-1 ${showFilters ? 'block' : 'hidden'} md:block`}>
               <div className="flex flex-wrap gap-3">
                 {/* Type Filter — only categories for the active tab */}
                 <select
@@ -394,18 +390,13 @@ export function Opportunities() {
             {/* Right Tabs (Applied, Inbox) */}
             <div className="flex gap-2 shrink-0">
               {RIGHT_TABS.map(tab => (
-                <button
+                <Link
                   key={tab.id}
-                  type="button"
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`px-6 py-2 rounded-md font-semibold transition-all border ${
-                    activeTab === tab.id
-                      ? 'bg-white text-blue-900 border-white shadow-md'
-                      : 'bg-transparent text-white border-white/30 hover:bg-white/10'
-                  }`}
+                  to={`/${tab.id}`}
+                  className="px-6 py-2 rounded-md font-semibold transition-all border bg-transparent text-white border-white/30 hover:bg-white/10"
                 >
                   {tab.label}
-                </button>
+                </Link>
               ))}
             </div>
           </div>
@@ -421,19 +412,12 @@ export function Opportunities() {
                 )}
               </p>
             </div>
-          )}
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {activeTab === 'applied' ? (
-          <AppliedDashboard />
-        ) : activeTab === 'inbox' ? (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden min-h-[600px]">
-            <Inbox />
-          </div>
-        ) : loading ? (
+        {loading ? (
           <div className="fixed inset-0 flex items-center justify-center">
             <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-900 rounded-full animate-spin"></div>
           </div>
