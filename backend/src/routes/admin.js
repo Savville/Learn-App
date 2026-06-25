@@ -772,6 +772,49 @@ router.post('/reports/:id/resolve', verifyAdminKey, async (req, res) => {
   }
 });
 
+// GET /api/admin/user-reports
+router.get('/user-reports', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const reports = await db.collection('user_reports').find({ status: 'pending' }).sort({ createdAt: -1 }).toArray();
+    res.json(reports);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/user-reports/:id/judgment
+router.post('/user-reports/:id/judgment', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const { action } = req.body; // 'dismiss', 'warn', 'suspend'
+    
+    const { ObjectId } = await import('mongodb');
+    
+    const report = await db.collection('user_reports').findOne({ _id: new ObjectId(id) });
+    if (!report) return res.status(404).json({ error: 'Report not found' });
+
+    if (action === 'suspend') {
+      // Suspend the user (disables login/apply)
+      await db.collection('subscribers').updateOne(
+        { email: report.reportedUser },
+        { $set: { suspended: true, suspendedAt: new Date(), suspendReason: report.reason } }
+      );
+    }
+    
+    // Note: 'warn' could be hooked up to send an email via emailService here in the future
+    
+    await db.collection('user_reports').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status: 'resolved', judgment: action, resolvedAt: new Date() } }
+    );
+    res.json({ message: `Report resolved with action: ${action}` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // â”€â”€ Organization Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 // GET /api/admin/organizations

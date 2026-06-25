@@ -356,4 +356,56 @@ router.post('/:conversationId/dispute', async (req, res) => {
   }
 });
 
+// POST /api/messages/:conversationId/report
+// Report a user for bad behavior
+router.post('/:conversationId/report', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId } = req.params;
+    const { reason, details, reporterEmail } = req.body;
+    
+    const conv = await db.collection('conversations').findOne({ _id: new ObjectId(conversationId) });
+    if (!conv) {
+      return res.status(404).json({ error: 'Conversation not found' });
+    }
+    
+    const reportedUser = conv.participants.find(p => p !== reporterEmail);
+
+    await db.collection('user_reports').insertOne({
+      conversationId: new ObjectId(conversationId),
+      reportedBy: reporterEmail,
+      reportedUser: reportedUser,
+      reason,
+      details,
+      status: 'pending',
+      createdAt: new Date()
+    });
+
+    res.json({ success: true, message: 'User reported to administration.' });
+  } catch (error) {
+    console.error('Error reporting user:', error);
+    res.status(500).json({ error: 'Failed to report user' });
+  }
+});
+
+// POST /api/messages/:conversationId/mute
+// Mute notifications for a conversation
+router.post('/:conversationId/mute', async (req, res) => {
+  try {
+    const db = getDB();
+    const { conversationId } = req.params;
+    const { email } = req.body; // User who is muting
+    
+    await db.collection('conversations').updateOne(
+      { _id: new ObjectId(conversationId) },
+      { $addToSet: { mutedBy: email } }
+    );
+    
+    res.json({ success: true, message: 'Conversation muted.' });
+  } catch (error) {
+    console.error('Error muting conversation:', error);
+    res.status(500).json({ error: 'Failed to mute conversation' });
+  }
+});
+
 export default router;
