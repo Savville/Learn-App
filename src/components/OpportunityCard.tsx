@@ -56,7 +56,14 @@ export const getDynamicImageUrl = (category: string, id: string, providedUrl?: s
 };
 
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
-  const [isSaved, setIsSaved] = React.useState(false);
+  const [isSaved, setIsSaved] = React.useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('saved_bookmarks') || '[]');
+      return saved.includes(opportunity.id);
+    } catch {
+      return false;
+    }
+  });
   const { showAlert } = useAlert();
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
@@ -108,6 +115,15 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
       const data = await res.json();
       if (res.ok) {
         setIsSaved(data.saved);
+        try {
+          let savedList = JSON.parse(localStorage.getItem('saved_bookmarks') || '[]');
+          if (data.saved && !savedList.includes(opportunity.id)) {
+            savedList.push(opportunity.id);
+          } else if (!data.saved) {
+            savedList = savedList.filter((id: string) => id !== opportunity.id);
+          }
+          localStorage.setItem('saved_bookmarks', JSON.stringify(savedList));
+        } catch (e) {}
       }
     } catch (err) {
       console.error(err);

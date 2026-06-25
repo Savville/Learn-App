@@ -89,7 +89,13 @@ export function Tracker() {
         headers: { Authorization: `Bearer ${currentToken}` },
       });
       const data = await res.json();
-      if (res.ok) setBookmarks(data);
+      if (res.ok) {
+        setBookmarks(data);
+        try {
+          const ids = data.map((b: any) => b.opportunityId);
+          localStorage.setItem('saved_bookmarks', JSON.stringify(ids));
+        } catch (e) {}
+      }
     } catch (err) {
       console.error(err);
     }
