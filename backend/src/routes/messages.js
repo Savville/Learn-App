@@ -7,34 +7,12 @@ import { v2 as cloudinary } from 'cloudinary';
 
 const router = express.Router();
 
-// Stage 3: The Radical Anti-Leakage Rule (The Auto-Censor)
+// Stage 3: The Radical Anti-Leakage Rule (The Auto-Censor) - DISABLED FOR TRUST BUILDING
 const applyAutoCensor = (text) => {
   if (!text) return '';
-  let censored = text;
-  
-  // 1. Censor Email Addresses
-  const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-  censored = censored.replace(emailRegex, '[REDACTED BY L-EARN]');
-  
-  // 2. Censor Phone Numbers (General matching for digits looking like phone numbers, particularly Kenyan ones)
-  // Matches: 0712345678, +254712345678, 254712345678, etc.
-  const phoneRegex = /\b(?:\+?254|0)[17]\d{8}\b/g;
-  censored = censored.replace(phoneRegex, '[REDACTED BY L-EARN]');
-  
-  // 3. Censor 'WhatsApp' keyword to prevent them asking to move offline
-  const whatsappRegex = /whatsapp/ig;
-  censored = censored.replace(whatsappRegex, '[REDACTED BY L-EARN]');
-
-  // 4. General link detection (outside links to prevent 'linktr.ee/mycontact' or personal portfolios)
-  const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|(\b[a-zA-Z0-9-]+\.(com|org|net|io|co|me|ee|ke)\b(\/[^\s]*)?)/ig;
-  censored = censored.replace(urlRegex, (match) => {
-    if (/github\.com|linkedin\.com/i.test(match)) {
-      return match;
-    }
-    return '[REDACTED LINK]';
-  });
-
-  return censored;
+  // Auto-censor disabled to allow Google Meet, phone numbers, and emails to build trust.
+  // Escrow is now positioned as an optional security service rather than a forced cage.
+  return text;
 };
 
 // GET /api/messages/upload-signature

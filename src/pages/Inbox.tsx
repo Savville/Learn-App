@@ -648,9 +648,9 @@ export function Inbox() {
                   </div>
                 </form>
                 {/(mpesa|pay me directly|07\d{8}|\+254\d{9}|send money|off-platform|off platform)/i.test(replyContent) && (
-                  <div className="px-4 py-3 bg-red-50 text-red-700 text-xs font-bold rounded-lg flex items-center gap-2 border border-red-100">
+                  <div className="px-4 py-3 bg-blue-50 text-[#131ADF] text-xs font-bold rounded-lg flex items-center gap-2 border border-blue-100">
                     <AlertTriangle className="w-5 h-5 shrink-0" />
-                    Warning: Off-platform payments violate our Terms of Service.
+                    Tip: L-Earn cannot protect payments made off-platform. For guaranteed safety, use the Escrow system.
                   </div>
                 )}
               </div>
