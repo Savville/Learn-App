@@ -329,13 +329,38 @@ export function Inbox() {
     }
     
     try {
-      // In the future this will hit /api/messages/report-user
-      // For now we simulate success and just close
+      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          reason: reportModal.reason, 
+          details: reportModal.details, 
+          reporterEmail: email 
+        })
+      });
+      
+      if (!res.ok) throw new Error('Failed to submit report');
+
       setReportModal(prev => ({ ...prev, isOpen: false }));
       showAlert({ title: 'User Reported', message: 'This user has been reported to administration.', type: 'success' });
     } catch (err) {
       console.error(err);
       showAlert({ title: 'Error', message: 'Failed to report user.', type: 'error' });
+    }
+  };
+
+  const handleMute = async () => {
+    if (!activeConv) return;
+    try {
+      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/mute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      showAlert({ title: 'Muted', message: 'Notifications muted for this conversation.', type: 'info' });
+      setShowChatMenu(false);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -600,7 +625,7 @@ export function Inbox() {
                           View Profile
                         </button>
                         <button 
-                          onClick={() => { showAlert({ title: 'Info', message: 'Conversation muted.', type: 'info' }); setShowChatMenu(false); }}
+                          onClick={handleMute}
                           className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-semibold"
                         >
                           Mute Notifications
