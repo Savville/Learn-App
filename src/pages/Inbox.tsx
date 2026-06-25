@@ -525,7 +525,19 @@ export function Inbox() {
                       className={`flex items-start gap-4 group ${isMe ? "flex-row-reverse" : "flex-row"}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
-                        setContextMenu({ x: e.clientX, y: e.clientY, message: msg });
+                        let x = e.clientX;
+                        let y = e.clientY;
+                        
+                        // Prevent menu from going off-screen on the right
+                        if (x + 160 > window.innerWidth) {
+                          x = window.innerWidth - 170;
+                        }
+                        // Prevent menu from going off-screen on the bottom
+                        if (y + 160 > window.innerHeight) {
+                          y = window.innerHeight - 170;
+                        }
+                        
+                        setContextMenu({ x, y, message: msg });
                       }}
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 mt-auto shadow-sm ${avatarColor}`}>
