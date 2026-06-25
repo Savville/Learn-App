@@ -402,16 +402,15 @@ export function Opportunities() {
           </div>
 
           {/* Results Count */}
-          {activeTab !== 'applied' && (
-            <div className="mt-6">
-              <p className="text-white">
-                Showing <span className="font-semibold">{filteredOpportunities.length}</span>{' '}
-                {filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
-                {activeTab !== 'all' && (
-                  <span className="text-white/60 text-sm ml-2">in {currentTab.description}</span>
-                )}
-              </p>
-            </div>
+          <div className="mt-6">
+            <p className="text-white">
+              Showing <span className="font-semibold">{filteredOpportunities.length}</span>{' '}
+              {filteredOpportunities.length === 1 ? 'opportunity' : 'opportunities'}
+              {activeTab !== 'all' && (
+                <span className="text-white/60 text-sm ml-2">in {currentTab.description}</span>
+              )}
+            </p>
+          </div>
         </div>
       </div>
 
