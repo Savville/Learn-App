@@ -6,10 +6,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send, MessageCircle } from 'lucide-react';
+import { useAlert } from '@/contexts/AlertContext';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminDashboard() {
+  const { showAlert } = useAlert();
   const [pending, setPending] = useState<any[]>([]);
   const [orgRequests, setOrgRequests] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
