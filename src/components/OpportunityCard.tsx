@@ -3,6 +3,7 @@ import { ArrowRight, Calendar, CheckCircle, Users, Flame, Bookmark } from 'lucid
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
 import type { Opportunity } from '../data/opportunities';
+import { useAlert } from '../contexts/AlertContext';
 import { calculateUrgency, toSlug } from '../utils/dateUtils';
 
 interface OpportunityCardProps {
@@ -56,6 +57,7 @@ export const getDynamicImageUrl = (category: string, id: string, providedUrl?: s
 
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const [isSaved, setIsSaved] = React.useState(false);
+  const { showAlert } = useAlert();
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
 
@@ -90,7 +92,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
     
     const token = localStorage.getItem('user_token');
     if (!token) {
-      alert('Please log in through the Tracker or Inbox to save opportunities.');
+      showAlert({ title: 'Sign In Required', message: 'Please log in through the Tracker or Inbox to save opportunities.', type: 'info' });
       return;
     }
 

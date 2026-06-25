@@ -130,7 +130,7 @@ export function PosterDashboard() {
       // Update local state
       setApplicants(prev => prev.map(a => a._id === appId ? { ...a, status: newStatus } : a));
     } catch (err: any) {
-      alert(err.message);
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
     }
   };
 

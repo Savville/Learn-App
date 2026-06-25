@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { LogOut, FolderHeart, Calendar, ChevronRight, CheckCircle, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toSlug } from '@/utils/dateUtils';
+import { useAlert } from '../contexts/AlertContext';
 
 interface Application {
   _id: string;
@@ -24,6 +25,7 @@ export function Tracker() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'followed' | 'saved'>('followed');
+  const { showAlert } = useAlert();
 
   // Dispute Modal State
   const [disputeAppId, setDisputeAppId] = useState<string | null>(null);
@@ -54,7 +56,7 @@ export function Tracker() {
       setDisputeAppId(null);
       setDisputeReason('');
     } catch (err: any) {
-      alert(err.message || 'Error communicating with server');
+      showAlert({ title: 'Communication Error', message: err.message || 'Error communicating with server', type: 'error' });
     } finally {
       setSubmittingDispute(false);
     }

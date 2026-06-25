@@ -82,7 +82,7 @@ export default function AdminDashboard() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ posterEmail: reportData.posterEmail })
       });
-      alert('Report emailed successfully!');
+      showAlert({ title: 'Success', message: 'Report emailed successfully!', type: 'success' });
     } finally {
       setActionLoading(null);
     }
@@ -166,13 +166,13 @@ export default function AdminDashboard() {
       if (res.ok) {
         setAllOpps(prev => prev.map(o => o.id === editingOpp.id ? updatedData : o));
         setEditingOpp(null);
-        alert('Opportunity updated successfully');
+        showAlert({ title: 'Success', message: 'Opportunity updated successfully', type: 'success' });
       } else {
         const errorData = await res.json();
-        alert('Error updating: ' + errorData.error);
+        showAlert({ title: 'Error', message: 'Error updating: ' + errorData.error, type: 'error' });
       }
     } catch (error: any) {
-      alert('Error updating: ' + error.message);
+      showAlert({ title: 'Error', message: 'Error updating: ' + error.message, type: 'error' });
     }
     setActionLoading(null);
   };
@@ -193,10 +193,10 @@ export default function AdminDashboard() {
         }
       } else {
         const errorData = await res.json();
-        alert('Error deleting: ' + errorData.error);
+        showAlert({ title: 'Error', message: 'Error deleting: ' + errorData.error, type: 'error' });
       }
     } catch (error: any) {
-      alert('Error deleting: ' + error.message);
+      showAlert({ title: 'Error', message: 'Error deleting: ' + error.message, type: 'error' });
     }
     setActionLoading(null);
   };
@@ -230,10 +230,10 @@ export default function AdminDashboard() {
       });
       if (res.ok) {
         setOrgRequests(prev => prev.filter(o => o._id !== objId));
-        alert('Organization Verified & Notified!');
+        showAlert({ title: 'Success', message: 'Organization Verified & Notified!', type: 'success' });
       }
     } catch (e: any) {
-      alert('Error: ' + e.message);
+      showAlert({ title: 'Error', message: 'Error: ' + e.message, type: 'error' });
     }
     setActionLoading(null);
   };
@@ -249,7 +249,7 @@ export default function AdminDashboard() {
       });
       if (res.ok) setOrgRequests(prev => prev.filter(o => o._id !== objId));
     } catch (e: any) {
-      alert('Error: ' + e.message);
+      showAlert({ title: 'Error', message: 'Error: ' + e.message, type: 'error' });
     }
     setActionLoading(null);
   };
@@ -258,7 +258,7 @@ export default function AdminDashboard() {
     const reviewForm = reviewFormById[objId] || { reviewerName: '', proofLinksText: '' };
     const reviewerName = reviewForm.reviewerName.trim();
     if (!reviewerName) {
-      alert('Reviewer name is required before approval.');
+      showAlert({ title: 'Alert', message: 'Reviewer name is required before approval.', type: 'info' });
       return;
     }
     const proofLinks = reviewForm.proofLinksText
@@ -284,13 +284,13 @@ export default function AdminDashboard() {
           delete next[objId];
           return next;
         });
-        alert('Opportunity Approved & Published!');
+        showAlert({ title: 'Success', message: 'Opportunity Approved & Published!', type: 'success' });
       } else {
         const data = await res.json();
-        alert('Failed to approve: ' + data.error);
+        showAlert({ title: 'Error', message: 'Failed to approve: ' + data.error, type: 'error' });
       }
     } catch (e: any) {
-      alert('Error: ' + e.message);
+      showAlert({ title: 'Error', message: 'Error: ' + e.message, type: 'error' });
     }
     setActionLoading(null);
   };
@@ -308,10 +308,10 @@ export default function AdminDashboard() {
         setPending(prev => prev.filter(p => p._id !== objId));
       } else {
         const data = await res.json();
-        alert('Failed to reject: ' + data.error);
+        showAlert({ title: 'Error', message: 'Failed to reject: ' + data.error, type: 'error' });
       }
     } catch (e: any) {
-      alert('Error: ' + e.message);
+      showAlert({ title: 'Error', message: 'Error: ' + e.message, type: 'error' });
     }
     setActionLoading(null);
   };
@@ -328,7 +328,7 @@ export default function AdminDashboard() {
         setReports(prev => prev.filter(r => r._id !== objId));
       }
     } catch (e: any) {
-      alert('Error: ' + e.message);
+      showAlert({ title: 'Error', message: 'Error: ' + e.message, type: 'error' });
     }
     setActionLoading(null);
   };
@@ -344,10 +344,10 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Payment failed');
-      alert(`âœ… ${data.message}`);
+      showAlert({ title: 'Alert', message: `âœ… ${data.message}`, type: 'info' });
       setEscrowReleases(prev => prev.filter(r => r._id !== appId));
     } catch (e: any) {
-      alert(`âŒ Error: ${e.message}`);
+      showAlert({ title: 'Error', message: `âŒ Error: ${e.message}`, type: 'error' });
     }
     setPayDoerLoading(null);
   };
@@ -1349,15 +1349,15 @@ export default function AdminDashboard() {
                         });
                         const data = await res.json();
                         if (res.ok) {
-                          alert(data.message);
+                          showAlert({ title: 'Alert', message: data.message, type: 'info' });
                           const now = new Date().toLocaleString();
                           setLastDigestSent(now);
                           localStorage.setItem('lastDigestSent', now);
                         } else {
-                          alert('Error: ' + data.error);
+                          showAlert({ title: 'Error', message: 'Error: ' + data.error, type: 'error' });
                         }
                       } catch (e: any) {
-                        alert('Failed: ' + e.message);
+                        showAlert({ title: 'Error', message: 'Failed: ' + e.message, type: 'error' });
                       }
                     }}
                   >
@@ -1389,15 +1389,15 @@ export default function AdminDashboard() {
                         });
                         const data = await res.json();
                         if (res.ok) {
-                          alert(data.message);
+                          showAlert({ title: 'Alert', message: data.message, type: 'info' });
                           const now = new Date().toLocaleString();
                           setLastDigestSent(now);
                           localStorage.setItem('lastDigestSent', now);
                         } else {
-                          alert('Error: ' + data.error);
+                          showAlert({ title: 'Error', message: 'Error: ' + data.error, type: 'error' });
                         }
                       } catch (e: any) {
-                        alert('Failed: ' + e.message);
+                        showAlert({ title: 'Error', message: 'Failed: ' + e.message, type: 'error' });
                       }
                     }}
                   >
@@ -1495,7 +1495,7 @@ export default function AdminDashboard() {
                             });
                             const data = await res.json();
                             if (res.ok) {
-                              alert(`${data.message} (${data.subscriberCount} emails sent)`);
+                              showAlert({ title: 'Alert', message: `${data.message} (${data.subscriberCount} emails sent)`, type: 'info' });
                               const now = new Date().toLocaleString();
                               setLastDigestSent(now);
                               localStorage.setItem('lastDigestSent', now);
@@ -1503,10 +1503,10 @@ export default function AdminDashboard() {
                               setCustomSubject('');
                               setCustomMessage('');
                             } else {
-                              alert('Error: ' + data.error);
+                              showAlert({ title: 'Error', message: 'Error: ' + data.error, type: 'error' });
                             }
                           } catch (e: any) {
-                            alert('Failed: ' + e.message);
+                            showAlert({ title: 'Error', message: 'Failed: ' + e.message, type: 'error' });
                           }
                         }}
                       >

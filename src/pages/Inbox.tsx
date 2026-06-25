@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2, LogOut, Search, Settings, MoreVertical, Smile, User, Github, Linkedin, Globe } from 'lucide-react';
 import { OTPLoginForm } from '../components/OTPLoginForm';
+import { useAlert } from '../contexts/AlertContext';
 
 export function Inbox() {
   const [email, setEmail] = useState<string>(localStorage.getItem('user_email') || '');
@@ -25,8 +26,10 @@ export function Inbox() {
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
   const [partnerProfile, setPartnerProfile] = useState<any | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [showPortfolioPane, setShowPortfolioPane] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { showAlert } = useAlert();
 
   const fetchConversations = async (userEmail: string) => {
     setLoading(true);
@@ -47,7 +50,7 @@ export function Inbox() {
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      alert("File is too large. Max 10MB allowed.");
+      showAlert({ title: 'File Too Large', message: 'File is too large. Max 10MB allowed.', type: 'warning' });
       return;
     }
 
@@ -93,7 +96,7 @@ export function Inbox() {
         await fetchMessages(activeConv._id);
       }
     } catch (err: any) {
-      alert("File upload error: " + err.message);
+      showAlert({ title: 'Upload Failed', message: "File upload error: " + err.message, type: 'error' });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -204,7 +207,7 @@ export function Inbox() {
       setReplyContent('');
       fetchMessages(activeConv._id); // Refresh messages
     } catch (err: any) {
-      alert(err.message);
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
       console.error(err);
     }
   };
@@ -225,7 +228,7 @@ export function Inbox() {
       setMessages(messages.filter(m => m._id !== messageToDelete));
       setMessageToDelete(null);
     } catch (err: any) {
-      alert(err.message);
+      showAlert({ title: 'Delete Failed', message: err.message, type: 'error' });
       console.error(err);
     }
   };
@@ -283,7 +286,7 @@ export function Inbox() {
     }
     
     if (!disputeReason.trim()) {
-      alert("Please provide a reason for the dispute.");
+      showAlert({ title: 'Missing Information', message: 'Please provide a reason for the dispute.', type: 'warning' });
       return;
     }
     
@@ -507,9 +510,14 @@ export function Inbox() {
                     const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
                     const avatarColor = colors[seed % colors.length];
                     return (
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg ${avatarColor}`}>
+                      <button 
+                        onClick={() => setShowPortfolioPane(!showPortfolioPane)}
+                        onContextMenu={(e) => { e.preventDefault(); setShowPortfolioPane(!showPortfolioPane); }}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg cursor-pointer hover:scale-105 transition-transform shadow-sm ${avatarColor}`}
+                        title="View Portfolio"
+                      >
                         {partnerEmail.charAt(0).toUpperCase()}
-                      </div>
+                      </button>
                     );
                   })()}
                   <div className="text-left">
@@ -805,7 +813,7 @@ export function Inbox() {
         </div>
 
         {/* Right Panel: Portfolio Viewer */}
-        {activeConv && (
+        {activeConv && showPortfolioPane && (
           <div className="hidden lg:flex flex-col h-full bg-white rounded-xl w-72 shrink-0 overflow-hidden shadow-sm border border-[#D1E6FF]">
             {loadingProfile ? (
               <div className="flex-1 flex items-center justify-center">

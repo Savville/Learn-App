@@ -21,6 +21,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { PageLoader } from './components/PageLoader';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Toaster } from './components/ui/sonner';
+import { AlertProvider } from './contexts/AlertContext';
 
 function AppContent() {
   const location = useLocation();
@@ -99,9 +100,11 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <AlertProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </AlertProvider>
     </ErrorBoundary>
   );
 }

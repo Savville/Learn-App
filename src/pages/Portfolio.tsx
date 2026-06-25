@@ -3,6 +3,7 @@ import { OTPLoginForm } from '../components/OTPLoginForm';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { FolderHeart, LogOut, UploadCloud, Github, Linkedin, Globe, Link as LinkIcon, DollarSign, CheckCircle, Save, Loader2, User } from 'lucide-react';
+import { useAlert } from '../contexts/AlertContext';
 
 export function Portfolio() {
   const [token, setToken] = useState(localStorage.getItem('user_token'));
@@ -10,6 +11,7 @@ export function Portfolio() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showAlert } = useAlert();
 
   const [profile, setProfile] = useState({
     name: '',
@@ -77,9 +79,9 @@ export function Portfolio() {
         body: JSON.stringify(profile)
       });
       if (!res.ok) throw new Error('Failed to save profile');
-      alert('Profile saved successfully!');
+      showAlert({ title: 'Success', message: 'Profile saved successfully!', type: 'success' });
     } catch (err: any) {
-      alert(err.message);
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
     } finally {
       setSaving(false);
     }
@@ -91,7 +93,7 @@ export function Portfolio() {
     
     // Check size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      alert("Image is too large. Max size is 2MB.");
+      showAlert({ title: 'File Too Large', message: 'Image is too large. Max size is 2MB.', type: 'warning' });
       return;
     }
 
@@ -109,7 +111,7 @@ export function Portfolio() {
       
       setProfile(prev => ({ ...prev, avatar: data.imageUrl }));
     } catch (err: any) {
-      alert("Failed to upload image: " + err.message);
+      showAlert({ title: 'Upload Failed', message: "Failed to upload image: " + err.message, type: 'error' });
     }
   };
 

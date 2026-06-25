@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ShieldAlert, CheckCircle2, RefreshCcw } from 'lucide-react';
+import { useAlert } from '../contexts/AlertContext';
 
 interface DisputedApplication {
   _id: string;
@@ -20,6 +21,7 @@ export function AdminDisputes() {
   const [isAuthorized, setIsAuthorized] = useState(!!adminKey);
   const [disputes, setDisputes] = useState<DisputedApplication[]>([]);
   const [loading, setLoading] = useState(false);
+  const { showAlert } = useAlert();
 
   const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -37,7 +39,7 @@ export function AdminDisputes() {
       const data = await res.json();
       setDisputes(data);
     } catch (err: any) {
-      alert(err.message);
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -56,10 +58,10 @@ export function AdminDisputes() {
       });
       if (!res.ok) throw new Error('Failed to resolve');
       
-      alert(`Success. Application is now ${resolution}.`);
+      showAlert({ title: 'Success', message: `Application is now ${resolution}.`, type: 'success' });
       setDisputes(prev => prev.filter(d => d._id !== appId));
     } catch (err: any) {
-      alert(err.message);
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
     }
   };
 
