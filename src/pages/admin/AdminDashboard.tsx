@@ -13,13 +13,14 @@ export default function AdminDashboard() {
   const [pending, setPending] = useState<any[]>([]);
   const [orgRequests, setOrgRequests] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
+  const [userReports, setUserReports] = useState<any[]>([]);
   const [allOpps, setAllOpps] = useState<any[]>([]);
   const [escrowReleases, setEscrowReleases] = useState<any[]>([]);
   const [disputes, setDisputes] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [chatOversight, setChatOversight] = useState<any>(null);
   const [payDoerLoading, setPayDoerLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats'>('opps');
+  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats'>('opps');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
@@ -93,9 +94,10 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('adminToken');
       if (!token) return;
       
-      const [oppsRes, reportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes, categoriesRes] = await Promise.all([
+      const [oppsRes, reportsRes, userReportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes, categoriesRes] = await Promise.all([
         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/user-reports`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/opportunities`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/escrow-releases`, { headers: { Authorization: `Bearer ${token}` } }),
@@ -107,6 +109,7 @@ export default function AdminDashboard() {
 
       if (oppsRes.ok) setPending(await oppsRes.json());
       if (reportsRes.ok) setReports(await reportsRes.json());
+      if (userReportsRes.ok) setUserReports(await userReportsRes.json());
       if (orgsRes.ok) setOrgRequests(await orgsRes.json());
       if (allOppsRes.ok) setAllOpps(await allOppsRes.json());
       if (escrowRes.ok) setEscrowReleases(await escrowRes.json());
@@ -333,6 +336,25 @@ export default function AdminDashboard() {
     setActionLoading(null);
   };
 
+  const handleResolveUserReport = async (objId: string, action: string) => {
+    setActionLoading(`resolve_user_${objId}`);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/user-reports/${objId}/judgment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action })
+      });
+      if (res.ok) {
+        setUserReports(prev => prev.filter(r => r._id !== objId));
+        showAlert({ title: 'Success', message: `Report marked as ${action}.`, type: 'success' });
+      }
+    } catch (e: any) {
+      showAlert({ title: 'Error', message: 'Error: ' + e.message, type: 'error' });
+    }
+    setActionLoading(null);
+  };
+
   const handlePayDoer = async (appId: string) => {
     if (!window.confirm('Send M-PESA payment to this job doer? This action cannot be undone.')) return;
     setPayDoerLoading(appId);
@@ -428,7 +450,14 @@ export default function AdminDashboard() {
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'reports' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
           >
             <Flag className="w-4 h-4" />
-            Reports {reports.length > 0 && <span className="bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">{reports.length}</span>}
+            Opp Reports {reports.length > 0 && <span className="bg-orange-500 text-white text-xs rounded-full px-1.5 py-0.5">{reports.length}</span>}
+          </button>
+          <button 
+            onClick={() => setActiveTab('userReports')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'userReports' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            User Reports {userReports.length > 0 && <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{userReports.length}</span>}
           </button>
           <button 
             onClick={() => setActiveTab('orgs')}
@@ -727,6 +756,71 @@ export default function AdminDashboard() {
                           disabled={actionLoading === `delete_${report.opportunityId}`}
                         >
                           <Trash2 className="w-4 h-4 mr-2" /> Delete Opportunity
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )
+        ) : activeTab === 'userReports' ? (
+          /* User Reports Tab */
+          userReports.length === 0 ? (
+            <Card className="border-slate-200 shadow-sm">
+               <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                  <ShieldCheck className="h-12 w-12 text-slate-300 mb-4" />
+                  <h3 className="text-lg font-medium text-slate-900">No open user reports</h3>
+                  <p className="text-sm text-slate-500 max-w-sm mt-1">Users reported for spam or scams in chat will appear here.</p>
+               </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {userReports.map((report: any) => (
+                <Card key={report._id} className="border-slate-200 shadow-sm overflow-hidden">
+                  <CardContent className="p-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100">User Report</Badge>
+                          <span className="text-xs text-slate-400">{new Date(report.createdAt).toLocaleString()}</span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-900">{report.reason}</h3>
+                        <p className="text-sm font-bold text-red-600 mt-1">Reported User: {report.reportedUser}</p>
+                        <p className="text-sm text-slate-600">Reported By: {report.reportedBy}</p>
+                        {report.details && (
+                          <div className="mt-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <p className="text-sm font-semibold text-slate-700 mb-1">Details Provided:</p>
+                            <p className="text-sm text-slate-700 whitespace-pre-wrap italic">"{report.details}"</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-2 shrink-0 lg:items-end">
+                        <Button
+                          variant="outline"
+                          className="border-slate-200"
+                          onClick={() => handleResolveUserReport(report._id, 'dismiss')}
+                          disabled={actionLoading === `resolve_user_${report._id}`}
+                        >
+                          Dismiss (False Alarm)
+                        </Button>
+                        <Button
+                          className="bg-amber-500 hover:bg-amber-600 text-white"
+                          onClick={() => handleResolveUserReport(report._id, 'warn')}
+                          disabled={actionLoading === `resolve_user_${report._id}`}
+                        >
+                          Issue Warning
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={async () => {
+                            if (window.confirm(`Are you sure you want to suspend the account for ${report.reportedUser}? They will not be able to login.`)) {
+                              await handleResolveUserReport(report._id, 'suspend');
+                            }
+                          }}
+                          disabled={actionLoading === `resolve_user_${report._id}`}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" /> Suspend Account
                         </Button>
                       </div>
                     </div>
