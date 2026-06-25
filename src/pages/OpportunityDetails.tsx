@@ -876,9 +876,16 @@ export function OpportunityDetails() {
                   const location = opportunity?.location ? `📍 Location: ${opportunity.location}` : '';
                   const compensation = opportunity?.compensationType ? `💰 Compensation: ${opportunity.compensationType}` : '';
                   const cost = opportunity?.upfrontCost === 'No Upfront Cost' ? '✅ Free to Apply' : opportunity?.upfrontCost ? `⚠️ ${opportunity.upfrontCost}` : '';
+                  
+                  let reqString = '';
+                  if (opportunity?.eligibility?.requirements?.length) {
+                    reqString = '\n\n📋 *Requirements:*\n' + opportunity.eligibility.requirements.slice(0, 3).map((r: string) => `• ${r}`).join('\n');
+                    if (opportunity.eligibility.requirements.length > 3) reqString += '\n• ...and more';
+                  }
+
                   const snippet = opportunity?.description ? opportunity.description.slice(0, 180).trim() + '…' : '';
                   const metaLines = [deadline, location, compensation, cost].filter(Boolean).join('\n');
-                  const shareText = `🌍 *${opportunity?.title}*\nby ${opportunity?.provider} · ${opportunity?.category}\n\n${metaLines}\n\n${snippet}\n\n🔗 Apply or learn more on Opportunities Kenya — your go-to hub for scholarships, fellowships, internships & grants across Africa.\n\n${window.location.href}`;
+                  const shareText = `🌍 *${opportunity?.title}*\nby ${opportunity?.provider} · ${opportunity?.category}\n\n${metaLines}${reqString}\n\n${snippet}\n\n🔗 Apply or learn more on Opportunities Kenya — your go-to hub for scholarships, fellowships, internships & grants across Africa.\n\n${window.location.href}`;
                   if (navigator.share) {
                     navigator.share({
                       title: opportunity?.title,

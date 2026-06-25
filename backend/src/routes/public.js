@@ -661,6 +661,28 @@ router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
       updateDoc
     );
 
+    // Create Notification for the Applicant
+    if (status !== 'disputed') {
+      let actionText = '';
+      if (status === 'approved') actionText = 'approved your application';
+      else if (status === 'rejected') actionText = 'declined your application';
+      else if (status === 'shortlisted') actionText = 'shortlisted you';
+      else if (status === 'interviewing') actionText = 'wants to interview you';
+      else if (status === 'paid') actionText = 'marked you as paid';
+
+      if (actionText) {
+        await db.collection('notifications').insertOne({
+          email: application.applicantEmail.toLowerCase(),
+          type: 'application_update',
+          title: `Application ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+          message: `The poster for "${application.opportunityTitle}" has ${actionText}.`,
+          isRead: false,
+          createdAt: new Date(),
+          link: '/applied' // link to Tracker
+        });
+      }
+    }
+
     res.json({ message: 'Status updated successfully', status });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -971,6 +993,43 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
 // ==========================================
 // Phase 5: Bookmarks (Tracker)
 // ==========================================
+
+// ==========================================
+// NOTIFICATIONS API
+// ==========================================
+
+// GET /api/public/me/notifications
+router.get('/me/notifications', verifyUserToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+    const db = getDB();
+    const notifications = await db.collection('notifications')
+      .find({ email: email.toLowerCase() })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .toArray();
+    res.json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/public/me/notifications/:id/read
+router.put('/me/notifications/:id/read', verifyUserToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+    const { id } = req.params;
+    const db = getDB();
+    
+    // Validate ObjectID if possible, or just string match if it's not ObjectID
+    const query = { _id: new (require('mongodb').ObjectId)(id), email: email.toLowerCase() };
+    
+    await db.collection('notifications').updateOne(query, { $set: { isRead: true } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // GET /api/public/me/bookmarks
 router.get('/me/bookmarks', verifyUserToken, async (req, res) => {

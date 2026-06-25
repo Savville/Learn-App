@@ -1060,6 +1060,25 @@ router.put('/conversations/:convId/resolve', verifyAdminKey, async (req, res) =>
       return res.status(404).json({ error: "Disputed conversation not found." });
     }
 
+    const conversation = await db.collection('conversations').findOne({ _id: new ObjectId(convId) });
+    
+    if (conversation) {
+      // Notify both parties
+      const notificationData = {
+        type: 'dispute_resolved',
+        title: 'Dispute Resolved',
+        message: `An admin has resolved your dispute with the outcome: ${resolution.replace('resolved_', '')}.`,
+        isRead: false,
+        createdAt: new Date(),
+        link: '/inbox'
+      };
+
+      await db.collection('notifications').insertMany([
+        { ...notificationData, email: conversation.participants[0].toLowerCase() },
+        { ...notificationData, email: conversation.participants[1].toLowerCase() }
+      ]);
+    }
+
     res.json({ message: `Dispute resolved as ${resolution}` });
   } catch (error) {
     res.status(500).json({ error: error.message });
