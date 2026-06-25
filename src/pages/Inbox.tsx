@@ -319,32 +319,32 @@ export function Inbox() {
     <div className="w-full min-h-screen p-4 md:p-8 relative" style={{ background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }} onClick={() => setContextMenu(null)}>
       {contextMenu && (
         <div 
-          className="absolute z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[120px]"
+          className="fixed z-50 bg-[#131ADF] text-white rounded-lg shadow-2xl border border-blue-400 py-1.5 min-w-[140px] overflow-hidden"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
           <button 
-            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className="w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-blue-600 transition-colors"
             onClick={() => { setReplyingTo({ _id: contextMenu.message._id, content: contextMenu.message.content, senderEmail: contextMenu.message.senderEmail }); setContextMenu(null); }}
           >
             Reply
           </button>
           <button 
-            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className="w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-blue-600 transition-colors"
             onClick={() => { navigator.clipboard.writeText(contextMenu.message.content); setContextMenu(null); }}
           >
             Copy Text
           </button>
           {contextMenu.message.senderEmail === email && (Date.now() - new Date(contextMenu.message.createdAt).getTime() <= 5 * 60 * 1000) && (
             <button 
-              className="w-full text-left px-4 py-2 text-sm text-[#131ADF] hover:bg-blue-50"
+              className="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-200 hover:bg-blue-600 hover:text-white transition-colors"
               onClick={() => { 
                 setEditingMessage({ _id: contextMenu.message._id, content: contextMenu.message.content, createdAt: contextMenu.message.createdAt }); 
                 setReplyContent(contextMenu.message.content); 
                 setContextMenu(null); 
               }}
             >
-              Edit
+              Edit Message
             </button>
           )}
         </div>
@@ -523,7 +523,7 @@ export function Inbox() {
                       className={`flex items-start gap-4 group ${isMe ? "flex-row-reverse" : "flex-row"}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
-                        setContextMenu({ x: e.pageX, y: e.pageY, message: msg });
+                        setContextMenu({ x: e.clientX, y: e.clientY, message: msg });
                       }}
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 mt-auto shadow-sm ${avatarColor}`}>
