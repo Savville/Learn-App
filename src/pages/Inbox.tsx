@@ -18,6 +18,7 @@ export function Inbox() {
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [disputeReason, setDisputeReason] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number, y: number, message: any } | null>(null);
   const [replyingTo, setReplyingTo] = useState<{ _id: string, content: string, senderEmail: string } | null>(null);
   const [editingMessage, setEditingMessage] = useState<{ _id: string, content: string, createdAt: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -269,7 +270,7 @@ export function Inbox() {
   const isEmployer = activeConv && activeConv.participants[1] === email;
 
   // Custom Colors
-  const BLUE = "#1D75DD";
+  const BLUE = "#131ADF";
   const LIGHT_BLUE = "#D1E6FF";
   const PALE_BLUE = "#A5CEFF";
   const GRAY = "#555758";
@@ -315,16 +316,49 @@ export function Inbox() {
   );
 
   return (
-    <div className="w-full min-h-screen p-5 md:p-8" style={{ background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <div className="max-w-6xl mx-auto h-[85vh] min-h-[600px] flex gap-5">
+    <div className="w-full min-h-screen p-4 md:p-8 relative" style={{ background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }} onClick={() => setContextMenu(null)}>
+      {contextMenu && (
+        <div 
+          className="absolute z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[120px]"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button 
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            onClick={() => { setReplyingTo({ _id: contextMenu.message._id, content: contextMenu.message.content, senderEmail: contextMenu.message.senderEmail }); setContextMenu(null); }}
+          >
+            Reply
+          </button>
+          <button 
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            onClick={() => { navigator.clipboard.writeText(contextMenu.message.content); setContextMenu(null); }}
+          >
+            Copy Text
+          </button>
+          {contextMenu.message.senderEmail === email && (Date.now() - new Date(contextMenu.message.createdAt).getTime() <= 5 * 60 * 1000) && (
+            <button 
+              className="w-full text-left px-4 py-2 text-sm text-[#131ADF] hover:bg-blue-50"
+              onClick={() => { 
+                setEditingMessage({ _id: contextMenu.message._id, content: contextMenu.message.content, createdAt: contextMenu.message.createdAt }); 
+                setReplyContent(contextMenu.message.content); 
+                setContextMenu(null); 
+              }}
+            >
+              Edit
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="max-w-6xl mx-auto h-[85vh] min-h-[600px] flex gap-5 md:gap-8">
         
         {/* Left Panel: Contacts List */}
-        <div className="flex flex-col h-full bg-white rounded-[10px] w-[320px] shrink-0 overflow-hidden shadow-sm">
+        <div className="flex flex-col h-full bg-white rounded-xl w-72 md:w-80 shrink-0 overflow-hidden shadow-sm">
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
             <div className="flex items-center gap-2">
-              <span className="text-[16px] font-bold" style={{ color: GRAY }}>Inbox</span>
-              <span className="bg-[#A5CEFF] text-[#1D75DD] text-[10px] font-bold px-3 py-[3px] rounded-full">
+              <span className="text-base font-bold" style={{ color: GRAY }}>Inbox</span>
+              <span className="bg-[#A5CEFF] text-[#131ADF] text-xs font-bold px-3 py-1 rounded-full">
                 {conversations.length} New
               </span>
             </div>
@@ -332,17 +366,17 @@ export function Inbox() {
           </div>
 
           <div className="px-5 pb-3 shrink-0">
-            <p className="text-[12px] text-gray-500 truncate">{email}</p>
+            <p className="text-xs text-gray-500 truncate text-left">{email}</p>
           </div>
 
           {/* Search */}
           <div className="px-3 pb-3 shrink-0">
-            <div className="flex items-center gap-2 bg-[#f5f5f5] rounded-full px-4 py-[10px]">
+            <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
               <IconSearch />
               <input 
                 type="text"
                 placeholder="Search..." 
-                className="bg-transparent border-none outline-none text-[14px] w-full"
+                className="bg-transparent border-none outline-none text-sm w-full"
                 style={{ color: GRAY }}
               />
             </div>
@@ -369,26 +403,26 @@ export function Inbox() {
                   <button
                     key={conv._id}
                     onClick={() => handleSelectConv(conv)}
-                    className={`w-full text-left px-5 py-[15px] relative transition-colors border-b border-[#D1E6FF] last:border-b-0 ${isActive ? "" : "bg-white hover:bg-[#f0f7ff]"}`}
-                    style={isActive ? { background: "linear-gradient(90deg, #1D75DD 0%, #085EC3 100%)" } : {}}
+                    className={`w-full text-left px-5 py-4 relative transition-colors border-b border-[#D1E6FF] last:border-b-0 ${isActive ? "" : "bg-white hover:bg-[#f0f7ff]"}`}
+                    style={isActive ? { background: "linear-gradient(90deg, #131ADF 0%, #085EC3 100%)" } : {}}
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm ${isActive ? 'bg-white/20' : avatarColor}`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm ${isActive ? 'bg-white/20' : avatarColor}`}>
                           {initial}
                         </div>
-                        <div>
-                          <div className="text-[14px] font-semibold leading-tight truncate w-[180px]" style={{ color: isActive ? "white" : GRAY }}>
+                        <div className="flex flex-col text-left">
+                          <div className="text-sm font-semibold leading-tight truncate w-40 md:w-48" style={{ color: isActive ? "white" : GRAY }}>
                             {partnerEmail.split('@')[0]}
                           </div>
-                          <div className="text-[11px] mt-1 truncate w-[180px]" style={{ color: isActive ? "rgba(255,255,255,0.75)" : MUTED }}>
+                          <div className="text-xs mt-1 truncate w-40 md:w-48" style={{ color: isActive ? "rgba(255,255,255,0.75)" : MUTED }}>
                             {conv.gigTitle}
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 mt-2">
-                      <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${
+                    <div className="flex items-center gap-1 mt-1 text-left">
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
                         isActive ? 'bg-white/10 text-white border-white/20' : 'bg-gray-50 text-gray-600 border-gray-200'
                       }`}>
                         {conv.status}
@@ -406,7 +440,7 @@ export function Inbox() {
           {activeConv ? (
             <>
               {/* Chat Header */}
-              <div className="bg-white rounded-[10px] px-8 py-6 flex items-center justify-between shrink-0 shadow-sm border border-[#D1E6FF]">
+              <div className="bg-white rounded-xl px-8 py-5 flex items-center justify-between shrink-0 shadow-sm border border-[#D1E6FF]">
                 <div className="flex items-center gap-4">
                   {(() => {
                     const partnerEmail = activeConv.participants.find((p: string) => p !== email) || 'Unknown';
@@ -414,16 +448,16 @@ export function Inbox() {
                     const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
                     const avatarColor = colors[seed % colors.length];
                     return (
-                      <div className={`w-[40px] h-[40px] rounded-full flex items-center justify-center text-white font-bold text-lg ${avatarColor}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg ${avatarColor}`}>
                         {partnerEmail.charAt(0).toUpperCase()}
                       </div>
                     );
                   })()}
-                  <div>
-                    <div className="text-[18px] font-bold" style={{ color: GRAY }}>
+                  <div className="text-left">
+                    <div className="text-lg font-bold" style={{ color: GRAY }}>
                       {activeConv.gigTitle}
                     </div>
-                    <div className="text-[13px]" style={{ color: MUTED }}>
+                    <div className="text-sm" style={{ color: MUTED }}>
                       Chat with {activeConv.participants.find((p: string) => p !== email)}
                     </div>
                   </div>
@@ -433,43 +467,43 @@ export function Inbox() {
                 </button>
               </div>
 
-              {/* Status Banners (Using standard HTML/Tailwind) */}
+              {/* Status Banners */}
               {activeConv.status === 'pending' && (
-                <div className="bg-amber-50 p-4 text-sm text-amber-800 border border-amber-200 rounded-[10px] flex items-center gap-3">
+                <div className="bg-amber-50 p-4 text-sm text-amber-800 border border-amber-200 rounded-xl flex items-center gap-3">
                   <Lock className="w-5 h-5 text-amber-600 shrink-0" />
                   <span className="font-medium">{isEmployer ? 'Unlock to reply to this pitch.' : 'Waiting for employer to unlock.'}</span>
                 </div>
               )}
               {activeConv.status === 'hired' && (
-                <div className="bg-green-50 p-4 text-sm text-green-800 border border-green-200 rounded-[10px] flex items-center gap-3">
+                <div className="bg-green-50 p-4 text-sm text-green-800 border border-green-200 rounded-xl flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
                   <span className="font-semibold">Escrow Funded! Keep all communication here.</span>
                 </div>
               )}
               {activeConv.status === 'completed' && (
-                <div className="bg-indigo-50 p-4 text-sm text-indigo-800 border border-indigo-200 rounded-[10px] flex items-center gap-3">
+                <div className="bg-indigo-50 p-4 text-sm text-indigo-800 border border-indigo-200 rounded-xl flex items-center gap-3">
                   <UploadCloud className="w-5 h-5 text-indigo-600 shrink-0" />
                   <span className="font-semibold">Job Delivered! Waiting for Employer to approve.</span>
                 </div>
               )}
               {activeConv.status === 'approved' && (
-                <div className="bg-teal-50 p-4 text-sm text-teal-800 border border-teal-200 rounded-[10px] flex items-center gap-3">
+                <div className="bg-teal-50 p-4 text-sm text-teal-800 border border-teal-200 rounded-xl flex items-center gap-3">
                   <Handshake className="w-5 h-5 text-teal-600 shrink-0" />
                   <span className="font-semibold">Job Approved! Funds released.</span>
                 </div>
               )}
               {activeConv.status === 'disputed' && (
-                <div className="bg-red-50 p-4 text-sm text-red-800 border border-red-200 rounded-[10px] flex items-center gap-3">
+                <div className="bg-red-50 p-4 text-sm text-red-800 border border-red-200 rounded-xl flex items-center gap-3">
                   <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
                   <span className="font-semibold">Dispute Opened. Admin is reviewing.</span>
                 </div>
               )}
 
               {/* Messages */}
-              <div className="flex-1 bg-white rounded-[10px] overflow-y-auto p-8 flex flex-col gap-6 shadow-sm border border-[#D1E6FF]">
-                <div className="flex items-center gap-4 w-full mb-4">
+              <div className="flex-1 bg-white rounded-xl overflow-y-auto p-6 md:p-8 flex flex-col gap-6 shadow-sm border border-[#D1E6FF]">
+                <div className="flex items-center gap-4 w-full mb-6">
                   <div className="flex-1 h-px bg-[#989BA1] opacity-20 rounded" />
-                  <span className="text-[10px] font-bold tracking-widest uppercase shrink-0" style={{ color: MUTED }}>Chat Started</span>
+                  <span className="text-xs font-bold tracking-widest uppercase shrink-0" style={{ color: MUTED }}>Chat Started</span>
                   <div className="flex-1 h-px bg-[#989BA1] opacity-20 rounded" />
                 </div>
 
@@ -484,32 +518,21 @@ export function Inbox() {
                   const avatarColor = isMe ? 'bg-orange-600' : colors[seed % colors.length];
 
                   return (
-                    <div key={i} className={`flex items-start gap-3 group ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-                      <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 mt-auto ${avatarColor}`}>
+                    <div 
+                      key={i} 
+                      className={`flex items-start gap-4 group ${isMe ? "flex-row-reverse" : "flex-row"}`}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setContextMenu({ x: e.pageX, y: e.pageY, message: msg });
+                      }}
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 mt-auto shadow-sm ${avatarColor}`}>
                         {senderEmail.charAt(0).toUpperCase()}
                       </div>
-                      <div className={`flex flex-col gap-1 w-full max-w-[80%] ${isMe ? "items-end" : "items-start"}`}>
-                        
-                        {/* Hover Actions */}
-                        <div className="flex gap-2 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
-                            onClick={() => setReplyingTo({ _id: msg._id, content: msg.content, senderEmail: msg.senderEmail })} 
-                            className="text-[10px] text-[#1D75DD] hover:underline font-bold"
-                          >
-                            Reply
-                          </button>
-                          {isMe && (Date.now() - new Date(msg.createdAt).getTime() <= 5 * 60 * 1000) && (
-                            <button 
-                              onClick={() => { setEditingMessage({ _id: msg._id, content: msg.content, createdAt: msg.createdAt }); setReplyContent(msg.content); }} 
-                              className="text-[10px] text-[#1D75DD] hover:underline font-bold"
-                            >
-                              Edit
-                            </button>
-                          )}
-                        </div>
-
+                      
+                      <div className={`flex flex-col gap-1.5 w-full max-w-xl ${isMe ? "items-end" : "items-start"}`}>
                         <div
-                          className="rounded-[8px] px-5 py-4 text-[14px] leading-relaxed break-words"
+                          className="rounded-xl px-5 py-4 text-sm leading-relaxed break-words shadow-sm relative group cursor-context-menu"
                           style={{
                             color: GRAY,
                             background: isMe ? PALE_BLUE : "white",
@@ -518,32 +541,34 @@ export function Inbox() {
                         >
                           {/* Reply Quote Block */}
                           {msg.replyTo && (
-                            <div className="mb-2 p-2 rounded bg-black/5 border-l-4 border-[#1D75DD] text-[12px] opacity-90">
-                              <div className="font-bold mb-0.5 text-[#1D75DD]">{msg.replyTo.senderEmail.split('@')[0]}</div>
-                              <div className="truncate text-gray-700">{msg.replyTo.content}</div>
+                            <div className="mb-3 p-3 rounded-lg bg-black/5 border-l-4 border-[#131ADF] text-xs opacity-90 text-left">
+                              <div className="font-bold mb-1 text-[#131ADF]">{msg.replyTo.senderEmail.split('@')[0]}</div>
+                              <div className="truncate text-gray-700 italic">"{msg.replyTo.content}"</div>
                             </div>
                           )}
 
-                          {(activeConv.status === 'partnership') ? (
-                            <span>{displayContent}</span>
-                          ) : (
-                            displayContent.split(/(\[REDACTED.*?\])/).map((part: string, idx: number) => 
-                              part.startsWith('[REDACTED') ? (
-                                <span key={idx} className={`font-mono text-[11px] px-1.5 py-0.5 rounded mx-1 ${isMe ? 'bg-blue-800 text-blue-200' : 'bg-red-100 text-red-800 font-bold'}`}>
-                                  {part}
-                                </span>
-                              ) : (
-                                <span key={idx}>{part}</span>
+                          <div className="text-left">
+                            {(activeConv.status === 'partnership') ? (
+                              <span>{displayContent}</span>
+                            ) : (
+                              displayContent.split(/(\[REDACTED.*?\])/).map((part: string, idx: number) => 
+                                part.startsWith('[REDACTED') ? (
+                                  <span key={idx} className={`font-mono text-xs px-2 py-0.5 rounded mx-1 ${isMe ? 'bg-blue-800 text-blue-200' : 'bg-red-100 text-red-800 font-bold'}`}>
+                                    {part}
+                                  </span>
+                                ) : (
+                                  <span key={idx}>{part}</span>
+                                )
                               )
-                            )
-                          )}
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 mt-1 px-1">
-                          <span className="text-[10px]" style={{ color: MUTED }}>
+                        <div className="flex items-center gap-2 mt-0.5 px-2">
+                          <span className="text-xs" style={{ color: MUTED }}>
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           {msg.isEdited && (
-                            <span className="text-[9px] text-gray-400 italic">(edited)</span>
+                            <span className="text-xs text-gray-400 italic">(edited)</span>
                           )}
                         </div>
                       </div>
@@ -554,27 +579,27 @@ export function Inbox() {
               </div>
 
               {/* Input */}
-              <div className="bg-white rounded-[10px] border border-[#DDD] px-4 py-4 flex flex-col gap-3 shrink-0 shadow-sm">
+              <div className="bg-white rounded-xl border border-[#DDD] px-5 py-4 flex flex-col gap-3 shrink-0 shadow-sm">
                 {(replyingTo || editingMessage) && (
-                  <div className="flex items-center justify-between bg-blue-50/50 p-2 rounded border border-blue-100">
+                  <div className="flex items-center justify-between bg-blue-50/50 p-3 rounded-lg border border-blue-100 mb-2 text-left">
                     <div className="flex flex-col gap-1 overflow-hidden">
-                      <span className="text-[10px] font-bold text-[#1D75DD] uppercase tracking-wider">
+                      <span className="text-xs font-bold text-[#131ADF] uppercase tracking-wider">
                         {editingMessage ? 'Editing Message' : `Replying to ${replyingTo?.senderEmail.split('@')[0]}`}
                       </span>
-                      <span className="text-[12px] text-gray-600 truncate max-w-sm">
-                        {editingMessage ? editingMessage.content : replyingTo?.content}
+                      <span className="text-sm text-gray-600 truncate max-w-xl italic">
+                        "{editingMessage ? editingMessage.content : replyingTo?.content}"
                       </span>
                     </div>
                     <button 
                       type="button" 
                       onClick={() => { setReplyingTo(null); setEditingMessage(null); setReplyContent(''); }}
-                      className="text-gray-400 hover:text-gray-700 font-bold px-2"
+                      className="text-gray-400 hover:text-gray-800 font-bold px-3 py-1 rounded-full hover:bg-gray-100 transition-colors"
                     >
                       ✕
                     </button>
                   </div>
                 )}
-                <form onSubmit={handleSendReply} className="flex items-center gap-3">
+                <form onSubmit={handleSendReply} className="flex items-center gap-4">
                   <textarea
                     value={replyContent} 
                     onChange={e => {
@@ -590,8 +615,8 @@ export function Inbox() {
                         }
                       }
                     }}
-                    className="flex-1 text-[15px] outline-none bg-transparent resize-none overflow-y-auto"
-                    placeholder="Write a message... (Shift+Enter for newline)"
+                    className="flex-1 text-base outline-none bg-transparent resize-none overflow-y-auto"
+                    placeholder="Write a message... (Shift+Enter for newline, Right-Click messages to reply/edit)"
                     rows={1}
                     style={{ color: GRAY, minHeight: '24px', maxHeight: '150px' }}
                   />
@@ -600,7 +625,7 @@ export function Inbox() {
                       type="button" 
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isUploading}
-                      className="hover:opacity-70 transition-opacity"
+                      className="hover:opacity-70 transition-opacity p-2"
                     >
                       {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <IconPaperclip />}
                     </button>
@@ -611,11 +636,11 @@ export function Inbox() {
                       className="hidden" 
                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.ppt,.pptx"
                     />
-                    <button type="button" className="hover:opacity-70 transition-opacity"><IconSmile /></button>
+                    <button type="button" className="hover:opacity-70 transition-opacity p-2"><IconSmile /></button>
                     <button
                       type="submit"
                       disabled={!replyContent.trim() && !isUploading}
-                      className="w-[35px] h-[35px] rounded-[5px] flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-50"
+                      className="w-10 h-10 rounded-lg flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-50"
                       style={{ background: BLUE }}
                     >
                       <IconSend />
@@ -623,37 +648,37 @@ export function Inbox() {
                   </div>
                 </form>
                 {/(mpesa|pay me directly|07\d{8}|\+254\d{9}|send money|off-platform|off platform)/i.test(replyContent) && (
-                  <div className="px-3 py-2 bg-red-50 text-red-700 text-[11px] font-bold rounded-lg flex items-center gap-2 border border-red-100">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <div className="px-4 py-3 bg-red-50 text-red-700 text-xs font-bold rounded-lg flex items-center gap-2 border border-red-100">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
                     Warning: Off-platform payments violate our Terms of Service.
                   </div>
                 )}
               </div>
 
               {/* Action Controls */}
-              <div className="flex flex-wrap justify-end gap-3">
+              <div className="flex flex-wrap justify-end gap-3 mt-2">
                 {isEmployer && activeConv.status === 'pending' && (
-                  <button onClick={handleUnlock} className="px-5 py-2.5 bg-blue-50 text-blue-700 rounded-[8px] hover:bg-blue-100 transition-colors font-semibold text-sm">
+                  <button onClick={handleUnlock} className="px-5 py-2.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors font-semibold text-sm shadow-sm border border-blue-200">
                     Unlock to Reply
                   </button>
                 )}
                 {isEmployer && activeConv.status === 'active' && (
-                  <button onClick={handleHire} className="px-6 py-2.5 bg-green-600 text-white rounded-[8px] hover:bg-green-700 transition-colors font-semibold text-sm">
+                  <button onClick={handleHire} className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold text-sm shadow-sm">
                     Fund Escrow & Hire
                   </button>
                 )}
                 {isEmployer && activeConv.status === 'completed' && (
                   <>
-                    <button onClick={handleApprove} className="px-6 py-2.5 bg-teal-600 text-white rounded-[8px] hover:bg-teal-700 transition-colors font-semibold text-sm">
+                    <button onClick={handleApprove} className="px-6 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold text-sm shadow-sm">
                       Approve & Release
                     </button>
-                    <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-[8px] hover:bg-rose-50 transition-colors font-semibold text-sm">
+                    <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-lg hover:bg-rose-50 transition-colors font-semibold text-sm shadow-sm bg-white">
                       Dispute
                     </button>
                   </>
                 )}
                 {isEmployer && activeConv.status === 'hired' && (
-                  <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-[8px] hover:bg-rose-50 transition-colors font-semibold text-sm">
+                  <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-lg hover:bg-rose-50 transition-colors font-semibold text-sm shadow-sm bg-white">
                     Dispute
                   </button>
                 )}
@@ -661,16 +686,16 @@ export function Inbox() {
                 {/* Applicant Controls */}
                 {!isEmployer && activeConv.status === 'hired' && (
                   <>
-                    <button onClick={handleDeliver} className="px-6 py-2.5 bg-[#1D75DD] text-white rounded-[8px] hover:bg-blue-700 transition-colors font-semibold text-sm">
+                    <button onClick={handleDeliver} className="px-6 py-2.5 bg-[#131ADF] text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm shadow-sm">
                       Deliver Job
                     </button>
-                    <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-[8px] hover:bg-rose-50 transition-colors font-semibold text-sm">
+                    <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-lg hover:bg-rose-50 transition-colors font-semibold text-sm shadow-sm bg-white">
                       Dispute
                     </button>
                   </>
                 )}
                 {!isEmployer && activeConv.status === 'completed' && (
-                  <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-[8px] hover:bg-rose-50 transition-colors font-semibold text-sm">
+                  <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-lg hover:bg-rose-50 transition-colors font-semibold text-sm shadow-sm bg-white">
                     Dispute Employer
                   </button>
                 )}
@@ -678,26 +703,26 @@ export function Inbox() {
 
               {/* Dispute Form */}
               {showDisputeForm && (
-                <div className="p-5 bg-red-50 rounded-[10px] border border-red-100 flex flex-col gap-3">
-                  <p className="text-sm font-bold text-red-800">Open a Dispute</p>
+                <div className="p-5 bg-red-50 rounded-xl border border-red-100 flex flex-col gap-3 mt-2 shadow-sm">
+                  <p className="text-sm font-bold text-red-800 text-left">Open a Dispute</p>
                   <textarea 
                     value={disputeReason}
                     onChange={(e) => setDisputeReason(e.target.value)}
                     placeholder="Explain what went wrong..."
-                    className="w-full p-4 rounded-[8px] border border-red-200 outline-none text-sm h-24 resize-none bg-white"
+                    className="w-full p-4 rounded-lg border border-red-200 outline-none text-sm h-24 resize-none bg-white"
                   />
-                  <div className="flex gap-2 justify-end">
-                    <button onClick={() => setShowDisputeForm(false)} className="px-5 py-2 text-sm font-bold text-red-700 hover:bg-red-100 rounded-[8px]">Cancel</button>
-                    <button onClick={handleDispute} className="px-5 py-2 text-sm font-bold bg-red-600 hover:bg-red-700 text-white rounded-[8px]">Submit Dispute</button>
+                  <div className="flex gap-2 justify-end mt-2">
+                    <button onClick={() => setShowDisputeForm(false)} className="px-5 py-2 text-sm font-bold text-red-700 hover:bg-red-100 rounded-lg">Cancel</button>
+                    <button onClick={handleDispute} className="px-5 py-2 text-sm font-bold bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-sm">Submit Dispute</button>
                   </div>
                 </div>
               )}
 
             </>
           ) : (
-            <div className="bg-white rounded-[10px] shadow-sm flex flex-col h-full overflow-hidden items-center justify-center border border-[#D1E6FF]">
+            <div className="bg-white rounded-xl shadow-sm flex flex-col h-full overflow-hidden items-center justify-center border border-[#D1E6FF]">
               <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-                <MessageCircle className="w-12 h-12 text-[#1D75DD]" />
+                <MessageCircle className="w-12 h-12 text-[#131ADF]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Select a Conversation</h3>
               <p className="text-gray-500 text-center max-w-sm">Choose an active chat from the sidebar to continue.</p>

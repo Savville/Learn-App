@@ -112,7 +112,7 @@ export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitl
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Access Code'}
               </button>
@@ -139,7 +139,7 @@ export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitl
               <button 
                 type="submit" 
                 disabled={loading || otp.length !== 4}
-                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify & Access'}
               </button>

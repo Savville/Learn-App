@@ -10,7 +10,7 @@ export function About() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+      <div className="bg-[#131ADF] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <h1 className="mb-6">About Opportunities Kenya</h1>
           <p className="text-blue-100 max-w-2xl mx-auto">
@@ -93,7 +93,7 @@ export function About() {
         </section>
 
         {/* Why We Exist */}
-        <section className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 mb-16">
+        <section className="bg-[#f0f7ff] rounded-2xl p-8 mb-16">
           <div className="flex items-start gap-4 mb-6">
             <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center flex-shrink-0">
               <Heart className="w-7 h-7 text-red-500" />
@@ -183,7 +183,7 @@ export function About() {
         </section>
 
         {/* Call to Action */}
-        <section className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-center text-white">
+        <section className="bg-[#131ADF] rounded-2xl p-8 text-center text-white">
           <h2 className="text-white mb-4">Join Our Community</h2>
           <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
             Stay connected with thousands of students and young professionals who are discovering opportunities every day.

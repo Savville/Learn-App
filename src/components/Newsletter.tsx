@@ -116,7 +116,7 @@ export function Newsletter() {
   };
 
   return (
-    <section id="newsletter" className="py-16 bg-gradient-to-br from-blue-600 to-purple-600">
+    <section id="newsletter" className="py-16 bg-[#131ADF]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Header */}
         <div className="mb-8">

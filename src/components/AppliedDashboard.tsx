@@ -147,7 +147,7 @@ export function AppliedDashboard() {
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-2">No applications yet</h3>
             <p className="text-gray-500 mb-8 max-w-sm mx-auto leading-relaxed">You haven't submitted any internal applications via Learn Opportunities yet. Browse jobs to get started.</p>
-            <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg transition-all text-white rounded-xl px-8 py-6 h-auto text-base">
+            <Button asChild className="bg-[#131ADF] hover:shadow-lg transition-all text-white rounded-xl px-8 py-6 h-auto text-base">
                <Link to="/opportunities">Browse Opportunities</Link>
             </Button>
           </div>

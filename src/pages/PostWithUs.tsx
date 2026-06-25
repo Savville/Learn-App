@@ -449,7 +449,7 @@ export function PostWithUs() {
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
       {/* Dynamic Header */}
-      <div className="bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-md rounded-b-3xl">
+      <div className="bg-[#131ADF] text-white shadow-md rounded-b-3xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <p className="text-white mb-6 px-4 py-1 uppercase tracking-widest text-sm font-semibold opacity-90 block">For Organizations & Recruiters</p>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-6">

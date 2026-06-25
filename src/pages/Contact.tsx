@@ -35,7 +35,7 @@ export function Contact() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+      <div className="bg-[#131ADF] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <h1 className="mb-6">Get in Touch</h1>
           <p className="text-blue-100 max-w-2xl mx-auto">
@@ -119,7 +119,7 @@ export function Contact() {
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all"
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all"
               >
                 <Send className="w-5 h-5" />
                 <span>Send Message</span>
@@ -161,7 +161,7 @@ export function Contact() {
             </div>
 
             {/* Social Media */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6">
+            <div className="bg-[#f0f7ff] rounded-2xl p-6">
               <h3 className="text-gray-900 mb-4">Connect on Social Media</h3>
               <p className="text-gray-600 mb-6">
                 Follow us for daily updates on new opportunities

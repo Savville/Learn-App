@@ -636,7 +636,7 @@ export function OpportunityDetails() {
 
             
             {/* Apply Button / Challenge CTA */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 text-center" id="apply-section">
+            <div className="bg-[#f0f7ff] rounded-2xl p-8 text-center" id="apply-section">
               {urgency?.label === 'Closed' ? (
                 <>
                   <h3 className="text-gray-900 mb-3 text-xl font-bold">Applications Closed</h3>
@@ -688,7 +688,7 @@ export function OpportunityDetails() {
                       <div className="mt-6 flex gap-3">
                         <Button
                           type="submit"
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
+                          className="w-full bg-[#131ADF]"
                           disabled={isSubmittingPitch}
                         >
                           {isSubmittingPitch ? 'Sending Pitch...' : 'Send Pitch'}
@@ -717,7 +717,7 @@ export function OpportunityDetails() {
                      <div className="flex justify-center">
                         <Button
                           onClick={() => setShowApplyForm(true)}
-                          className="flex-1 max-w-xs inline-flex items-center justify-center py-6 text-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                          className="flex-1 max-w-xs inline-flex items-center justify-center py-6 text-lg bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold"
                         >
                           Fill Application Form
                         </Button>
@@ -784,7 +784,7 @@ export function OpportunityDetails() {
                         </Button>
                         <Button 
                           type="submit" 
-                          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600"
+                          className="flex-1 bg-[#131ADF]"
                           disabled={isSubmittingApp}
                         >
                           {isSubmittingApp ? 'Submitting...' : 'Submit Application'}
@@ -821,7 +821,7 @@ export function OpportunityDetails() {
                       href={opportunity.applicationLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                      className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold"
                     >
                       <span>Apply Now</span>
                       <ExternalLink className="w-5 h-5" />
@@ -850,7 +850,7 @@ export function OpportunityDetails() {
                       href={opportunity.contactLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold"
                     >
                       <span>Explore Further</span>
                       <ExternalLink className="w-5 h-5" />
