@@ -340,7 +340,7 @@ export function Tracker() {
                     <span className="text-sm text-slate-500">Saved on {new Date(bookmark.savedAt).toLocaleDateString()}</span>
                   </div>
                   <Link 
-                    to={`/opportunities`}
+                    to={`/opportunity/${bookmark.opportunityId}`}
                     className="flex items-center text-sm font-bold text-[#131ADF] px-5 py-2.5 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
                   >
                     View <ChevronRight className="w-4 h-4 ml-1" />
