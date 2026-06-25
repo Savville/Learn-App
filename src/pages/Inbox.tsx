@@ -17,8 +17,12 @@ export function Inbox() {
   const [replyContent, setReplyContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDisputeForm, setShowDisputeForm] = useState(false);
-  const [disputeReason, setDisputeReason] = useState('');
+  const [reportModal, setReportModal] = useState<{ isOpen: boolean; type: 'report' | 'dispute'; reason: string; details: string }>({
+    isOpen: false,
+    type: 'report',
+    reason: 'Scam/Fraud',
+    details: ''
+  });
   const [isUploading, setIsUploading] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, message: any } | null>(null);
   const [replyingTo, setReplyingTo] = useState<{ _id: string, content: string, senderEmail: string } | null>(null);
@@ -292,16 +296,11 @@ export function Inbox() {
     }
   };
 
-  const handleDispute = async () => {
+  const handleDisputeSubmit = async () => {
     if (!activeConv) return;
-    if (!showDisputeForm) {
-      setShowDisputeForm(true);
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-      return;
-    }
     
-    if (!disputeReason.trim()) {
-      showAlert({ title: 'Missing Information', message: 'Please provide a reason for the dispute.', type: 'warning' });
+    if (!reportModal.details.trim()) {
+      showAlert({ title: 'Missing Information', message: 'Please provide details for the dispute.', type: 'warning' });
       return;
     }
     
@@ -309,13 +308,49 @@ export function Inbox() {
       await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/dispute`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: disputeReason, initiatorEmail: email })
+        body: JSON.stringify({ reason: reportModal.details, initiatorEmail: email })
       });
       activeConv.status = 'disputed';
-      setShowDisputeForm(false);
-      setDisputeReason('');
+      setReportModal(prev => ({ ...prev, isOpen: false }));
       setActiveConv({ ...activeConv });
+      showAlert({ title: 'Dispute Opened', message: 'Your dispute has been sent to administration.', type: 'success' });
     } catch (err) {
+      console.error(err);
+      showAlert({ title: 'Error', message: 'Failed to open dispute.', type: 'error' });
+    }
+  };
+
+  const handleReportSubmit = async () => {
+    if (!activeConv) return;
+    
+    if (!reportModal.details.trim()) {
+      showAlert({ title: 'Missing Information', message: 'Please provide details for the report.', type: 'warning' });
+      return;
+    }
+    
+    try {
+      // In the future this will hit /api/messages/report-user
+      // For now we simulate success and just close
+      setReportModal(prev => ({ ...prev, isOpen: false }));
+      showAlert({ title: 'User Reported', message: 'This user has been reported to administration.', type: 'success' });
+    } catch (err) {
+      console.error(err);
+      showAlert({ title: 'Error', message: 'Failed to report user.', type: 'error' });
+    }
+  };
+
+  const handleModalSubmit = () => {
+    if (reportModal.type === 'dispute') {
+      handleDisputeSubmit();
+    } else {
+      handleReportSubmit();
+    }
+  };
+
+  const handleDispute = () => {
+    if (!activeConv) return;
+    setReportModal({ isOpen: true, type: 'dispute', reason: 'Non-delivery of work', details: '' });
+  };
       console.error(err);
     }
   };
@@ -573,10 +608,15 @@ export function Inbox() {
                         >
                           Mute Notifications
                         </button>
-                        <div className="my-1 border-t border-slate-100"></div>
                         <button 
-                          onClick={() => { showAlert({ title: 'Reported', message: 'User has been reported to administration.', type: 'success' }); setShowChatMenu(false); }}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold"
+                          onClick={() => { setReportModal({ isOpen: true, type: 'dispute', reason: 'Non-delivery of work', details: '' }); setShowChatMenu(false); }}
+                          className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 font-semibold"
+                        >
+                          Open Dispute
+                        </button>
+                        <button 
+                          onClick={() => { setReportModal({ isOpen: true, type: 'report', reason: 'Scam/Fraud', details: '' }); setShowChatMenu(false); }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100"
                         >
                           Report User
                         </button>
@@ -838,22 +878,6 @@ export function Inbox() {
                 )}
               </div>
 
-              {/* Dispute Form */}
-              {showDisputeForm && (
-                <div className="p-5 bg-red-50 rounded-xl border border-red-100 flex flex-col gap-3 mt-2 shadow-sm">
-                  <p className="text-sm font-bold text-red-800 text-left">Open a Dispute</p>
-                  <textarea 
-                    value={disputeReason}
-                    onChange={(e) => setDisputeReason(e.target.value)}
-                    placeholder="Explain what went wrong..."
-                    className="w-full p-4 rounded-lg border border-red-200 outline-none text-sm h-24 resize-none bg-white"
-                  />
-                  <div className="flex gap-2 justify-end mt-2">
-                    <button onClick={() => setShowDisputeForm(false)} className="px-5 py-2 text-sm font-bold text-red-700 hover:bg-red-100 rounded-lg">Cancel</button>
-                    <button onClick={handleDispute} className="px-5 py-2 text-sm font-bold bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-sm">Submit Dispute</button>
-                  </div>
-                </div>
-              )}
 
             </>
           ) : (
@@ -966,6 +990,81 @@ export function Inbox() {
                   onClick={handleDeleteMessage}
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {/* Universal Report/Dispute Modal */}
+      {reportModal.isOpen && createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex flex-col text-left gap-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${reportModal.type === 'report' ? 'bg-red-100 text-red-600' : 'bg-rose-100 text-rose-600'}`}>
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {reportModal.type === 'report' ? 'Report User' : 'Open a Dispute'}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {reportModal.type === 'report' ? 'This will be sent directly to administration for review.' : 'Escalate this escrow transaction to administration.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-2">
+                <label className="text-sm font-bold text-gray-700">Reason</label>
+                <select 
+                  className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF]"
+                  value={reportModal.reason}
+                  onChange={(e) => setReportModal({ ...reportModal, reason: e.target.value })}
+                >
+                  {reportModal.type === 'report' ? (
+                    <>
+                      <option value="Scam/Fraud">Scam / Fraud</option>
+                      <option value="Spam">Spam / Unsolicited Advertising</option>
+                      <option value="Inappropriate Behavior">Inappropriate / Offensive Behavior</option>
+                      <option value="Other">Other</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="Non-delivery of work">Non-delivery of work</option>
+                      <option value="Poor quality of work">Poor quality of work</option>
+                      <option value="Unresponsive">User is unresponsive</option>
+                      <option value="Other">Other</option>
+                    </>
+                  )}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-gray-700">Provide Details</label>
+                <textarea 
+                  className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF] h-32 resize-none"
+                  placeholder="Please provide specific details about what happened..."
+                  value={reportModal.details}
+                  onChange={(e) => setReportModal({ ...reportModal, details: e.target.value })}
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end mt-4">
+                <button 
+                  onClick={() => setReportModal({ ...reportModal, isOpen: false })}
+                  className="px-6 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleModalSubmit}
+                  className={`px-6 py-2.5 rounded-xl font-bold text-white transition-colors shadow-sm ${
+                    reportModal.type === 'report' ? 'bg-red-600 hover:bg-red-700 shadow-red-200' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
+                  }`}
+                >
+                  Submit
                 </button>
               </div>
             </div>
