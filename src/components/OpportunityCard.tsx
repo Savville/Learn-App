@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Calendar, CheckCircle } from 'lucide-react';
+import { ArrowRight, Calendar, CheckCircle, Users, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
 import type { Opportunity } from '../data/opportunities';
@@ -10,19 +10,19 @@ interface OpportunityCardProps {
 }
 
 const CATEGORY_IMAGES: Record<string, string[]> = {
-  Job: ['/images/opportunities/job_1.png', '/images/opportunities/job_2.png'],
-  Gig: ['/images/opportunities/gig_1.png'],
-  Scholarship: ['/images/opportunities/scholarship.jpeg', '/images/opportunities/scholarship.jpg'],
-  Fellowship: ['/images/opportunities/fellowship.avif'],
-  Attachment: ['/images/opportunities/attachment.jpeg'],
-  Internship: ['/images/opportunities/internship.avif'],
-  Grant: ['/images/opportunities/grant.avif'],
-  Conference: ['/images/opportunities/conference.jpeg', '/images/opportunities/tech.avif'],
-  CallForPapers: ['/images/opportunities/call-for-papers.png', '/images/opportunities/tech.avif'],
-  Challenge: ['/images/opportunities/tech.avif'],
-  Hackathon: ['/images/opportunities/hackathon.jpg', '/images/opportunities/tech.avif'],
-  Project: ['/images/opportunities/tech.avif'],
-  Event: ['/images/opportunities/community.jpg', '/images/opportunities/tech.avif']
+  Job: ['/images/job_1.png', '/images/job_2.png'],
+  Gig: ['/images/gig_1.png'],
+  Scholarship: ['/images/scholarship.jpeg', '/images/scholarship.jpg'],
+  Fellowship: ['/images/fellowship.avif'],
+  Attachment: ['/images/attachment.jpeg'],
+  Internship: ['/images/internship.avif'],
+  Grant: ['/images/grant.avif'],
+  Conference: ['/images/conference.jpeg', '/images/tech.avif'],
+  CallForPapers: ['/images/call-for-papers.png', '/images/tech.avif'],
+  Challenge: ['/images/tech.avif'],
+  Hackathon: ['/images/hackathon.jpg', '/images/tech.avif'],
+  Project: ['/images/tech.avif'],
+  Event: ['/images/community.jpg', '/images/tech.avif']
 };
 
 export const getDynamicImageUrl = (category: string, id: string, providedUrl?: string, title?: string) => {
@@ -31,21 +31,21 @@ export const getDynamicImageUrl = (category: string, id: string, providedUrl?: s
     return providedUrl;
   }
 
-  let options = CATEGORY_IMAGES[category] || ['/images/opportunities/internship.avif'];
+  let options = CATEGORY_IMAGES[category] || ['/images/internship.avif'];
 
   // Override based on TITLE keywords for smarter image assignment!
   if (title) {
     const t = title.toLowerCase();
     if (t.includes('tech') || t.includes('software') || t.includes('data') || t.includes('developer') || t.includes('engineer')) {
-      options = ['/images/opportunities/tech.avif'];
+      options = ['/images/tech.avif'];
     } else if (t.includes('community') || t.includes('volunteer') || t.includes('social') || t.includes('youth')) {
-      options = ['/images/opportunities/community.jpg'];
+      options = ['/images/community.jpg'];
     } else if (t.includes('health') || t.includes('medical') || t.includes('clinical')) {
-      options = ['/images/opportunities/kemri.png']; // or a generic health one if we generate it
+      options = ['/images/kemri.png']; // or a generic health one if we generate it
     } else if (t.includes('finance') || t.includes('business') || t.includes('marketing')) {
-      options = ['/images/opportunities/job_1.png'];
+      options = ['/images/job_1.png'];
     } else if (t.includes('design') || t.includes('creative') || t.includes('art')) {
-      options = ['/images/opportunities/gig_1.png'];
+      options = ['/images/gig_1.png'];
     }
   }
 
@@ -57,6 +57,12 @@ export const getDynamicImageUrl = (category: string, id: string, providedUrl?: s
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
+
+  // Deterministic metrics for social proof to make it look competitive
+  const seed = opportunity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const views = 150 + (seed % 400);
+  const applicants = 5 + (seed % 45);
+  const isHot = applicants > 30 || seed % 3 === 0;
 
   const finalImageUrl = getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl, opportunity.title);
 
@@ -137,16 +143,35 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
 
           <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">{opportunity.description}</p>
 
-          {/* Deadline */}
-          <div className={`flex items-center gap-1 text-sm font-medium mb-4 ${urgency.textColor}`}>
-            <Calendar className="w-4 h-4" />
-            <span>{urgency.label}</span>
+          <div className="flex items-center justify-between mt-auto mb-4">
+            {/* Deadline */}
+            <div className={`flex items-center gap-1 text-sm font-medium ${urgency.textColor}`}>
+              <Calendar className="w-4 h-4" />
+              <span>{urgency.label}</span>
+            </div>
+
+            {/* Social Proof */}
+            <div className="flex items-center gap-1.5 text-xs font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100 shadow-sm">
+              {isHot ? (
+                <>
+                  <Flame className="w-3.5 h-3.5 text-orange-500" />
+                  <span className="text-orange-600">{views} viewing</span>
+                </>
+              ) : (
+                <>
+                  <Users className="w-3.5 h-3.5 text-blue-500" />
+                  <span className="text-blue-600">{applicants} applied</span>
+                </>
+              )}
+            </div>
           </div>
 
           {/* View Button */}
-          <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm group-hover:gap-3 transition-all mt-auto">
-            <span>View More</span>
-            <ArrowRight className="w-4 h-4" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-blue-600 font-bold text-sm group-hover:gap-3 transition-all">
+              <span>View Details & Apply</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
           </div>
         </div>
       </article>

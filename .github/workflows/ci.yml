@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     strategy:
       matrix:
@@ -52,7 +52,7 @@ jobs:
 
   deploy-to-render:
     needs: build-and-test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Only deploy when changes are pushed to the main branch
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
