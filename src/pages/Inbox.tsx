@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -317,7 +318,7 @@ export function Inbox() {
 
   return (
     <div className="w-full min-h-screen p-4 md:p-8 relative" style={{ background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }} onClick={() => setContextMenu(null)}>
-      {contextMenu && (
+      {contextMenu && createPortal(
         <div 
           className="fixed z-50 bg-[#131ADF] text-white rounded-lg shadow-2xl border border-blue-400 py-1.5 min-w-[140px] overflow-hidden"
           style={{ top: contextMenu.y, left: contextMenu.x }}
@@ -335,7 +336,7 @@ export function Inbox() {
           >
             Copy Text
           </button>
-          {contextMenu.message.senderEmail === email && (Date.now() - new Date(contextMenu.message.createdAt).getTime() <= 5 * 60 * 1000) && (
+          {contextMenu.message.senderEmail?.toLowerCase() === email?.toLowerCase() && (Date.now() - new Date(contextMenu.message.createdAt).getTime() <= 5 * 60 * 1000) && (
             <button 
               className="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-200 hover:bg-blue-600 hover:text-white transition-colors"
               onClick={() => { 
@@ -347,7 +348,8 @@ export function Inbox() {
               Edit Message
             </button>
           )}
-        </div>
+        </div>,
+        document.body
       )}
 
       <div className="max-w-6xl mx-auto h-[85vh] min-h-[600px] flex gap-5 md:gap-8">
