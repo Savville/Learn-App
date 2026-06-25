@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Calendar, CheckCircle, Users, Flame } from 'lucide-react';
+import { ArrowRight, Calendar, CheckCircle, Users, Flame, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
 import type { Opportunity } from '../data/opportunities';
@@ -55,6 +55,7 @@ export const getDynamicImageUrl = (category: string, id: string, providedUrl?: s
 };
 
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
+  const [isSaved, setIsSaved] = React.useState(false);
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
 
@@ -83,6 +84,34 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
     }
   };
 
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const token = localStorage.getItem('user_token');
+    if (!token) {
+      alert('Please log in through the Tracker or Inbox to save opportunities.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/bookmarks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ opportunityId: opportunity.id })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsSaved(data.saved);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <Link
       to={`/opportunity/${toSlug(opportunity.title)}`}
@@ -107,8 +136,15 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
               </span>
             </div>
           )}
-          <div className="absolute top-4 right-4">
-            <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-gray-700 text-sm font-medium">
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button 
+              onClick={handleBookmark}
+              className={`p-2 rounded-full backdrop-blur-md transition-all shadow-sm ${isSaved ? 'bg-[#131ADF] text-white' : 'bg-white/90 text-slate-500 hover:text-[#131ADF]'}`}
+              title="Save for later"
+            >
+              <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
+            </button>
+            <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-gray-700 text-xs font-bold uppercase tracking-wider shadow-sm">
               {opportunity.category}
             </span>
           </div>

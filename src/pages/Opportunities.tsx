@@ -71,8 +71,9 @@ const TABS: { id: TabId; label: string; description: string }[] = [
 ];
 
 const RIGHT_TABS: { id: string; label: string; description: string }[] = [
-  { id: 'applied',  label: 'Applied',               description: 'Applied' },
+  { id: 'applied',  label: 'Tracker',               description: 'Tracker' },
   { id: 'inbox',    label: 'Inbox',                 description: 'Inbox' },
+  { id: 'portfolio', label: 'Portfolio',            description: 'Portfolio' },
 ];
 
 const applyFilters = (

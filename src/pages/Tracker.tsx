@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { OTPLoginForm } from './OTPLoginForm';
+import { OTPLoginForm } from '../components/OTPLoginForm';
 import { Button } from '@/components/ui/button';
-import { LogOut, FolderHeart, Calendar, ChevronRight, CheckCircle } from 'lucide-react';
+import { LogOut, FolderHeart, Calendar, ChevronRight, CheckCircle, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toSlug } from '@/utils/dateUtils';
 
@@ -16,12 +16,14 @@ interface Application {
   isEscrowFunded?: boolean;
 }
 
-export function AppliedDashboard() {
+export function Tracker() {
   const [token, setToken] = useState(localStorage.getItem('user_token'));
   const [email, setEmail] = useState(localStorage.getItem('user_email'));
   const [applications, setApplications] = useState<Application[]>([]);
+  const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'followed' | 'saved'>('followed');
 
   // Dispute Modal State
   const [disputeAppId, setDisputeAppId] = useState<string | null>(null);
@@ -79,9 +81,22 @@ export function AppliedDashboard() {
     }
   };
 
+  const fetchBookmarks = async (currentToken: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/public/me/bookmarks`, {
+        headers: { Authorization: `Bearer ${currentToken}` },
+      });
+      const data = await res.json();
+      if (res.ok) setBookmarks(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchApplications(token);
+      fetchBookmarks(token);
     }
   }, [token]);
 
@@ -121,7 +136,7 @@ export function AppliedDashboard() {
             <FolderHeart className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">My Applications</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Opportunity Tracker</h2>
             <p className="text-sm text-gray-600">Logged in as {email}</p>
           </div>
         </div>
@@ -130,7 +145,22 @@ export function AppliedDashboard() {
         </Button>
       </div>
 
-      <div className="p-8">
+      <div className="px-8 pt-4 pb-0 flex gap-6 border-b border-slate-100 bg-white">
+        <button 
+          onClick={() => setActiveTab('followed')}
+          className={`py-3 font-semibold border-b-2 transition-colors ${activeTab === 'followed' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+        >
+          Followed Applications
+        </button>
+        <button 
+          onClick={() => setActiveTab('saved')}
+          className={`py-3 font-semibold border-b-2 transition-colors ${activeTab === 'saved' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+        >
+          Saved (Bookmarks)
+        </button>
+      </div>
+
+      <div className="p-8 min-h-[400px]">
         {loading ? (
           <div className="text-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3" />
@@ -140,18 +170,19 @@ export function AppliedDashboard() {
           <div className="bg-red-50 text-red-600 p-6 rounded-2xl flex items-center justify-center shadow-sm">
             {error}
           </div>
-        ) : applications.length === 0 ? (
-          <div className="text-center py-20 bg-slate-50 rounded-2xl">
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-400 shadow-sm">
-              <FolderHeart className="w-8 h-8" />
+        ) : activeTab === 'followed' ? (
+          applications.length === 0 ? (
+            <div className="text-center py-20 bg-slate-50 rounded-2xl">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-400 shadow-sm">
+                <FolderHeart className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">No applications yet</h3>
+              <p className="text-gray-500 mb-8 max-w-sm mx-auto leading-relaxed">You haven't submitted any internal applications via Learn Opportunities yet. Browse jobs to get started.</p>
+              <Button asChild className="bg-[#131ADF] hover:shadow-lg transition-all text-white rounded-xl px-8 py-6 h-auto text-base">
+                 <Link to="/opportunities">Browse Opportunities</Link>
+              </Button>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">No applications yet</h3>
-            <p className="text-gray-500 mb-8 max-w-sm mx-auto leading-relaxed">You haven't submitted any internal applications via Learn Opportunities yet. Browse jobs to get started.</p>
-            <Button asChild className="bg-[#131ADF] hover:shadow-lg transition-all text-white rounded-xl px-8 py-6 h-auto text-base">
-               <Link to="/opportunities">Browse Opportunities</Link>
-            </Button>
-          </div>
-        ) : (
+          ) : (
           <div className="space-y-6">
             {applications.map((app) => (
               <div key={app._id} className="flex flex-col p-6 bg-white border border-transparent shadow-sm hover:shadow-md hover:border-blue-100 rounded-2xl transition-all group">
@@ -279,6 +310,37 @@ export function AppliedDashboard() {
               </div>
             ))}
           </div>
+          )
+        ) : (
+          bookmarks.length === 0 ? (
+            <div className="text-center py-20 bg-slate-50 rounded-2xl">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-400 shadow-sm">
+                <Bookmark className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">No saved opportunities</h3>
+              <p className="text-gray-500 mb-8 max-w-sm mx-auto leading-relaxed">You haven't bookmarked any opportunities yet.</p>
+              <Button asChild className="bg-[#131ADF] hover:shadow-lg transition-all text-white rounded-xl px-8 py-6 h-auto text-base">
+                 <Link to="/opportunities">Browse Opportunities</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {bookmarks.map((bookmark) => (
+                <div key={bookmark._id} className="flex items-center justify-between p-5 bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-100 rounded-2xl transition-all group">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Opportunity ID: {bookmark.opportunityId}</span>
+                    <span className="text-sm text-slate-500">Saved on {new Date(bookmark.savedAt).toLocaleDateString()}</span>
+                  </div>
+                  <Link 
+                    to={`/opportunities`}
+                    className="flex items-center text-sm font-bold text-[#131ADF] px-5 py-2.5 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
+                  >
+                    View <ChevronRight className="w-4 h-4 ml-1" />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
 

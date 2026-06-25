@@ -968,6 +968,49 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
   }
 });
 
+// ==========================================
+// Phase 5: Bookmarks (Tracker)
+// ==========================================
+
+// GET /api/public/me/bookmarks
+router.get('/me/bookmarks', verifyUserToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+    const db = getDB();
+    const bookmarks = await db.collection('bookmarks').find({ email: email.toLowerCase() }).toArray();
+    res.json(bookmarks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/public/bookmarks
+router.post('/bookmarks', verifyUserToken, async (req, res) => {
+  try {
+    const email = req.user.email.toLowerCase();
+    const { opportunityId } = req.body;
+    if (!opportunityId) return res.status(400).json({ error: 'opportunityId required' });
+
+    const db = getDB();
+    const existing = await db.collection('bookmarks').findOne({ email, opportunityId });
+    if (existing) {
+      // Toggle off
+      await db.collection('bookmarks').deleteOne({ _id: existing._id });
+      res.json({ saved: false });
+    } else {
+      // Toggle on
+      await db.collection('bookmarks').insertOne({
+        email,
+        opportunityId,
+        savedAt: new Date()
+      });
+      res.json({ saved: true });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
 
 // Refurbished

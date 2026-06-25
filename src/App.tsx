@@ -11,7 +11,8 @@ import { Contact } from './pages/Contact';
 import { PostWithUs } from './pages/PostWithUs';
 import { Inbox } from './pages/Inbox';
 import { Subscribe } from './pages/Subscribe';
-import { AppliedDashboard } from './components/AppliedDashboard';
+import { Tracker } from './pages/Tracker';
+import { Portfolio } from './pages/Portfolio';
 import { MobileNav } from './components/MobileNav';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
@@ -71,7 +72,8 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/post-with-us" element={<PostWithUs />} />
           <Route path="/inbox" element={<Inbox />} />
-          <Route path="/applied" element={<AppliedDashboard />} />
+          <Route path="/applied" element={<Tracker />} />
+          <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/subscribe" element={<Subscribe />} />
 
           {/* Admin Routes */}

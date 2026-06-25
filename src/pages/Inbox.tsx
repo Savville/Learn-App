@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2, LogOut, Search, Settings, MoreVertical, Smile, User } from 'lucide-react';
+import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2, LogOut, Search, Settings, MoreVertical, Smile, User, Github, Linkedin, Globe } from 'lucide-react';
 import { OTPLoginForm } from '../components/OTPLoginForm';
 
 export function Inbox() {
@@ -23,6 +23,8 @@ export function Inbox() {
   const [replyingTo, setReplyingTo] = useState<{ _id: string, content: string, senderEmail: string } | null>(null);
   const [editingMessage, setEditingMessage] = useState<{ _id: string, content: string, createdAt: string } | null>(null);
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
+  const [partnerProfile, setPartnerProfile] = useState<any | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +116,26 @@ export function Inbox() {
       fetchConversations(email.trim().toLowerCase());
     }
   }, [token, email]);
+
+  useEffect(() => {
+    if (activeConv) {
+      const partnerEmail = activeConv.participants.find((p: string) => p !== email);
+      if (partnerEmail) {
+        setLoadingProfile(true);
+        fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/portfolio/${partnerEmail}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              setPartnerProfile(data);
+            }
+          })
+          .catch(err => console.error(err))
+          .finally(() => setLoadingProfile(false));
+      }
+    } else {
+      setPartnerProfile(null);
+    }
+  }, [activeConv, email]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -781,6 +803,82 @@ export function Inbox() {
             </div>
           )}
         </div>
+
+        {/* Right Panel: Portfolio Viewer */}
+        {activeConv && (
+          <div className="hidden lg:flex flex-col h-full bg-white rounded-xl w-72 shrink-0 overflow-hidden shadow-sm border border-[#D1E6FF]">
+            {loadingProfile ? (
+              <div className="flex-1 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-[#131ADF]" />
+              </div>
+            ) : partnerProfile ? (
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-6 flex flex-col items-center border-b border-slate-100">
+                  <div className="w-24 h-24 rounded-full bg-slate-100 mb-4 overflow-hidden shadow-sm border border-slate-200">
+                    {partnerProfile.profile?.avatar ? (
+                      <img src={partnerProfile.profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-300">
+                        <User className="w-10 h-10" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 text-center">{partnerProfile.profile?.name || partnerProfile.profile?.email.split('@')[0]}</h3>
+                  <p className="text-xs text-slate-400 mt-1">{partnerProfile.profile?.email}</p>
+                </div>
+                
+                {partnerProfile.profile?.bio && (
+                  <div className="p-5 border-b border-slate-100">
+                    <p className="text-sm text-gray-600 leading-relaxed text-center">{partnerProfile.profile.bio}</p>
+                  </div>
+                )}
+
+                <div className="p-5">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Links</h4>
+                  <div className="flex gap-2 justify-center flex-wrap">
+                    {partnerProfile.profile?.links?.github && (
+                      <a href={partnerProfile.profile.links.github} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 hover:text-[#131ADF] hover:bg-blue-50 transition-colors">
+                        <Github className="w-4 h-4" />
+                      </a>
+                    )}
+                    {partnerProfile.profile?.links?.linkedin && (
+                      <a href={partnerProfile.profile.links.linkedin} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 hover:text-[#131ADF] hover:bg-blue-50 transition-colors">
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                    )}
+                    {partnerProfile.profile?.links?.website && (
+                      <a href={partnerProfile.profile.links.website} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 hover:text-[#131ADF] hover:bg-blue-50 transition-colors">
+                        <Globe className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-5 bg-slate-50 min-h-[200px] flex-1">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Completed Gigs</h4>
+                  {partnerProfile.stats?.completedGigsCount > 0 ? (
+                    <div className="flex flex-col gap-3">
+                      {partnerProfile.stats.completedGigs.slice(0, 5).map((gig: any, i: number) => (
+                        <div key={i} className="bg-white p-3 rounded-lg shadow-sm border border-slate-100">
+                          <p className="text-xs font-bold text-slate-800 line-clamp-1">{gig.opportunityTitle}</p>
+                          <p className="text-[10px] text-slate-400 mt-1">{new Date(gig.completedAt).toLocaleDateString()}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-xs text-slate-400">No completed gigs yet.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
+                Profile not available
+              </div>
+            )}
+          </div>
+        )}
       </div>
       {messageToDelete && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
