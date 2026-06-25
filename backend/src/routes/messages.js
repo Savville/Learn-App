@@ -132,7 +132,7 @@ router.get('/user/:email', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const db = getDB();
-    const { conversationId, gigId, senderEmail, receiverEmail, content, isPartnership } = req.body;
+    const { conversationId, gigId, senderEmail, receiverEmail, content, isPartnership, replyTo } = req.body;
 
     if (!content) {
       return res.status(400).json({ error: 'Message content is required' });
@@ -170,7 +170,8 @@ router.post('/', async (req, res) => {
       content: censoredContent,
       originalContent: content, // Keep the original just in case for admin review (optional)
       createdAt: new Date(),
-      read: false
+      read: false,
+      replyTo: replyTo || null
     };
 
     await db.collection('messages').insertOne(newMessage);
@@ -190,6 +191,50 @@ router.post('/', async (req, res) => {
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// PUT /api/messages/:id
+// Edit a message within 5 minutes
+router.put('/:id', async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+    const { content, senderEmail } = req.body;
+
+    const message = await db.collection('messages').findOne({ _id: new ObjectId(id) });
+    if (!message) return res.status(404).json({ error: 'Message not found' });
+    if (message.senderEmail !== senderEmail) return res.status(403).json({ error: 'Not authorized to edit' });
+
+    // Check time window (5 minutes)
+    if (Date.now() - new Date(message.createdAt).getTime() > 5 * 60 * 1000) {
+      return res.status(403).json({ error: 'Time window to edit has expired. Messages can only be edited within 5 minutes.' });
+    }
+
+    const censoredContent = applyAutoCensor(content);
+
+    await db.collection('messages').updateOne(
+      { _id: new ObjectId(id) },
+      { 
+        $set: { 
+          content: censoredContent,
+          originalContent: content,
+          isEdited: true,
+          updatedAt: new Date()
+        },
+        $push: {
+          editHistory: {
+            content: message.originalContent || message.content,
+            timestamp: new Date()
+          }
+        }
+      }
+    );
+
+    res.json({ success: true, message: 'Message edited successfully' });
+  } catch (error) {
+    console.error('Error editing message:', error);
+    res.status(500).json({ error: 'Failed to edit message' });
   }
 });
 

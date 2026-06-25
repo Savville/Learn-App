@@ -18,6 +18,8 @@ export function Inbox() {
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [disputeReason, setDisputeReason] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<{ _id: string, content: string, senderEmail: string } | null>(null);
+  const [editingMessage, setEditingMessage] = useState<{ _id: string, content: string, createdAt: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -140,22 +142,44 @@ export function Inbox() {
     const receiverEmail = activeConv.participants.find((p: string) => p !== email) || email;
 
     try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversationId: activeConv._id,
-          senderEmail: email,
-          receiverEmail,
-          content: replyContent,
-          isPartnership: activeConv.status === 'partnership'
-        })
-      });
+      if (editingMessage) {
+        // Handle Edit
+        const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${editingMessage._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: replyContent,
+            senderEmail: email
+          })
+        });
 
-      if (!res.ok) throw new Error('Failed to send');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to edit');
+        
+        setEditingMessage(null);
+      } else {
+        // Handle Send / Reply
+        const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId: activeConv._id,
+            senderEmail: email,
+            receiverEmail,
+            content: replyContent,
+            isPartnership: activeConv.status === 'partnership',
+            replyTo: replyingTo ? replyingTo : undefined
+          })
+        });
+
+        if (!res.ok) throw new Error('Failed to send');
+        setReplyingTo(null);
+      }
+
       setReplyContent('');
       fetchMessages(activeConv._id); // Refresh messages
-    } catch (err) {
+    } catch (err: any) {
+      alert(err.message);
       console.error(err);
     }
   };
@@ -244,374 +268,441 @@ export function Inbox() {
 
   const isEmployer = activeConv && activeConv.participants[1] === email;
 
+  // Custom Colors
+  const BLUE = "#1D75DD";
+  const LIGHT_BLUE = "#D1E6FF";
+  const PALE_BLUE = "#A5CEFF";
+  const GRAY = "#555758";
+  const MUTED = "#989BA1";
+  const BG = "#D1E6FF";
+
+  // Icons
+  const IconSearch = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="7.333" cy="7.333" r="5" stroke={MUTED} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m14 14-2.867-2.867" stroke={MUTED} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  const IconGear = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="2" stroke={MUTED} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12.933 8a4.933 4.933 0 0 0-.047-.667l1.44-1.12-1.333-2.307-1.747.707A4.96 4.96 0 0 0 10.1 4.06L9.667 2h-2.4l-.433 2.06a4.96 4.96 0 0 0-1.147.554L4.007 3.906 2.674 6.213 4.113 7.333A4.96 4.96 0 0 0 4.067 8a4.96 4.96 0 0 0 .047.667L2.674 9.787l1.333 2.307 1.747-.707c.353.22.733.4 1.147.554L7.334 14h2.4l.433-2.06a4.96 4.96 0 0 0 1.147-.553l1.747.707 1.333-2.307-1.44-1.12c.033-.22.047-.44.047-.667Z" stroke={MUTED} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  const IconMoreVertical = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="5" r="1" stroke={MUTED} strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="1" stroke={MUTED} strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="19" r="1" stroke={MUTED} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+  const IconPaperclip = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M13.8 7.367 8.06 13.107a3.667 3.667 0 0 1-5.18-5.18l5.74-5.74a2.444 2.444 0 0 1 3.453 3.453L6.327 11.38a1.222 1.222 0 0 1-1.727-1.727L9.867 4.38" stroke={MUTED} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  const IconSmile = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="6.667" stroke={MUTED} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5.333 9.333s1 1.334 2.667 1.334c1.667 0 2.667-1.334 2.667-1.334" stroke={MUTED} strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 6h.004M10 6h.005" stroke={MUTED} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+    </svg>
+  );
+  const IconSend = () => (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <path d="M11.917 1.083 5.958 7.042M11.917 1.083 8.083 11.917l-2.125-4.875-4.875-2.125 10.834-3.834Z" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+
   return (
-    <div className="min-h-screen bg-[#E3F2FD] p-4 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Chat</h1>
+    <div className="w-full min-h-screen p-5 md:p-8" style={{ background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div className="max-w-6xl mx-auto h-[85vh] min-h-[600px] flex gap-5">
         
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-[85vh] min-h-[600px]">
-          
-          {/* Sidebar */}
-          <div className="md:col-span-4 flex flex-col h-full bg-transparent">
-            {/* Inbox Header */}
-            <div className="flex items-center justify-between mb-4 px-2">
-              <div className="flex items-center gap-3">
-                <h2 className="text-gray-600 font-semibold text-lg">Inbox</h2>
-                <span className="bg-blue-200 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full">
-                  {conversations.length} New
-                </span>
-              </div>
-              <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                <Settings className="w-5 h-5" />
-              </button>
+        {/* Left Panel: Contacts List */}
+        <div className="flex flex-col h-full bg-white rounded-[10px] w-[320px] shrink-0 overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[16px] font-bold" style={{ color: GRAY }}>Inbox</span>
+              <span className="bg-[#A5CEFF] text-[#1D75DD] text-[10px] font-bold px-3 py-[3px] rounded-full">
+                {conversations.length} New
+              </span>
             </div>
-            
-            {/* Search */}
-            <div className="relative mb-6">
-              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <IconGear />
+          </div>
+
+          <div className="px-5 pb-3 shrink-0">
+            <p className="text-[12px] text-gray-500 truncate">{email}</p>
+          </div>
+
+          {/* Search */}
+          <div className="px-3 pb-3 shrink-0">
+            <div className="flex items-center gap-2 bg-[#f5f5f5] rounded-full px-4 py-[10px]">
+              <IconSearch />
               <input 
-                type="text" 
+                type="text"
                 placeholder="Search..." 
-                className="w-full pl-11 pr-4 py-3 rounded-full bg-white border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0B5CFF] text-sm"
+                className="bg-transparent border-none outline-none text-[14px] w-full"
+                style={{ color: GRAY }}
               />
             </div>
-            
-            {/* Conversations List */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-              {loading ? (
-                <p className="text-center text-sm text-gray-500 mt-8">Loading...</p>
-              ) : conversations.length === 0 ? (
-                <p className="text-center text-sm text-gray-500 mt-8">No conversations yet.</p>
-              ) : (
-                conversations.map(conv => {
-                  const isActive = activeConv?._id === conv._id;
-                  const partnerEmail = conv.participants.find((p: string) => p !== email) || 'Unknown';
-                  
-                  // Generate deterministic color/initials
-                  const seed = partnerEmail.charCodeAt(0) || 0;
-                  const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
-                  const avatarColor = colors[seed % colors.length];
-                  const initial = partnerEmail.charAt(0).toUpperCase();
-
-                  return (
-                    <button
-                      key={conv._id}
-                      onClick={() => handleSelectConv(conv)}
-                      className={`w-full text-left p-4 rounded-2xl transition-all flex items-center gap-4 ${
-                        isActive 
-                          ? 'bg-[#0B5CFF] text-white shadow-md' 
-                          : 'bg-white hover:bg-gray-50 shadow-sm border border-transparent'
-                      }`}
-                    >
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-lg ${isActive ? 'bg-white/20' : avatarColor}`}>
-                        {initial}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center mb-1">
-                          <p className={`font-bold text-base truncate ${isActive ? 'text-white' : 'text-gray-900'}`}>
-                            {partnerEmail.split('@')[0]}
-                          </p>
-                          <span className={`text-[10px] font-semibold ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
-                            5m
-                          </span>
-                        </div>
-                        <p className={`text-xs font-medium truncate ${isActive ? 'text-blue-100' : 'text-gray-500'}`}>
-                          {conv.gigTitle}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })
-              )}
-            </div>
           </div>
-          
-          {/* Main Chat Area */}
-          <div className="md:col-span-8 h-full">
-            {activeConv ? (
-              <div className="bg-white rounded-[2rem] shadow-sm flex flex-col h-full overflow-hidden border border-gray-100">
-                
-                {/* Chat Header */}
-                <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
-                  <div className="flex items-center gap-4">
-                    {(() => {
-                      const partnerEmail = activeConv.participants.find((p: string) => p !== email) || 'Unknown';
-                      const seed = partnerEmail.charCodeAt(0) || 0;
-                      const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
-                      const avatarColor = colors[seed % colors.length];
-                      return (
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${avatarColor}`}>
-                          {partnerEmail.charAt(0).toUpperCase()}
-                        </div>
-                      );
-                    })()}
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 leading-tight">
-                        {activeConv.participants.find((p: string) => p !== email)?.split('@')[0]}
-                      </h3>
-                      <p className="text-sm text-gray-500">{activeConv.gigTitle}</p>
-                    </div>
-                  </div>
-                  <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <MoreVertical className="w-6 h-6" />
-                  </button>
-                </div>
 
-                {/* Status Banners (Original Logic Retained) */}
-                {activeConv.status === 'pending' && (
-                  <div className="bg-amber-50/50 p-4 text-sm text-amber-800 border-b border-amber-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                      <Lock className="w-4 h-4 text-amber-600" />
-                    </div>
-                    <span className="font-medium text-center sm:text-left">{isEmployer ? 'Unlock to reply to this pitch.' : 'Waiting for employer to unlock.'}</span>
-                  </div>
-                )}
-                {activeConv.status === 'hired' && (
-                  <div className="bg-green-50/50 p-4 text-sm text-green-800 border-b border-green-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                    </div>
-                    <span className="font-semibold text-center sm:text-left">
-                      Escrow Funded! Keep all communication here.
-                    </span>
-                  </div>
-                )}
-                {activeConv.status === 'completed' && (
-                  <div className="bg-indigo-50/50 p-4 text-sm text-indigo-800 border-b border-indigo-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                      <UploadCloud className="w-4 h-4 text-indigo-600" />
-                    </div>
-                    <span className="font-semibold text-center sm:text-left">Job Delivered! Waiting for Employer to approve.</span>
-                  </div>
-                )}
-                {activeConv.status === 'approved' && (
-                  <div className="bg-teal-50/50 p-4 text-sm text-teal-800 border-b border-teal-100/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                        <Handshake className="w-4 h-4 text-teal-600" />
-                      </div>
-                      <span className="font-semibold text-center sm:text-left">Job Approved! Funds released.</span>
-                    </div>
-                  </div>
-                )}
-                {activeConv.status === 'disputed' && (
-                  <div className="bg-red-50/50 p-4 text-sm text-red-800 border-b border-red-100/50 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                      <AlertTriangle className="w-4 h-4 text-red-600" />
-                    </div>
-                    <span className="font-semibold text-center sm:text-left">Dispute Opened. Admin is reviewing.</span>
-                  </div>
-                )}
-                
-                {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-white scroll-smooth">
-                  <div className="flex items-center justify-center mb-8">
-                    <div className="h-[1px] bg-gray-100 flex-1"></div>
-                    <span className="text-[10px] text-gray-400 mx-4 font-bold uppercase tracking-widest">Today</span>
-                    <div className="h-[1px] bg-gray-100 flex-1"></div>
-                  </div>
-
-                  {messages.map((msg, i) => {
-                    const isMe = msg.senderEmail === email;
-                    const displayContent = (activeConv.status === 'partnership') ? msg.originalContent : msg.content;
-                    
-                    const senderEmail = msg.senderEmail;
-                    const partnerEmail = activeConv.participants.find((p: string) => p !== email) || 'Unknown';
-                    const seed = isMe ? email.charCodeAt(0) || 0 : partnerEmail.charCodeAt(0) || 0;
-                    const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
-                    const avatarColor = isMe ? 'bg-orange-600' : colors[seed % colors.length];
-
-                    return (
-                      <div key={i} className={`flex ${isMe ? 'justify-end' : 'justify-start'} gap-4 w-full`}>
-                        {/* Received Avatar */}
-                        {!isMe && (
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 mt-auto ${avatarColor}`}>
-                            {senderEmail.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        
-                        <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[70%]`}>
-                          <div className={`px-6 py-4 rounded-2xl whitespace-pre-wrap break-words text-[15px] leading-relaxed ${
-                            isMe 
-                              ? 'bg-[#E3F2FD] text-[#0A2540] border border-blue-100' 
-                              : 'bg-white border border-[#E5E7EB] text-gray-800 shadow-sm'
-                          }`}>
-                            {(activeConv.status === 'partnership') ? (
-                              <span>{displayContent}</span>
-                            ) : (
-                              displayContent.split(/(\[REDACTED.*?\])/).map((part: string, idx: number) => 
-                                part.startsWith('[REDACTED') ? (
-                                  <span key={idx} className={`font-mono text-[11px] px-1.5 py-0.5 rounded mx-1 ${isMe ? 'bg-blue-800 text-blue-200' : 'bg-red-100 text-red-800 font-bold'}`}>
-                                    {part}
-                                  </span>
-                                ) : (
-                                  <span key={idx}>{part}</span>
-                                )
-                              )
-                            )}
-                          </div>
-                          <span className="text-[10px] text-gray-400 mt-2 font-medium px-1">
-                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-
-                        {/* Sent Avatar */}
-                        {isMe && (
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 mt-auto ${avatarColor}`}>
-                            {email.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                  <div ref={bottomRef} />
-                </div>
-                
-                {/* Input Area */}
-                <div className="px-8 py-6 bg-white">
-                  {(activeConv.status === 'approved' || activeConv.status === 'disputed') ? (
-                    <p className="text-sm text-center text-gray-500 italic py-4 bg-gray-50 rounded-xl border border-gray-100">Conversation is closed.</p>
-                  ) : activeConv.status === 'pending' && !isEmployer ? (
-                    <p className="text-sm text-center text-gray-500 italic py-4 bg-gray-50 rounded-xl border border-gray-100">Waiting for the employer to unlock this conversation before you can reply.</p>
-                  ) : (
-                    <form onSubmit={handleSendReply} className="flex flex-col gap-3 relative">
-                      {/* The textarea itself */}
-                      <div className="relative border border-gray-200 rounded-[1.5rem] overflow-hidden focus-within:border-[#0B5CFF] focus-within:ring-2 focus-within:ring-blue-100 transition-all bg-white flex items-end shadow-sm">
-                        <textarea 
-                          value={replyContent} 
-                          onChange={e => {
-                            setReplyContent(e.target.value);
-                            e.target.style.height = 'auto';
-                            e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
-                          }} 
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              if (replyContent.trim()) {
-                                handleSendReply(e as any);
-                              }
-                            }
-                          }}
-                          placeholder="Write a message..." 
-                          className="flex-1 px-6 py-4 outline-none resize-none overflow-y-auto text-[15px] text-gray-800 bg-transparent"
-                          rows={1}
-                          style={{ minHeight: '56px', maxHeight: '150px' }}
-                        />
-                        
-                        {/* Icons Container inside input */}
-                        <div className="flex items-center gap-2 pr-2 pb-2 pl-2">
-                          <button 
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            className="text-gray-400 hover:text-gray-700 transition-colors p-2 rounded-full hover:bg-gray-100"
-                          >
-                            {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Paperclip className="w-5 h-5" />}
-                          </button>
-                          <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            onChange={handleFileUpload} 
-                            className="hidden" 
-                            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.ppt,.pptx"
-                          />
-                          
-                          <button type="button" className="text-gray-400 hover:text-gray-700 transition-colors p-2 rounded-full hover:bg-gray-100">
-                            <Smile className="w-5 h-5" />
-                          </button>
-                          
-                          <button type="submit" disabled={!replyContent.trim() && !isUploading} className="bg-[#0B5CFF] text-white p-2.5 rounded-full hover:bg-blue-700 hover:shadow-lg transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center shrink-0 ml-1">
-                            <Send className="w-5 h-5 ml-0.5" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {/(mpesa|pay me directly|07\d{8}|\+254\d{9}|send money|off-platform|off platform)/i.test(replyContent) && (
-                        <div className="px-3 py-2 bg-red-50 text-red-700 text-[11px] font-bold rounded-lg flex items-center gap-2 animate-in slide-in-from-top-1 border border-red-100">
-                          <AlertTriangle className="w-4 h-4 shrink-0" />
-                          Warning: Off-platform payments violate our Terms of Service and void Escrow protection.
-                        </div>
-                      )}
-                    </form>
-                  )}
-
-                  {/* Action Controls Moved Below Input */}
-                  <div className="flex flex-wrap justify-center gap-3 mt-4">
-                    {isEmployer && activeConv.status === 'pending' && (
-                      <button onClick={handleUnlock} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors font-semibold text-sm w-full sm:w-auto shadow-sm">
-                        <Unlock className="w-4 h-4" /> Unlock to Reply
-                      </button>
-                    )}
-                    {isEmployer && activeConv.status === 'active' && (
-                      <button onClick={handleHire} className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm animate-pulse w-full sm:w-auto">
-                        <CheckCircle className="w-5 h-5" /> Fund Escrow & Hire
-                      </button>
-                    )}
-                    {isEmployer && activeConv.status === 'completed' && (
-                      <>
-                        <button onClick={handleApprove} className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm w-full sm:w-auto">
-                          <Handshake className="w-5 h-5" /> Approve & Release
-                        </button>
-                        <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-rose-300 text-rose-600 rounded-xl hover:bg-rose-50 hover:border-rose-400 transition-colors font-bold text-sm w-full sm:w-auto shadow-sm">
-                          <AlertTriangle className="w-4 h-4" /> Dispute
-                        </button>
-                      </>
-                    )}
-                    {isEmployer && activeConv.status === 'hired' && (
-                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-rose-300 text-rose-600 rounded-xl hover:bg-rose-50 hover:border-rose-400 transition-colors font-bold text-sm w-full sm:w-auto shadow-sm">
-                        <AlertTriangle className="w-4 h-4" /> Dispute
-                      </button>
-                    )}
-                    
-                    {/* Applicant Controls */}
-                    {!isEmployer && activeConv.status === 'hired' && (
-                      <>
-                        <button onClick={handleDeliver} className="flex items-center justify-center gap-2 px-6 py-3 bg-[#0B5CFF] text-white rounded-xl hover:bg-blue-700 hover:shadow-lg transition-all font-bold text-sm w-full sm:w-auto">
-                          <CheckSquare className="w-5 h-5" /> Deliver Job
-                        </button>
-                        <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-rose-300 text-rose-600 rounded-xl hover:bg-rose-50 hover:border-rose-400 transition-colors font-bold text-sm w-full sm:w-auto shadow-sm">
-                          <AlertTriangle className="w-4 h-4" /> Dispute
-                        </button>
-                      </>
-                    )}
-                    {!isEmployer && activeConv.status === 'completed' && (
-                      <button onClick={handleDispute} className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-rose-300 text-rose-600 rounded-xl hover:bg-rose-50 hover:border-rose-400 transition-colors font-bold text-sm w-full sm:w-auto shadow-sm">
-                        <AlertTriangle className="w-4 h-4" /> Dispute Employer
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Sliding Dispute Form */}
-                  {showDisputeForm && (
-                    <div className="mt-4 p-5 bg-red-50 rounded-2xl border border-red-100 flex flex-col gap-3 animate-in slide-in-from-top-2 duration-300 shadow-inner">
-                      <p className="text-sm font-bold text-red-800">Open a Dispute</p>
-                      <p className="text-xs text-red-600">Please provide a clear reason for the dispute. An admin will review the chat history.</p>
-                      <textarea 
-                        value={disputeReason}
-                        onChange={(e) => setDisputeReason(e.target.value)}
-                        placeholder="Explain what went wrong..."
-                        className="w-full p-4 rounded-xl border border-red-200 outline-none focus:border-red-500 text-sm h-24 resize-none bg-white shadow-sm"
-                      />
-                      <div className="flex gap-2 justify-end mt-2">
-                        <button onClick={() => setShowDisputeForm(false)} className="px-5 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 rounded-xl transition-colors">Cancel</button>
-                        <button onClick={handleDispute} className="px-5 py-2.5 text-sm font-bold bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-md transition-colors">Submit Dispute</button>
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-
-              </div>
+          {/* List */}
+          <div className="flex-1 overflow-y-auto space-y-0">
+            {loading ? (
+              <p className="text-center text-sm text-gray-500 mt-8">Loading...</p>
+            ) : conversations.length === 0 ? (
+              <p className="text-center text-sm text-gray-500 mt-8">No conversations yet.</p>
             ) : (
-              <div className="bg-white rounded-[2rem] shadow-sm flex flex-col h-full overflow-hidden border border-gray-100 items-center justify-center">
-                <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                  <MessageCircle className="w-12 h-12 text-[#0B5CFF]" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Select a Conversation</h3>
-                <p className="text-gray-500 text-center max-w-sm">Choose an active chat from the sidebar to continue your negotiation or collaboration.</p>
-              </div>
+              conversations.map(conv => {
+                const isActive = activeConv?._id === conv._id;
+                const partnerEmail = conv.participants.find((p: string) => p !== email) || 'Unknown';
+                
+                // Deterministic color
+                const seed = partnerEmail.charCodeAt(0) || 0;
+                const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
+                const avatarColor = colors[seed % colors.length];
+                const initial = partnerEmail.charAt(0).toUpperCase();
+
+                return (
+                  <button
+                    key={conv._id}
+                    onClick={() => handleSelectConv(conv)}
+                    className={`w-full text-left px-5 py-[15px] relative transition-colors border-b border-[#D1E6FF] last:border-b-0 ${isActive ? "" : "bg-white hover:bg-[#f0f7ff]"}`}
+                    style={isActive ? { background: "linear-gradient(90deg, #1D75DD 0%, #085EC3 100%)" } : {}}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm ${isActive ? 'bg-white/20' : avatarColor}`}>
+                          {initial}
+                        </div>
+                        <div>
+                          <div className="text-[14px] font-semibold leading-tight truncate w-[180px]" style={{ color: isActive ? "white" : GRAY }}>
+                            {partnerEmail.split('@')[0]}
+                          </div>
+                          <div className="text-[11px] mt-1 truncate w-[180px]" style={{ color: isActive ? "rgba(255,255,255,0.75)" : MUTED }}>
+                            {conv.gigTitle}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 mt-2">
+                      <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${
+                        isActive ? 'bg-white/10 text-white border-white/20' : 'bg-gray-50 text-gray-600 border-gray-200'
+                      }`}>
+                        {conv.status}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
             )}
           </div>
+        </div>
+        
+        {/* Main Chat Area */}
+        <div className="flex flex-col flex-1 min-w-0 h-full gap-5">
+          {activeConv ? (
+            <>
+              {/* Chat Header */}
+              <div className="bg-white rounded-[10px] px-8 py-6 flex items-center justify-between shrink-0 shadow-sm border border-[#D1E6FF]">
+                <div className="flex items-center gap-4">
+                  {(() => {
+                    const partnerEmail = activeConv.participants.find((p: string) => p !== email) || 'Unknown';
+                    const seed = partnerEmail.charCodeAt(0) || 0;
+                    const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
+                    const avatarColor = colors[seed % colors.length];
+                    return (
+                      <div className={`w-[40px] h-[40px] rounded-full flex items-center justify-center text-white font-bold text-lg ${avatarColor}`}>
+                        {partnerEmail.charAt(0).toUpperCase()}
+                      </div>
+                    );
+                  })()}
+                  <div>
+                    <div className="text-[18px] font-bold" style={{ color: GRAY }}>
+                      {activeConv.gigTitle}
+                    </div>
+                    <div className="text-[13px]" style={{ color: MUTED }}>
+                      Chat with {activeConv.participants.find((p: string) => p !== email)}
+                    </div>
+                  </div>
+                </div>
+                <button className="hover:opacity-70 transition-opacity">
+                  <IconMoreVertical />
+                </button>
+              </div>
+
+              {/* Status Banners (Using standard HTML/Tailwind) */}
+              {activeConv.status === 'pending' && (
+                <div className="bg-amber-50 p-4 text-sm text-amber-800 border border-amber-200 rounded-[10px] flex items-center gap-3">
+                  <Lock className="w-5 h-5 text-amber-600 shrink-0" />
+                  <span className="font-medium">{isEmployer ? 'Unlock to reply to this pitch.' : 'Waiting for employer to unlock.'}</span>
+                </div>
+              )}
+              {activeConv.status === 'hired' && (
+                <div className="bg-green-50 p-4 text-sm text-green-800 border border-green-200 rounded-[10px] flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                  <span className="font-semibold">Escrow Funded! Keep all communication here.</span>
+                </div>
+              )}
+              {activeConv.status === 'completed' && (
+                <div className="bg-indigo-50 p-4 text-sm text-indigo-800 border border-indigo-200 rounded-[10px] flex items-center gap-3">
+                  <UploadCloud className="w-5 h-5 text-indigo-600 shrink-0" />
+                  <span className="font-semibold">Job Delivered! Waiting for Employer to approve.</span>
+                </div>
+              )}
+              {activeConv.status === 'approved' && (
+                <div className="bg-teal-50 p-4 text-sm text-teal-800 border border-teal-200 rounded-[10px] flex items-center gap-3">
+                  <Handshake className="w-5 h-5 text-teal-600 shrink-0" />
+                  <span className="font-semibold">Job Approved! Funds released.</span>
+                </div>
+              )}
+              {activeConv.status === 'disputed' && (
+                <div className="bg-red-50 p-4 text-sm text-red-800 border border-red-200 rounded-[10px] flex items-center gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+                  <span className="font-semibold">Dispute Opened. Admin is reviewing.</span>
+                </div>
+              )}
+
+              {/* Messages */}
+              <div className="flex-1 bg-white rounded-[10px] overflow-y-auto p-8 flex flex-col gap-6 shadow-sm border border-[#D1E6FF]">
+                <div className="flex items-center gap-4 w-full mb-4">
+                  <div className="flex-1 h-px bg-[#989BA1] opacity-20 rounded" />
+                  <span className="text-[10px] font-bold tracking-widest uppercase shrink-0" style={{ color: MUTED }}>Chat Started</span>
+                  <div className="flex-1 h-px bg-[#989BA1] opacity-20 rounded" />
+                </div>
+
+                {messages.map((msg, i) => {
+                  const isMe = msg.senderEmail === email;
+                  const displayContent = (activeConv.status === 'partnership') ? msg.originalContent : msg.content;
+                  
+                  const senderEmail = msg.senderEmail;
+                  const partnerEmail = activeConv.participants.find((p: string) => p !== email) || 'Unknown';
+                  const seed = isMe ? email.charCodeAt(0) || 0 : partnerEmail.charCodeAt(0) || 0;
+                  const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
+                  const avatarColor = isMe ? 'bg-orange-600' : colors[seed % colors.length];
+
+                  return (
+                    <div key={i} className={`flex items-start gap-3 group ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                      <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 mt-auto ${avatarColor}`}>
+                        {senderEmail.charAt(0).toUpperCase()}
+                      </div>
+                      <div className={`flex flex-col gap-1 w-full max-w-[80%] ${isMe ? "items-end" : "items-start"}`}>
+                        
+                        {/* Hover Actions */}
+                        <div className="flex gap-2 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button 
+                            onClick={() => setReplyingTo({ _id: msg._id, content: msg.content, senderEmail: msg.senderEmail })} 
+                            className="text-[10px] text-[#1D75DD] hover:underline font-bold"
+                          >
+                            Reply
+                          </button>
+                          {isMe && (Date.now() - new Date(msg.createdAt).getTime() <= 5 * 60 * 1000) && (
+                            <button 
+                              onClick={() => { setEditingMessage({ _id: msg._id, content: msg.content, createdAt: msg.createdAt }); setReplyContent(msg.content); }} 
+                              className="text-[10px] text-[#1D75DD] hover:underline font-bold"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
+
+                        <div
+                          className="rounded-[8px] px-5 py-4 text-[14px] leading-relaxed break-words"
+                          style={{
+                            color: GRAY,
+                            background: isMe ? PALE_BLUE : "white",
+                            border: isMe ? "none" : `1px solid ${BLUE}`,
+                          }}
+                        >
+                          {/* Reply Quote Block */}
+                          {msg.replyTo && (
+                            <div className="mb-2 p-2 rounded bg-black/5 border-l-4 border-[#1D75DD] text-[12px] opacity-90">
+                              <div className="font-bold mb-0.5 text-[#1D75DD]">{msg.replyTo.senderEmail.split('@')[0]}</div>
+                              <div className="truncate text-gray-700">{msg.replyTo.content}</div>
+                            </div>
+                          )}
+
+                          {(activeConv.status === 'partnership') ? (
+                            <span>{displayContent}</span>
+                          ) : (
+                            displayContent.split(/(\[REDACTED.*?\])/).map((part: string, idx: number) => 
+                              part.startsWith('[REDACTED') ? (
+                                <span key={idx} className={`font-mono text-[11px] px-1.5 py-0.5 rounded mx-1 ${isMe ? 'bg-blue-800 text-blue-200' : 'bg-red-100 text-red-800 font-bold'}`}>
+                                  {part}
+                                </span>
+                              ) : (
+                                <span key={idx}>{part}</span>
+                              )
+                            )
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 px-1">
+                          <span className="text-[10px]" style={{ color: MUTED }}>
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          {msg.isEdited && (
+                            <span className="text-[9px] text-gray-400 italic">(edited)</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div ref={bottomRef} />
+              </div>
+
+              {/* Input */}
+              <div className="bg-white rounded-[10px] border border-[#DDD] px-4 py-4 flex flex-col gap-3 shrink-0 shadow-sm">
+                {(replyingTo || editingMessage) && (
+                  <div className="flex items-center justify-between bg-blue-50/50 p-2 rounded border border-blue-100">
+                    <div className="flex flex-col gap-1 overflow-hidden">
+                      <span className="text-[10px] font-bold text-[#1D75DD] uppercase tracking-wider">
+                        {editingMessage ? 'Editing Message' : `Replying to ${replyingTo?.senderEmail.split('@')[0]}`}
+                      </span>
+                      <span className="text-[12px] text-gray-600 truncate max-w-sm">
+                        {editingMessage ? editingMessage.content : replyingTo?.content}
+                      </span>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => { setReplyingTo(null); setEditingMessage(null); setReplyContent(''); }}
+                      className="text-gray-400 hover:text-gray-700 font-bold px-2"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+                <form onSubmit={handleSendReply} className="flex items-center gap-3">
+                  <textarea
+                    value={replyContent} 
+                    onChange={e => {
+                      setReplyContent(e.target.value);
+                      e.target.style.height = 'auto';
+                      e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+                    }} 
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (replyContent.trim()) {
+                          handleSendReply(e as any);
+                        }
+                      }
+                    }}
+                    className="flex-1 text-[15px] outline-none bg-transparent resize-none overflow-y-auto"
+                    placeholder="Write a message... (Shift+Enter for newline)"
+                    rows={1}
+                    style={{ color: GRAY, minHeight: '24px', maxHeight: '150px' }}
+                  />
+                  <div className="flex items-center gap-4 shrink-0">
+                    <button 
+                      type="button" 
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      className="hover:opacity-70 transition-opacity"
+                    >
+                      {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <IconPaperclip />}
+                    </button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleFileUpload} 
+                      className="hidden" 
+                      accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.ppt,.pptx"
+                    />
+                    <button type="button" className="hover:opacity-70 transition-opacity"><IconSmile /></button>
+                    <button
+                      type="submit"
+                      disabled={!replyContent.trim() && !isUploading}
+                      className="w-[35px] h-[35px] rounded-[5px] flex items-center justify-center transition-opacity hover:opacity-80 disabled:opacity-50"
+                      style={{ background: BLUE }}
+                    >
+                      <IconSend />
+                    </button>
+                  </div>
+                </form>
+                {/(mpesa|pay me directly|07\d{8}|\+254\d{9}|send money|off-platform|off platform)/i.test(replyContent) && (
+                  <div className="px-3 py-2 bg-red-50 text-red-700 text-[11px] font-bold rounded-lg flex items-center gap-2 border border-red-100">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    Warning: Off-platform payments violate our Terms of Service.
+                  </div>
+                )}
+              </div>
+
+              {/* Action Controls */}
+              <div className="flex flex-wrap justify-end gap-3">
+                {isEmployer && activeConv.status === 'pending' && (
+                  <button onClick={handleUnlock} className="px-5 py-2.5 bg-blue-50 text-blue-700 rounded-[8px] hover:bg-blue-100 transition-colors font-semibold text-sm">
+                    Unlock to Reply
+                  </button>
+                )}
+                {isEmployer && activeConv.status === 'active' && (
+                  <button onClick={handleHire} className="px-6 py-2.5 bg-green-600 text-white rounded-[8px] hover:bg-green-700 transition-colors font-semibold text-sm">
+                    Fund Escrow & Hire
+                  </button>
+                )}
+                {isEmployer && activeConv.status === 'completed' && (
+                  <>
+                    <button onClick={handleApprove} className="px-6 py-2.5 bg-teal-600 text-white rounded-[8px] hover:bg-teal-700 transition-colors font-semibold text-sm">
+                      Approve & Release
+                    </button>
+                    <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-[8px] hover:bg-rose-50 transition-colors font-semibold text-sm">
+                      Dispute
+                    </button>
+                  </>
+                )}
+                {isEmployer && activeConv.status === 'hired' && (
+                  <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-[8px] hover:bg-rose-50 transition-colors font-semibold text-sm">
+                    Dispute
+                  </button>
+                )}
+                
+                {/* Applicant Controls */}
+                {!isEmployer && activeConv.status === 'hired' && (
+                  <>
+                    <button onClick={handleDeliver} className="px-6 py-2.5 bg-[#1D75DD] text-white rounded-[8px] hover:bg-blue-700 transition-colors font-semibold text-sm">
+                      Deliver Job
+                    </button>
+                    <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-[8px] hover:bg-rose-50 transition-colors font-semibold text-sm">
+                      Dispute
+                    </button>
+                  </>
+                )}
+                {!isEmployer && activeConv.status === 'completed' && (
+                  <button onClick={handleDispute} className="px-5 py-2.5 border border-rose-300 text-rose-600 rounded-[8px] hover:bg-rose-50 transition-colors font-semibold text-sm">
+                    Dispute Employer
+                  </button>
+                )}
+              </div>
+
+              {/* Dispute Form */}
+              {showDisputeForm && (
+                <div className="p-5 bg-red-50 rounded-[10px] border border-red-100 flex flex-col gap-3">
+                  <p className="text-sm font-bold text-red-800">Open a Dispute</p>
+                  <textarea 
+                    value={disputeReason}
+                    onChange={(e) => setDisputeReason(e.target.value)}
+                    placeholder="Explain what went wrong..."
+                    className="w-full p-4 rounded-[8px] border border-red-200 outline-none text-sm h-24 resize-none bg-white"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <button onClick={() => setShowDisputeForm(false)} className="px-5 py-2 text-sm font-bold text-red-700 hover:bg-red-100 rounded-[8px]">Cancel</button>
+                    <button onClick={handleDispute} className="px-5 py-2 text-sm font-bold bg-red-600 hover:bg-red-700 text-white rounded-[8px]">Submit Dispute</button>
+                  </div>
+                </div>
+              )}
+
+            </>
+          ) : (
+            <div className="bg-white rounded-[10px] shadow-sm flex flex-col h-full overflow-hidden items-center justify-center border border-[#D1E6FF]">
+              <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+                <MessageCircle className="w-12 h-12 text-[#1D75DD]" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Select a Conversation</h3>
+              <p className="text-gray-500 text-center max-w-sm">Choose an active chat from the sidebar to continue.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
