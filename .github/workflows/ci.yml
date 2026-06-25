@@ -1,0 +1,68 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+
+      # --- Frontend Checks ---
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Build Frontend
+        run: npm run build
+        env:
+          # Add any required frontend environment variables here
+          NODE_ENV: production
+
+      # --- Backend Checks ---
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      # Note: The backend currently lacks a build or test script.
+      # If you add 'npm test' in backend/package.json in the future, uncomment the lines below:
+      # - name: Run Backend Tests
+      #   working-directory: ./backend
+      #   run: npm test
+
+  deploy-to-render:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    # Only deploy when changes are pushed to the main branch
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Trigger Render Deployment
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            echo "Error: RENDER_DEPLOY_HOOK secret is not set in GitHub."
+            echo "Please go to your GitHub repository Settings > Secrets and variables > Actions > New repository secret,"
+            echo "and add your Render Deploy Hook URL as RENDER_DEPLOY_HOOK."
+            exit 1
+          fi
+          echo "Triggering deployment to Render..."
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

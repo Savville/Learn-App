@@ -58,7 +58,57 @@ export interface Opportunity {
   suggestCustomForm?: boolean; // Temporary flag from AI parsing
 }
 
-export const opportunities: Opportunity[] = [
+export const opportunities: Opportunity[
+  {
+  "id": "boston-university-presidential-scholarship-2026",
+  "title": "Boston University Presidential Scholarship 2026",
+  "provider": "Boston University",
+  "category": "Scholarship",
+  "description": "A prestigious $25,000/year scholarship for high-achieving international students to pursue their undergraduate degree in the USA.",
+  "fullDescription": "Are you looking for a high-value undergraduate scholarship in the USA? The Boston University Presidential Scholarship 2026 is an excellent opportunity for international students who want to study at one of the most prestigious universities in the United States. This funded scholarship in USA helps talented students from all over the world pursue their undergraduate degree at Boston University. The scholarship focuses on academic excellence, leadership potential, and active participation in extracurricular activities. It also supports cultural exchange by bringing students from different countries into one diverse academic environment.",
+  "deadline": "2026-12-01",
+  "location": "Boston, USA",
+  "eligibility": {
+    "educationLevel": "UnderGrad",
+    "fieldOfStudy": [
+      "Health & Rehabilitation Sciences",
+      "Communication",
+      "Arts & Sciences",
+      "Engineering",
+      "Fine Arts",
+      "Business",
+      "General Studies",
+      "Global Studies",
+      "Administration",
+      "Education & Human Development"
+    ],
+    "requirements": [
+      "Must be an international student applying for an undergraduate degree program at Boston University.",
+      "Must demonstrate outstanding academic performance in high school and rank in the top 5% of graduating class.",
+      "Candidates with strong SAT scores (above 1500) or ACT scores (above 33) have a better chance.",
+      "Should have excellent extracurricular achievements and leadership experience.",
+      "Must fulfill English language proficiency requirements such as TOEFL or IELTS."
+    ]
+  },
+  "benefits": [
+    "$25,000 per academic year.",
+    "Reduces the overall cost of undergraduate studies.",
+    "Study at a top-ranked university in the USA.",
+    "Access to a diverse and international student community.",
+    "Enhances academic and professional development."
+  ],
+  "applicationType": "Platform Link",
+  "applicationLink": "https://www.bu.edu/admissions/apply/",
+  "fundingType": "Partially Funded",
+  "compensationType": "N/A",
+  "upfrontCost": "No Upfront Cost",
+  "featured": true,
+  "dateAdded": "2026-06-25",
+  "logoUrl": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=800",
+  "isVerified": true,
+  "status": "Verified",
+  "postedBy": "Opportunities Kenya Admin"
+},] = [
   {
     id: 'engineering-automation-developer-2026',
     title: 'Software Developer for Engineering Automation (Equity Opportunity)',
@@ -92,7 +142,7 @@ export const opportunities: Opportunity[] = [
     duration: 'Project-Based (with long-term partnership potential)',
     featured: true,
     dateAdded: '2026-06-03',
-    logoUrl: '/images/opportunities/autocad_automation.jpeg',
+    logoUrl: '/images/autocad_automation.jpeg',
     postedBy: 'Williams Savville',
     isVerified: true,
     status: 'Verified'
@@ -145,263 +195,16 @@ What You Get From SBS:
     duration: '1 Year (Renewable)',
     featured: true,
     dateAdded: '2026-06-03',
-    logoUrl: '/images/opportunities/safbuild.png',
+    logoUrl: '/images/safbuild.png',
     isVerified: true,
     status: 'Verified'
   },
-  {
-    id: 'canva-madaraka-day-challenge-2026',
-    title: 'Canva Africa Madaraka Day Design Challenge 2026',
-    provider: 'Canva Africa, KNEC, Microsoft Elevate & STEAM Labs',
-    category: 'Challenge',
-    description: 'Use Canva to create a poster, social media campaign, or presentation showing what Madaraka means to you for a chance to win prizes and national recognition.',
-    fullDescription: `Canva Africa presents the Madaraka Day Design Challenge 2026 in partnership with the Kenya National Examinations Council (KNEC), Microsoft Elevate, and STEAM Labs Africa.
-
-The Madaraka Day Design Challenge invites you to show what Madaraka means to you. Use Canva to create a poster, social media campaign pack, or short presentation, then submit your entry for a chance to win prizes and national recognition. First-time designers are welcome.
-
-**2 Ways To Enter:**
-
-**1. Schools:** All Junior and Senior school students in Kenya (Grades 7-10 and Form 3-4 only). A teacher champion registers the school, facilitates collaboration, and submits on behalf of the class.
-**2. General Public (18+):** Individual entries for Kenyan nationals aged 18+.
-
-Start with Canva's free Madaraka Day templates. Use tools like Magic Write and AI image generation to bring your ideas to life. To ensure you're equipped to submit a winning entry, Canva is hosting a series of weekly digital training sessions with STEAMLabs & Microsoft.`,
-    deadline: '2026-06-12',
-    location: 'Kenya / Remote',
-    eligibility: {
-      educationLevel: 'All',
-      fieldOfStudy: ['Design', 'Creative Arts', 'Any Field'],
-      requirements: [
-        'Schools Category: Junior and Senior school students in Kenya (Grades 7-10 and Form 3-4 only).',
-        'General Public Category: Kenya nationals aged 18+ years.',
-        'Must have an active Canva account (teachers can register on behalf of a class).',
-        'Designs must celebrate Kenyan pride, history, and the future.',
-        'Must include a short statement (100–150 words) about the design, what Madaraka Day means to you, and which Canva AI tools were used.',
-        'Multiple entries are permitted (no cap).'
-      ]
-    },
-    benefits: [
-      'Schools: Top 5 entries plus one overall winner receive KNEC certificates, Canva merchandise, and a national showcase feature.',
-      'General Public: Top 5 entries plus one overall winner receive 1 Year Canva Pro or Teams subscriptions, Canva merch, and a showcase feature.',
-      'Access to weekly digital design training sessions.'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://www.canva.com/africa-design-challenge',
-    fundingType: 'N/A', 
-    compensationType: 'N/A', 
-    upfrontCost: 'No Upfront Cost',
-    duration: 'April 22 - June 12, 2026',
-    featured: true,
-    dateAdded: '2026-05-30',
-    logoUrl: '/images/opportunities/CanvaAfricaDesignChallenge-Madaraka-Day.avif', 
-    isVerified: true,
-    status: 'Verified'
-  },
-  {
-    id: 'safal-eye-in-the-wild-2026',
-    title: 'Safal Eye in the Wild Photography Competition 2026',
-    provider: 'Safal Group',
-    category: 'Challenge',
-    description: 'Photography competition rooted in care for community and environment under the theme "Frame Your Future". Top prize USD 3,000.',
-    fullDescription: 'Safal Eye in the Wild is a photography competition and Safal Group Corporate Social Investment initiative rooted in care for community and environment. In 2026, the campaign is anchored in education and conservation under the theme Frame Your Future, turning creative capital into human capital through photography, awareness, fundraising, exhibitions, calendars, and education support.',
-    deadline: '2026-06-20',
-    location: 'East and Southern Africa (Safal Group Operating Countries)',
-    eligibility: {
-      educationLevel: 'All',
-      requirements: [
-        'Must be a resident of Safal Group operating countries in East and Southern Africa.',
-        'Entrants under 18 years old must have prior written consent from a parent or legal guardian.',
-        'Images must feature nature, conservation, climate resilience, sustainable agriculture, community solutions, or positive environmental storytelling.',
-        'Images must be original, in JPEG/PNG format, landscape orientation, at least 1,600px wide, max 10MB.',
-        'Composite, synthetic, or AI-generated images are not permitted.'
-      ]
-    },
-    benefits: [
-      'Gold Award: USD 3,000',
-      'Silver Award: USD 2,000',
-      'Bronze Award: USD 1,000',
-      'Public Award: USD 500'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://safaleyeinthewild.safalgroup.com/#/',
-    fundingType: 'N/A',
-    compensationType: 'Paid',
-    upfrontCost: 'No Upfront Cost',
-    duration: 'N/A',
-    featured: true,
-    dateAdded: '2026-05-20',
-    logoUrl: '/images/opportunities/safal_group2.jpg',
-    postedBy: 'Opportunities Kenya Admin',
-    isVerified: true,
-    status: 'Verified'
-  },
-  {
-    id: 'mock-gig-student-project',
-    title: 'Need help with React Native App UI for Final Year Project',
-    provider: 'David Ochieng (Student, KU)',
-    category: 'Gig',
-    description: 'Looking for a student who knows React Native to help me fix some UI bugs on my final year project. Needs to be done ASAP.',
-    fullDescription: 'I am a final year computer science student at Kenyatta University and I am building a React Native application for my project. I am struggling with the UI layout, specifically flexbox and some navigation issues. Looking for someone who can help me polish the design and fix the bugs over the weekend. I have applied some funds to my escrow.\\n\\n**Status:** Job has been assigned and work is currently ongoing.',
-    deadline: '2026-05-10',
-    location: 'Remote / Nairobi',
-    eligibility: {
-      educationLevel: 'UnderGrad',
-      fieldOfStudy: ['Computer Science', 'Software Engineering'],
-      requirements: [
-        'Must be proficient in React Native and Expo',
-        'Available to work this weekend',
-        'Student preferred'
-      ]
-    },
-    benefits: [
-      'Flexible remote work',
-      'Quick payment via escrow'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: '#',
-    fundingType: 'N/A',
-    compensationType: 'Paid',
-    upfrontCost: 'No Upfront Cost',
-    duration: '2 days',
-    featured: false,
-    dateAdded: '2026-04-29',
-    logoUrl: '/images/opportunities/default-avatar.png',
-    postedBy: 'David Ochieng',
-    isEscrow: true,
-    isEscrowFunded: false,
-    escrowAmount: 3000,
-    status: 'Verified'
-  },
-  {
-    id: 'mock-gig-lecturer-ppt',
-    title: 'Design Professional PowerPoint for Lecture Notes with Graphics',
-    provider: 'Dr. Sarah Wanjiku (Lecturer, Kenyatta University)',
-    category: 'Gig',
-    description: 'I need a student proficient in PowerPoint and Canva to turn my 50-page word document of lecture notes into a visually appealing presentation with infographics.',
-    fullDescription: 'As a busy lecturer, I am looking for a creative professional or student to convert my plain text lecture notes into a professional and visually engaging PowerPoint presentation. The notes cover topics in environmental science, and I need relevant graphics, charts, and icons added. The final output should be 30-40 slides.\\n\\n**Status:** Job has been assigned and paid already. Escrow is fully funded.',
-    deadline: '2026-05-10',
-    location: 'Remote',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Design', 'Communication', 'Any Field'],
-      requirements: [
-        'Strong skills in Microsoft PowerPoint and Canva',
-        'Ability to summarize text into bullet points',
-        'Experience with data visualization and infographics'
-      ]
-    },
-    benefits: [
-      'Guaranteed payment (Escrow Funded)',
-      'Potential for future work on other modules'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: '#',
-    fundingType: 'N/A',
-    compensationType: 'Paid',
-    upfrontCost: 'No Upfront Cost',
-    duration: '1 week',
-    featured: true,
-    dateAdded: '2026-05-06',
-    logoUrl: '/images/opportunities/default-avatar.png',
-    postedBy: 'Dr. Sarah Wanjiku',
-    isEscrow: true,
-    isEscrowFunded: true,
-    escrowAmount: 5000,
-    status: 'Verified'
-  },
-  {
-    id: 'mock-gig-grad-research',
-    title: 'Data Entry and Survey Analysis using SPSS/Excel',
-    provider: 'Brian Mutua (Research Consultant)',
-    category: 'Gig',
-    description: 'I have 200 survey responses that need to be entered into Excel and cleaned for SPSS analysis. Looking for a meticulous graduate or student.',
-    fullDescription: 'I am a recent graduate and research consultant working on a public health survey. I have collected 200 physical questionnaires that need to be digitized. You will be responsible for entering the data into an Excel spreadsheet, cleaning the dataset, and performing some basic descriptive statistics in SPSS. Accuracy is key.\\n\\n**Status:** Job has been assigned. Escrow is set up and work is in progress.',
-    deadline: '2026-05-10',
-    location: 'Remote',
-    eligibility: {
-      educationLevel: 'PostGrad',
-      fieldOfStudy: ['Statistics', 'Public Health', 'Data Science'],
-      requirements: [
-        'High attention to detail',
-        'Proficiency in Microsoft Excel and SPSS',
-        'Previous experience with data entry'
-      ]
-    },
-    benefits: [
-      'Gain experience in real-world data analysis',
-      'Flexible working hours'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: '#',
-    fundingType: 'N/A',
-    compensationType: 'Paid',
-    upfrontCost: 'No Upfront Cost',
-    duration: '3 days',
-    featured: false,
-    dateAdded: '2026-05-02',
-    logoUrl: '/images/opportunities/default-avatar.png',
-    postedBy: 'Brian Mutua',
-    isEscrow: true,
-    isEscrowFunded: false,
-    escrowAmount: 2500,
-    status: 'Verified'
-  },
-  {
-    id: 'agea-startup-lab-2026',
-    title: "AGEA Start-up Lab Call for Applications 2026",
-    provider: "African German Entrepreneurship Academy (AGEA)",
-    category: 'Project',
-    description: "The 2026 edition of the AGEA Start-up Lab is officially open for submissions. Support for innovative, research-based tech start-ups and spin-offs from African HEIs.",
-    fullDescription: `The 2026 edition of the AGEA Start-up Lab is now officially open for submissions of innovative start-up projects. The competition is the first arm of the three-phase programme (AGEA Start-up Lab), which aims to support innovative spin-offs, technology-oriented start-ups, and start-up projects, and to strengthen the link between academia and industry in Africa.
-
-We invite submissions of innovative spin-offs and technology-oriented start-ups, developed from academic and scientific research activities by students (Masters and PhD), lecturers, and researchers at African universities in partner countries: Benin, Ghana, Kenya, Nigeria, Rwanda, Tunisia, and Ethiopia.
-
-The application window for the 2026 edition officially opens on 13 April 2026 and closes on 17 May 2026.
-
-────────────────────────────────────
- THE THREE-PHASE ACCELERATION PROGRAMME
-────────────────────────────────────
-
-Phase 1: Start-up Competition (13 April – 17 May 2026)
-The foundational application and selection phase followed by evaluation and candidate interviews.
-
-Phase 2: Start-up Class (23 September – 02 October 2026)
-An intensive, highly focused training program held in-person at Leipzig University, Germany. Includes investment readiness training, dedicated coaching, and connections to early-stage investors.
-
-Phase 3: Start-up Investment Coaching (November 2026 – 2027)
-Extended, tailored support for top-performing start-ups to help secure funding and scale. Includes direct introductions to Angel Investors and specialised investor trips.`,
-    deadline: '2026-05-17',
-    location: 'Leipzig, Germany / Hybrid',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Any Field', 'Technology', 'Agriculture', 'Health', 'Education', 'Energy', 'IT', 'Commerce'],
-      requirements: [
-        'Academics (lecturers, professors, researchers)',
-        'Students currently enrolled in Masters and PhD programmes',
-        'Entrepreneurs, recent Masters or PhD graduates (1 – 2 years)',
-        'Applicants must be affiliated with universities in Benin, Ghana, Kenya, Nigeria, Rwanda, Tunisia, or Ethiopia',
-        'Minimum Viable Product (MVP) or Minimum Marketable Product (MMP) must be available',
-        'Student-led teams or recent graduate founders should have a faculty mentor'
-      ]
-    },
-    benefits: [
-      'Intensive Investment Readiness Training (Start-up Class in Leipzig, Germany)',
-      'Partial funding for travel and accommodation for up to two team members',
-      'Investment Coaching and direct connections to Angel Investors',
-      'Strategic Support for Grant Applications (including EXIST)',
-      'Professional Promotional Video Development for the start-up'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://www.ageacademy.de/agea-business-idea-competition/',
-    contactEmail: 'bayeboah@uni-leipzig.de',
-    fundingType: 'Partially Funded',
-    compensationType: 'N/A',
-    upfrontCost: 'No Upfront Cost',
-    duration: 'Multi-phase (April 2026 - 2027)',
-    featured: true,
-    dateAdded: '2026-04-24',
-    logoUrl: '/images/opportunities/agea.png',
-    postedBy: 'Opportunities Kenya Admin'
-  },
+  
+  
+  
+  
+  
+  
   {
     id: 'science-scilifelab-prize-for-young-scientists-2026',
     title: 'Science & SciLifeLab Prize for Young Scientists 2026',
@@ -449,69 +252,9 @@ The grand winner will get a prize money of $30,000 USD, and the other three cate
     upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-29',
-    logoUrl: '/images/opportunities/Scilifelab.png',
+    logoUrl: '/images/Scilifelab.png',
   },
-  {
-    id: 'aces-civexpo-2026-incubation',
-    title: 'ACES CivExpo 2026: Project Participation & Incubation',
-    provider: 'Association of Civil Engineering Students (ACES - KU)',
-    category: 'Project',
-    description: 'Official 6-month project incubation program for Civil Engineering students to bridge the gap between academia and industry. Includes Industry Skills, Tech & Automation, and Venture Studio tracks with direct paths to industry attachments.',
-    fullDescription: `ACES is here to bridge the gap between Industry and Academia. We are officially starting a 6-month project programme for the ACES CivExpo 2026 — focusing on student-led action rather than just hosting events.
-
-THE INCUBATION PROGRAMME
-Are you working on a project that can transform Kenya's infrastructure? Join one of our three dedicated tracks to build, optimize, and pitch your engineering ideas to industry giants.
-
-TRACK 1: INDUSTRY SKILLS & WORKFLOW (THE BIG THREE)
-Tackle the official CivExpo challenges: The Hillside Hostel, The Zero-Day Campus, or The Last Mile Mobility corridor. Focus on mastering industry-standard tools like Revit, Civil 3D, and EPANET.
-🎯 Reward: Direct paths to attachments and internships through ACES industry networks (Sika, KeNHA, Bamburi, etc.)
-
-TRACK 2: TECH & AUTOMATION (THE FUTURE-PROOF ENGINEER)
-For students using AI, Machine Learning, Rhino, Grasshopper, or Python scripts to automate and optimize engineering workflows. Show the industry how you are ahead of the curve.
-🎯 Reward: Get noticed by tech-driven engineering startups and consulting firms.
-
-TRACK 3: PROBLEM SOLVING, INNOVATION & BUSINESS (THE VENTURE STUDIO)
-Turn your research into a viable business or a funded pilot. Focus on sustainable materials (recycled plastics, natural binders) or solving community challenges like Nairobi Water network leakages.
-🎯 Reward: Access to project funding, professional mentorship, and the chance to pitch to VCs and Industry Giants like Sika and KeNHA.
-
-WHY PARTICIPATE?
-• ACES Advocacy: We pitch you directly to companies for personal career opportunities based on masterclass work.
-• Traction: Forums and feedback sessions to keep your project moving toward the September Expo.
-• Networking: High-level access to the IEK, NCA, and private sector leaders.
-
-Registered projects will present at ACES meet-ups leading up to the CivExpo in September 2026, where a big stage will be provided for presentations to partners and interested firms.`,
-    deadline: '2026-04-20',
-    location: 'Kenyatta University / Nairobi, Kenya',
-    eligibility: {
-      educationLevel: 'UnderGrad',
-      fieldOfStudy: ['Civil Engineering'],
-      requirements: [
-        'Kenyatta University Civil Engineering student (all years including 5th years)',
-        'Sign up individually or in teams (up to 4 members)',
-        'Select one of the three dedicated tracks: Industry, Tech, or Business',
-        'Commit to regular presentations and project milestones leading to the September Expo'
-      ]
-    },
-    benefits: [
-      'Direct paths to attachments and internships with ACES industry partners (Sika, KeNHA, Bamburi)',
-      'Access to project funding and professional mentorship from industry experts',
-      'Opportunity to pitch to Venture Capitalists and Industry Giants at CivExpo 2026',
-      'Networking with IEK (Institution of Engineers of Kenya) and NCA leaders',
-      'Portfolio-worthy project development with mastery of Revit, Civil 3D, and AI tools'
-    ],
-    applicationType: 'Online Form',
-    applicationLink: 'https://docs.google.com/forms/d/e/1FAIpQLSdg83mA2Sw9gtzUYZxiEkf-N3tg9TpLzVQZsgOqHR3UBkK4aQ/viewform?usp=dialog',
-    fundingType: 'Partially Funded',
-    compensationType: 'N/A',
-    upfrontCost: 'No Upfront Cost',
-    featured: true,
-    dateAdded: '2026-03-23',
-    logoUrl: 'https://images.unsplash.com/photo-1517089596392-fb9a9033e05b?auto=format&fit=crop&q=80&w=800',
-    thematicAreas: [
-      {
-        heading: 'Industry Skills (Phase 1)',
-        topics: ['Hillside Hostel Challenge', 'Zero-Day Campus Water Systems', 'Last Mile Mobility corridors', 'Mastery of Revit, Civil 3D & EPANET']
-      },
+  
       {
         heading: 'Tech & Automation (Phase 2)',
         topics: ['Python & Dynamo script automation', 'Parametric design (Rhino/Grasshopper)', 'BIM plugin development', 'AI-driven structural optimization']
@@ -616,7 +359,7 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
     compensationType: 'N/A',
     upfrontCost: 'No Upfront Cost',
     dateAdded: '2026-03-06',
-    logoUrl: '/images/opportunities/nairobi_water.png',
+    logoUrl: '/images/nairobi_water.png',
     thematicAreas: [
       {
         heading: 'Leak Detection',
@@ -644,67 +387,7 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
       }
     ]
   },
-  {
-    id: 'worldquant-brain-iqc-2026',
-    title: 'WorldQuant BRAIN International Quant Championship (IQC) 2026',
-    provider: 'WorldQuant BRAIN',
-    category: 'Hackathon',
-    description: 'A three-stage, team-based global competition where participants develop and backtest Alphas — mathematical models that seek to predict future price movements of financial instruments — using WorldQuant’s proprietary BRAIN simulation platform. US$100,000 global prize pool.',
-    fullDescription: `The WorldQuant BRAIN International Quant Championship (IQC) 2026 is one of the premier global competitions for students and early-career professionals in quantitative finance, mathematics, and data science. It is a perfect opportunity for students with a strong interest in machine learning and coding to apply their skills to real-world financial modeling.
-
-THE COMPETITION
-The IQC is a team-based global competition where participants develop and backtest Alphas — mathematical models that seek to predict future price movements of financial instruments — using WorldQuant’s proprietary BRAIN simulation platform.
-
-COMPETITION TIMELINE
-• Qualifier Round (Stage 1): March 17 – May 18, 2026 (Virtual/University-based)
-• National/Regional Round (Stage 2): May 26 – Mid-July 2026 (Virtual & Final Presentation)
-• Global Finals (Stage 3): September 2026 (In-Person in Singapore)
-
-PRIZES & CAREER OPPORTUNITIES
-Beyond the prestige, the IQC offers significant rewards:
-• Cash Prizes: A total global prize pool of US$100,000.
-  - Global Finals: 1st Place (US$20,000), 2nd Place (US$12,000), 3rd Place (US$8,000)
-  - National Rounds: 1st Place (US$3,000), 2nd Place (US$2,000), 3rd Place (US$1,000)
-• Career Growth: Top performers are regularly considered for BRAIN Research Consultant positions, internships, and full-time quantitative researcher roles at WorldQuant.
-• Travel: Finalists are invited to an all-expenses-paid trip to Singapore for the Global Finals.
-
-HOW TO PARTICIPATE
-1. Sign Up: Create a free account on the WorldQuant BRAIN platform.
-2. Form a Team: Compete individually or in teams of up to 4 members (must be from the same university).
-3. Build Alphas: Use the BRAIN platform’s 125,000+ data fields and AI-powered analytics.
-4. Accumulate Points: Scores are based on both the quality (predictive power) and quantity of the Alphas you submit.`,
-    deadline: '2026-05-18',
-    location: 'Singapore (Global Finals) / Virtual (Qualifier)',
-    eligibility: {
-      educationLevel: 'Both',
-      fieldOfStudy: ['Mathematics', 'Quantitative Finance', 'Computer Science', 'Data Science', 'Engineering', 'Physics', 'Economics'],
-      requirements: [
-        'Open to students and early-career professionals worldwide',
-        'Teams of up to 4 members (must all be from the same university)',
-        'Sign up for a free account on the WorldQuant BRAIN platform',
-        'Must demonstrate ability to develop and backtest mathematical models (Alphas)'
-      ]
-    },
-    benefits: [
-      'US$100,000 total global prize pool',
-      'All-expenses-paid trip to Singapore for Global Finals',
-      'Direct pathway to Research Consultant, Intern, and Full-time roles',
-      'Access to 125,000+ data fields and AI-powered simulation tools',
-      'Participate in an elite global network of quants and researchers'
-    ],
-    applicationType: 'Platform Link',
-    applicationLink: 'https://worldquantbrain.com/iqc',
-    fundingType: 'Fully Funded',
-    compensationType: 'Paid',
-    upfrontCost: 'No Upfront Cost',
-    featured: true,
-    dateAdded: '2026-03-23',
-    logoUrl: '/images/opportunities/world_brain.png',
-    thematicAreas: [
-      {
-        heading: 'Alpha Development',
-        topics: ['Mathematical modelling of financial signals', 'Predictive factor generation', 'Algorithmic strategy design']
-      },
+  
       {
         heading: 'Simulation & Backtesting',
         topics: ['WorldQuant BRAIN platform navigation', 'Performance metric analysis (Sharpe Ratio, Returns)', 'Risk management integration']
@@ -808,7 +491,7 @@ For full details visit: https://www.dfat.gov.au/people-to-people/australia-award
     duration: 'Bachelor: 4 years | Masters: 2–3 years | PhD: 4–5 years',
     featured: true,
     dateAdded: '2026-03-05',
-    logoUrl: '/images/opportunities/australia2.jpg',
+    logoUrl: '/images/australia2.jpg',
     thematicAreas: [
       {
         heading: 'General',
@@ -890,7 +573,7 @@ No Japanese language skills required. All interns with outstanding performance m
     duration: '4–6 weeks',
     featured: false,
     dateAdded: '2026-03-09',
-    logoUrl: '/images/opportunities/japan.jpg',
+    logoUrl: '/images/japan.jpg',
     thematicAreas: [
       {
         heading: 'Full-Stack Software Engineering',
@@ -941,7 +624,7 @@ No Japanese language skills required. All interns with outstanding performance m
     upfrontCost: 'No Upfront Cost',
     featured: true,
     dateAdded: '2026-03-13',
-    logoUrl: '/images/opportunities/german.jpg'
+    logoUrl: '/images/german.jpg'
   },
   {
     id: 'google-student-researcher-internship-2026',
@@ -976,7 +659,7 @@ No Japanese language skills required. All interns with outstanding performance m
     upfrontCost: 'Has Upfront Cost',
     featured: true,
     dateAdded: '2026-03-22',
-    logoUrl: '/images/opportunities/google.jpg',
+    logoUrl: '/images/google.jpg',
     thematicAreas: [
       {
         heading: 'AI & Research',
