@@ -27,6 +27,7 @@ export function Inbox() {
   const [partnerProfile, setPartnerProfile] = useState<any | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [showPortfolioPane, setShowPortfolioPane] = useState(false);
+  const [showChatMenu, setShowChatMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { showAlert } = useAlert();
@@ -529,9 +530,40 @@ export function Inbox() {
                     </div>
                   </div>
                 </div>
-                <button className="hover:opacity-70 transition-opacity">
-                  <IconMoreVertical />
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowChatMenu(!showChatMenu)}
+                    className="hover:bg-slate-100 p-2 rounded-full transition-colors"
+                  >
+                    <IconMoreVertical />
+                  </button>
+                  {showChatMenu && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowChatMenu(false)} />
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-2 animate-in fade-in zoom-in duration-100">
+                        <button 
+                          onClick={() => { setShowPortfolioPane(true); setShowChatMenu(false); }}
+                          className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-semibold"
+                        >
+                          View Profile
+                        </button>
+                        <button 
+                          onClick={() => { showAlert({ title: 'Info', message: 'Conversation muted.', type: 'info' }); setShowChatMenu(false); }}
+                          className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-semibold"
+                        >
+                          Mute Notifications
+                        </button>
+                        <div className="my-1 border-t border-slate-100"></div>
+                        <button 
+                          onClick={() => { showAlert({ title: 'Reported', message: 'User has been reported to administration.', type: 'success' }); setShowChatMenu(false); }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold"
+                        >
+                          Report User
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Status Banners */}
