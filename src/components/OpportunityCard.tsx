@@ -2,6 +2,8 @@ import React from 'react';
 import { ArrowRight, Calendar, CheckCircle, Users, Flame, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
+import { OTPLoginForm } from './OTPLoginForm';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { Opportunity } from '../data/opportunities';
 import { useAlert } from '../contexts/AlertContext';
 import { calculateUrgency, toSlug } from '../utils/dateUtils';
@@ -64,6 +66,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
       return false;
     }
   });
+  const [showLogin, setShowLogin] = React.useState(false);
   const { showAlert } = useAlert();
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
@@ -99,7 +102,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
     
     const token = localStorage.getItem('user_token');
     if (!token) {
-      showAlert({ title: 'Sign In Required', message: 'Please log in through the Tracker or Inbox to save opportunities.', type: 'info' });
+      setShowLogin(true);
       return;
     }
 
@@ -130,8 +133,16 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
     }
   };
 
+  const handleLoginSuccess = (newToken: string, newEmail: string) => {
+    // Note: handleSuccess on OTPLoginForm automatically sets localStorage.
+    setShowLogin(false);
+    showAlert({ title: 'Logged In', message: 'You can now save this opportunity!', type: 'success' });
+    // Optionally trigger bookmark automatically here
+  };
+
   return (
-    <Link
+    <>
+      <Link
       to={`/opportunity/${toSlug(opportunity.title)}`}
       onClick={handleCardClick}
       className={`group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${urgency.label === 'Depleted' ? 'grayscale opacity-75' : ''}`}
@@ -230,6 +241,21 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
         </div>
       </article>
     </Link>
+
+      <Dialog open={showLogin} onOpenChange={setShowLogin}>
+        <DialogContent className="sm:max-w-[425px] p-0 border-0 overflow-hidden bg-transparent shadow-none">
+          <div className="bg-white rounded-2xl overflow-hidden shadow-xl">
+            <div className="p-6">
+              <OTPLoginForm 
+                onSuccess={handleLoginSuccess}
+                title="Sign in to Save"
+                subtitle="You need to sign in to save opportunities to your Tracker."
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
