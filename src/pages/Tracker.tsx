@@ -24,7 +24,7 @@ export function Tracker() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'followed' | 'saved'>('followed');
+  const [activeTab, setActiveTab] = useState<'applied' | 'saved'>('applied');
   const { showAlert } = useAlert();
 
   // Dispute Modal State
@@ -155,16 +155,16 @@ export function Tracker() {
 
       <div className="px-8 pt-4 pb-0 flex gap-6 border-b border-slate-100 bg-white">
         <button 
-          onClick={() => setActiveTab('followed')}
-          className={`py-3 font-semibold border-b-2 transition-colors ${activeTab === 'followed' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+          onClick={() => setActiveTab('applied')}
+          className={`py-3 font-semibold border-b-2 transition-colors ${activeTab === 'applied' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
         >
-          Followed Applications
+          Applied
         </button>
         <button 
           onClick={() => setActiveTab('saved')}
           className={`py-3 font-semibold border-b-2 transition-colors ${activeTab === 'saved' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
         >
-          Saved (Bookmarks)
+          Saved
         </button>
       </div>
 
@@ -178,7 +178,7 @@ export function Tracker() {
           <div className="bg-red-50 text-red-600 p-6 rounded-2xl flex items-center justify-center shadow-sm">
             {error}
           </div>
-        ) : activeTab === 'followed' ? (
+        ) : activeTab === 'applied' ? (
           applications.length === 0 ? (
             <div className="text-center py-20 bg-slate-50 rounded-2xl">
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-400 shadow-sm">
