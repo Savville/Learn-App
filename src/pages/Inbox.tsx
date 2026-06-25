@@ -22,6 +22,7 @@ export function Inbox() {
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, message: any } | null>(null);
   const [replyingTo, setReplyingTo] = useState<{ _id: string, content: string, senderEmail: string } | null>(null);
   const [editingMessage, setEditingMessage] = useState<{ _id: string, content: string, createdAt: string } | null>(null);
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -186,10 +187,10 @@ export function Inbox() {
     }
   };
 
-  const handleDeleteMessage = async (messageId: string) => {
-    if (!activeConv || !confirm("Are you sure you want to delete this message?")) return;
+  const handleDeleteMessage = async () => {
+    if (!activeConv || !messageToDelete) return;
     try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${messageId}`, {
+      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${messageToDelete}`, {
         method: 'DELETE',
         headers: {
           'x-user-email': email
@@ -199,7 +200,8 @@ export function Inbox() {
       if (!res.ok) throw new Error(data.error || 'Failed to delete message');
       
       // Update local state immediately for better UX
-      setMessages(messages.filter(m => m._id !== messageId));
+      setMessages(messages.filter(m => m._id !== messageToDelete));
+      setMessageToDelete(null);
     } catch (err: any) {
       alert(err.message);
       console.error(err);
@@ -373,7 +375,7 @@ export function Inbox() {
               <button 
                 className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-300 hover:bg-red-600 hover:text-white transition-colors"
                 onClick={() => { 
-                  handleDeleteMessage(contextMenu.message._id);
+                  setMessageToDelete(contextMenu.message._id);
                   setContextMenu(null); 
                 }}
               >
@@ -780,6 +782,36 @@ export function Inbox() {
           )}
         </div>
       </div>
+      {messageToDelete && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Delete Message</h3>
+              <p className="text-gray-500 text-sm">
+                Are you sure you want to permanently delete this message? This action cannot be undone.
+              </p>
+              <div className="flex gap-3 w-full mt-4">
+                <button
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors"
+                  onClick={() => setMessageToDelete(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+                  onClick={handleDeleteMessage}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
