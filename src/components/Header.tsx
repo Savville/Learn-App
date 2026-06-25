@@ -173,6 +173,16 @@ export function Header() {
             >
               Post With Us
             </Link>
+            <Link
+              to="/manage"
+              className={`transition-all px-4 py-2 rounded-xl font-medium ${
+                isActive('/manage') 
+                  ? 'bg-slate-800 text-white shadow-md' 
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-800 hover:text-white hover:shadow-md'
+              }`}
+            >
+              Manage
+            </Link>
           </div>
 
           {/* Mobile Actions: Bell + Menu Button */}
@@ -275,6 +285,15 @@ export function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Post With Us
+              </Link>
+              <Link
+                to="/manage"
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isActive('/manage') ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-800 hover:text-white'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Manage
               </Link>
             </div>
           </div>
