@@ -351,9 +351,6 @@ export function Inbox() {
     if (!activeConv) return;
     setReportModal({ isOpen: true, type: 'dispute', reason: 'Non-delivery of work', details: '' });
   };
-      console.error(err);
-    }
-  };
 
   if (!token) {
     return (
