@@ -58,7 +58,7 @@ export interface Opportunity {
   suggestCustomForm?: boolean; // Temporary flag from AI parsing
 }
 
-export const opportunities: Opportunity[
+export const opportunities: Opportunity[] = [
   {
   "id": "boston-university-presidential-scholarship-2026",
   "title": "Boston University Presidential Scholarship 2026",
@@ -104,11 +104,11 @@ export const opportunities: Opportunity[
   "upfrontCost": "No Upfront Cost",
   "featured": true,
   "dateAdded": "2026-06-25",
-  "logoUrl": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=800",
+  "logoUrl": "/images/boston_university.png",
   "isVerified": true,
   "status": "Verified",
   "postedBy": "Opportunities Kenya Admin"
-},] = [
+  },
   {
     id: 'engineering-automation-developer-2026',
     title: 'Software Developer for Engineering Automation (Equity Opportunity)',
@@ -199,12 +199,7 @@ What You Get From SBS:
     isVerified: true,
     status: 'Verified'
   },
-  
-  
-  
-  
-  
-  
+
   {
     id: 'science-scilifelab-prize-for-young-scientists-2026',
     title: 'Science & SciLifeLab Prize for Young Scientists 2026',
@@ -254,17 +249,7 @@ The grand winner will get a prize money of $30,000 USD, and the other three cate
     dateAdded: '2026-03-29',
     logoUrl: '/images/Scilifelab.png',
   },
-  
-      {
-        heading: 'Tech & Automation (Phase 2)',
-        topics: ['Python & Dynamo script automation', 'Parametric design (Rhino/Grasshopper)', 'BIM plugin development', 'AI-driven structural optimization']
-      },
-      {
-        heading: 'Innovation & Business (Phase 3)',
-        topics: ['Sustainable construction materials', 'Network leakage solutions (Nairobi Water)', 'Decentralized rainwater purification', 'Structural biofuel briquettes & business models']
-      }
-    ]
-  },
+
   {
     id: '37',
     title: 'Non-Revenue Water Crisis — Can You Help Nairobi Fix It?',
@@ -387,17 +372,7 @@ No formal application is needed — explore NCWSC's website, dig into the data, 
       }
     ]
   },
-  
-      {
-        heading: 'Simulation & Backtesting',
-        topics: ['WorldQuant BRAIN platform navigation', 'Performance metric analysis (Sharpe Ratio, Returns)', 'Risk management integration']
-      },
-      {
-        heading: 'Quant Finance Career',
-        topics: ['BRAIN Research Consultant positions', 'Quantitative Researcher networking', 'Global finals in Singapore']
-      }
-    ]
-  },
+
   {
     id: '36',
     title: 'Australia Awards Scholarships 2027',
@@ -672,6 +647,5 @@ No Japanese language skills required. All interns with outstanding performance m
     ]
   }
 ];
-
 
 // Refurbished
