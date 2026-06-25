@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2, LogOut, Search, Settings, MoreVertical, Smile, User, Github, Linkedin, Globe } from 'lucide-react';
+import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2, LogOut, Search, Settings, MoreVertical, Smile, User, Github, Linkedin, Globe, ArrowLeft } from 'lucide-react';
 import { OTPLoginForm } from '../components/OTPLoginForm';
 import { useAlert } from '../contexts/AlertContext';
 
@@ -31,6 +31,20 @@ export function Inbox() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { showAlert } = useAlert();
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent, msg: any) => {
+    const touch = e.touches[0];
+    longPressTimer.current = setTimeout(() => {
+      setContextMenu({ x: touch.clientX, y: touch.clientY, message: msg });
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+    }
+  };
 
   const fetchConversations = async (userEmail: string) => {
     setLoading(true);
@@ -416,7 +430,7 @@ export function Inbox() {
       <div className="max-w-6xl mx-auto h-[85vh] min-h-[600px] flex gap-5 md:gap-8">
         
         {/* Left Panel: Contacts List */}
-        <div className="flex flex-col h-full bg-white rounded-xl w-72 md:w-80 shrink-0 overflow-hidden shadow-sm">
+        <div className={`flex-col h-full bg-white rounded-xl w-full md:w-80 shrink-0 overflow-hidden shadow-sm ${activeConv ? 'hidden md:flex' : 'flex'}`}>
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
             <div className="flex items-center gap-2">
@@ -499,12 +513,18 @@ export function Inbox() {
         </div>
         
         {/* Main Chat Area */}
-        <div className="flex flex-col flex-1 min-w-0 h-full gap-5">
+        <div className={`flex-col flex-1 min-w-0 h-full gap-5 ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
           {activeConv ? (
             <>
               {/* Chat Header */}
-              <div className="bg-white rounded-xl px-8 py-5 flex items-center justify-between shrink-0 shadow-sm border border-[#D1E6FF]">
-                <div className="flex items-center gap-4">
+              <div className="bg-white rounded-xl px-4 md:px-8 py-4 md:py-5 flex items-center justify-between shrink-0 shadow-sm border border-[#D1E6FF]">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <button 
+                    onClick={() => setActiveConv(null)} 
+                    className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
                   {(() => {
                     const partnerEmail = activeConv.participants.find((p: string) => p !== email) || 'Unknown';
                     const seed = partnerEmail.charCodeAt(0) || 0;
@@ -526,7 +546,7 @@ export function Inbox() {
                       {activeConv.gigTitle}
                     </div>
                     <div className="text-sm" style={{ color: MUTED }}>
-                      Chat with {activeConv.participants.find((p: string) => p !== email)}
+                      {activeConv.participants.find((p: string) => p !== email)?.split('@')[0]}
                     </div>
                   </div>
                 </div>
@@ -620,6 +640,9 @@ export function Inbox() {
                     <div 
                       key={i} 
                       className={`flex items-start gap-4 group ${isMe ? "flex-row-reverse" : "flex-row"}`}
+                      onTouchStart={(e) => handleTouchStart(e, msg)}
+                      onTouchEnd={handleTouchEnd}
+                      onTouchMove={handleTouchEnd}
                       onContextMenu={(e) => {
                         e.preventDefault();
                         let x = e.clientX;
@@ -846,7 +869,7 @@ export function Inbox() {
 
         {/* Right Panel: Portfolio Viewer */}
         {activeConv && showPortfolioPane && (
-          <div className="hidden lg:flex flex-col h-full bg-white rounded-xl w-72 shrink-0 overflow-hidden shadow-sm border border-[#D1E6FF]">
+          <div className="absolute inset-0 z-40 lg:relative lg:inset-auto lg:z-auto lg:flex flex-col h-full bg-white lg:rounded-xl w-full lg:w-72 shrink-0 overflow-hidden shadow-2xl lg:shadow-sm border-l lg:border border-[#D1E6FF]">
             {loadingProfile ? (
               <div className="flex-1 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-[#131ADF]" />
