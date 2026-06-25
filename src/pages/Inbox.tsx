@@ -662,7 +662,10 @@ export function Inbox() {
                     Unlock to Reply
                   </button>
                 )}
-                {isEmployer && activeConv.status === 'active' && (
+                {isEmployer && activeConv.status === 'active' && 
+                 activeConv.gigCompensationType !== 'Equity' && 
+                 activeConv.gigCategory !== 'Partnership' && 
+                 !activeConv.gigTitle?.toLowerCase().includes('equity') && (
                   <button onClick={handleHire} className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold text-sm shadow-sm">
                     Fund Escrow & Hire
                   </button>
