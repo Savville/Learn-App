@@ -184,11 +184,53 @@ export function OpportunityDetails() {
   const [pitchError, setPitchError] = useState<string | null>(null);
 
   // Crowdfunding State
+  const [contributeName, setContributeName] = useState('');
+  const [contributeAnonymous, setContributeAnonymous] = useState(false);
   const [contributeAmount, setContributeAmount] = useState('');
   const [contributePhone, setContributePhone] = useState('');
   const [isContributing, setIsContributing] = useState(false);
   const [contributeError, setContributeError] = useState<string | null>(null);
   const [contributeSuccess, setContributeSuccess] = useState(false);
+  const [pendingCheckoutId, setPendingCheckoutId] = useState<string | null>(null);
+  const [localFundedAmount, setLocalFundedAmount] = useState<number>(0);
+  const [contributors, setContributors] = useState<{name: string, amount: number}[]>([]);
+  const [showContributors, setShowContributors] = useState(false);
+
+  useEffect(() => {
+    if (opportunity?.fundedAmount) setLocalFundedAmount(opportunity.fundedAmount);
+  }, [opportunity?.fundedAmount]);
+
+  const fetchContributors = async () => {
+    if (opportunity?.isEscrow) {
+      try {
+        const res = await opportunitiesAPI.getContributors(opportunity.id);
+        setContributors(res.data);
+      } catch (e) {}
+    }
+  };
+
+  useEffect(() => {
+    if (opportunity) fetchContributors();
+  }, [opportunity?.id]);
+
+  useEffect(() => {
+    if (!pendingCheckoutId) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await opportunitiesAPI.getCrowdfundStatus(pendingCheckoutId);
+        if (res.data.status === 'completed') {
+          setLocalFundedAmount(prev => prev + parseFloat(contributeAmount));
+          setPendingCheckoutId(null);
+          fetchContributors();
+        } else if (res.data.status === 'failed') {
+          setContributeError('Payment failed or was cancelled.');
+          setPendingCheckoutId(null);
+          setContributeSuccess(false);
+        }
+      } catch (e) {}
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [pendingCheckoutId, contributeAmount]);
 
   const handleContributeSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -203,6 +245,8 @@ export function OpportunityDetails() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           opportunityId: opportunity.id,
+          name: contributeName,
+          isAnonymous: contributeAnonymous,
           amount: parseFloat(contributeAmount),
           phone: contributePhone
         })
@@ -211,6 +255,7 @@ export function OpportunityDetails() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Failed to initiate STK Push');
 
+      setPendingCheckoutId(result.checkoutRequestId);
       setContributeSuccess(true);
     } catch (err: any) {
       setContributeError(err.message);
@@ -602,12 +647,49 @@ export function OpportunityDetails() {
                     
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm font-semibold text-gray-700">
-                        <span>Raised: KES 0</span>
+                        <span>Raised: KES {localFundedAmount.toLocaleString()}</span>
                         <span>Goal: KES {opportunity.escrowAmount?.toLocaleString() || '0'}</span>
                       </div>
-                      <div className="w-full bg-blue-100 rounded-full h-3">
-                        <div className="bg-[#131ADF] h-3 rounded-full" style={{ width: '0%' }}></div>
+                      <div className="w-full bg-blue-100 rounded-full h-3 overflow-hidden">
+                        <div className="bg-[#131ADF] h-full rounded-full transition-all duration-1000" style={{ width: \`\${Math.min(100, (localFundedAmount / (opportunity.escrowAmount || 1)) * 100)}%\` }}></div>
                       </div>
+                    </div>
+                    
+                    {/* Top Contributors Accordion */}
+                    <div className="mt-6">
+                      <button 
+                        onClick={() => setShowContributors(!showContributors)}
+                        className="flex items-center justify-between w-full p-3 bg-white border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors"
+                      >
+                        <span className="font-semibold text-gray-800 flex items-center gap-2">
+                          <Users className="w-4 h-4 text-[#131ADF]" /> Top Contributors ({contributors.length})
+                        </span>
+                        {showContributors ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                      </button>
+                      
+                      {showContributors && (
+                        <div className="mt-2 bg-white border border-blue-100 rounded-xl overflow-hidden shadow-inner max-h-60 overflow-y-auto">
+                          {contributors.length === 0 ? (
+                            <div className="p-6 text-center text-gray-500 text-sm">
+                              No contributors yet. Be the first!
+                            </div>
+                          ) : (
+                            <ul className="divide-y divide-gray-100">
+                              {contributors.map((c, idx) => (
+                                <li key={idx} className="p-3 flex items-center justify-between hover:bg-gray-50">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
+                                      <UserCircle className="w-6 h-6" />
+                                    </div>
+                                    <span className="font-semibold text-sm text-gray-800">{c.name}</span>
+                                  </div>
+                                  <span className="font-bold text-[#131ADF] text-sm">KES {c.amount.toLocaleString()}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -629,6 +711,18 @@ export function OpportunityDetails() {
                         </DialogHeader>
                         {!contributeSuccess ? (
                           <form onSubmit={handleContributeSubmit} className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <label className="text-sm font-semibold text-gray-700">Your Name</label>
+                                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                                  <input type="checkbox" checked={contributeAnonymous} onChange={(e) => setContributeAnonymous(e.target.checked)} className="rounded text-[#131ADF] focus:ring-[#131ADF]"/>
+                                  Anonymous
+                                </label>
+                              </div>
+                              {!contributeAnonymous && (
+                                <Input type="text" placeholder="John Doe" value={contributeName} onChange={(e) => setContributeName(e.target.value)} required={!contributeAnonymous} />
+                              )}
+                            </div>
                             <div className="space-y-2">
                               <label className="text-sm font-semibold text-gray-700">Amount (KES)</label>
                               <Input
@@ -664,16 +758,26 @@ export function OpportunityDetails() {
                               {isContributing ? 'Initiating STK Push...' : 'Send STK Push'}
                             </Button>
                           </form>
+                        ) : pendingCheckoutId ? (
+                          <div className="py-6 text-center animate-in fade-in zoom-in duration-300">
+                            <div className="w-16 h-16 mx-auto mb-4 animate-pulse bg-blue-100 rounded-full flex items-center justify-center">
+                              <Bell className="w-8 h-8 text-[#131ADF]" />
+                            </div>
+                            <h4 className="text-xl font-bold text-gray-900 mb-2">Check Your Phone!</h4>
+                            <p className="text-gray-600 text-sm">
+                              We've sent an M-PESA STK Push to your phone. Enter your PIN to complete the contribution. Waiting for payment...
+                            </p>
+                          </div>
                         ) : (
                           <div className="py-6 text-center animate-in fade-in zoom-in duration-300">
                             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                            <h4 className="text-xl font-bold text-gray-900 mb-2">Check Your Phone!</h4>
+                            <h4 className="text-xl font-bold text-gray-900 mb-2">Thank you!</h4>
                             <p className="text-gray-600 text-sm">
-                              We've sent an M-PESA STK Push to your phone. Enter your PIN to complete the contribution.
+                              Your contribution was received successfully. The project progress has been updated!
                             </p>
                             <Button 
-                              className="w-full mt-6"
-                              onClick={() => setContributeSuccess(false)}
+                              className="w-full mt-6 bg-[#131ADF]"
+                              onClick={() => { setContributeSuccess(false); setContributeAmount(''); }}
                             >
                               Make Another Contribution
                             </Button>
