@@ -192,6 +192,7 @@ export function OpportunityDetails() {
   const [contributeError, setContributeError] = useState<string | null>(null);
   const [contributeSuccess, setContributeSuccess] = useState(false);
   const [pendingCheckoutId, setPendingCheckoutId] = useState<string | null>(null);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [localFundedAmount, setLocalFundedAmount] = useState<number>(0);
   const [contributors, setContributors] = useState<{name: string, amount: number}[]>([]);
   const [showContributors, setShowContributors] = useState(false);
@@ -231,6 +232,31 @@ export function OpportunityDetails() {
     }, 5000);
     return () => clearInterval(interval);
   }, [pendingCheckoutId, contributeAmount]);
+
+  const handleCheckPayment = async () => {
+    if (!pendingCheckoutId) return;
+    setIsCheckingPayment(true);
+    setContributeError(null);
+    try {
+      const res = await opportunitiesAPI.getCrowdfundStatus(pendingCheckoutId);
+      if (res.data.status === 'completed') {
+        setLocalFundedAmount(prev => prev + parseFloat(contributeAmount));
+        setPendingCheckoutId(null);
+        fetchContributors();
+      } else if (res.data.status === 'failed') {
+        setContributeError('Payment failed or was cancelled.');
+        setPendingCheckoutId(null);
+        setContributeSuccess(false);
+      } else {
+        // Still pending
+        setContributeError('Payment not received yet. Please try again in a few seconds.');
+      }
+    } catch (e: any) {
+      setContributeError(e.message || 'Error checking payment status.');
+    } finally {
+      setIsCheckingPayment(false);
+    }
+  };
 
   const handleContributeSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -764,9 +790,19 @@ export function OpportunityDetails() {
                               <Bell className="w-8 h-8 text-[#131ADF]" />
                             </div>
                             <h4 className="text-xl font-bold text-gray-900 mb-2">Check Your Phone!</h4>
-                            <p className="text-gray-600 text-sm">
-                              We've sent an M-PESA STK Push to your phone. Enter your PIN to complete the contribution. Waiting for payment...
+                            <p className="text-gray-600 text-sm mb-6">
+                              We've sent an M-PESA STK Push to your phone. Enter your PIN to complete the contribution.
                             </p>
+                            {contributeError && (
+                              <p className="text-red-500 text-sm font-medium mb-4 bg-red-50 p-2 rounded-lg">{contributeError}</p>
+                            )}
+                            <Button 
+                              className="w-full bg-[#131ADF] font-bold"
+                              onClick={handleCheckPayment}
+                              disabled={isCheckingPayment}
+                            >
+                              {isCheckingPayment ? 'Checking...' : 'I Have Paid'}
+                            </Button>
                           </div>
                         ) : (
                           <div className="py-6 text-center animate-in fade-in zoom-in duration-300">

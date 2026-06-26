@@ -47,6 +47,7 @@ export function PosterDashboard() {
   const [escrowMessage, setEscrowMessage] = useState<string | null>(null);
   const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
   const [escrowStatus, setEscrowStatus] = useState<'idle' | 'waiting' | 'success' | 'failed'>('idle');
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
 
   // Expanded post for applicants
   const [expandedPostId, setExpandedPostId] = useState<string | null>(urlPostId || null);
@@ -260,6 +261,45 @@ export function PosterDashboard() {
     }
   };
 
+  const handleCheckEscrowPayment = async () => {
+    if (!checkoutRequestId) return;
+    setIsCheckingPayment(true);
+    setEscrowMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/public/payments/status/${checkoutRequestId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.status === 'completed') {
+          setEscrowStatus('success');
+          setEscrowMessage(`Escrow funded! KES ${data.amountPaid} is securely held. Receipt: ${data.receiptNo}`);
+          // Update post locally to reflect funded
+          setPendingPosts(prev => prev.map(p => 
+            (p.opportunity?.id || p.id) === escrowJob?.id ? { ...p, isEscrowFunded: true } : p
+          ));
+          setLivePosts(prev => prev.map(p => 
+            p.id === escrowJob?.id ? { ...p, isEscrowFunded: true } : p
+          ));
+          if (escrowApplicant) {
+            setApplicants(prev => prev.map(a => a._id === escrowApplicant._id ? { ...a, status: 'approved' } : a));
+          }
+        } else if (data.status === 'failed' || data.status === 'cancelled') {
+          setEscrowStatus('failed');
+          setEscrowMessage(`Payment failed or cancelled: ${data.resultDesc || 'User cancelled'}`);
+        } else {
+          setEscrowMessage('Payment not received yet. Please try again in a few seconds.');
+        }
+      } else {
+        setEscrowMessage(data.error || 'Failed to check status');
+      }
+    } catch (e: any) {
+      setEscrowMessage(e.message || 'Error checking payment status.');
+    } finally {
+      setIsCheckingPayment(false);
+    }
+  };
+
   useEffect(() => {
     let interval: any;
     if (checkoutRequestId && escrowStatus === 'waiting') {
@@ -320,11 +360,11 @@ export function PosterDashboard() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to request release');
-      setReleaseMessage(`âœ… ${data.message} Net payout: KES ${data.netPayable}`);
+      setReleaseMessage(`✅ ${data.message} Net payout: KES ${data.netPayable}`);
       // Update local state
       setApplicants(prev => prev.map(a => a._id === app._id ? { ...a, escrowReleaseRequested: true } as any : a));
     } catch (err: any) {
-      setReleaseMessage(`âŒ ${err.message}`);
+      setReleaseMessage(`❌ ${err.message}`);
     } finally {
       setReleaseLoading(false);
     }
@@ -755,7 +795,17 @@ export function PosterDashboard() {
                    </div>
                    <h4 className="text-xl font-bold text-slate-800 mb-2">Waiting for PIN...</h4>
                    <p className="text-slate-600 mb-6">Check your phone. Enter your M-PESA PIN to complete the KES {escrowJob.opportunity?.escrowAmount || 1000} deposit.</p>
-                   <Button variant="outline" onClick={() => setEscrowStatus('idle')} className="text-slate-500">Cancel & Go Back</Button>
+                   {escrowMessage && (
+                     <p className="text-amber-600 text-sm mb-4 font-medium bg-amber-50 p-2 rounded-lg text-center w-full">{escrowMessage}</p>
+                   )}
+                   <Button 
+                     className="w-full bg-[#131ADF] hover:bg-blue-700 font-bold mb-3"
+                     onClick={handleCheckEscrowPayment}
+                     disabled={isCheckingPayment}
+                   >
+                     {isCheckingPayment ? 'Checking...' : 'I Have Paid'}
+                   </Button>
+                   <Button variant="outline" onClick={() => setEscrowStatus('idle')} className="w-full text-slate-500">Cancel & Go Back</Button>
                  </div>
                ) : escrowStatus === 'success' ? (
                  <div className="text-center py-8 animate-in fade-in zoom-in duration-300">
