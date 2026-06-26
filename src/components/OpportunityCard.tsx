@@ -73,8 +73,8 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
 
   // Real metrics from DB tracking for new posts, deterministic fake for older hardcoded posts
   const seed = opportunity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const views = opportunity.views ? opportunity.views : (100 + (seed % 100));
-  const isHot = views > 50;
+  const views = opportunity.views ? opportunity.views : (20 + (seed % 21));
+  const isHot = views > 30;
 
   const finalImageUrl = getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl, opportunity.title);
 

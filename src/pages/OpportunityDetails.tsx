@@ -25,7 +25,8 @@ function renderDescription(text: string): JSX.Element {
   let key = 0;
 
   for (const raw of lines) {
-    const line = raw.trim();
+    // Strip all asterisks EXCEPT a leading bullet asterisk
+    const line = raw.trim().replace(/(?!^\*)\*/g, '');
 
     // Skip separator lines
     if (!line || /^[─\-\u2014]{3,}$/.test(line)) continue;
@@ -418,7 +419,7 @@ export function OpportunityDetails() {
 
   // Real metrics from DB tracking for new posts, deterministic fake for older hardcoded posts
   const seed = opportunity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const views = opportunity.views ? opportunity.views : (100 + (seed % 100));
+  const views = opportunity.views ? opportunity.views : (20 + (seed % 21));
 
   return (
     <div className="min-h-screen bg-gray-50">
