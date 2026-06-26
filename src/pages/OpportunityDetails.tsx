@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
-import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, Flag, Share2, Link as LinkIcon, Linkedin, MessageCircle, Flame, Users } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, Flag, Share2, Link as LinkIcon, Linkedin, MessageCircle, Flame, Users, UserCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,

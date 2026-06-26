@@ -882,6 +882,18 @@ router.post('/payments/crowdfund', async (req, res) => {
   }
 });
 
+// GET /api/public/payments/crowdfund/status/:checkoutRequestId (Public Polling)
+router.get('/payments/crowdfund/status/:checkoutRequestId', async (req, res) => {
+  try {
+    const db = getDB();
+    const tx = await db.collection('transactions').findOne({ checkoutRequestId: req.params.checkoutRequestId, type: 'crowdfund' });
+    if (!tx) return res.status(404).json({ error: 'Transaction not found' });
+    res.json({ status: tx.status, amountPaid: tx.amountPaid, resultDesc: tx.resultDesc });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET /api/public/payments/status/:checkoutRequestId
 router.get('/payments/status/:checkoutRequestId', verifyUserToken, async (req, res) => {
   try {

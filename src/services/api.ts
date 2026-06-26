@@ -58,6 +58,12 @@ export const opportunitiesAPI = {
     });
   },
 
+  getContributors: (id: string) =>
+    apiClient.get(`/public/opportunities/${id}/contributors`),
+
+  getCrowdfundStatus: (checkoutRequestId: string) =>
+    apiClient.get(`/public/payments/crowdfund/status/${checkoutRequestId}`),
+
   report: (id: string, data: { reason: string; details?: string; reporterName?: string; reporterEmail?: string }) =>
     apiClient.post(`/public/report-opportunity/${id}`, data),
 

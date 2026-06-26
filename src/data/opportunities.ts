@@ -58,6 +58,7 @@ export interface Opportunity {
   suggestCustomForm?: boolean; // Temporary flag from AI parsing
   views?: number;
   clicks?: number;
+  fundedAmount?: number;
 }
 
 export const opportunities: Opportunity[] = [
