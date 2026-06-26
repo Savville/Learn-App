@@ -9,50 +9,58 @@ import { useSEO } from '../hooks/useSEO';
 
 // ── Tab category buckets (must match backend constants exactly) ───────────────
 const GIG_CATEGORIES      = ['Gig', 'Job'];
-const CAREER_CATEGORIES   = ['Internship', 'Attachment', 'Project', 'StudentProject', 'Hackathon', 'Challenge'];
-const ACADEMIC_CATEGORIES = ['Scholarship', 'Fellowship', 'Conference', 'Grant', 'CallForPapers', 'Event', 'Volunteer'];
+const ACADEMIC_CAREER_CATEGORIES = ['Internship', 'Attachment', 'Conference', 'CallForPapers', 'Event', 'Volunteer', 'Scholarship', 'Fellowship', 'Grant'];
+const INNOVATION_CATEGORIES = ['Hackathon', 'Challenge', 'StartupFunding'];
+const PROJECT_CATEGORIES = ['StudentProject', 'Project'];
 
-type TabId = 'all' | 'gigs' | 'career' | 'academic';
+type TabId = 'all' | 'jobs' | 'academic_career' | 'innovation' | 'projects';
 
 // Category options tagged to their tab
 const ALL_CATEGORY_OPTIONS: { value: string; label: string; tab: TabId }[] = [
-  { value: 'Gig',           label: 'Microgigs',            tab: 'gigs' },
-  { value: 'Job',           label: 'Jobs',                 tab: 'gigs' },
-  { value: 'Internship',    label: 'Internships',          tab: 'career' },
-  { value: 'Attachment',    label: 'Attachments',          tab: 'career' },
-  { value: 'Project',       label: 'Community Projects',   tab: 'career' },
-  { value: 'StudentProject',label: 'Student Projects',     tab: 'career' },
-  { value: 'Hackathon',     label: 'Hackathons',           tab: 'career' },
-  { value: 'Challenge',     label: 'Industry Challenges',  tab: 'career' },
-  { value: 'Scholarship',   label: 'Scholarships',         tab: 'academic' },
-  { value: 'Fellowship',    label: 'Fellowships',          tab: 'academic' },
-  { value: 'Grant',         label: 'Grants',               tab: 'academic' },
-  { value: 'Conference',    label: 'Conferences',          tab: 'academic' },
-  { value: 'CallForPapers', label: 'Call for Papers',      tab: 'academic' },
-  { value: 'Event',         label: 'Events',               tab: 'academic' },
-  { value: 'Volunteer',     label: 'Volunteer Programmes', tab: 'academic' },
+  { value: 'Gig',           label: 'Microgigs',            tab: 'jobs' },
+  { value: 'Job',           label: 'Jobs',                 tab: 'jobs' },
+  { value: 'Internship',    label: 'Internships',          tab: 'academic_career' },
+  { value: 'Attachment',    label: 'Attachments',          tab: 'academic_career' },
+  { value: 'Conference',    label: 'Conferences',          tab: 'academic_career' },
+  { value: 'CallForPapers', label: 'Call for Papers',      tab: 'academic_career' },
+  { value: 'Event',         label: 'Events',               tab: 'academic_career' },
+  { value: 'Volunteer',     label: 'Volunteer Programmes', tab: 'academic_career' },
+  { value: 'Scholarship',   label: 'Scholarships',         tab: 'academic_career' },
+  { value: 'Fellowship',    label: 'Fellowships',          tab: 'academic_career' },
+  { value: 'Grant',         label: 'Academic Grants',      tab: 'academic_career' },
+  { value: 'Hackathon',     label: 'Hackathons',           tab: 'innovation' },
+  { value: 'Challenge',     label: 'Industry Challenges',  tab: 'innovation' },
+  { value: 'StartupFunding',label: 'Startup Funding',      tab: 'innovation' },
+  { value: 'Project',       label: 'Community Projects',   tab: 'projects' },
+  { value: 'StudentProject',label: 'Student Projects',     tab: 'projects' },
   { value: 'Other',         label: 'Others',               tab: 'all' },
 ];
 
 // Funding options tailored per tab
-const GIG_FUNDING_OPTIONS = [
+const JOBS_FUNDING_OPTIONS = [
   { value: 'all',              label: 'All Pay Types' },
   { value: 'Paid Internship',  label: 'Paid' },
   { value: 'Partially Funded', label: 'Partially Paid' },
   { value: 'Unpaid Internship',label: 'Unpaid' },
 ];
-const CAREER_FUNDING_OPTIONS = [
-  { value: 'all',              label: 'All Pay Types' },
-  { value: 'Paid Internship',  label: 'Paid / Stipend' },
-  { value: 'Partially Funded', label: 'Partially Funded' },
-  { value: 'Unpaid Internship',label: 'Unpaid' },
-];
-const ACADEMIC_FUNDING_OPTIONS = [
+const ACADEMIC_CAREER_FUNDING_OPTIONS = [
   { value: 'all',              label: 'All Funding Types' },
   { value: 'Fully Funded',     label: 'Fully Funded' },
   { value: 'Partially Funded', label: 'Partially Funded' },
+  { value: 'Paid Internship',  label: 'Paid / Stipend' },
   { value: 'Stipend',          label: 'Stipend' },
+  { value: 'Unpaid Internship',label: 'Unpaid' },
   { value: 'Unpaid',           label: 'Unpaid' },
+];
+const INNOVATION_FUNDING_OPTIONS = [
+  { value: 'all',              label: 'All Funding Types' },
+  { value: 'Fully Funded',     label: 'Fully Funded' },
+  { value: 'Partially Funded', label: 'Partially Funded' },
+];
+const PROJECTS_FUNDING_OPTIONS = [
+  { value: 'all',              label: 'All Types' },
+  { value: 'Fully Funded',     label: 'Fully Funded' },
+  { value: 'Partially Funded', label: 'Partially Funded' },
 ];
 const ALL_FUNDING_OPTIONS = [
   { value: 'all',              label: 'All Funding Types' },
@@ -65,10 +73,11 @@ const ALL_FUNDING_OPTIONS = [
 
 // Tab metadata
 const TABS: { id: TabId; label: string; description: string }[] = [
-  { id: 'all',      label: 'All',                  description: 'Opportunities' },
-  { id: 'gigs',     label: 'Microgigs & Jobs',      description: 'Microgigs & Jobs' },
-  { id: 'career',   label: 'Career & Innovation',   description: 'Career & Innovation' },
-  { id: 'academic', label: 'Academic & Learning',   description: 'Academic & Learning' },
+  { id: 'all',             label: 'All',                  description: 'Opportunities' },
+  { id: 'jobs',            label: 'Jobs',                 description: 'Jobs & Microgigs' },
+  { id: 'academic_career', label: 'Academic & Career',    description: 'Academic & Career' },
+  { id: 'innovation',      label: 'Innovation',           description: 'Innovation & Tech' },
+  { id: 'projects',        label: 'Projects',             description: 'Student & Community Projects' },
 ];
 
 const RIGHT_TABS: { id: string; label: string; description: string }[] = [
@@ -93,9 +102,10 @@ const applyFilters = (
       opp.description.toLowerCase().includes(q);
 
     let matchesTab = true;
-    if (activeTab === 'gigs')     matchesTab = GIG_CATEGORIES.includes(opp.category);
-    else if (activeTab === 'career')   matchesTab = CAREER_CATEGORIES.includes(opp.category);
-    else if (activeTab === 'academic') matchesTab = ACADEMIC_CATEGORIES.includes(opp.category);
+    if (activeTab === 'jobs') matchesTab = GIG_CATEGORIES.includes(opp.category);
+    else if (activeTab === 'academic_career') matchesTab = ACADEMIC_CAREER_CATEGORIES.includes(opp.category);
+    else if (activeTab === 'innovation') matchesTab = INNOVATION_CATEGORIES.includes(opp.category);
+    else if (activeTab === 'projects') matchesTab = PROJECT_CATEGORIES.includes(opp.category);
 
     const matchesType    = selectedType === 'all' || opp.category === selectedType;
     const matchesLevel   = selectedLevel === 'all' || opp.eligibility.educationLevel === selectedLevel;
@@ -229,26 +239,29 @@ export function Opportunities() {
 
   // Derive funding options for the current tab
   const visibleFundingOptions =
-    activeTab === 'gigs'     ? GIG_FUNDING_OPTIONS :
-    activeTab === 'career'   ? CAREER_FUNDING_OPTIONS :
-    activeTab === 'academic' ? ACADEMIC_FUNDING_OPTIONS :
+    activeTab === 'jobs' ? JOBS_FUNDING_OPTIONS :
+    activeTab === 'academic_career' ? ACADEMIC_CAREER_FUNDING_OPTIONS :
+    activeTab === 'innovation' ? INNOVATION_FUNDING_OPTIONS :
+    activeTab === 'projects' ? PROJECTS_FUNDING_OPTIONS :
     ALL_FUNDING_OPTIONS;
 
   // Count local opportunities per category, scoped to the current tab
   const countFor = (categoryValue: string) =>
     localOpportunities.filter(o => {
       const inTab =
-        activeTab === 'gigs'     ? GIG_CATEGORIES.includes(o.category) :
-        activeTab === 'career'   ? CAREER_CATEGORIES.includes(o.category) :
-        activeTab === 'academic' ? ACADEMIC_CATEGORIES.includes(o.category) :
+        activeTab === 'jobs' ? GIG_CATEGORIES.includes(o.category) :
+        activeTab === 'academic_career' ? ACADEMIC_CAREER_CATEGORIES.includes(o.category) :
+        activeTab === 'innovation' ? INNOVATION_CATEGORIES.includes(o.category) :
+        activeTab === 'projects' ? PROJECT_CATEGORIES.includes(o.category) :
         true;
       return inTab && o.category === categoryValue;
     }).length;
 
   const totalForTab =
-    activeTab === 'gigs'     ? localOpportunities.filter(o => GIG_CATEGORIES.includes(o.category)).length :
-    activeTab === 'career'   ? localOpportunities.filter(o => CAREER_CATEGORIES.includes(o.category)).length :
-    activeTab === 'academic' ? localOpportunities.filter(o => ACADEMIC_CATEGORIES.includes(o.category)).length :
+    activeTab === 'jobs' ? localOpportunities.filter(o => GIG_CATEGORIES.includes(o.category)).length :
+    activeTab === 'academic_career' ? localOpportunities.filter(o => ACADEMIC_CAREER_CATEGORIES.includes(o.category)).length :
+    activeTab === 'innovation' ? localOpportunities.filter(o => INNOVATION_CATEGORIES.includes(o.category)).length :
+    activeTab === 'projects' ? localOpportunities.filter(o => PROJECT_CATEGORIES.includes(o.category)).length :
     localOpportunities.length;
 
   const filteredOpportunities = opportunities;
@@ -270,9 +283,10 @@ export function Opportunities() {
   };
 
   const searchPlaceholder =
-    activeTab === 'gigs'     ? 'Search microgigs, jobs...' :
-    activeTab === 'career'   ? 'Search internships, hackathons, projects...' :
-    activeTab === 'academic' ? 'Search scholarships, fellowships, grants...' :
+    activeTab === 'jobs'            ? 'Search microgigs, jobs...' :
+    activeTab === 'academic_career' ? 'Search scholarships, internships, fellowships...' :
+    activeTab === 'innovation'      ? 'Search hackathons, challenges, startup funding...' :
+    activeTab === 'projects'        ? 'Search student and community projects...' :
     'Search by title, organization, or keyword...';
 
   return (
@@ -281,8 +295,7 @@ export function Opportunities() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
           {/* Tab Navigation */}
-          <div className="flex bg-white/10 p-1 rounded-lg w-full mb-8 overflow-x-auto gap-1 justify-start items-center backdrop-blur-sm">
-            <div className="flex gap-1 overflow-x-auto w-full sm:w-auto">
+          <div className="flex bg-white/10 p-1 rounded-lg w-full mb-8 gap-1 items-center backdrop-blur-sm flex-wrap">
               {TABS.map(tab => (
                 <button
                   key={tab.id}
@@ -297,7 +310,6 @@ export function Opportunities() {
                   {tab.label}
                 </button>
               ))}
-            </div>
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-6">
