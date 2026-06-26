@@ -416,10 +416,9 @@ export function OpportunityDetails() {
     );
   }
 
-  // Deterministic metrics for social proof
+  // Real metrics from DB tracking for new posts, deterministic fake for older hardcoded posts
   const seed = opportunity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const views = 150 + (seed % 400);
-  const applicants = 5 + (seed % 45);
+  const views = opportunity.views ? opportunity.views : (100 + (seed % 100));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -543,13 +542,7 @@ export function OpportunityDetails() {
                   <p className="font-semibold text-orange-600">{views} viewing</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Users className="w-5 h-5 text-blue-500" />
-                <div>
-                  <p className="text-gray-500 text-sm">Applicants</p>
-                  <p className="font-semibold text-blue-600">{applicants} applied</p>
-                </div>
-              </div>
+
             </div>
 
             {/* Financial Summary - New Section */}

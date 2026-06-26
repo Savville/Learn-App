@@ -71,11 +71,10 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
 
-  // Deterministic metrics for social proof to make it look competitive
+  // Real metrics from DB tracking for new posts, deterministic fake for older hardcoded posts
   const seed = opportunity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const views = 150 + (seed % 400);
-  const applicants = 5 + (seed % 45);
-  const isHot = applicants > 30 || seed % 3 === 0;
+  const views = opportunity.views ? opportunity.views : (100 + (seed % 100));
+  const isHot = views > 50;
 
   const finalImageUrl = getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl, opportunity.title);
 
@@ -220,12 +219,12 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
               {isHot ? (
                 <>
                   <Flame className="w-3.5 h-3.5 text-orange-500" />
-                  <span className="text-orange-600">{views} viewing</span>
+                  <span className="text-orange-600">{views} viewed</span>
                 </>
               ) : (
                 <>
                   <Users className="w-3.5 h-3.5 text-blue-500" />
-                  <span className="text-blue-600">{applicants} applied</span>
+                  <span className="text-blue-600">{views} viewed</span>
                 </>
               )}
             </div>

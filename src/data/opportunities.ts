@@ -56,6 +56,8 @@ export interface Opportunity {
   thematicAreas?: { heading: string; topics: string[] }[];
   applicationForm?: ApplicationForm;
   suggestCustomForm?: boolean; // Temporary flag from AI parsing
+  views?: number;
+  clicks?: number;
 }
 
 export const opportunities: Opportunity[] = [
