@@ -183,4 +183,39 @@ export async function initiateB2CPayout(phone, amount, remarks) {
   }
 }
 
+
+/**
+ * Query STK Push Status
+ * @param {string} checkoutRequestId 
+ */
+export async function querySTKPush(checkoutRequestId) {
+  try {
+    const token = await getOAuthToken();
+    const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
+    const password = Buffer.from(`${SHORTCODE}${PASSKEY}${timestamp}`).toString('base64');
+
+    const payload = {
+      BusinessShortCode: SHORTCODE,
+      Password: password,
+      Timestamp: timestamp,
+      CheckoutRequestID: checkoutRequestId
+    };
+
+    const response = await fetch(`${BASE_URL}/mpesa/stkpushquery/v1/query`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    return { success: response.ok, data };
+  } catch (error) {
+    console.error('STK Query Error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // Refurbished

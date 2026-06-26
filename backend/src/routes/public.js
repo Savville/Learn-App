@@ -163,6 +163,70 @@ function detectRedFlags(opportunity = {}, reporter = {}) {
 
 const router = express.Router();
 
+async function checkDarajaStatus(checkoutRequestId, expectedType, db) {
+  const tx = await db.collection('transactions').findOne({ checkoutRequestId, type: expectedType });
+  if (!tx) return { status: 404, json: { error: 'Transaction not found' } };
+  if (tx.status !== 'pending') {
+    return { status: 200, json: { status: tx.status, amountPaid: tx.amountPaid || tx.amount, resultDesc: tx.resultDesc } };
+  }
+
+  const { querySTKPush } = await import('../services/mpesaService.js');
+  const queryRes = await querySTKPush(checkoutRequestId);
+  
+  if (queryRes.success && queryRes.data) {
+    const resultCode = String(queryRes.data.ResultCode);
+    if (resultCode === "0") {
+      await handleSuccessfulPayment(checkoutRequestId, db, queryRes.data.ResultDesc || 'Completed via Query');
+      const updatedTx = await db.collection('transactions').findOne({ checkoutRequestId });
+      return { status: 200, json: { status: 'completed', amountPaid: updatedTx.amount, resultDesc: updatedTx.resultDesc } };
+    } else if (resultCode === "1032") {
+      await db.collection('transactions').updateOne({ checkoutRequestId }, { $set: { status: 'failed', failReason: 'User cancelled' } });
+      return { status: 200, json: { status: 'failed', resultDesc: 'User cancelled' } };
+    } else if (resultCode === "1037") {
+      await db.collection('transactions').updateOne({ checkoutRequestId }, { $set: { status: 'failed', failReason: 'Timeout' } });
+      return { status: 200, json: { status: 'failed', resultDesc: 'Timeout' } };
+    } else if (resultCode !== undefined) {
+      await db.collection('transactions').updateOne({ checkoutRequestId }, { $set: { status: 'failed', failReason: queryRes.data.ResultDesc } });
+      return { status: 200, json: { status: 'failed', resultDesc: queryRes.data.ResultDesc } };
+    }
+  }
+  return { status: 200, json: { status: 'pending' } };
+}
+
+async function handleSuccessfulPayment(checkoutRequestId, db, resultDesc) {
+  const tx = await db.collection('transactions').findOne({ checkoutRequestId, status: 'pending' });
+  if (!tx) return;
+
+  await db.collection('transactions').updateOne(
+    { checkoutRequestId },
+    { $set: { status: 'completed', resultDesc, completedAt: new Date() } }
+  );
+
+  if (tx.type === 'crowdfund') {
+    await db.collection('opportunities').updateOne(
+      { id: tx.opportunityId },
+      { $inc: { fundedAmount: tx.amount } }
+    );
+  } else if (tx.type === 'escrow') {
+    await db.collection('pending_opportunities').updateOne(
+      { 'opportunity.id': tx.opportunityId },
+      { $set: { isEscrowFunded: true, escrowAmount: tx.amount, status: 'EscrowHeld' } }
+    );
+    await db.collection('opportunities').updateOne(
+      { id: tx.opportunityId },
+      { $set: { isEscrowFunded: true, escrowAmount: tx.amount } }
+    );
+    if (tx.applicationId) {
+      const { ObjectId } = await import('mongodb');
+      await db.collection('applications').updateOne(
+        { _id: new ObjectId(tx.applicationId) },
+        { $set: { status: 'approved', escrowFunded: true, updatedAt: new Date() } }
+      );
+    }
+  }
+}
+
+
 router.post('/upload-image', upload.single('coverImage'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
@@ -906,9 +970,8 @@ router.get('/opportunities/:id/contributors', async (req, res) => {
 router.get('/payments/crowdfund/status/:checkoutRequestId', async (req, res) => {
   try {
     const db = getDB();
-    const tx = await db.collection('transactions').findOne({ checkoutRequestId: req.params.checkoutRequestId, type: 'crowdfund' });
-    if (!tx) return res.status(404).json({ error: 'Transaction not found' });
-    res.json({ status: tx.status, amountPaid: tx.amountPaid, resultDesc: tx.resultDesc });
+    const result = await checkDarajaStatus(req.params.checkoutRequestId, 'crowdfund', db);
+    res.status(result.status).json(result.json);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -922,13 +985,9 @@ router.get('/payments/status/:checkoutRequestId', verifyUserToken, async (req, r
     
     if (!tx) return res.status(404).json({ error: 'Transaction not found' });
     if (tx.posterEmail !== req.user.email) return res.status(403).json({ error: 'Unauthorized to view this transaction' });
-    
-    res.json({ 
-      status: tx.status, // 'pending', 'completed', or 'failed'
-      receiptNo: tx.receiptNo, 
-      amountPaid: tx.amount,
-      resultDesc: tx.resultDesc
-    });
+
+    const result = await checkDarajaStatus(req.params.checkoutRequestId, 'escrow', db);
+    res.status(result.status).json(result.json);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -976,52 +1035,7 @@ router.post('/payments/mpesa/callback', async (req, res) => {
         return res.status(200).send('OK');
       }
 
-      // MongoDB driver v6: findOneAndUpdate returns the document directly (no .value wrapper)
-      const txDoc = await db.collection('transactions').findOneAndUpdate(
-        { checkoutRequestId },
-        { $set: { status: 'completed', receiptNo, amountPaid, completedAt: new Date() } },
-        { returnDocument: 'after' }
-      );
-
-      // Support both driver v4 ({value: doc}) and v6 (doc directly)
-      const txData = txDoc?.value || txDoc;
-
-      if (txData?.opportunityId) {
-        // Mark escrow as funded — do NOT auto-publish. Admin must still review and approve.
-        await db.collection('pending_opportunities').updateOne(
-          { 'opportunity.id': txData.opportunityId },
-          { $set: { isEscrowFunded: true, escrowAmount: amountPaid, status: 'EscrowHeld' } }
-        );
-        // Also update live doc if already approved
-        await db.collection('opportunities').updateOne(
-          { id: txData.opportunityId },
-          { $set: { isEscrowFunded: true, escrowAmount: amountPaid } }
-        );
-        console.log(`[M-PESA] Escrow funded for opportunity: ${txData.opportunityId} (Receipt: ${receiptNo}) — awaiting admin approval.`);
-        
-        // If this was tied to a specific applicant hire, approve them automatically
-        if (txData.applicationId) {
-          const { ObjectId } = await import('mongodb');
-          await db.collection('applications').updateOne(
-            { _id: new ObjectId(txData.applicationId) },
-            { $set: { status: 'approved', escrowFunded: true, updatedAt: new Date() } }
-          );
-          
-          const application = await db.collection('applications').findOne({ _id: new ObjectId(txData.applicationId) });
-          if (application) {
-            await db.collection('notifications').insertOne({
-              email: application.applicantEmail.toLowerCase(),
-              type: 'application_update',
-              title: `Hired! Escrow Funded`,
-              message: `The poster for "${application.opportunityTitle}" has securely funded the escrow and officially hired you!`,
-              isRead: false,
-              createdAt: new Date(),
-              link: '/applied' // link to Tracker
-            });
-            console.log(`[M-PESA] Auto-approved applicant ${txData.applicationId} based on escrow deposit.`);
-          }
-        }
-      }
+      await handleSuccessfulPayment(checkoutRequestId, db, 'Completed via Webhook');
     } else {
       // Payment Failed or User Cancelled
       await db.collection('transactions').updateOne(
