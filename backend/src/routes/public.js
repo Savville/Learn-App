@@ -838,7 +838,7 @@ router.post('/payments/deposit', verifyUserToken, async (req, res) => {
 // Initiate STK Push (Public Crowdfunding for Projects/Hackathons)
 router.post('/payments/crowdfund', async (req, res) => {
   try {
-    const { amount, phone, opportunityId } = req.body;
+    const { amount, phone, opportunityId, name, isAnonymous } = req.body;
     const db = getDB();
 
     if (!amount || amount < 10) return res.status(400).json({ error: 'Valid amount required (Min KES 10)' });
@@ -865,6 +865,7 @@ router.post('/payments/crowdfund', async (req, res) => {
     // Log transaction so the webhook can find it
     await db.collection('transactions').insertOne({
       opportunityId,
+      contributorName: isAnonymous ? 'Anonymous' : (name || 'Anonymous'),
       contributorPhone: phone,
       amount,
       checkoutRequestId: result.data.CheckoutRequestID,
@@ -877,6 +878,25 @@ router.post('/payments/crowdfund', async (req, res) => {
       message: 'STK Push sent to your phone. Enter PIN to contribute.',
       checkoutRequestId: result.data.CheckoutRequestID 
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/public/opportunities/:id/contributors (Public Aggregation)
+router.get('/opportunities/:id/contributors', async (req, res) => {
+  try {
+    const db = getDB();
+    const opportunityId = req.params.id;
+    
+    const contributors = await db.collection('transactions').aggregate([
+      { $match: { opportunityId, type: 'crowdfund', status: 'completed' } },
+      { $group: { _id: "$contributorName", amount: { $sum: "$amount" } } },
+      { $project: { name: { $ifNull: ["$_id", "Anonymous"] }, amount: 1, _id: 0 } },
+      { $sort: { amount: -1 } }
+    ]).toArray();
+
+    res.json(contributors);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
