@@ -1204,6 +1204,150 @@ router.post('/reports/:id/email-postmortem', verifyAdminKey, async (req, res) =>
   }
 });
 
+// ==========================================
+// Phase 4: Crowdfunding Ledger & Payouts
+// ==========================================
+
+// GET /api/admin/crowdfund/ledger
+router.get('/crowdfund/ledger', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    // Get all completed crowdfund transactions
+    const txs = await db.collection('transactions').find({ type: 'crowdfund', status: 'completed' }).toArray();
+    
+    // Group by opportunityId
+    const ledgerMap = {};
+    for (const tx of txs) {
+      if (!ledgerMap[tx.opportunityId]) {
+        const opp = await db.collection('opportunities').findOne({ id: tx.opportunityId });
+        ledgerMap[tx.opportunityId] = {
+          opportunityId: tx.opportunityId,
+          title: opp?.title || 'Unknown Project',
+          category: opp?.category || 'Unknown',
+          contactEmail: opp?.contactEmail || opp?.reporter?.email,
+          totalRaised: 0,
+          txCount: 0,
+          transactions: []
+        };
+      }
+      ledgerMap[tx.opportunityId].totalRaised += Number(tx.amountPaid || tx.amount || 0);
+      ledgerMap[tx.opportunityId].txCount++;
+      ledgerMap[tx.opportunityId].transactions.push(tx);
+    }
+    res.json(Object.values(ledgerMap));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/crowdfund/payout/:opportunityId
+router.post('/crowdfund/payout/:opportunityId', verifyAdminKey, async (req, res) => {
+  try {
+    const { opportunityId } = req.params;
+    const { mpesaNumber } = req.body;
+    
+    if (!mpesaNumber || !/^2547\d{8}$/.test(mpesaNumber.toString())) {
+      return res.status(400).json({ error: 'Valid M-PESA number is required' });
+    }
+
+    const db = getDB();
+    const txs = await db.collection('transactions').find({ opportunityId, type: 'crowdfund', status: 'completed' }).toArray();
+    
+    if (txs.length === 0) return res.status(400).json({ error: 'No completed transactions found for this project.' });
+
+    let totalRaised = 0;
+    txs.forEach(tx => totalRaised += Number(tx.amountPaid || tx.amount || 0));
+
+    const platformFee = Math.ceil(totalRaised * 0.05);
+    const netPayable = totalRaised - platformFee;
+
+    const { initiateB2CPayout } = await import('../services/mpesaService.js');
+    const b2cResult = await initiateB2CPayout(mpesaNumber, netPayable, `Crowdfund Payout for ${opportunityId}`);
+
+    if (!b2cResult.success) {
+      return res.status(500).json({ error: b2cResult.error || 'Failed to initiate Daraja B2C Payout' });
+    }
+
+    // Log the payout
+    await db.collection('transactions').insertOne({
+      opportunityId,
+      phone: mpesaNumber,
+      amount: netPayable,
+      conversationId: b2cResult.data.ConversationID,
+      status: 'pending',
+      type: 'crowdfund_payout',
+      createdAt: new Date()
+    });
+
+    res.json({ message: 'Payout successfully initiated to ' + mpesaNumber, netPayable });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/crowdfund/refund/:opportunityId
+router.post('/crowdfund/refund/:opportunityId', verifyAdminKey, async (req, res) => {
+  try {
+    const { opportunityId } = req.params;
+    const db = getDB();
+    const txs = await db.collection('transactions').find({ opportunityId, type: 'crowdfund', status: 'completed' }).toArray();
+    
+    if (txs.length === 0) return res.status(400).json({ error: 'No completed transactions found for this project.' });
+
+    const { initiateB2CPayout } = await import('../services/mpesaService.js');
+    
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const tx of txs) {
+      // Simulate refund using B2C to the contributor's phone
+      const phone = tx.contributorPhone || tx.phone;
+      const amount = Number(tx.amountPaid || tx.amount);
+      if (!phone) continue;
+
+      const b2cResult = await initiateB2CPayout(phone, amount, `Refund for ${opportunityId}`);
+      if (b2cResult.success) {
+        successCount++;
+        await db.collection('transactions').insertOne({
+          opportunityId,
+          phone,
+          amount,
+          conversationId: b2cResult.data.ConversationID,
+          status: 'pending',
+          type: 'crowdfund_refund',
+          originalTxId: tx._id,
+          createdAt: new Date()
+        });
+      } else {
+        failCount++;
+      }
+      // Small delay to prevent hitting Daraja rate limits
+      await new Promise(r => setTimeout(r, 200));
+    }
+
+    res.json({ message: `Refunds initiated: ${successCount} successful, ${failCount} failed.` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==========================================
+// Phase 5: Secure KYC / Endorsement Viewing
+// ==========================================
+router.get('/kyc/:filename', verifyAdminKey, (req, res) => {
+  const filename = req.params.filename;
+  // Ensure the filename doesn't contain directory traversal sequences
+  if (filename.includes('..') || filename.includes('/')) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const filePath = path.join(PROJECT_ROOT, 'backend', 'uploads', 'kyc', filename);
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ error: 'KYC Document not found' });
+  }
+});
+
 export default router;
 
 // Refurbished

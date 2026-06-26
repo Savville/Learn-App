@@ -9,6 +9,8 @@ const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || (isProduction ? '' : 'you
 const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || (isProduction ? '' : 'your_sandbox_consumer_secret');
 const SHORTCODE = process.env.MPESA_SHORTCODE || (isProduction ? '' : '174379'); 
 const PASSKEY = process.env.MPESA_PASSKEY || (isProduction ? '' : 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919');
+const B2C_INITIATOR_NAME = process.env.MPESA_B2C_INITIATOR || 'testapi';
+const B2C_INITIATOR_PASSWORD = process.env.MPESA_B2C_PASSWORD || 'Safaricom999!*!';
 
 // Validate production environment to ensure sandbox defaults don't slip in
 if (isProduction) {
@@ -96,6 +98,87 @@ export async function initiateSTKPush(phone, amount, reference, description) {
     return { success: true, data };
   } catch (error) {
     console.error('STK Push Error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Generate Security Credential for B2C
+ */
+function generateSecurityCredential(plaintext) {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const certPath = process.env.DARAJA_CERT_PATH || path.join(__dirname, '..', '..', 'SandboxCertificate.cer');
+    
+    if (!fs.existsSync(certPath)) {
+      console.warn('⚠️ SandboxCertificate.cer not found! Mocking SecurityCredential for Sandbox.');
+      return Buffer.from('mock_encrypted_password_for_sandbox').toString('base64');
+    }
+    
+    const cert = fs.readFileSync(certPath, 'utf8');
+    const buffer = Buffer.from(plaintext, 'utf8');
+    const encrypted = crypto.publicEncrypt({
+      key: cert,
+      padding: crypto.constants.RSA_PKCS1_PADDING
+    }, buffer);
+    
+    return encrypted.toString('base64');
+  } catch (error) {
+    console.error('Failed to generate Security Credential:', error);
+    return Buffer.from('mock_encrypted_password_for_sandbox').toString('base64');
+  }
+}
+
+/**
+ * Initiate B2C Payout
+ * @param {string} phone - Freelancer/Receiver phone number
+ * @param {number} amount - Amount in KES to send
+ * @param {string} remarks - Description or ID
+ */
+export async function initiateB2CPayout(phone, amount, remarks) {
+  try {
+    const token = await getOAuthToken();
+    const securityCredential = generateSecurityCredential(B2C_INITIATOR_PASSWORD);
+
+    const callbackUrl = process.env.BACKEND_API_URL
+      ? `${process.env.BACKEND_API_URL}/public/payments/mpesa/b2c/result`
+      : 'https://your-domain.com/api/public/payments/mpesa/b2c/result';
+    const timeoutUrl = process.env.BACKEND_API_URL
+      ? `${process.env.BACKEND_API_URL}/public/payments/mpesa/b2c/timeout`
+      : 'https://your-domain.com/api/public/payments/mpesa/b2c/timeout';
+
+    const payload = {
+      InitiatorName: B2C_INITIATOR_NAME,
+      SecurityCredential: securityCredential,
+      CommandID: 'BusinessPayment', // or SalaryPayment/PromotionPayment
+      Amount: Math.ceil(amount).toString(),
+      PartyA: SHORTCODE, // Sender (Your Till/Shortcode)
+      PartyB: phone,     // Receiver
+      Remarks: remarks.substring(0, 100),
+      QueueTimeOutURL: timeoutUrl,
+      ResultURL: callbackUrl,
+      Occasion: 'Escrow Payout'
+    };
+
+    const response = await fetch(`${BASE_URL}/mpesa/b2c/v1/paymentrequest`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (!response.ok || data.errorMessage) {
+      throw new Error(data.errorMessage || 'B2C Payout failed');
+    }
+
+    // data contains ConversationID and OriginatorConversationID
+    return { success: true, data };
+  } catch (error) {
+    console.error('B2C Payout Error:', error);
     return { success: false, error: error.message };
   }
 }

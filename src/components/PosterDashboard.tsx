@@ -3,8 +3,9 @@ import { OTPLoginForm } from './OTPLoginForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock, Clock, CheckCircle } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toSlug } from '@/utils/dateUtils';
+import { useAlert } from '@/contexts/AlertContext';
 
 interface Post {
   _id: string;
@@ -35,6 +36,8 @@ interface Applicant {
 
 export function PosterDashboard() {
   const navigate = useNavigate();
+  const { id: urlPostId } = useParams<{ id: string }>();
+  const { showAlert } = useAlert();
   const [token, setToken] = useState(localStorage.getItem('user_token'));
   const [email, setEmail] = useState(localStorage.getItem('user_email'));
   
@@ -46,13 +49,35 @@ export function PosterDashboard() {
   const [escrowStatus, setEscrowStatus] = useState<'idle' | 'waiting' | 'success' | 'failed'>('idle');
 
   // Expanded post for applicants
-  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(urlPostId || null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loadingApplicants, setLoadingApplicants] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Auto-fetch applicants if we arrived via direct URL
+  useEffect(() => {
+    if (urlPostId && token && !applicants.length && expandedPostId === urlPostId) {
+      const loadInitialApplicants = async () => {
+        setLoadingApplicants(true);
+        try {
+          const res = await fetch(`${API_BASE}/public/me/posts/${urlPostId}/applicants`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+          if (res.ok) setApplicants(data || []);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoadingApplicants(false);
+        }
+      };
+      loadInitialApplicants();
+    }
+  }, [urlPostId, token]);
+
   // Escrow Deposit State
   const [escrowJob, setEscrowJob] = useState<Post | null>(null);
+  const [escrowApplicant, setEscrowApplicant] = useState<Applicant | null>(null);
   const [escrowPhone, setEscrowPhone] = useState('');
   const [escrowLoading, setEscrowLoading] = useState(false);
 
@@ -210,7 +235,12 @@ export function PosterDashboard() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}` 
         },
-        body: JSON.stringify({ amount, phone: escrowPhone, opportunityId })
+        body: JSON.stringify({ 
+          amount, 
+          phone: escrowPhone, 
+          opportunityId,
+          applicationId: escrowApplicant?._id || undefined
+        })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to initiate deposit');
@@ -259,6 +289,10 @@ export function PosterDashboard() {
               setLivePosts(prev => prev.map(p => 
                 p.id === escrowJob?.id ? { ...p, isEscrowFunded: true } : p
               ));
+              // Update applicant locally if this was an applicant hire
+              if (escrowApplicant) {
+                setApplicants(prev => prev.map(a => a._id === escrowApplicant._id ? { ...a, status: 'approved' } : a));
+              }
             } else if (data.status === 'failed' || data.status === 'cancelled') {
               setEscrowStatus('failed');
               setEscrowMessage(`Payment failed or cancelled: ${data.resultDesc || 'User cancelled'}`);
@@ -535,20 +569,32 @@ export function PosterDashboard() {
                                         <>
                                           <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
                                           {isJobOrGig && <Button variant="outline" size="sm" className="text-purple-600 hover:bg-purple-50 border-purple-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'shortlisted')}>Shortlist</Button>}
-                                          <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                          {isJobOrGig ? (
+                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => { setEscrowJob(post); setEscrowApplicant(app); }}>Hire & Deposit Escrow</Button>
+                                          ) : (
+                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                          )}
                                         </>
                                       )}
                                       {app.status === 'shortlisted' && (
                                         <>
                                           <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
                                           <Button variant="outline" size="sm" className="text-blue-600 hover:bg-blue-50 border-blue-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'interviewing')}>Interview</Button>
-                                          <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                          {isJobOrGig ? (
+                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => { setEscrowJob(post); setEscrowApplicant(app); }}>Hire & Deposit Escrow</Button>
+                                          ) : (
+                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                          )}
                                         </>
                                       )}
                                       {app.status === 'interviewing' && (
                                         <>
                                           <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
-                                          <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                          {isJobOrGig ? (
+                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => { setEscrowJob(post); setEscrowApplicant(app); }}>Hire & Deposit Escrow</Button>
+                                          ) : (
+                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
+                                          )}
                                         </>
                                       )}
                                       {app.status === 'approved' && (
@@ -695,7 +741,9 @@ export function PosterDashboard() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
             <div className="bg-blue-600 p-4 text-white">
                <h3 className="font-bold text-lg flex items-center gap-2"><ShieldCheck className="w-5 h-5"/> Secure Escrow Deposit</h3>
-               <p className="text-blue-100 text-sm mt-1">Fund your job post to automatically publish it.</p>
+               <p className="text-blue-100 text-sm mt-1">
+                 {escrowApplicant ? `Fund the escrow to officially hire ${escrowApplicant.applicantEmail}.` : 'Fund your job post to automatically publish it.'}
+               </p>
             </div>
             
             <div className="p-6">
@@ -716,7 +764,7 @@ export function PosterDashboard() {
                    </div>
                    <h4 className="text-xl font-bold text-slate-800 mb-2">Escrow Funded!</h4>
                    <p className="text-slate-600 mb-6 font-medium">{escrowMessage}</p>
-                   <Button onClick={() => { setEscrowJob(null); setEscrowStatus('idle'); setCheckoutRequestId(null); }} className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold">Done</Button>
+                   <Button onClick={() => { setEscrowJob(null); setEscrowApplicant(null); setEscrowStatus('idle'); setCheckoutRequestId(null); }} className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold">Done</Button>
                  </div>
                ) : escrowStatus === 'failed' ? (
                  <div className="text-center py-8 animate-in fade-in zoom-in duration-300">
@@ -726,7 +774,7 @@ export function PosterDashboard() {
                    <h4 className="text-xl font-bold text-slate-800 mb-2">Payment Failed</h4>
                    <p className="text-slate-600 mb-6 font-medium text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">{escrowMessage}</p>
                    <Button onClick={() => setEscrowStatus('idle')} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold mb-2">Try Again</Button>
-                   <Button variant="ghost" onClick={() => { setEscrowJob(null); setEscrowStatus('idle'); setCheckoutRequestId(null); }} className="w-full">Cancel</Button>
+                   <Button variant="ghost" onClick={() => { setEscrowJob(null); setEscrowApplicant(null); setEscrowStatus('idle'); setCheckoutRequestId(null); }} className="w-full">Cancel</Button>
                  </div>
                ) : (
                  <>
@@ -757,7 +805,7 @@ export function PosterDashboard() {
                       </div>
                       
                       <div className="flex gap-3 pt-2">
-                        <Button type="button" variant="outline" className="flex-1" onClick={() => { setEscrowJob(null); setEscrowMessage(null); setEscrowStatus('idle'); }}>Cancel</Button>
+                        <Button type="button" variant="outline" className="flex-1" onClick={() => { setEscrowJob(null); setEscrowApplicant(null); setEscrowMessage(null); setEscrowStatus('idle'); }}>Cancel</Button>
                         <Button type="submit" className="flex-1 bg-green-600 hover:bg-green-700 text-white" disabled={escrowLoading || !escrowPhone}>
                           {escrowLoading ? 'Initiating...' : 'Send M-PESA Prompt'}
                         </Button>

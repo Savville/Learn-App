@@ -39,7 +39,7 @@ export function MobileNav() {
         // exact match for home, startsWith for others — but only against THIS link's path
         const isActive = link.exact
           ? location.pathname === link.path
-          : location.pathname === link.path || location.pathname.startsWith(link.path + '/');
+          : location.pathname === link.path || location.pathname.startsWith(link.path + '/') || (link.name === 'Post' && location.pathname.startsWith('/manage'));
 
         return (
           <Link

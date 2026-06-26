@@ -22,7 +22,7 @@ export interface Opportunity {
   escrowAmount?: number;
   isEscrowFunded?: boolean;
   provider: string;
-  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'Gig' | 'Job' | 'Partnership' | 'Other';
+  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'StudentProject' | 'Gig' | 'Job' | 'Partnership' | 'Other';
   description: string;
   fullDescription: string;
   deadline?: string;

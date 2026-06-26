@@ -22,7 +22,8 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [chatOversight, setChatOversight] = useState<any>(null);
   const [payDoerLoading, setPayDoerLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats'>('opps');
+  const [ledgerItems, setLedgerItems] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats' | 'ledger'>('opps');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
@@ -96,7 +97,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('adminToken');
       if (!token) return;
       
-      const [oppsRes, reportsRes, userReportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes, categoriesRes] = await Promise.all([
+      const [oppsRes, reportsRes, userReportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes, categoriesRes, ledgerRes] = await Promise.all([
         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/user-reports`, { headers: { Authorization: `Bearer ${token}` } }),
@@ -107,6 +108,7 @@ export default function AdminDashboard() {
         fetch(`${API_BASE}/admin/disputes`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/chat-oversight`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/subscriber-categories`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/crowdfund/ledger`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (oppsRes.ok) setPending(await oppsRes.json());
@@ -118,6 +120,7 @@ export default function AdminDashboard() {
       if (statsRes.ok) setStats(await statsRes.json());
       if (disputesRes.ok) setDisputes(await disputesRes.json());
       if (oversightRes.ok) setChatOversight(await oversightRes.json());
+      if (ledgerRes.ok) setLedgerItems(await ledgerRes.json());
       if (categoriesRes.ok) {
         const catData = await categoriesRes.json();
         setSubscriberCategories(catData.breakdown || []);
@@ -375,6 +378,52 @@ export default function AdminDashboard() {
     }
     setPayDoerLoading(null);
   };
+
+  const handleCrowdfundPayout = async (opportunityId: string) => {
+    const mpesaNumber = window.prompt("Enter the Creator's M-PESA number (e.g., 2547XXXXXXXX) to send them the funds:");
+    if (!mpesaNumber) return;
+    if (!window.confirm(`Send payout to ${mpesaNumber}? This cannot be undone.`)) return;
+    
+    setActionLoading(`payout_${opportunityId}`);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/crowdfund/payout/${opportunityId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ mpesaNumber })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Payout failed');
+      showAlert({ title: 'Success', message: `✅ ${data.message}`, type: 'success' });
+      // Update UI state
+      setLedgerItems(prev => prev.map(l => l.opportunityId === opportunityId ? { ...l, totalRaised: 0 } : l));
+    } catch (e: any) {
+      showAlert({ title: 'Error', message: `❌ Error: ${e.message}`, type: 'error' });
+    }
+    setActionLoading(null);
+  };
+
+  const handleCrowdfundRefund = async (opportunityId: string) => {
+    if (!window.confirm(`Are you sure you want to refund ALL contributors for project ${opportunityId}? This will initiate Daraja B2C transfers back to everyone.`)) return;
+    
+    setActionLoading(`refund_${opportunityId}`);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/crowdfund/refund/${opportunityId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Refund failed');
+      showAlert({ title: 'Success', message: `✅ ${data.message}`, type: 'success' });
+      // Update UI state
+      setLedgerItems(prev => prev.map(l => l.opportunityId === opportunityId ? { ...l, totalRaised: 0 } : l));
+    } catch (e: any) {
+      showAlert({ title: 'Error', message: `❌ Error: ${e.message}`, type: 'error' });
+    }
+    setActionLoading(null);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
@@ -489,6 +538,13 @@ export default function AdminDashboard() {
             <MessageCircle className="w-4 h-4" />
             Chats Oversight
           </button>
+          <button 
+            onClick={() => setActiveTab('ledger')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'ledger' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <FileText className="w-4 h-4" />
+            Crowdfund Ledger
+          </button>
         </div>
 
         {loading ? (
@@ -555,6 +611,22 @@ export default function AdminDashboard() {
                               }}
                             />
                           </div>
+                          
+                          {/* KYC Document Viewer */}
+                          {item.opportunity.kycProofFilename && (
+                            <div className="mt-4 w-full">
+                              <Button 
+                                variant="outline" 
+                                className="w-full bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800 font-bold shadow-sm"
+                                onClick={() => {
+                                  const token = localStorage.getItem('adminToken');
+                                  window.open(`${API_BASE}/admin/kyc/${item.opportunity.kycProofFilename}?token=${token}`, '_blank');
+                                }}
+                              >
+                                <FileText className="w-4 h-4 mr-2" /> View Endorsement Proof
+                              </Button>
+                            </div>
+                          )}
                        </div>
                        <div className="mt-6 flex flex-col gap-2">
                           <div className="rounded-md border border-slate-200 bg-white p-3 space-y-2">
@@ -1706,6 +1778,65 @@ export default function AdminDashboard() {
                 </table>
               </CardContent>
             </Card>
+          </div>
+        ) : activeTab === 'ledger' ? (
+          /* Crowdfund Ledger Tab */
+          <div className="space-y-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-slate-900">Crowdfunding Ledger</h2>
+              <p className="text-sm text-slate-500">Track all funded projects and manage payouts or mass refunds.</p>
+            </div>
+            
+            {ledgerItems.length === 0 ? (
+              <Card className="border-slate-200 shadow-sm">
+                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                    <FileText className="h-12 w-12 text-slate-300 mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900">No Crowdfunds Found</h3>
+                    <p className="text-sm text-slate-500 max-w-sm mt-1">There are no completed crowdfund transactions yet.</p>
+                 </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {ledgerItems.map((item: any) => (
+                  <Card key={item.opportunityId} className="border-slate-200 shadow-sm">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+                        <div>
+                          <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 mb-2">{item.category}</Badge>
+                          <h3 className="text-lg font-bold text-slate-900">{item.title}</h3>
+                          <p className="text-sm text-slate-500 font-mono mt-1">ID: {item.opportunityId}</p>
+                          <p className="text-sm text-slate-600 mt-1">Creator/Contact: {item.contactEmail || 'N/A'}</p>
+                        </div>
+                        
+                        <div className="flex flex-col gap-2 p-4 bg-slate-50 rounded-lg border border-slate-100 w-full lg:w-64">
+                          <p className="text-xs uppercase font-semibold text-slate-500 tracking-wider">Total Raised</p>
+                          <p className="text-2xl font-bold text-green-600">KES {item.totalRaised.toLocaleString()}</p>
+                          <p className="text-xs text-slate-500">From {item.txCount} contributions</p>
+                          
+                          <div className="flex flex-col gap-2 mt-2 pt-3 border-t border-slate-200">
+                            <Button 
+                              onClick={() => handleCrowdfundPayout(item.opportunityId)}
+                              disabled={actionLoading === `payout_${item.opportunityId}`}
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                            >
+                              <DollarSign className="w-4 h-4 mr-2" /> Payout to Creator
+                            </Button>
+                            <Button 
+                              onClick={() => handleCrowdfundRefund(item.opportunityId)}
+                              disabled={actionLoading === `refund_${item.opportunityId}`}
+                              variant="outline" 
+                              className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                            >
+                              <AlertTriangle className="w-4 h-4 mr-2" /> Refund Contributors
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         ) : null}
       </div>

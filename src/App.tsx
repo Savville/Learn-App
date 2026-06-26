@@ -9,8 +9,6 @@ import { OpportunityDetails } from './pages/OpportunityDetails';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { PostWithUs } from './pages/PostWithUs';
-import { ManageDashboard } from './pages/employer/ManageDashboard';
-import { ManageApplicants } from './pages/employer/ManageApplicants';
 import { Inbox } from './pages/Inbox';
 import { Subscribe } from './pages/Subscribe';
 import { Tracker } from './pages/Tracker';
@@ -74,10 +72,10 @@ function AppContent() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/post-with-us" element={<PostWithUs />} />
-          <Route path="/manage" element={<ManageDashboard />} />
-          <Route path="/manage/applicants/:id" element={<ManageApplicants />} />
+          <Route path="/manage" element={<PostWithUs defaultMode="manage" />} />
+          <Route path="/manage/applicants/:id" element={<PostWithUs defaultMode="manage" />} />
           {/* /manage/edit/:id reuses PostWithUs which already handles location.state.editPost */}
-          <Route path="/manage/edit/:id" element={<PostWithUs />} />
+          <Route path="/manage/edit/:id" element={<PostWithUs defaultMode="post" />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/applied" element={<Tracker />} />
           <Route path="/portfolio" element={<Portfolio />} />

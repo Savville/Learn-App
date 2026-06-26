@@ -14,10 +14,16 @@ const JWT_SECRET = process.env.JWT_SECRET;
  *   2. The raw API key:     x-api-key: <key>              (legacy, kept for compatibility)
  */
 export function verifyAdminKey(req, res, next) {
-  // ── 1. Try JWT Bearer token first ──────────────────────────────────────────
+  // ── 1. Try JWT Bearer token or Query token first ──────────────────────────────────────────
   const authHeader = req.headers['authorization'];
+  let token = null;
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.slice(7);
+    token = authHeader.slice(7);
+  } else if (req.query && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (token) {
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       req.admin = decoded; // attach decoded payload to request

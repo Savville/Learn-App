@@ -182,6 +182,42 @@ export function OpportunityDetails() {
   const [pitchSuccess, setPitchSuccess] = useState(false);
   const [pitchError, setPitchError] = useState<string | null>(null);
 
+  // Crowdfunding State
+  const [contributeAmount, setContributeAmount] = useState('');
+  const [contributePhone, setContributePhone] = useState('');
+  const [isContributing, setIsContributing] = useState(false);
+  const [contributeError, setContributeError] = useState<string | null>(null);
+  const [contributeSuccess, setContributeSuccess] = useState(false);
+
+  const handleContributeSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!opportunity) return;
+    
+    setIsContributing(true);
+    setContributeError(null);
+
+    try {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/payments/crowdfund`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          opportunityId: opportunity.id,
+          amount: parseFloat(contributeAmount),
+          phone: contributePhone
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to initiate STK Push');
+
+      setContributeSuccess(true);
+    } catch (err: any) {
+      setContributeError(err.message);
+    } finally {
+      setIsContributing(false);
+    }
+  };
+
   const handleApplySubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!opportunity || !opportunity.applicationForm) return;
@@ -558,6 +594,173 @@ export function OpportunityDetails() {
                 )}
               </div>
             </div>
+
+            {/* Crowdfunding UI for Community Projects */}
+            {['Project', 'StudentProject'].includes(opportunity.category) && opportunity.isEscrow && (
+              <div className="bg-gradient-to-br from-[#131ADF]/10 to-blue-50 rounded-2xl p-6 md:p-8 mb-8 border border-blue-100">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                  <div className="flex-1 w-full">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Fund this {opportunity.category === 'StudentProject' ? 'Student' : 'Community'} Project</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Support this student or community initiative by contributing securely via M-PESA. 
+                      Platform fees of 5% apply.
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm font-semibold text-gray-700">
+                        <span>Raised: KES 0</span>
+                        <span>Goal: KES {opportunity.escrowAmount?.toLocaleString() || '0'}</span>
+                      </div>
+                      <div className="w-full bg-blue-100 rounded-full h-3">
+                        <div className="bg-[#131ADF] h-3 rounded-full" style={{ width: '0%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="w-full md:w-auto shrink-0 flex flex-col gap-3">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          className="w-full md:w-48 py-6 text-lg font-bold bg-[#131ADF] hover:bg-blue-800 shadow-md transition-all hover:shadow-lg"
+                        >
+                          Contribute
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Contribute to this {opportunity.category === 'StudentProject' ? 'Student' : 'Community'} Project</DialogTitle>
+                          <DialogDescription>
+                            Enter your M-PESA number and the amount you'd like to contribute. You will receive an STK push on your phone.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {!contributeSuccess ? (
+                          <form onSubmit={handleContributeSubmit} className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-gray-700">Amount (KES)</label>
+                              <Input
+                                type="number"
+                                min="10"
+                                required
+                                placeholder="e.g. 500"
+                                value={contributeAmount}
+                                onChange={(e) => setContributeAmount(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-gray-700">M-PESA Phone Number</label>
+                              <Input
+                                type="tel"
+                                required
+                                placeholder="e.g. 254700000000"
+                                value={contributePhone}
+                                onChange={(e) => setContributePhone(e.target.value)}
+                              />
+                              <p className="text-[11px] text-gray-500 italic">Format: 2547XXXXXXXX</p>
+                            </div>
+                            {contributeError && (
+                              <div className="p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">
+                                {contributeError}
+                              </div>
+                            )}
+                            <Button 
+                              type="submit" 
+                              className="w-full bg-[#131ADF]"
+                              disabled={isContributing}
+                            >
+                              {isContributing ? 'Initiating STK Push...' : 'Send STK Push'}
+                            </Button>
+                          </form>
+                        ) : (
+                          <div className="py-6 text-center animate-in fade-in zoom-in duration-300">
+                            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                            <h4 className="text-xl font-bold text-gray-900 mb-2">Check Your Phone!</h4>
+                            <p className="text-gray-600 text-sm">
+                              We've sent an M-PESA STK Push to your phone. Enter your PIN to complete the contribution.
+                            </p>
+                            <Button 
+                              className="w-full mt-6"
+                              onClick={() => setContributeSuccess(false)}
+                            >
+                              Make Another Contribution
+                            </Button>
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Contact Creator Button / Dialog */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline"
+                          className="w-full md:w-48 py-6 text-base font-bold border-[#131ADF] text-[#131ADF] hover:bg-blue-50 shadow-sm transition-all"
+                        >
+                          Contact Creator
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Message Project Creator</DialogTitle>
+                          <DialogDescription>
+                            Interested in arranging a physical visit or verifying details? Send a message directly to the creator.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {!pitchSuccess ? (
+                          <form onSubmit={handlePitchSubmit} className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-gray-700">Your Email</label>
+                              <Input
+                                type="email"
+                                required
+                                placeholder="Enter your email"
+                                value={pitchEmail}
+                                onChange={(e) => setPitchEmail(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-gray-700">Message</label>
+                              <Textarea
+                                required
+                                rows={4}
+                                placeholder="I'm interested in funding this project. Can we arrange a visit?"
+                                value={pitchMessage}
+                                onChange={(e) => setPitchMessage(e.target.value)}
+                              />
+                            </div>
+                            {pitchError && (
+                              <div className="p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">
+                                {pitchError}
+                              </div>
+                            )}
+                            <Button 
+                              type="submit" 
+                              className="w-full bg-[#131ADF]"
+                              disabled={isSubmittingPitch}
+                            >
+                              {isSubmittingPitch ? 'Sending Message...' : 'Send Message'}
+                            </Button>
+                          </form>
+                        ) : (
+                          <div className="py-6 text-center animate-in fade-in zoom-in duration-300">
+                            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                            <h4 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h4>
+                            <p className="text-gray-600 text-sm mb-6">
+                              Your message has been delivered. You can track this conversation in your Inbox.
+                            </p>
+                            <Link to="/inbox">
+                              <Button className="w-full">
+                                Go to Inbox
+                              </Button>
+                            </Link>
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
+
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Description */}
             <div className="mb-8">

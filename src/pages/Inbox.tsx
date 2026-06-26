@@ -9,9 +9,17 @@ import { OTPLoginForm } from '../components/OTPLoginForm';
 import { useAlert } from '../contexts/AlertContext';
 
 export function Inbox() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  
+  const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>(
+    (queryParams.get('tab') as 'chats' | 'notifications') || 'chats'
+  );
+  
   const [email, setEmail] = useState<string>(localStorage.getItem('user_email') || '');
   const [token, setToken] = useState<string | null>(localStorage.getItem('user_token'));
   const [conversations, setConversations] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [activeConv, setActiveConv] = useState<any | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [replyContent, setReplyContent] = useState('');
@@ -61,6 +69,37 @@ export function Inbox() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/me/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markNotificationAsRead = async (id: string, link?: string) => {
+    if (!token) return;
+    try {
+      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/me/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+      if (link) {
+        window.location.href = link;
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -136,8 +175,16 @@ export function Inbox() {
   useEffect(() => {
     if (token && email) {
       fetchConversations(email.trim().toLowerCase());
+      fetchNotifications();
     }
   }, [token, email]);
+
+  useEffect(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    if (tab === 'notifications' || tab === 'chats') {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (activeConv) {
@@ -490,81 +537,118 @@ export function Inbox() {
         <div className={`flex-col h-full bg-white rounded-xl w-full md:w-80 shrink-0 overflow-hidden shadow-sm ${activeConv ? 'hidden md:flex' : 'flex'}`}>
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold" style={{ color: GRAY }}>Inbox</span>
-              <span className="bg-[#A5CEFF] text-[#131ADF] text-xs font-bold px-3 py-1 rounded-full">
-                {conversations.length} New
-              </span>
+            <div className="flex bg-gray-100 p-1 rounded-lg w-full relative">
+              <button 
+                onClick={() => setActiveTab('chats')}
+                className={`flex-1 py-1.5 text-sm font-semibold rounded-md transition-all ${activeTab === 'chats' ? 'bg-white text-[#131ADF] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Chats
+                {conversations.length > 0 && <span className="ml-2 text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">{conversations.length}</span>}
+              </button>
+              <button 
+                onClick={() => setActiveTab('notifications')}
+                className={`flex-1 py-1.5 text-sm font-semibold rounded-md transition-all ${activeTab === 'notifications' ? 'bg-white text-[#131ADF] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Alerts
+                {notifications.filter(n => !n.isRead).length > 0 && <span className="ml-2 text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">{notifications.filter(n => !n.isRead).length}</span>}
+              </button>
             </div>
+          </div>
+
+          <div className="px-5 pb-3 shrink-0 flex justify-between items-center">
+            <p className="text-xs text-gray-500 truncate text-left">{email}</p>
             <IconGear />
           </div>
 
-          <div className="px-5 pb-3 shrink-0">
-            <p className="text-xs text-gray-500 truncate text-left">{email}</p>
-          </div>
-
           {/* Search */}
-          <div className="px-3 pb-3 shrink-0">
-            <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
-              <IconSearch />
-              <input 
-                type="text"
-                placeholder="Search..." 
-                className="bg-transparent border-none outline-none text-sm w-full"
-                style={{ color: GRAY }}
-              />
+          {activeTab === 'chats' && (
+            <div className="px-3 pb-3 shrink-0">
+              <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
+                <IconSearch />
+                <input 
+                  type="text"
+                  placeholder="Search..." 
+                  className="bg-transparent border-none outline-none text-sm w-full"
+                  style={{ color: GRAY }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* List */}
           <div className="flex-1 overflow-y-auto space-y-0">
-            {loading ? (
-              <p className="text-center text-sm text-gray-500 mt-8">Loading...</p>
-            ) : conversations.length === 0 ? (
-              <p className="text-center text-sm text-gray-500 mt-8">No conversations yet.</p>
-            ) : (
-              conversations.map(conv => {
-                const isActive = activeConv?._id === conv._id;
-                const partnerEmail = conv.participants.find((p: string) => p !== email) || 'Unknown';
-                
-                // Deterministic color
-                const seed = partnerEmail.charCodeAt(0) || 0;
-                const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
-                const avatarColor = colors[seed % colors.length];
-                const initial = partnerEmail.charAt(0).toUpperCase();
-
-                return (
+            {activeTab === 'notifications' ? (
+              notifications.length === 0 ? (
+                <p className="text-center text-sm text-gray-500 mt-8">No notifications yet.</p>
+              ) : (
+                notifications.map(notif => (
                   <button
-                    key={conv._id}
-                    onClick={() => handleSelectConv(conv)}
-                    className={`w-full text-left px-5 py-4 relative transition-colors border-b border-[#D1E6FF] last:border-b-0 ${isActive ? "" : "bg-white hover:bg-[#f0f7ff]"}`}
-                    style={isActive ? { background: "linear-gradient(90deg, #131ADF 0%, #085EC3 100%)" } : {}}
+                    key={notif._id}
+                    onClick={() => markNotificationAsRead(notif._id, notif.link)}
+                    className={`w-full text-left px-5 py-4 border-b border-[#D1E6FF] last:border-b-0 hover:bg-[#f0f7ff] transition-colors ${notif.isRead ? 'opacity-70' : 'bg-blue-50/30'}`}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm ${isActive ? 'bg-white/20' : avatarColor}`}>
-                          {initial}
-                        </div>
-                        <div className="flex flex-col text-left">
-                          <div className="text-sm font-semibold leading-tight truncate w-40 md:w-48" style={{ color: isActive ? "white" : GRAY }}>
-                            {partnerEmail.split('@')[0]}
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 w-2 h-2 rounded-full shrink-0 bg-blue-600" style={{ opacity: notif.isRead ? 0 : 1 }} />
+                      <div>
+                        <h4 className={`text-sm font-semibold mb-1 ${notif.isRead ? 'text-gray-700' : 'text-gray-900'}`}>{notif.title}</h4>
+                        <p className="text-xs text-gray-600 line-clamp-2">{notif.message}</p>
+                        <span className="text-[10px] text-gray-400 mt-2 block">
+                          {new Date(notif.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                ))
+              )
+            ) : (
+              loading ? (
+                <p className="text-center text-sm text-gray-500 mt-8">Loading...</p>
+              ) : conversations.length === 0 ? (
+                <p className="text-center text-sm text-gray-500 mt-8">No conversations yet.</p>
+              ) : (
+                conversations.map(conv => {
+                  const isActive = activeConv?._id === conv._id;
+                  const partnerEmail = conv.participants.find((p: string) => p !== email) || 'Unknown';
+                  
+                  // Deterministic color
+                  const seed = partnerEmail.charCodeAt(0) || 0;
+                  const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
+                  const avatarColor = colors[seed % colors.length];
+                  const initial = partnerEmail.charAt(0).toUpperCase();
+
+                  return (
+                    <button
+                      key={conv._id}
+                      onClick={() => handleSelectConv(conv)}
+                      className={`w-full text-left px-5 py-4 relative transition-colors border-b border-[#D1E6FF] last:border-b-0 ${isActive ? "" : "bg-white hover:bg-[#f0f7ff]"}`}
+                      style={isActive ? { background: "linear-gradient(90deg, #131ADF 0%, #085EC3 100%)" } : {}}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm ${isActive ? 'bg-white/20' : avatarColor}`}>
+                            {initial}
                           </div>
-                          <div className="text-xs mt-1 truncate w-40 md:w-48" style={{ color: isActive ? "rgba(255,255,255,0.75)" : MUTED }}>
-                            {conv.gigTitle}
+                          <div className="flex flex-col text-left">
+                            <div className="text-sm font-semibold leading-tight truncate w-40 md:w-48" style={{ color: isActive ? "white" : GRAY }}>
+                              {partnerEmail.split('@')[0]}
+                            </div>
+                            <div className="text-xs mt-1 truncate w-40 md:w-48" style={{ color: isActive ? "rgba(255,255,255,0.75)" : MUTED }}>
+                              {conv.gigTitle}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-1 mt-1 text-left">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
-                        isActive ? 'bg-white/10 text-white border-white/20' : 'bg-gray-50 text-gray-600 border-gray-200'
-                      }`}>
-                        {conv.status}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })
+                      <div className="flex items-center gap-1 mt-1 text-left">
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+                          isActive ? 'bg-white/10 text-white border-white/20' : 'bg-gray-50 text-gray-600 border-gray-200'
+                        }`}>
+                          {conv.status}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })
+              )
             )}
           </div>
         </div>

@@ -35,6 +35,32 @@ const upload = multer({
   }
 });
 
+const kycStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dest = path.join(PROJECT_ROOT, 'backend', 'uploads', 'kyc');
+    fs.mkdirSync(dest, { recursive: true });
+    cb(null, dest);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'kyc-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const uploadKyc = multer({
+  storage: kycStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: function (req, file, cb) {
+    const filetypes = /jpeg|jpg|png|pdf/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Error: KYC upload only supports PDF, JPG, or PNG.'));
+  }
+});
+
 const GENERIC_EMAIL_DOMAINS = new Set([
   'gmail.com',
   'yahoo.com',
@@ -184,13 +210,13 @@ router.post('/parse-opportunity', async (req, res) => {
       You are an expert data extractor for a student and professional opportunities portal.
       Analyze the following raw text and extract key data points to create an opportunity listing.
       
-      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'Gig', 'Job', 'Other'.
+      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'StudentProject', 'Gig', 'Job', 'Other'.
       
       For missing information like deadlines, if the text says something generic like "End of September", extract that. If the application link is missing, return an empty string "".
       
       Special Rules for Categories:
       - If the category is 'Event', you MUST extract 'Date' and 'Time' as specific features in the extractedFeatures array.
-      - If the category is 'Project', you MUST extract 'Timeline' as a feature in the extractedFeatures array. Any other complex project requirements (like daily availability duration) should just be merged nicely into the description.
+      - If the category is 'Project' or 'StudentProject', you MUST extract 'Timeline' as a feature in the extractedFeatures array. Any other complex project requirements (like daily availability duration) should just be merged nicely into the description.
       - Extract 'Venue' or 'Location' as the 'Location' feature.
 
       Respond ONLY with a valid JSON object using the following structure. Do not include markdown formatting like \`\`\`json.
@@ -751,7 +777,7 @@ router.post('/opportunities/:id/apply', async (req, res) => {
 // Initiate STK Push (Poster depositing Escrow)
 router.post('/payments/deposit', verifyUserToken, async (req, res) => {
   try {
-    const { amount, phone, opportunityId } = req.body;
+    const { amount, phone, opportunityId, applicationId } = req.body;
     const email = req.user.email;
     const db = getDB();
 
@@ -790,16 +816,65 @@ router.post('/payments/deposit', verifyUserToken, async (req, res) => {
     // Log transaction so the webhook can find it
     await db.collection('transactions').insertOne({
       opportunityId,
+      applicationId: applicationId || null,
       posterEmail: email,
       amount,
       phone,
       checkoutRequestId: result.data.CheckoutRequestID,
       status: 'pending',
+      type: 'escrow',
       createdAt: new Date(),
     });
 
     res.json({ 
       message: 'STK Push sent to your phone. Enter PIN to complete deposit.',
+      checkoutRequestId: result.data.CheckoutRequestID 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Initiate STK Push (Public Crowdfunding for Projects/Hackathons)
+router.post('/payments/crowdfund', async (req, res) => {
+  try {
+    const { amount, phone, opportunityId } = req.body;
+    const db = getDB();
+
+    if (!amount || amount < 10) return res.status(400).json({ error: 'Valid amount required (Min KES 10)' });
+    if (!phone || !phone.match(/^2547\d{8}$/)) return res.status(400).json({ error: 'Valid Safaricom phone required (format 2547XXXXXXXX)' });
+
+    // Validate opportunity
+    const liveOpp = await db.collection('opportunities').findOne({ id: opportunityId });
+    if (!liveOpp) {
+      return res.status(404).json({ error: 'Opportunity not found' });
+    }
+
+    if (!['Project', 'StudentProject', 'Hackathon'].includes(liveOpp.category)) {
+      return res.status(400).json({ error: 'Crowdfunding is only allowed for Community/Student Projects and Hackathons.' });
+    }
+
+    // Call Daraja Sandbox
+    const { initiateSTKPush } = await import('../services/mpesaService.js');
+    const result = await initiateSTKPush(phone, amount, opportunityId, 'Crowdfund Contribution');
+
+    if (!result.success) {
+      return res.status(500).json({ error: result.error || 'Failed to initiate STK Push' });
+    }
+
+    // Log transaction so the webhook can find it
+    await db.collection('transactions').insertOne({
+      opportunityId,
+      contributorPhone: phone,
+      amount,
+      checkoutRequestId: result.data.CheckoutRequestID,
+      status: 'pending',
+      type: 'crowdfund',
+      createdAt: new Date(),
+    });
+
+    res.json({ 
+      message: 'STK Push sent to your phone. Enter PIN to contribute.',
       checkoutRequestId: result.data.CheckoutRequestID 
     });
   } catch (error) {
@@ -891,6 +966,29 @@ router.post('/payments/mpesa/callback', async (req, res) => {
           { $set: { isEscrowFunded: true, escrowAmount: amountPaid } }
         );
         console.log(`[M-PESA] Escrow funded for opportunity: ${txData.opportunityId} (Receipt: ${receiptNo}) — awaiting admin approval.`);
+        
+        // If this was tied to a specific applicant hire, approve them automatically
+        if (txData.applicationId) {
+          const { ObjectId } = await import('mongodb');
+          await db.collection('applications').updateOne(
+            { _id: new ObjectId(txData.applicationId) },
+            { $set: { status: 'approved', escrowFunded: true, updatedAt: new Date() } }
+          );
+          
+          const application = await db.collection('applications').findOne({ _id: new ObjectId(txData.applicationId) });
+          if (application) {
+            await db.collection('notifications').insertOne({
+              email: application.applicantEmail.toLowerCase(),
+              type: 'application_update',
+              title: `Hired! Escrow Funded`,
+              message: `The poster for "${application.opportunityTitle}" has securely funded the escrow and officially hired you!`,
+              isRead: false,
+              createdAt: new Date(),
+              link: '/applied' // link to Tracker
+            });
+            console.log(`[M-PESA] Auto-approved applicant ${txData.applicationId} based on escrow deposit.`);
+          }
+        }
       }
     } else {
       // Payment Failed or User Cancelled
@@ -914,9 +1012,10 @@ router.post('/payments/mpesa/callback', async (req, res) => {
 router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (req, res) => {
   try {
     const { opportunityId } = req.params;
-    const { applicationId } = req.body; // which applicant's payment to release
+    const { applicationId } = req.body;
     const email = req.user.email;
     const db = getDB();
+    const { ObjectId } = await import('mongodb');
 
     if (!applicationId) return res.status(400).json({ error: 'applicationId is required.' });
 
@@ -939,6 +1038,7 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
       opportunityId,
       status: 'approved'
     });
+    
     if (!application) {
       return res.status(404).json({ error: 'Approved application not found for this job.' });
     }
@@ -948,6 +1048,34 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
     if (!mpesaNumber || !/^2547\d{8}$/.test(mpesaNumber.toString())) {
       return res.status(400).json({ error: 'Applicant does not have a valid M-PESA number on record.' });
     }
+
+    // Calculate net payout (escrowAmount - 5% platform fee - 2% M-PESA B2C fee)
+    const escrowAmount = opp.escrowAmount || 0;
+    const platformFee = Math.ceil(escrowAmount * 0.05);
+    const transactionFee = Math.ceil((escrowAmount - platformFee) * 0.02);
+    const netPayable = escrowAmount - platformFee - transactionFee;
+
+    // Call Daraja B2C API
+    const { initiateB2CPayout } = await import('../services/mpesaService.js');
+    const b2cResult = await initiateB2CPayout(mpesaNumber, netPayable, `Payout for ${opportunityId}`);
+
+    if (!b2cResult.success) {
+      return res.status(500).json({ error: b2cResult.error || 'Failed to initiate Daraja B2C Payout' });
+    }
+
+    // Log the transaction
+    await db.collection('transactions').insertOne({
+      opportunityId,
+      applicationId,
+      posterEmail: email,
+      recipientEmail: application.applicantEmail,
+      phone: mpesaNumber,
+      amount: netPayable,
+      conversationId: b2cResult.data.ConversationID,
+      status: 'pending',
+      type: 'payout',
+      createdAt: new Date(),
+    });
 
     // Mark release as requested on the application
     await db.collection('applications').updateOne(
@@ -959,35 +1087,86 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
       }}
     );
 
-    // Calculate net payout (escrowAmount - 5% platform fee - 2% M-PESA B2C fee)
-    const escrowAmount = opp.escrowAmount || 0;
-    const platformFee = Math.ceil(escrowAmount * 0.05);
-    const transactionFee = Math.ceil((escrowAmount - platformFee) * 0.02);
-    const netPayable = escrowAmount - platformFee - transactionFee;
-
-    // Notify admin via email (non-blocking)
-    const { sendEscrowReleaseRequestEmail } = await import('../services/emailService.js');
-    sendEscrowReleaseRequestEmail({
-      jobTitle: opp.title,
-      posterEmail: email,
-      applicantEmail: application.applicantEmail,
-      mpesaNumber,
-      escrowAmount,
-      platformFee,
-      transactionFee,
-      netPayable,
-      applicationId,
-      opportunityId
-    }).catch(err => console.error('Escrow release email failed:', err));
-
     res.json({
-      message: 'Payment release approved. Admin will process the M-PESA transfer within 24 hours.',
+      message: '✅ Payment release successfully requested via Daraja B2C.',
       netPayable,
       applicantPhone: mpesaNumber
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// Daraja B2C Webhook Callback
+router.post('/payments/mpesa/b2c/result', async (req, res) => {
+  try {
+    const callbackData = req.body?.Result;
+    if (!callbackData) return res.status(200).send('OK');
+
+    const db = getDB();
+    const conversationId = callbackData.ConversationID;
+
+    // Must exist and be pending
+    const existingTx = await db.collection('transactions').findOne({ conversationId, status: 'pending' });
+    if (!existingTx) {
+      return res.status(200).send('OK');
+    }
+
+    // ResultCode 0 means Success
+    if (callbackData.ResultCode === 0) {
+      const { ObjectId } = await import('mongodb');
+      
+      const receiptNo = callbackData.TransactionID;
+      
+      await db.collection('transactions').updateOne(
+        { conversationId },
+        { $set: { status: 'completed', receiptNo, completedAt: new Date() } }
+      );
+
+      // Mark the application as officially PAID
+      await db.collection('applications').updateOne(
+        { _id: new ObjectId(existingTx.applicationId) },
+        { $set: { status: 'paid', updatedAt: new Date() } }
+      );
+
+      // Notify the freelancer
+      await db.collection('notifications').insertOne({
+        email: existingTx.recipientEmail.toLowerCase(),
+        type: 'payment',
+        title: `Payment Received!`,
+        message: `Your payment of KES ${existingTx.amount} has been successfully sent to your M-PESA. (Receipt: ${receiptNo})`,
+        isRead: false,
+        createdAt: new Date(),
+        link: '/applied'
+      });
+      console.log(`[B2C Payout] Success for ${existingTx.recipientEmail}. Receipt: ${receiptNo}`);
+      
+    } else {
+      // Failed B2C transaction
+      await db.collection('transactions').updateOne(
+        { conversationId },
+        { $set: { status: 'failed', failReason: callbackData.ResultDesc, completedAt: new Date() } }
+      );
+      
+      const { ObjectId } = await import('mongodb');
+      await db.collection('applications').updateOne(
+        { _id: new ObjectId(existingTx.applicationId) },
+        { $set: { escrowReleaseRequested: false, updatedAt: new Date() } } // Reset so they can try again
+      );
+      
+      console.log(`[B2C Payout] Failed for ${existingTx.recipientEmail}: ${callbackData.ResultDesc}`);
+    }
+
+    res.status(200).send('Webhook Processed');
+  } catch (error) {
+    console.error('B2C Callback Error:', error);
+    res.status(500).send('Error');
+  }
+});
+
+// Daraja B2C Timeout Callback
+router.post('/payments/mpesa/b2c/timeout', async (req, res) => {
+  res.status(200).send('OK');
 });
 
 // ==========================================
@@ -1066,6 +1245,19 @@ router.post('/bookmarks', verifyUserToken, async (req, res) => {
       res.json({ saved: true });
     }
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/public/upload-kyc
+router.post('/upload-kyc', verifyUserToken, uploadKyc.single('kycDocument'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded.' });
+    }
+    res.json({ filename: req.file.filename, message: 'Proof uploaded securely.' });
+  } catch (error) {
+    console.error('KYC Upload Error:', error);
     res.status(500).json({ error: error.message });
   }
 });

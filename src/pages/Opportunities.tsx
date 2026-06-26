@@ -9,7 +9,7 @@ import { useSEO } from '../hooks/useSEO';
 
 // ── Tab category buckets (must match backend constants exactly) ───────────────
 const GIG_CATEGORIES      = ['Gig', 'Job'];
-const CAREER_CATEGORIES   = ['Internship', 'Attachment', 'Project', 'Hackathon', 'Challenge'];
+const CAREER_CATEGORIES   = ['Internship', 'Attachment', 'Project', 'StudentProject', 'Hackathon', 'Challenge'];
 const ACADEMIC_CATEGORIES = ['Scholarship', 'Fellowship', 'Conference', 'Grant', 'CallForPapers', 'Event', 'Volunteer'];
 
 type TabId = 'all' | 'gigs' | 'career' | 'academic';
@@ -20,7 +20,8 @@ const ALL_CATEGORY_OPTIONS: { value: string; label: string; tab: TabId }[] = [
   { value: 'Job',           label: 'Jobs',                 tab: 'gigs' },
   { value: 'Internship',    label: 'Internships',          tab: 'career' },
   { value: 'Attachment',    label: 'Attachments',          tab: 'career' },
-  { value: 'Project',       label: 'Projects',             tab: 'career' },
+  { value: 'Project',       label: 'Community Projects',   tab: 'career' },
+  { value: 'StudentProject',label: 'Student Projects',     tab: 'career' },
   { value: 'Hackathon',     label: 'Hackathons',           tab: 'career' },
   { value: 'Challenge',     label: 'Industry Challenges',  tab: 'career' },
   { value: 'Scholarship',   label: 'Scholarships',         tab: 'academic' },
