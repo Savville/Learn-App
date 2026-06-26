@@ -651,7 +651,7 @@ export function OpportunityDetails() {
                         <span>Goal: KES {opportunity.escrowAmount?.toLocaleString() || '0'}</span>
                       </div>
                       <div className="w-full bg-blue-100 rounded-full h-3 overflow-hidden">
-                        <div className="bg-[#131ADF] h-full rounded-full transition-all duration-1000" style={{ width: \`\${Math.min(100, (localFundedAmount / (opportunity.escrowAmount || 1)) * 100)}%\` }}></div>
+                        <div className="bg-[#131ADF] h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, (localFundedAmount / (opportunity.escrowAmount || 1)) * 100)}%` }}></div>
                       </div>
                     </div>
                     
