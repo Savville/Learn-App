@@ -19,6 +19,7 @@ import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 import { useSEO } from '../hooks/useSEO';
 import { isChallengeCategory, isProjectCategory } from '@/constants/categories';
+import { getDynamicImageUrl } from '../components/OpportunityCard';
 
 function renderDescription(text: string): JSX.Element {
   const lines = text.split('\n');
@@ -520,7 +521,7 @@ export function OpportunityDetails() {
           {/* Header Image */}
           <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
             <img
-              src={opportunity.logoUrl}
+              src={getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl, opportunity.title)}
               alt={`${opportunity.category}: ${opportunity.title} by ${opportunity.provider}`}
               decoding="async"
               className="w-full h-full object-cover"

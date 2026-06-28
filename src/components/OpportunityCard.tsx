@@ -39,6 +39,16 @@ export const getDynamicImageUrl = (category: string, id: string, providedUrl?: s
   // Override based on TITLE keywords for smarter image assignment!
   if (title) {
     const t = title.toLowerCase();
+    if (t.includes('hydro-guard') || t.includes('hydrophobic')) {
+      return '/images/hydrophobic_concrete_demo.png';
+    }
+    if (t.includes('alkali-activated') || t.includes('binders')) {
+      return '/images/alkali_sustainable_binder.png';
+    }
+    if (t.includes('geo-bind') || t.includes('uhpc') || t.includes('rice husk')) {
+      return '/images/uhpc_rice_husks.png';
+    }
+
     if (t.includes('tech') || t.includes('software') || t.includes('data') || t.includes('developer') || t.includes('engineer')) {
       options = ['/images/tech.avif'];
     } else if (t.includes('community') || t.includes('volunteer') || t.includes('social') || t.includes('youth')) {
@@ -150,7 +160,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
           {/* Header Image */}
           <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
             <img
-              src={opportunity.logoUrl}
+              src={finalImageUrl}
               alt={`${opportunity.category} opportunity from ${opportunity.provider}`}
               loading="lazy"
               decoding="async"
