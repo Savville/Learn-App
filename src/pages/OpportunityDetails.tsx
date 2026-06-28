@@ -583,6 +583,40 @@ export function OpportunityDetails() {
                     ))}
                   </div>
                 )}
+
+                {/* Official Proposal Document */}
+                {(() => {
+                  const getProposalUrl = (title: string) => {
+                    const t = title.toLowerCase();
+                    if (t.includes('hydro-guard') || t.includes('hydrophobic')) {
+                      return 'https://drive.google.com/file/d/1ge6HauLBnxHg70VxlALsU5Ji0Qvi3zHK/view?usp=drive_link';
+                    }
+                    if (t.includes('geo-bind') || t.includes('geopolymer') || t.includes('tuff')) {
+                      return 'https://drive.google.com/file/d/1ZG-ETzE2WjxPNDPGqOdoaabuhWaMaHWz/view?usp=drive_link';
+                    }
+                    if (t.includes('uhpc') || t.includes('agro') || t.includes('rice husk')) {
+                      return 'https://drive.google.com/file/d/1ib9dWeSakb28Xx2RUfAmpQ-FfW28SzKF/view?usp=drive_link';
+                    }
+                    return opportunity.projectProposalUrl || null;
+                  };
+                  
+                  const proposalUrl = getProposalUrl(opportunity.title);
+                  if (!proposalUrl) return null;
+                  
+                  return (
+                    <div className="mt-4">
+                      <a
+                        href={proposalUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-[#131ADF] rounded-lg text-sm font-bold transition-colors border border-indigo-200 shadow-sm"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        View Official Project Proposal
+                      </a>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
