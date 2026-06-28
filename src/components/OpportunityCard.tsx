@@ -29,14 +29,7 @@ const CATEGORY_IMAGES: Record<string, string[]> = {
 };
 
 export const getDynamicImageUrl = (category: string, id: string, providedUrl?: string, title?: string) => {
-  // If the provided url is not the default generic logo, use it
-  if (providedUrl && !providedUrl.includes('Opportunities Kenya Logo')) {
-    return providedUrl;
-  }
-
-  let options = CATEGORY_IMAGES[category] || ['/images/internship.avif'];
-
-  // Override based on TITLE keywords for smarter image assignment!
+  // 1. Force custom AI images for specific known projects first, regardless of database logoUrl
   if (title) {
     const t = title.toLowerCase();
     if (t.includes('hydro-guard') || t.includes('hydrophobic')) {
@@ -48,7 +41,18 @@ export const getDynamicImageUrl = (category: string, id: string, providedUrl?: s
     if (t.includes('geo-bind') || t.includes('uhpc') || t.includes('rice husk')) {
       return '/images/uhpc_rice_husks.png';
     }
+  }
 
+  // 2. If the provided url is not the default generic logo, use it
+  if (providedUrl && !providedUrl.includes('Opportunities Kenya Logo')) {
+    return providedUrl;
+  }
+
+  let options = CATEGORY_IMAGES[category] || ['/images/internship.avif'];
+
+  // 3. Fallback semantic overrides for general categories
+  if (title) {
+    const t = title.toLowerCase();
     if (t.includes('tech') || t.includes('software') || t.includes('data') || t.includes('developer') || t.includes('engineer')) {
       options = ['/images/tech.avif'];
     } else if (t.includes('community') || t.includes('volunteer') || t.includes('social') || t.includes('youth')) {
