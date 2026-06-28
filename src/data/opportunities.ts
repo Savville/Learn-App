@@ -758,6 +758,47 @@ No Japanese language skills required. All interns with outstanding performance m
         topics: ['Algorithmic Foundations', 'Infrastructure Engineering', 'Performance Optimization']
       }
     ]
+  },
+  {
+    "id": "liquidity-arena-2026-ai-quant-trading",
+    "title": "Liquidity Arena 2026 - AI Quant Trading Competition",
+    "provider": "LiquidityTech (LTP)",
+    "category": "Challenge",
+    "description": "Global AI-powered quantitative trading competition. Deploy AI models in a high-fidelity simulated market for a chance to win from a $300,000+ prize pool.",
+    "fullDescription": "Welcome to Liquidity Arena 2026, a global AI-powered quantitative trading competition organized by LiquidityTech (LTP). Participants will deploy cutting-edge AI and quantitative models in a high-fidelity simulated market environment.\n\n────────────────────────────────────\n OVERVIEW & PRIZES\n────────────────────────────────────\nThe top 30 teams overall will advance to Phase 2 (Live Trading Championship) to compete for a grand prize pool of over $300,000 and institutional support. For Track A Stage 1 (Sandbox Elimination), the cash prizes are:\n• Winner Prize: $10,000\n• 2nd Place Prize: $5,000\n• 3rd Place Prize: $3,000\n\n────────────────────────────────────\n THE PROCESS\n────────────────────────────────────\n1. Register Officially: Joining on Kaggle is not enough. You must apply via the official Google Form.\n2. Onboarding: Receive confirmation and credentials to the RapidX demo environment from LTP.\n3. Setup: Connect your AI agent to the demo environment using the MCP SDK.\n4. Trade: Compete in Track A, Phase 1 (July 15 – August 15, 2026).\n5. Logs: Ensure each trade submission includes a machine-generated reasoning log.\n\n────────────────────────────────────\n KEY RULES\n────────────────────────────────────\n• Eligibility: Open to worldwide participants who are 18+ years old.\n• Team Rules: Teams must have 1 or more members; individuals can only belong to one team.\n• AI Usage: All AI models and manual-assisted strategies are allowed, but trades must include real, machine-generated reasoning logs.\n• Prohibited Conduct: Wash trading, collusion, manipulation of the demo environment, and use of insider/non-public data are strictly forbidden.",
+    "deadline": "2026-08-15",
+    "location": "Remote / Online",
+    "eligibility": {
+      "educationLevel": "All",
+      "fieldOfStudy": [
+        "AI & Machine Learning",
+        "Data Science",
+        "Finance",
+        "Computer Science",
+        "Quantitative Analysis"
+      ],
+      "requirements": [
+        "Must be 18+ years old",
+        "Must complete official application form (Kaggle registration alone is insufficient)",
+        "Submit machine-generated reasoning logs for all trades",
+        "Teams of 1 or more members allowed"
+      ]
+    },
+    "benefits": [
+      "Top 30 teams advance to Phase 2 (Live Trading Championship)",
+      "Grand prize pool of over $300,000 in Phase 2",
+      "Track A Stage 1 Prizes: $10k (1st), $5k (2nd), $3k (3rd)",
+      "Institutional infrastructure support"
+    ],
+    "applicationType": "Platform Link",
+    "applicationLink": "https://forms.gle/ZzFZejJ5RyWmLQqEA",
+    "contactLink": "https://arena.liquiditytech.com/",
+    "fundingType": "N/A",
+    "compensationType": "Paid",
+    "upfrontCost": "No Upfront Cost",
+    "logoUrl": "/images/liquidity_arena.png",
+    "featured": true,
+    "dateAdded": "2026-06-28"
   }
 ];
 
