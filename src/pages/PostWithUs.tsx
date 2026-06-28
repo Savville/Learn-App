@@ -8,6 +8,18 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, AlertCircle, Info, CheckCircle2, Building2, User, Camera, Plus, Trash2, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { FormField, ApplicationForm } from '@/data/opportunities';
 import { PosterDashboard } from '@/components/PosterDashboard';
+import {
+  POST_WITH_US_CATEGORY_GROUPS,
+  applyCategoryFieldDefaults,
+  categoryHidesCompensation,
+  categoryHidesFunding,
+  categoryHidesUpfrontCost,
+  categoryShowsEndorsement,
+  categoryShowsJobEscrow,
+  categoryShowsProjectFunding,
+  isChallengeCategory,
+  isProjectCategory,
+} from '@/constants/categories';
 
 // Type definition for the data returned by the AI parser
 interface ParsedOpportunityData {
@@ -55,6 +67,12 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
   const [parsedData, setParsedData] = useState<ParsedOpportunityData | null>(null);
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [kycDocument, setKycDocument] = useState<File | null>(null);
+  const [endorsementInstitution, setEndorsementInstitution] = useState('');
+  const [endorsementContactTitle, setEndorsementContactTitle] = useState('');
+  const [endorsementLinkUrl, setEndorsementLinkUrl] = useState('');
+  const [projectProposalUrl, setProjectProposalUrl] = useState('');
+  const [funderRecognition, setFunderRecognition] = useState('');
+  const [seeksFunding, setSeeksFunding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [publishedSlug, setPublishedSlug] = useState<string | null>(null);
   const [showOrgRequest, setShowOrgRequest] = useState(false);
@@ -219,25 +237,28 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
 
   const handleBasicInfoEdit = (key: string, newValue: string) => {
     if (!parsedData) return;
-    
-    const newBasicInfo = { ...parsedData.basicInfo, [key]: newValue };
 
-    // Dynamic field logic based on category
     if (key === 'category') {
-      const disableFunding = ['Gig', 'Job', 'Internship', 'Attachment', 'Volunteer'].includes(newValue);
-      const disableCompensation = ['Scholarship', 'Grant', 'CallForPapers', 'Conference'].includes(newValue);
-      
-      if (disableFunding) {
-        newBasicInfo.fundingType = 'Not Applicable';
+      const newBasicInfo = applyCategoryFieldDefaults(newValue, parsedData.basicInfo);
+      setParsedData({
+        ...parsedData,
+        basicInfo: newBasicInfo,
+        ...(isProjectCategory(newValue) ? {} : { isEscrow: false, escrowAmount: undefined }),
+        ...(isChallengeCategory(newValue) ? { isEscrow: false, escrowAmount: undefined } : {}),
+      });
+      if (!isProjectCategory(newValue)) {
+        setSeeksFunding(false);
+        setEndorsementInstitution('');
+        setEndorsementContactTitle('');
+        setEndorsementLinkUrl('');
+        setKycDocument(null);
       }
-      if (disableCompensation) {
-        newBasicInfo.compensationType = 'N/A';
-      }
+      return;
     }
 
     setParsedData({
       ...parsedData,
-      basicInfo: newBasicInfo,
+      basicInfo: { ...parsedData.basicInfo, [key]: newValue },
     });
   };
 
@@ -316,24 +337,52 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
       // Step 1.5: Upload KYC Document if it's a Project
       const category = parsedData.basicInfo.category;
       let kycProofFilename = null;
-      if (['StudentProject', 'Project'].includes(category)) {
-        if (!kycDocument) {
-          throw new Error('Proof of Institutional Endorsement is required for this category.');
+      let institutionalEndorsement = undefined;
+
+      if (isProjectCategory(category)) {
+        if (!endorsementInstitution.trim() || !endorsementContactTitle.trim()) {
+          throw new Error('Institution name and endorser role are required for project posts.');
         }
-        const kycFormData = new FormData();
-        kycFormData.append('kycDocument', kycDocument);
-        const userToken = localStorage.getItem('user_token');
-        const kycRes = await fetch(`${API_BASE}/public/upload-kyc`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${userToken}` },
-          body: kycFormData
-        });
-        if (!kycRes.ok) {
-          const kErr = await kycRes.json();
-          throw new Error(kErr.error || 'Failed to upload KYC document.');
+        if (!kycDocument && !endorsementLinkUrl.trim()) {
+          throw new Error('Upload endorsement evidence (email screenshot/PDF) or provide a Google Drive link.');
         }
-        const kycData = await kycRes.json();
-        kycProofFilename = kycData.filename;
+        if (endorsementLinkUrl.trim() && !/^https?:\/\//i.test(endorsementLinkUrl.trim())) {
+          throw new Error('Endorsement link must be a valid URL (e.g. Google Drive).');
+        }
+
+        if (kycDocument) {
+          const kycFormData = new FormData();
+          kycFormData.append('kycDocument', kycDocument);
+          const userToken = localStorage.getItem('user_token');
+          const kycRes = await fetch(`${API_BASE}/public/upload-kyc`, {
+            method: 'POST',
+            headers: userToken ? { Authorization: `Bearer ${userToken}` } : {},
+            body: kycFormData
+          });
+          if (!kycRes.ok) {
+            const kErr = await kycRes.json();
+            throw new Error(kErr.error || 'Failed to upload endorsement document.');
+          }
+          const kycData = await kycRes.json();
+          kycProofFilename = kycData.filename;
+        }
+
+        institutionalEndorsement = {
+          institutionName: endorsementInstitution.trim(),
+          contactTitle: endorsementContactTitle.trim(),
+          evidenceType: endorsementLinkUrl.trim() ? 'link' as const : 'upload' as const,
+          evidenceUrl: endorsementLinkUrl.trim() || '',
+          ...(kycProofFilename ? { adminEvidenceFile: kycProofFilename } : {}),
+        };
+
+        if (seeksFunding) {
+          if (!parsedData.escrowAmount || parsedData.escrowAmount < 100) {
+            throw new Error('Funding goal must be at least KES 100 when raising funds.');
+          }
+          if (!parsedData.basicInfo.providerMpesa?.trim()) {
+            throw new Error('M-PESA number is required when raising funds for a project.');
+          }
+        }
       }
 
       // Step 2: Assemble the full opportunity object from parsed data
@@ -344,9 +393,11 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
       // Validation: Application Link is MANDATORY for most categories UNLESS custom form is enabled
       const isDemoLink = applicationLink.toLowerCase().includes('demo') || applicationLink.includes('example.com');
 
-      if (!customForm.isEnabled && category !== 'Open Challenge' && (!applicationLink || applicationLink.trim().length < 8 || isDemoLink)) {
+      if (!customForm.isEnabled && !isChallengeCategory(category) && category !== 'Open Challenge' && (!applicationLink || applicationLink.trim().length < 8 || isDemoLink)) {
         throw new Error(`For ${category}, a valid application link is required unless you enable the Custom Form. Please edit the "Application Link" field below.`);
       }
+
+      const projectSeeksFunding = isProjectCategory(category) && seeksFunding;
 
       const slug = parsedData.basicInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
@@ -372,15 +423,19 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
         benefits: parsedData.benefits || [],
         thematicAreas: parsedData.thematicAreas || [],
         applicationForm: customForm,
-        isEscrow: parsedData.isEscrow,
-        escrowAmount: parsedData.escrowAmount,
+        isEscrow: projectSeeksFunding ? true : (parsedData.isEscrow || false),
+        escrowAmount: projectSeeksFunding ? parsedData.escrowAmount : (parsedData.isEscrow ? parsedData.escrowAmount : undefined),
         isEscrowFunded: false,
         featured: false,
         dateAdded: new Date().toISOString().split('T')[0],
         logoUrl: imageUrl,
         views: 0,
         clicks: 0,
+        funderRecognition: funderRecognition.trim() || undefined,
         kycProofFilename: kycProofFilename,
+        institutionalEndorsement,
+        projectProposalUrl: projectProposalUrl.trim() || undefined,
+        slug,
       };
 
       // Step 3: POST to MongoDB via submit-opportunity
@@ -402,6 +457,11 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
       setRawText('');
       setParsedData(null);
       setCoverImage(null);
+      setKycDocument(null);
+      setEndorsementInstitution('');
+      setEndorsementContactTitle('');
+      setEndorsementLinkUrl('');
+      setSeeksFunding(false);
       setShowSuccessModal(true);
 
     } catch (error: any) {
@@ -745,43 +805,22 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('category', e.target.value)}
                       >
                         <option value="" disabled>Select a category</option>
-                        <optgroup label="Microgigs and Jobs">
-                          <option value="Gig">Microgig</option>
-                          <option value="Job">Job</option>
-                        </optgroup>
-                        <optgroup label="Career and Innovation">
-                          <option value="Internship">Internship</option>
-                          <option value="Attachment">Attachment</option>
-                          <option value="Project">Community Project</option>
-                          <option value="StudentProject">Student Project</option>
-                          <option value="Hackathon">Hackathon</option>
-                          <option value="Challenge">Industry Challenge</option>
-                        </optgroup>
-                        <optgroup label="Academic and Learning">
-                          <option value="Scholarship">Scholarship</option>
-                          <option value="Fellowship">Fellowship</option>
-                          <option value="Grant">Grant</option>
-                          <option value="Conference">Conference</option>
-                          <option value="CallForPapers">Call for Papers</option>
-                          <option value="Event">Event</option>
-                          <option value="Volunteer">Volunteer Programme</option>
-                        </optgroup>
-                        <optgroup label="Other">
-                          <option value="Other">Other</option>
-                        </optgroup>
+                        {POST_WITH_US_CATEGORY_GROUPS.map((group) => (
+                          <optgroup key={group.label} label={group.label}>
+                            {group.options.map((opt) => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </optgroup>
+                        ))}
                       </select>
                     </div>
+                    {!categoryHidesFunding(parsedData.basicInfo.category) && (
                     <div className="space-y-1.5">
                       <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Funding type
                       </span>
                       <select
-                        className={`w-full px-5 py-3 text-sm border rounded-xl transition-colors h-auto focus:outline-none ${
-                          ['Gig', 'Job', 'Internship', 'Attachment', 'Volunteer'].includes(parsedData.basicInfo.category)
-                            ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed opacity-70'
-                            : 'bg-white border-gray-200 focus:border-blue-500 text-gray-900'
-                        }`}
-                        disabled={['Gig', 'Job', 'Internship', 'Attachment', 'Volunteer'].includes(parsedData.basicInfo.category)}
+                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
                         value={parsedData.basicInfo.fundingType || ''}
                         onChange={(e) => handleBasicInfoEdit('fundingType', e.target.value)}
                       >
@@ -793,17 +832,14 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                         <option value="Not Applicable">Not Applicable</option>
                       </select>
                     </div>
+                    )}
+                    {!categoryHidesCompensation(parsedData.basicInfo.category) && (
                     <div className="space-y-1.5">
                       <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Compensation
                       </span>
                       <select
-                        className={`w-full px-5 py-3 text-sm border rounded-xl transition-colors h-auto focus:outline-none ${
-                          ['Scholarship', 'Grant', 'CallForPapers', 'Conference'].includes(parsedData.basicInfo.category)
-                            ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed opacity-70'
-                            : 'bg-white border-gray-200 focus:border-blue-500 text-gray-900'
-                        }`}
-                        disabled={['Scholarship', 'Grant', 'CallForPapers', 'Conference'].includes(parsedData.basicInfo.category)}
+                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
                         value={parsedData.basicInfo.compensationType || 'N/A'}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('compensationType', e.target.value)}
                       >
@@ -814,6 +850,8 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                         <option value="N/A">Not Applicable</option>
                       </select>
                     </div>
+                    )}
+                    {!categoryHidesUpfrontCost(parsedData.basicInfo.category) && (
                     <div className="space-y-1.5">
                       <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Upfront Cost
@@ -827,61 +865,85 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                         <option value="Has Upfront Cost">Has Upfront Cost</option>
                       </select>
                     </div>
+                    )}
 
-                    {['Project', 'StudentProject'].includes(parsedData.basicInfo.category) && (
-                      <>
-                      <div className="space-y-1.5 md:col-span-2">
-                        <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
-                          Funding Goal (KES)
-                        </span>
-                        <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">KES</span>
-                          <Input
-                            type="number"
-                            min="0"
-                            placeholder="e.g. 50000"
-                            value={parsedData.escrowAmount || ''}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              const val = parseInt(e.target.value);
+                    {categoryShowsProjectFunding(parsedData.basicInfo.category) && (
+                      <div className="space-y-4 md:col-span-2 border border-blue-100 bg-blue-50/50 rounded-xl p-5">
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={seeksFunding}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setSeeksFunding(checked);
                               setParsedData({
                                 ...parsedData,
-                                isEscrow: val > 0,
-                                escrowAmount: val || 0
+                                isEscrow: checked,
+                                escrowAmount: checked ? (parsedData.escrowAmount || 50000) : undefined,
                               });
                             }}
-                            className="w-full pl-12 pr-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
                           />
-                        </div>
-                        <p className="text-[11px] text-gray-500 italic mt-1 font-medium">
-                          Set a funding goal for your project. The public will be able to contribute to this goal.
-                        </p>
-                      </div>
+                          <div>
+                            <span className="text-sm font-bold text-gray-900">Are you looking to raise funds for this project?</span>
+                            <p className="text-xs text-gray-600 mt-1">
+                              Leave unchecked if you only need collaborators or volunteers. Crowdfunding requires institutional endorsement and M-PESA payout details.
+                            </p>
+                          </div>
+                        </label>
 
-                      <div className="space-y-1.5 md:col-span-2">
-                        <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
-                          Your M-PESA Number (For Payouts) <span className="text-red-500">*</span>
-                        </span>
-                        <Input
-                          type="text"
-                          required
-                          placeholder="e.g. 0700000000"
-                          value={parsedData.basicInfo.providerMpesa || ''}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            setParsedData({
-                              ...parsedData,
-                              basicInfo: {
-                                ...parsedData.basicInfo,
-                                providerMpesa: e.target.value
-                              }
-                            });
-                          }}
-                          className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
-                        />
-                        <p className="text-[11px] text-gray-500 italic mt-1 font-medium">
-                          We need this to securely remit your funds via B2C M-PESA once the project goal is met. Platform fees of 5% apply.
-                        </p>
+                        {seeksFunding && (
+                          <>
+                            <div className="space-y-1.5">
+                              <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
+                                Funding Goal (KES)
+                              </span>
+                              <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">KES</span>
+                                <Input
+                                  type="number"
+                                  min="100"
+                                  placeholder="e.g. 50000"
+                                  value={parsedData.escrowAmount || ''}
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    const val = parseInt(e.target.value, 10);
+                                    setParsedData({
+                                      ...parsedData,
+                                      isEscrow: true,
+                                      escrowAmount: val || 0
+                                    });
+                                  }}
+                                  className="w-full pl-12 pr-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-1.5">
+                              <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
+                                Your M-PESA Number (For Payouts) <span className="text-red-500">*</span>
+                              </span>
+                              <Input
+                                type="text"
+                                required
+                                placeholder="e.g. 0700000000"
+                                value={parsedData.basicInfo.providerMpesa || ''}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                  setParsedData({
+                                    ...parsedData,
+                                    basicInfo: {
+                                      ...parsedData.basicInfo,
+                                      providerMpesa: e.target.value
+                                    }
+                                  });
+                                }}
+                                className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-white transition-colors h-auto"
+                              />
+                              <p className="text-[11px] text-gray-500 italic mt-1 font-medium">
+                                Platform fee of 5% applies when funds are disbursed.
+                              </p>
+                            </div>
+                          </>
+                        )}
                       </div>
-                    </>
                     )}
                     
                     <div className="space-y-1.5 md:col-span-2">
@@ -1183,7 +1245,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                   </div>
 
                   {/* Optional Escrow Security Field */}
-                  {(parsedData.basicInfo.category === 'Gig' || parsedData.basicInfo.category === 'Job') && (
+                  {categoryShowsJobEscrow(parsedData.basicInfo.category) && (
                     <div className="mt-6 border border-blue-200 bg-blue-50 rounded-xl p-5 space-y-4">
                       <div className="flex items-start gap-4">
                         <input
@@ -1213,26 +1275,83 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                     </div>
                   )}
 
-                  {/* KYC Institutional Endorsement Upload */}
-                  {(parsedData.basicInfo.category === 'StudentProject' || parsedData.basicInfo.category === 'Project') && (
+                  {/* Institutional Endorsement & Project Docs — required for Student & Community Projects */}
+                  {categoryShowsEndorsement(parsedData.basicInfo.category) && (
                     <div className="mt-6 border border-purple-200 bg-purple-50 rounded-xl p-5 space-y-4">
                       <div className="flex flex-col gap-2">
                         <h4 className="font-semibold text-purple-900 text-lg flex items-center gap-2">
-                          <ShieldCheck className="w-5 h-5" /> Mandatory Institutional Verification
+                          <ShieldCheck className="w-5 h-5" /> Project Verification & Documentation
                         </h4>
                         <p className="text-sm text-purple-800">
-                          To protect our funders, your institution must send an official endorsement email directly to <strong>admin@opportunities.ke</strong> with your research document attached.
+                          Provide official documentation to verify your project. Both the endorsement letter and project proposal will be publicly visible to potential funders and collaborators.
                         </p>
-                        <p className="text-sm text-purple-800 font-bold mt-2">
-                          Please upload a screenshot of this email thread or your official endorsement letter below:
-                        </p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-extrabold uppercase tracking-widest text-purple-900">Institution name</label>
+                          <Input
+                            value={endorsementInstitution}
+                            onChange={(e) => setEndorsementInstitution(e.target.value)}
+                            placeholder="e.g. KU Dept of Engineering"
+                            className="bg-white"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-extrabold uppercase tracking-widest text-purple-900">Endorser role</label>
+                          <Input
+                            value={endorsementContactTitle}
+                            onChange={(e) => setEndorsementContactTitle(e.target.value)}
+                            placeholder="e.g. Head of Department"
+                            className="bg-white"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1.5 mt-4 border-t border-purple-200 pt-4">
+                        <h5 className="font-semibold text-purple-900 text-sm">Upload Endorsement (For Internal Verification)</h5>
+                        <label className="text-xs text-purple-800 font-medium">Please upload the official endorsement letter/email you received.</label>
                         <Input
                           type="file"
                           accept=".pdf,image/*"
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             setKycDocument(e.target.files?.[0] || null)
                           }
-                          className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-purple-600 file:text-white file:px-4 file:py-2 file:text-sm file:font-semibold hover:file:bg-purple-700 bg-white"
+                          className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-purple-600 file:text-white file:px-4 file:py-2 file:text-sm file:font-semibold hover:file:bg-purple-700 bg-white"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 mt-4 border-t border-purple-200 pt-4">
+                        <h5 className="font-semibold text-purple-900 text-sm">Public Evidence: Endorsement Letter</h5>
+                        <label className="text-xs text-purple-800 font-medium">Provide a public Google Drive link to the endorsement letter, which will be visible on your project page.</label>
+                        <Input
+                          type="url"
+                          value={endorsementLinkUrl}
+                          onChange={(e) => setEndorsementLinkUrl(e.target.value)}
+                          placeholder="https://drive.google.com/..."
+                          className="bg-white"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 mt-4 border-t border-purple-200 pt-4">
+                        <h5 className="font-semibold text-purple-900 text-sm">Public Evidence: Project Proposal / Pitch Deck (Recommended)</h5>
+                        <label className="text-xs text-purple-800 font-medium">Provide a public Google Drive link to a document demonstrating the need, impact, and phases of your project.</label>
+                        <Input
+                          type="url"
+                          value={projectProposalUrl}
+                          onChange={(e) => setProjectProposalUrl(e.target.value)}
+                          placeholder="https://drive.google.com/... (Project Proposal)"
+                          className="bg-white"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 mt-4 border-t border-purple-200 pt-4">
+                        <h5 className="font-semibold text-purple-900 text-sm">Funder Benefits / Recognitions (Optional)</h5>
+                        <label className="text-xs text-purple-800 font-medium">What do backers get in return? (e.g. Equity for commercialization, Co-authorship in research, Certificates, Public Recognition)</label>
+                        <Textarea
+                          value={funderRecognition}
+                          onChange={(e) => setFunderRecognition(e.target.value)}
+                          placeholder="List any rewards or recognitions for those who fund or support this project..."
+                          className="bg-white min-h-[80px]"
                         />
                       </div>
                     </div>

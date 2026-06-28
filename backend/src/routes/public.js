@@ -274,7 +274,14 @@ router.post('/parse-opportunity', async (req, res) => {
       You are an expert data extractor for a student and professional opportunities portal.
       Analyze the following raw text and extract key data points to create an opportunity listing.
       
-      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'StudentProject', 'Gig', 'Job', 'Other'.
+      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'StudentProject', 'Gig', 'Job', 'Partnership', 'StartupFunding', 'Other'.
+      
+      Category guidance:
+      - 'Challenge' = open industry brief (inspiration for capstone/research; NOT a poster-submitted student/community project).
+      - 'StudentProject' = student-led initiative posted by a student (may seek collaboration or crowdfunding).
+      - 'Project' = community initiative posted by an organization or group.
+      - 'StartupFunding' = startup grants, seed funding, accelerator programs for ventures.
+      - Do NOT use 'Challenge' for student crowdfunding posts.
       
       For missing information like deadlines, if the text says something generic like "End of September", extract that. If the application link is missing, return an empty string "".
       
@@ -404,6 +411,35 @@ router.post('/submit-opportunity', async (req, res) => {
         });
       }
     }
+
+    // ── Project endorsement required ─────────────────────────────────────────
+    const PROJECT_CATEGORIES = ['StudentProject', 'Project'];
+    if (PROJECT_CATEGORIES.includes(opportunity.category)) {
+      const endorsement = opportunity.institutionalEndorsement;
+      if (!endorsement?.institutionName?.trim() || !endorsement?.contactTitle?.trim()) {
+        return res.status(400).json({ error: 'Institution name and endorser role are required for project posts.' });
+      }
+      if (!endorsement.evidenceUrl?.trim() && !endorsement.adminEvidenceFile && !opportunity.kycProofFilename) {
+        return res.status(400).json({ error: 'Endorsement evidence (upload or link) is required for project posts.' });
+      }
+      if (opportunity.isEscrow) {
+        if (!opportunity.escrowAmount || Number(opportunity.escrowAmount) < 100) {
+          return res.status(400).json({ error: 'Funding goal must be at least KES 100 when raising funds.' });
+        }
+        if (!opportunity.providerMpesa?.trim()) {
+          return res.status(400).json({ error: 'M-PESA payout number is required when raising funds.' });
+        }
+      } else {
+        opportunity.isEscrow = false;
+        opportunity.escrowAmount = undefined;
+      }
+    }
+
+    if (opportunity.category === 'Challenge') {
+      opportunity.isEscrow = false;
+      opportunity.escrowAmount = undefined;
+    }
+
     const db = getDB();
 
     const normalizedReporter = {
@@ -1304,6 +1340,30 @@ router.post('/upload-kyc', verifyUserToken, uploadKyc.single('kycDocument'), asy
     res.json({ filename: req.file.filename, message: 'Proof uploaded securely.' });
   } catch (error) {
     console.error('KYC Upload Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/public/endorsement/:opportunityId — public evidence for approved projects only
+router.get('/endorsement/:opportunityId', async (req, res) => {
+  try {
+    const db = getDB();
+    const opp = await db.collection('opportunities').findOne({ id: req.params.opportunityId });
+    if (!opp || !['StudentProject', 'Project'].includes(opp.category)) {
+      return res.status(404).json({ error: 'Endorsement not found.' });
+    }
+    const filename =
+      opp.institutionalEndorsement?.adminEvidenceFile ||
+      opp.kycProofFilename;
+    if (!filename || filename.includes('..') || filename.includes('/')) {
+      return res.status(404).json({ error: 'Endorsement file not found.' });
+    }
+    const filePath = path.join(PROJECT_ROOT, 'backend', 'uploads', 'kyc', filename);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Endorsement file not found.' });
+    }
+    res.sendFile(filePath);
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });

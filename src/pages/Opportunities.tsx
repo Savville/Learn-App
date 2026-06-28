@@ -6,35 +6,16 @@ import { Search, Filter } from 'lucide-react';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 import { useSEO } from '../hooks/useSEO';
-
-// ── Tab category buckets (must match backend constants exactly) ───────────────
-const GIG_CATEGORIES      = ['Gig', 'Job'];
-const ACADEMIC_CAREER_CATEGORIES = ['Internship', 'Attachment', 'Conference', 'CallForPapers', 'Event', 'Volunteer', 'Scholarship', 'Fellowship', 'Grant'];
-const INNOVATION_CATEGORIES = ['Hackathon', 'Challenge', 'StartupFunding'];
-const PROJECT_CATEGORIES = ['StudentProject', 'Project'];
-
-type TabId = 'all' | 'jobs' | 'academic_career' | 'innovation' | 'projects';
-
-// Category options tagged to their tab
-const ALL_CATEGORY_OPTIONS: { value: string; label: string; tab: TabId }[] = [
-  { value: 'Gig',           label: 'Microgigs',            tab: 'jobs' },
-  { value: 'Job',           label: 'Jobs',                 tab: 'jobs' },
-  { value: 'Internship',    label: 'Internships',          tab: 'academic_career' },
-  { value: 'Attachment',    label: 'Attachments',          tab: 'academic_career' },
-  { value: 'Conference',    label: 'Conferences',          tab: 'academic_career' },
-  { value: 'CallForPapers', label: 'Call for Papers',      tab: 'academic_career' },
-  { value: 'Event',         label: 'Events',               tab: 'academic_career' },
-  { value: 'Volunteer',     label: 'Volunteer Programmes', tab: 'academic_career' },
-  { value: 'Scholarship',   label: 'Scholarships',         tab: 'academic_career' },
-  { value: 'Fellowship',    label: 'Fellowships',          tab: 'academic_career' },
-  { value: 'Grant',         label: 'Academic Grants',      tab: 'academic_career' },
-  { value: 'Hackathon',     label: 'Hackathons',           tab: 'innovation' },
-  { value: 'Challenge',     label: 'Industry Challenges',  tab: 'innovation' },
-  { value: 'StartupFunding',label: 'Startup Funding',      tab: 'innovation' },
-  { value: 'Project',       label: 'Community Projects',   tab: 'projects' },
-  { value: 'StudentProject',label: 'Student Projects',     tab: 'projects' },
-  { value: 'Other',         label: 'Others',               tab: 'all' },
-];
+import {
+  type TabId,
+  GIG_CATEGORIES,
+  ACADEMIC_CAREER_CATEGORIES,
+  INNOVATION_CATEGORIES,
+  PROJECT_CATEGORIES,
+  ALL_CATEGORY_OPTIONS,
+  BROWSE_TABS,
+  categoryMatchesTab,
+} from '../constants/categories';
 
 // Funding options tailored per tab
 const JOBS_FUNDING_OPTIONS = [
@@ -71,14 +52,7 @@ const ALL_FUNDING_OPTIONS = [
   { value: 'Unpaid',           label: 'Unpaid' },
 ];
 
-// Tab metadata
-const TABS: { id: TabId; label: string; description: string }[] = [
-  { id: 'all',             label: 'All',                  description: 'Opportunities' },
-  { id: 'jobs',            label: 'Jobs',                 description: 'Jobs & Microgigs' },
-  { id: 'academic_career', label: 'Academic & Career',    description: 'Academic & Career' },
-  { id: 'innovation',      label: 'Innovation',           description: 'Innovation & Tech' },
-  { id: 'projects',        label: 'Projects',             description: 'Student & Community Projects' },
-];
+const TABS = BROWSE_TABS;
 
 const RIGHT_TABS: { id: string; label: string; description: string }[] = [
   { id: 'applied',  label: 'Tracker',               description: 'Tracker' },
@@ -94,24 +68,26 @@ const applyFilters = (
   selectedFunding: string,
   activeTab: TabId
 ) => {
-  return opps.filter(opp => {
+  const filtered = opps.filter(opp => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q ||
       opp.title.toLowerCase().includes(q) ||
       opp.provider.toLowerCase().includes(q) ||
       opp.description.toLowerCase().includes(q);
 
-    let matchesTab = true;
-    if (activeTab === 'jobs') matchesTab = GIG_CATEGORIES.includes(opp.category);
-    else if (activeTab === 'academic_career') matchesTab = ACADEMIC_CAREER_CATEGORIES.includes(opp.category);
-    else if (activeTab === 'innovation') matchesTab = INNOVATION_CATEGORIES.includes(opp.category);
-    else if (activeTab === 'projects') matchesTab = PROJECT_CATEGORIES.includes(opp.category);
+    const matchesTab = categoryMatchesTab(opp.category, activeTab);
 
     const matchesType    = selectedType === 'all' || opp.category === selectedType;
     const matchesLevel   = selectedLevel === 'all' || opp.eligibility.educationLevel === selectedLevel;
     const matchesFunding = selectedFunding === 'all' || opp.fundingType === selectedFunding;
 
     return matchesSearch && matchesTab && matchesType && matchesLevel && matchesFunding;
+  });
+
+  return filtered.sort((a, b) => {
+    const dateA = new Date(a.dateAdded || 0).getTime();
+    const dateB = new Date(b.dateAdded || 0).getTime();
+    return dateB - dateA;
   });
 };
 
@@ -295,7 +271,7 @@ export function Opportunities() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
           {/* Tab Navigation */}
-          <div className="flex bg-white/10 p-1 rounded-lg w-full mb-8 gap-1 items-center backdrop-blur-sm flex-wrap">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap bg-white/10 p-1 rounded-lg w-full mb-8 gap-1 items-stretch sm:items-center backdrop-blur-sm">
               {TABS.map(tab => (
                 <button
                   key={tab.id}
@@ -352,9 +328,10 @@ export function Opportunities() {
                   onChange={(e) => setSelectedType(e.target.value)}
                 >
                   <option value="all" className="text-gray-900 bg-white">
-                    {activeTab === 'gigs'     ? `All Types (${totalForTab})` :
-                     activeTab === 'career'   ? `All Career Types (${totalForTab})` :
-                     activeTab === 'academic' ? `All Academic Types (${totalForTab})` :
+                    {activeTab === 'jobs'            ? `All Types (${totalForTab})` :
+                     activeTab === 'academic_career' ? `All Academic & Career Types (${totalForTab})` :
+                     activeTab === 'innovation'      ? `All Innovation Types (${totalForTab})` :
+                     activeTab === 'projects'        ? `All Project Types (${totalForTab})` :
                      `All Types (${totalForTab})`}
                   </option>
                   {visibleCategoryOptions.map(opt => (

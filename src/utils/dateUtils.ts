@@ -21,6 +21,17 @@ export function calculateUrgency(deadline?: string): UrgencyLevel {
   today.setHours(0, 0, 0, 0);
   
   const deadlineDate = new Date(deadline);
+  
+  if (isNaN(deadlineDate.getTime())) {
+    return {
+      status: 'available',
+      daysLeft: 9999,
+      bgColor: 'bg-green-100',
+      textColor: 'text-green-700',
+      label: deadline
+    };
+  }
+
   deadlineDate.setHours(0, 0, 0, 0);
   
   const daysLeft = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -68,5 +79,3 @@ export function toSlug(title: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 }
-
-// Refurbished

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { opportunitiesAPI, analyticsAPI } from '../services/api';
-import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, Flag, Share2, Link as LinkIcon, Linkedin, MessageCircle, Flame, Users, UserCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, ExternalLink, ArrowLeft, Tag, Bell, CheckCircle, Flag, Share2, Link as LinkIcon, Linkedin, MessageCircle, Flame, Users, UserCircle, ChevronDown, ChevronUp, ShieldCheck, Info, HandHeart } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -18,6 +18,7 @@ import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 import { useSEO } from '../hooks/useSEO';
+import { isChallengeCategory, isProjectCategory } from '@/constants/categories';
 
 function renderDescription(text: string): JSX.Element {
   const lines = text.split('\n');
@@ -130,8 +131,8 @@ export function OpportunityDetails() {
       baseSchema["@type"] = "Event";
       baseSchema.startDate = opp.deadline;
       baseSchema.endDate = opp.deadline;
-      baseSchema.eventAttendanceMode = opp.location?.toLowerCase().includes('online') 
-        ? "https://schema.org/OnlineEventAttendanceMode" 
+      baseSchema.eventAttendanceMode = opp.location?.toLowerCase().includes('online')
+        ? "https://schema.org/OnlineEventAttendanceMode"
         : "https://schema.org/OfflineEventAttendanceMode";
       baseSchema.location = {
         "@type": "VirtualLocation",
@@ -194,7 +195,7 @@ export function OpportunityDetails() {
   const [pendingCheckoutId, setPendingCheckoutId] = useState<string | null>(null);
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [localFundedAmount, setLocalFundedAmount] = useState<number>(0);
-  const [contributors, setContributors] = useState<{name: string, amount: number}[]>([]);
+  const [contributors, setContributors] = useState<{ name: string, amount: number }[]>([]);
   const [showContributors, setShowContributors] = useState(false);
 
   useEffect(() => {
@@ -206,7 +207,7 @@ export function OpportunityDetails() {
       try {
         const res = await opportunitiesAPI.getContributors(opportunity.id);
         setContributors(res.data);
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 
@@ -228,7 +229,7 @@ export function OpportunityDetails() {
           setPendingCheckoutId(null);
           setContributeSuccess(false);
         }
-      } catch (e) {}
+      } catch (e) { }
     }, 5000);
     return () => clearInterval(interval);
   }, [pendingCheckoutId, contributeAmount]);
@@ -261,7 +262,7 @@ export function OpportunityDetails() {
   const handleContributeSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!opportunity) return;
-    
+
     setIsContributing(true);
     setContributeError(null);
 
@@ -311,7 +312,7 @@ export function OpportunityDetails() {
 
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Failed to submit application');
-      
+
       setAppSubmitSuccess(true);
     } catch (err: any) {
       setAppSubmitError(err.message);
@@ -323,7 +324,7 @@ export function OpportunityDetails() {
   const handlePitchSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!opportunity) return;
-    
+
     setIsSubmittingPitch(true);
     setPitchError(null);
 
@@ -495,9 +496,9 @@ export function OpportunityDetails() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* JSON-LD Schema for Google Rich Snippets */}
-      <script 
-        type="application/ld+json" 
-        dangerouslySetInnerHTML={{ __html: generateSchema(opportunity) }} 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: generateSchema(opportunity) }}
       />
 
       {/* Header */}
@@ -617,60 +618,87 @@ export function OpportunityDetails() {
 
             </div>
 
-            {/* Financial Summary - New Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <div className={`p-4 rounded-xl border flex flex-col justify-center ${
-                opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend' || opportunity.compensationType === 'Equity'
-                  ? 'bg-blue-50 border-blue-100'
-                  : 'bg-slate-50 border-slate-200'
-              }`}>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Compensation</p>
-                <p className={`text-lg font-bold ${
-                  opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend' || opportunity.compensationType === 'Equity'
-                    ? 'text-blue-700'
-                    : 'text-slate-700'
-                }`}>
-                  {opportunity.compensationType}
-                </p>
-              </div>
-
-              <div className={`p-4 rounded-xl border flex flex-col justify-center ${
-                opportunity.upfrontCost === 'Has Upfront Cost'
-                  ? 'bg-amber-50 border-amber-100'
-                  : 'bg-green-50 border-green-100'
-              }`}>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Application Cost</p>
-                <div className="flex items-center gap-2">
-                  <p className={`text-lg font-bold ${
-                    opportunity.upfrontCost === 'Has Upfront Cost'
-                      ? 'text-amber-700'
-                      : 'text-green-700'
+            {/* Financial Summary */}
+            <div className={`grid grid-cols-1 gap-4 mb-8 ${opportunity.compensationType && opportunity.compensationType !== 'N/A' ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
+              {opportunity.compensationType && opportunity.compensationType !== 'N/A' && (
+                <div className={`p-4 rounded-xl border flex flex-col justify-center ${opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend' || opportunity.compensationType === 'Equity'
+                    ? 'bg-blue-50 border-blue-100'
+                    : 'bg-slate-50 border-slate-200'
                   }`}>
-                    {opportunity.upfrontCost}
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Compensation</p>
+                  <p className={`text-lg font-bold ${opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend' || opportunity.compensationType === 'Equity'
+                      ? 'text-blue-700'
+                      : 'text-slate-700'
+                    }`}>
+                    {opportunity.compensationType}
                   </p>
+                </div>
+              )}
+
+              {!isProjectCategory(opportunity.category) && (
+                <div className={`p-4 rounded-xl border flex flex-col justify-center ${opportunity.upfrontCost === 'Has Upfront Cost'
+                    ? 'bg-amber-50 border-amber-100'
+                    : 'bg-green-50 border-green-100'
+                  }`}>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Application Cost</p>
+                  <div className="flex items-center gap-2">
+                    <p className={`text-lg font-bold ${opportunity.upfrontCost === 'Has Upfront Cost'
+                        ? 'text-amber-700'
+                        : 'text-green-700'
+                      }`}>
+                      {opportunity.upfrontCost}
+                    </p>
+                    {opportunity.upfrontCost === 'Has Upfront Cost' && (
+                      <span className="text-[10px] bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase">Alert</span>
+                    )}
+                  </div>
                   {opportunity.upfrontCost === 'Has Upfront Cost' && (
-                    <span className="text-[10px] bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase">Alert</span>
+                    <p className="text-[10px] text-amber-600 mt-1 italic leading-tight">
+                      This opportunity may require you to pay for visa, travel, or flights out-of-pocket initially.
+                    </p>
                   )}
                 </div>
-                {opportunity.upfrontCost === 'Has Upfront Cost' && (
-                  <p className="text-[10px] text-amber-600 mt-1 italic leading-tight">
-                    This opportunity may require you to pay for visa, travel, or flights out-of-pocket initially.
-                  </p>
-                )}
-              </div>
+              )}
             </div>
 
-            {/* Crowdfunding UI for Community Projects */}
-            {['Project', 'StudentProject'].includes(opportunity.category) && opportunity.isEscrow && (
+            {/* Institutional Verification — Projects tab listings */}
+            {isProjectCategory(opportunity.category) && opportunity.institutionalEndorsement && (
+              <div id="institutional-verification" className="mb-8 rounded-2xl border border-purple-200 bg-purple-50 p-6">
+                <h3 className="text-lg font-bold text-purple-900 mb-2 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5" /> Institutional Verification
+                </h3>
+                <p className="text-sm text-purple-800 mb-3">
+                  <strong>{opportunity.institutionalEndorsement.institutionName}</strong>
+                  {' — '}{opportunity.institutionalEndorsement.contactTitle}
+                </p>
+                <p className="text-xs text-purple-700 mb-4">
+                  We verify endorsement emails from department heads or recognized community organizations before publishing.
+                </p>
+                {opportunity.institutionalEndorsement.evidenceUrl && (
+                  <a
+                    href={opportunity.institutionalEndorsement.evidenceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-purple-700 text-white rounded-lg text-sm font-semibold hover:bg-purple-800"
+                  >
+                    View endorsement evidence
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Crowdfunding UI for funded projects */}
+            {isProjectCategory(opportunity.category) && opportunity.isEscrow && (
               <div className="bg-gradient-to-br from-[#131ADF]/10 to-blue-50 rounded-2xl p-6 md:p-8 mb-8 border border-blue-100">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                   <div className="flex-1 w-full">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Fund this {opportunity.category === 'StudentProject' ? 'Student' : 'Community'} Project</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Fund this {opportunity.category === 'ResearchCollaboration' ? 'Research' : opportunity.category === 'StudentProject' ? 'Student' : 'Community'} Project</h3>
                     <p className="text-sm text-gray-600 mb-4">
-                      Support this student or community initiative by contributing securely via M-PESA. 
+                      Support this student or community initiative by contributing securely via M-PESA.
                       Platform fees of 5% apply.
                     </p>
-                    
+
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm font-semibold text-gray-700">
                         <span>Raised: KES {localFundedAmount.toLocaleString()}</span>
@@ -680,10 +708,10 @@ export function OpportunityDetails() {
                         <div className="bg-[#131ADF] h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, (localFundedAmount / (opportunity.escrowAmount || 1)) * 100)}%` }}></div>
                       </div>
                     </div>
-                    
+
                     {/* Top Contributors Accordion */}
                     <div className="mt-6">
-                      <button 
+                      <button
                         onClick={() => setShowContributors(!showContributors)}
                         className="flex items-center justify-between w-full p-3 bg-white border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors"
                       >
@@ -692,7 +720,7 @@ export function OpportunityDetails() {
                         </span>
                         {showContributors ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
                       </button>
-                      
+
                       {showContributors && (
                         <div className="mt-2 bg-white border border-blue-100 rounded-xl overflow-hidden shadow-inner max-h-60 overflow-y-auto">
                           {contributors.length === 0 ? (
@@ -718,11 +746,24 @@ export function OpportunityDetails() {
                       )}
                     </div>
                   </div>
-                  
-                  <div className="w-full md:w-auto shrink-0 flex flex-col gap-3">
+
+                  <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-3">
+                    <div className="rounded-xl border border-blue-200 bg-white p-4 text-sm text-gray-700 mb-1">
+                      <p className="font-semibold text-gray-900 flex items-center gap-2 mb-1">
+                        <Info className="w-4 h-4 text-[#131ADF]" /> Secure contributions
+                      </p>
+                      <p>
+                        Funds are held securely. Creators are verified via institutional endorsement before publishing. Platform fee 5% applies.
+                      </p>
+                      {opportunity.institutionalEndorsement?.evidenceUrl && (
+                        <a href="#institutional-verification" className="text-[#131ADF] font-semibold underline mt-2 inline-block">
+                          View verification details
+                        </a>
+                      )}
+                    </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button 
+                        <Button
                           className="w-full md:w-48 py-6 text-lg font-bold bg-[#131ADF] hover:bg-blue-800 shadow-md transition-all hover:shadow-lg"
                         >
                           Contribute
@@ -730,7 +771,7 @@ export function OpportunityDetails() {
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                          <DialogTitle>Contribute to this {opportunity.category === 'StudentProject' ? 'Student' : 'Community'} Project</DialogTitle>
+                          <DialogTitle>Contribute to this {opportunity.category === 'ResearchCollaboration' ? 'Research' : opportunity.category === 'StudentProject' ? 'Student' : 'Community'} Project</DialogTitle>
                           <DialogDescription>
                             Enter your M-PESA number and the amount you'd like to contribute. You will receive an STK push on your phone.
                           </DialogDescription>
@@ -741,7 +782,7 @@ export function OpportunityDetails() {
                               <div className="flex items-center justify-between">
                                 <label className="text-sm font-semibold text-gray-700">Your Name</label>
                                 <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                                  <input type="checkbox" checked={contributeAnonymous} onChange={(e) => setContributeAnonymous(e.target.checked)} className="rounded text-[#131ADF] focus:ring-[#131ADF]"/>
+                                  <input type="checkbox" checked={contributeAnonymous} onChange={(e) => setContributeAnonymous(e.target.checked)} className="rounded text-[#131ADF] focus:ring-[#131ADF]" />
                                   Anonymous
                                 </label>
                               </div>
@@ -776,8 +817,8 @@ export function OpportunityDetails() {
                                 {contributeError}
                               </div>
                             )}
-                            <Button 
-                              type="submit" 
+                            <Button
+                              type="submit"
                               className="w-full bg-[#131ADF]"
                               disabled={isContributing}
                             >
@@ -796,7 +837,7 @@ export function OpportunityDetails() {
                             {contributeError && (
                               <p className="text-red-500 text-sm font-medium mb-4 bg-red-50 p-2 rounded-lg">{contributeError}</p>
                             )}
-                            <Button 
+                            <Button
                               className="w-full bg-[#131ADF] font-bold"
                               onClick={handleCheckPayment}
                               disabled={isCheckingPayment}
@@ -811,7 +852,7 @@ export function OpportunityDetails() {
                             <p className="text-gray-600 text-sm">
                               Your contribution was received successfully. The project progress has been updated!
                             </p>
-                            <Button 
+                            <Button
                               className="w-full mt-6 bg-[#131ADF]"
                               onClick={() => { setContributeSuccess(false); setContributeAmount(''); }}
                             >
@@ -825,7 +866,7 @@ export function OpportunityDetails() {
                     {/* Contact Creator Button / Dialog */}
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button 
+                        <Button
                           variant="outline"
                           className="w-full md:w-48 py-6 text-base font-bold border-[#131ADF] text-[#131ADF] hover:bg-blue-50 shadow-sm transition-all"
                         >
@@ -866,8 +907,8 @@ export function OpportunityDetails() {
                                 {pitchError}
                               </div>
                             )}
-                            <Button 
-                              type="submit" 
+                            <Button
+                              type="submit"
                               className="w-full bg-[#131ADF]"
                               disabled={isSubmittingPitch}
                             >
@@ -879,11 +920,11 @@ export function OpportunityDetails() {
                             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                             <h4 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h4>
                             <p className="text-gray-600 text-sm mb-6">
-                              Your message has been delivered. You can track this conversation in your Inbox.
+                              Your message has been delivered. Please go to your Inbox and log in to continue the chat.
                             </p>
                             <Link to="/inbox">
                               <Button className="w-full">
-                                Go to Inbox
+                                Go to Inbox & Login
                               </Button>
                             </Link>
                           </div>
@@ -896,10 +937,141 @@ export function OpportunityDetails() {
               </div>
             )}
 
+            {/* Collaboration / volunteer mode — projects not seeking funds */}
+            {isProjectCategory(opportunity.category) && !opportunity.isEscrow && (
+              <div className="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-6 md:p-8 mb-8 border border-emerald-100">
+                <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <HandHeart className="w-6 h-6 text-emerald-600" />
+                  Volunteer or collaborate
+                </h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  This project is looking for collaborators and volunteers — not crowdfunding. Reach out to offer your skills or time.
+                </p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full md:w-auto py-6 px-8 text-lg font-bold bg-emerald-600 hover:bg-emerald-700">
+                      Volunteer / Help Out
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Offer to help</DialogTitle>
+                      <DialogDescription>
+                        Send a message to the project creator about how you can contribute.
+                      </DialogDescription>
+                    </DialogHeader>
+                    {!pitchSuccess ? (
+                      <form onSubmit={handlePitchSubmit} className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-gray-700">Your Email</label>
+                          <Input
+                            type="email"
+                            required
+                            placeholder="Enter your email"
+                            value={pitchEmail}
+                            onChange={(e) => setPitchEmail(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-gray-700">How can you help?</label>
+                          <Textarea
+                            required
+                            rows={4}
+                            placeholder="I can help with design, fieldwork, mentoring..."
+                            value={pitchMessage}
+                            onChange={(e) => setPitchMessage(e.target.value)}
+                          />
+                        </div>
+                        {pitchError && (
+                          <div className="p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">
+                            {pitchError}
+                          </div>
+                        )}
+                        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={isSubmittingPitch}>
+                          {isSubmittingPitch ? 'Sending...' : 'Send Message'}
+                        </Button>
+                      </form>
+                    ) : (
+                      <div className="py-6 text-center">
+                        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Offer Sent!</h4>
+                        <p className="text-gray-600 text-sm mb-6">
+                          The project creator has been notified. Please go to your Inbox and log in to continue this conversation.
+                        </p>
+                        <Link to="/inbox">
+                          <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                            Go to Inbox & Login
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+
             {/* Description */}
             <div className="mb-8">
               <h2 className="text-gray-900 mb-4 text-xl font-bold">About This Opportunity</h2>
               {renderDescription(opportunity.fullDescription || opportunity.description)}
+
+              {opportunity.projectProposalUrl && (
+                <div className="mt-6 p-5 bg-purple-50 border border-purple-200 rounded-xl flex items-start gap-4">
+                  <div className="bg-purple-100 p-2 rounded-lg text-purple-700">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-purple-900 font-bold mb-1">Project Proposal / Pitch Deck</h4>
+                    <p className="text-sm text-purple-800 mb-3">Read the detailed proposal to understand the problem, impact, and future plans for this project.</p>
+                    <a
+                      href={opportunity.projectProposalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
+                    >
+                      View Document
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {opportunity.institutionalEndorsement?.evidenceUrl && (
+                <div className="mt-4 p-5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-4">
+                  <div className="bg-blue-100 p-2 rounded-lg text-blue-700">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-blue-900 font-bold mb-1">Institutional Endorsement</h4>
+                    <p className="text-sm text-blue-800 mb-3">This project is officially endorsed by <strong>{opportunity.institutionalEndorsement.institutionName}</strong> ({opportunity.institutionalEndorsement.contactTitle}).</p>
+                    <a
+                      href={opportunity.institutionalEndorsement.evidenceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
+                    >
+                      View Endorsement Letter
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {opportunity.funderRecognition && (
+                <div className="mt-4 p-5 bg-green-50 border border-green-200 rounded-xl flex items-start gap-4">
+                  <div className="bg-green-100 p-2 rounded-lg text-green-700">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-green-900 font-bold mb-1">Funder Benefits & Recognitions</h4>
+                    <p className="text-sm text-green-800 whitespace-pre-wrap">{opportunity.funderRecognition}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Thematic Areas — 3-column grid */}
@@ -971,7 +1143,7 @@ export function OpportunityDetails() {
               </div>
             )}
 
-            
+
             {/* Apply Button / Challenge CTA */}
             <div className="bg-[#f0f7ff] rounded-2xl p-8 text-center" id="apply-section">
               {urgency?.label === 'Closed' ? (
@@ -992,7 +1164,7 @@ export function OpportunityDetails() {
                       <p className="text-sm text-gray-500 mb-6 border-b border-gray-100 pb-4">
                         Send a message directly to the poster. This will open a secure inbox where you can negotiate.
                       </p>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Your Email</label>
@@ -1051,14 +1223,14 @@ export function OpportunityDetails() {
                 <>
                   <h3 className="text-gray-900 mb-6 text-xl font-bold">Ready to Apply?</h3>
                   {!showApplyForm && !appSubmitSuccess && (
-                     <div className="flex justify-center">
-                        <Button
-                          onClick={() => setShowApplyForm(true)}
-                          className="flex-1 max-w-xs inline-flex items-center justify-center py-6 text-lg bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold"
-                        >
-                          Fill Application Form
-                        </Button>
-                     </div>
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={() => setShowApplyForm(true)}
+                        className="flex-1 max-w-xs inline-flex items-center justify-center py-6 text-lg bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                      >
+                        Fill Application Form
+                      </Button>
+                    </div>
                   )}
 
                   {showApplyForm && !appSubmitSuccess && (
@@ -1066,14 +1238,14 @@ export function OpportunityDetails() {
                       <p className="text-sm text-gray-500 mb-6 border-b border-gray-100 pb-4">
                         Please fill out the form below. Your email address will be used to track your application.
                       </p>
-                      
+
                       <div className="space-y-5">
                         {opportunity.applicationForm.fields.map(field => (
                           <div key={field.id}>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               {field.label} {field.required && <span className="text-red-500">*</span>}
                             </label>
-                            
+
                             {field.type === 'textarea' ? (
                               <Textarea
                                 required={field.required}
@@ -1094,7 +1266,7 @@ export function OpportunityDetails() {
                                 onChange={(e) => setApplicationData({ ...applicationData, [field.key]: e.target.value })}
                               />
                             )}
-                            
+
                             {field.type === 'textarea' && field.validation?.maxLength && (
                               <p className="text-xs text-gray-400 mt-1 text-right">
                                 Max {field.validation.maxLength} characters
@@ -1111,16 +1283,16 @@ export function OpportunityDetails() {
                       )}
 
                       <div className="mt-8 flex gap-3">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
+                        <Button
+                          type="button"
+                          variant="outline"
                           className="flex-1"
                           onClick={() => setShowApplyForm(false)}
                         >
                           Cancel
                         </Button>
-                        <Button 
-                          type="submit" 
+                        <Button
+                          type="submit"
                           className="flex-1 bg-[#131ADF]"
                           disabled={isSubmittingApp}
                         >
@@ -1131,23 +1303,23 @@ export function OpportunityDetails() {
                   )}
 
                   {appSubmitSuccess && (
-                     <div className="max-w-md mx-auto bg-green-50 rounded-xl p-8 border border-green-100 shadow-sm animate-in fade-in zoom-in duration-300">
-                       <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                       <h4 className="text-xl font-bold text-gray-900 mb-2">Application Sent!</h4>
-                       <p className="text-gray-600 text-sm">
-                         Your application has been securely delivered to the poster. You can track your status in the "Applied" tab on the main page.
-                       </p>
-                       <Button 
-                         variant="outline" 
-                         className="mt-6 w-full shadow-sm text-green-700 border-green-200 hover:bg-green-100"
-                         onClick={() => {
-                           setAppSubmitSuccess(false);
-                           setShowApplyForm(false);
-                         }}
-                       >
-                         Submit Another Application
-                       </Button>
-                     </div>
+                    <div className="max-w-md mx-auto bg-green-50 rounded-xl p-8 border border-green-100 shadow-sm animate-in fade-in zoom-in duration-300">
+                      <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                      <h4 className="text-xl font-bold text-gray-900 mb-2">Application Sent!</h4>
+                      <p className="text-gray-600 text-sm">
+                        Your application has been securely delivered to the poster. You can track your status in the "Applied" tab on the main page.
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="mt-6 w-full shadow-sm text-green-700 border-green-200 hover:bg-green-100"
+                        onClick={() => {
+                          setAppSubmitSuccess(false);
+                          setShowApplyForm(false);
+                        }}
+                      >
+                        Submit Another Application
+                      </Button>
+                    </div>
                   )}
                 </>
               ) : opportunity.applicationLink ? (
@@ -1178,10 +1350,36 @@ export function OpportunityDetails() {
                   </div>
                   <p className="text-gray-600 mt-4 text-sm">You'll be redirected to the official application page</p>
                 </>
+              ) : isChallengeCategory(opportunity.category) ? (
+                <>
+                  <h3 className="text-gray-900 mb-3 text-xl font-bold">Use as Research Inspiration</h3>
+                  <p className="text-gray-600 mb-6 text-sm max-w-md mx-auto">This is an open industry challenge — no formal application needed. Use it as inspiration for your capstone, thesis, class project, or research paper.</p>
+                  {opportunity.contactLink && (
+                    <a
+                      href={opportunity.contactLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+                    >
+                      <span>Explore Further</span>
+                      <ExternalLink className="w-5 h-5" />
+                    </a>
+                  )}
+                </>
+              ) : isProjectCategory(opportunity.category) ? (
+                <>
+                  <h3 className="text-gray-900 mb-3 text-xl font-bold">
+                    {opportunity.isEscrow ? 'Support this project' : 'Get involved'}
+                  </h3>
+                  <p className="text-gray-600 mb-6 text-sm max-w-md mx-auto">
+                    {opportunity.isEscrow
+                      ? 'Use the Contribute button above to fund this initiative, or contact the creator directly.'
+                      : 'This is a grassroots student or community project. Offer your time via Volunteer / Help Out above.'}
+                  </p>
+                </>
               ) : (
                 <>
-                  <h3 className="text-gray-900 mb-3 text-xl font-bold">Make This Your Project</h3>
-                  <p className="text-gray-600 mb-6 text-sm max-w-md mx-auto">This is an open industry challenge — no formal application needed. Use it as inspiration for your capstone, thesis, class project, or research paper.</p>
+                  <h3 className="text-gray-900 mb-3 text-xl font-bold">Learn more</h3>
                   {opportunity.contactLink && (
                     <a
                       href={opportunity.contactLink}
@@ -1198,22 +1396,23 @@ export function OpportunityDetails() {
             </div>
 
             {/* Action Buttons: Share & Subscribe */}
-            </div>{/* end p-8 content */}
+          </div>{/* end p-8 content */}
 
           {/* Share & Subscribe — full-width, outside p-8 */}
           <div className="border-t border-slate-100 px-8 py-8">
             <p className="text-sm text-slate-500 font-medium mb-4 text-center tracking-wide uppercase">Know someone who'd be a great fit?</p>
             <div className="flex flex-row gap-5 w-full">
               {/* Share Button — solid blue */}
-              <Button 
+              <Button
                 onClick={() => {
                   const deadline = opportunity?.deadline
                     ? `📅 Deadline: ${new Date(opportunity.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
                     : '📅 Deadline: Open / Ongoing';
                   const location = opportunity?.location ? `📍 Location: ${opportunity.location}` : '';
-                  const compensation = opportunity?.compensationType ? `💰 Compensation: ${opportunity.compensationType}` : '';
+                  const compensation = opportunity?.compensationType && opportunity.compensationType !== 'N/A'
+                    ? `💰 Compensation: ${opportunity.compensationType}` : '';
                   const cost = opportunity?.upfrontCost === 'No Upfront Cost' ? '✅ Free to Apply' : opportunity?.upfrontCost ? `⚠️ ${opportunity.upfrontCost}` : '';
-                  
+
                   let reqString = '';
                   if (opportunity?.eligibility?.requirements?.length) {
                     reqString = '\n\n📋 *Requirements:*\n' + opportunity.eligibility.requirements.slice(0, 3).map((r: string) => `• ${r}`).join('\n');

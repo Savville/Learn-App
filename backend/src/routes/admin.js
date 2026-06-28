@@ -541,7 +541,14 @@ router.post('/parse-opportunity', verifyAdminKey, async (req, res) => {
       You are an expert data extractor for a student and professional opportunities portal.
       Analyze the following raw text and extract key data points to create an opportunity listing.
       
-      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'Other'.
+      Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'StudentProject', 'Gig', 'Job', 'Partnership', 'StartupFunding', 'Other'.
+      
+      Category guidance:
+      - 'Challenge' = open industry brief (inspiration for capstone/research; NOT a poster-submitted student/community project).
+      - 'StudentProject' = student-led initiative posted by a student (may seek collaboration or crowdfunding).
+      - 'Project' = community initiative posted by an organization or group.
+      - 'StartupFunding' = startup grants, seed funding, accelerator programs for ventures.
+      - Do NOT use 'Challenge' for student crowdfunding posts.
       
       For missing information like deadlines, if the text says something generic like "End of September", extract that. If the application link is missing, return an empty string "".
       
@@ -692,6 +699,32 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     if (pendingDoc.isEscrowFunded) {
       oppToPublish.isEscrowFunded = true;
       oppToPublish.escrowAmount = pendingDoc.escrowAmount || oppToPublish.escrowAmount;
+    }
+
+    const PROJECT_CATEGORIES = ['StudentProject', 'Project'];
+
+    // Copy endorsement evidence URL for public display when approved
+    if (oppToPublish.institutionalEndorsement) {
+      const end = { ...oppToPublish.institutionalEndorsement };
+      const adminFile = end.adminEvidenceFile || oppToPublish.kycProofFilename;
+      if (!end.evidenceUrl?.trim() && adminFile) {
+        const apiBase = process.env.PUBLIC_API_URL || `${req.protocol}://${req.get('host')}/api`;
+        end.evidenceUrl = `${apiBase}/public/endorsement/${oppToPublish.id}`;
+      }
+      oppToPublish.institutionalEndorsement = end;
+    } else if (
+      PROJECT_CATEGORIES.includes(oppToPublish.category) &&
+      oppToPublish.kycProofFilename
+    ) {
+      const apiBase = process.env.PUBLIC_API_URL || `${req.protocol}://${req.get('host')}/api`;
+      oppToPublish.institutionalEndorsement = {
+        institutionName: 'Legacy listing',
+        contactTitle: 'Pending verification',
+        evidenceType: 'upload',
+        evidenceUrl: `${apiBase}/public/endorsement/${oppToPublish.id}`,
+        adminEvidenceFile: oppToPublish.kycProofFilename,
+        legacyGrandfathered: true,
+      };
     }
 
     await db.collection('opportunities').replaceOne({ id: oppToPublish.id }, oppToPublish, { upsert: true });

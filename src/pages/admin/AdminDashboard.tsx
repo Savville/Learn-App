@@ -612,6 +612,23 @@ export default function AdminDashboard() {
                             />
                           </div>
                           
+                          {/* Endorsement metadata */}
+                          {item.opportunity.institutionalEndorsement && (
+                            <div className="mt-4 rounded-md border border-purple-200 bg-purple-50 p-3 text-xs text-purple-900 space-y-1">
+                              <p className="font-bold">{item.opportunity.institutionalEndorsement.institutionName}</p>
+                              <p>{item.opportunity.institutionalEndorsement.contactTitle}</p>
+                              {item.opportunity.institutionalEndorsement.evidenceUrl && (
+                                <a
+                                  href={item.opportunity.institutionalEndorsement.evidenceUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-purple-700 underline font-semibold"
+                                >
+                                  Public evidence link
+                                </a>
+                              )}
+                            </div>
+                          )}
                           {/* KYC Document Viewer */}
                           {item.opportunity.kycProofFilename && (
                             <div className="mt-4 w-full">

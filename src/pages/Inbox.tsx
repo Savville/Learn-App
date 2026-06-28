@@ -848,7 +848,12 @@ export function Inbox() {
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           {msg.isEdited && (
-                            <span className="text-xs text-gray-400 italic">(edited)</span>
+                            <span className="text-[10px] italic" style={{ color: MUTED }}>(edited)</span>
+                          )}
+                          {isMe && (
+                            <div className="flex items-center gap-1 ml-1">
+                              <span className="text-[10px] font-bold text-blue-600">Seen</span>
+                            </div>
                           )}
                         </div>
                       </div>

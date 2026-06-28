@@ -12,8 +12,8 @@ export function Home() {
     description: 'Discover scholarships, fellowships, internships, grants and more — curated for African students and young professionals.',
     url: '/'
   });
-  const featuredOpportunities = opportunities.filter(opp => opp.featured).slice(0, 3);
-  const latestOpportunities = opportunities.slice(0, 6);
+  const featuredOpportunities = [...opportunities].filter(opp => opp.featured).slice(0, 3);
+  const latestOpportunities = [...opportunities].sort((a, b) => new Date(b.dateAdded || 0).getTime() - new Date(a.dateAdded || 0).getTime()).slice(0, 6);
 
   return (
     <div>

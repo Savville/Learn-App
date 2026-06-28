@@ -22,7 +22,7 @@ export interface Opportunity {
   escrowAmount?: number;
   isEscrowFunded?: boolean;
   provider: string;
-  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'StudentProject' | 'Gig' | 'Job' | 'Partnership' | 'StartupFunding' | 'Other';
+  category: 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship' | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'StudentProject' | 'ResearchCollaboration' | 'Gig' | 'Job' | 'Partnership' | 'StartupFunding' | 'Other';
   description: string;
   fullDescription: string;
   deadline?: string;
@@ -59,9 +59,210 @@ export interface Opportunity {
   views?: number;
   clicks?: number;
   fundedAmount?: number;
+  funderRecognition?: string;
+  projectProposalUrl?: string;
+  institutionalEndorsement?: {
+    institutionName: string;
+    contactTitle: string;
+    evidenceType: 'upload' | 'link';
+    evidenceUrl: string;
+    adminEvidenceFile?: string;
+    legacyGrandfathered?: boolean;
+  };
+  kycProofFilename?: string;
+  slug?: string;
 }
 
 export const opportunities: Opportunity[] = [
+  {
+    "id": "hydro-guard-concrete",
+    "title": "Hydro-Guard: Localized High-Performance Hydrophobic Concrete Admixtures",
+    "provider": "MTRD / University Laboratories",
+    "category": "ResearchCollaboration",
+    "description": "Developing localized hydrophobic concrete admixtures to reduce water infiltration and lower lifecycle maintenance costs by 40%.",
+    "fullDescription": "Traditional surface-applied concrete waterproofing is expensive, often imported, and degrades over time, leaving foundations and retaining walls vulnerable to water damage in aggressive soils.\n\nWe have engineered a novel surface-reactive concrete matrix that achieves 99% water repellency at the micro-structural level. Initial compressive strength tests show it performs 15% better than standard KS 572 compliant mixes. We are seeking funds for specialized out-of-house testing (XRD/XRF) and logistics.",
+    "deadline": "2026-12-31T23:59:59.000Z",
+    "location": "Nairobi, Kenya",
+    "eligibility": {
+      "educationLevel": "All",
+      "requirements": ["Interested in sustainable construction", "Willing to fund testing logistics"]
+    },
+    "benefits": [
+      "Access to comprehensive testing data",
+      "Co-authorship on final research publications",
+      "First right of refusal for commercial licensing"
+    ],
+    "fundingType": "N/A",
+    "compensationType": "Equity",
+    "upfrontCost": "No Upfront Cost",
+    "featured": true,
+    "dateAdded": "2026-06-28T14:55:00.000Z",
+    "logoUrl": "/images/hydrophobic_concrete_demo.png",
+    "postedBy": "Williams Ochieng",
+    "isVerified": true,
+    "status": "Verified",
+    "isEscrow": true,
+    "escrowAmount": 15000,
+    "fundedAmount": 0
+  },
+  {
+    "id": "alkali-activated-binders",
+    "title": "Alkali-Activated Binders for Sustainable Construction",
+    "provider": "MTRD / University Laboratories",
+    "category": "ResearchCollaboration",
+    "description": "Creating eco-friendly binders using industrial by-products to replace traditional Portland cement.",
+    "fullDescription": "Cement production is a massive contributor to global CO2 emissions. This project focuses on alkali-activated binders using local industrial by-products to create a sustainable alternative to ordinary Portland cement. \n\nOur bench-scale prototypes have shown excellent early-strength development. We require funding to cover advanced microstructural analysis (XRD/SEM) at commercial labs that are not available for free at our institution.",
+    "deadline": "2026-12-31T23:59:59.000Z",
+    "location": "Nairobi, Kenya",
+    "eligibility": {
+      "educationLevel": "All",
+      "requirements": ["Interest in green building materials", "Support for lab testing fees"]
+    },
+    "benefits": [
+      "Detailed material performance reports",
+      "Recognition as a founding sponsor in publications"
+    ],
+    "fundingType": "N/A",
+    "compensationType": "Equity",
+    "upfrontCost": "No Upfront Cost",
+    "featured": true,
+    "dateAdded": "2026-06-28T14:55:01.000Z",
+    "logoUrl": "/images/alkali_sustainable_binder.png",
+    "postedBy": "Williams Ochieng",
+    "isVerified": true,
+    "status": "Verified",
+    "isEscrow": true,
+    "escrowAmount": 12000,
+    "fundedAmount": 0
+  },
+  {
+    "id": "uhpc-agricultural-waste",
+    "title": "UHPC utilizing Agricultural Waste (Rice Husks)",
+    "provider": "Mwea Rice Mills / University Labs",
+    "category": "ResearchCollaboration",
+    "description": "Utilizing locally sourced rice husks from Mwea to produce Ultra-High Performance Concrete.",
+    "fullDescription": "Agricultural waste like rice husks is often burned or discarded, creating environmental hazards. By carefully incinerating these husks, we extract highly reactive silica which can be used to produce Ultra-High Performance Concrete (UHPC) at a fraction of the cost of imported silica fume.\n\nSince we are sourcing from nearby Mwea, raw material costs are negligible. We are raising funds strictly for the logistics of hauling the waste and renting specialized high-temperature kilns for controlled incineration.",
+    "deadline": "2026-12-31T23:59:59.000Z",
+    "location": "Mwea / Nairobi, Kenya",
+    "eligibility": {
+      "educationLevel": "All",
+      "requirements": ["Interest in agricultural waste recycling", "Funding for transport and kiln rental"]
+    },
+    "benefits": [
+      "Access to cost-effective UHPC mix designs",
+      "Acknowledgment in environmental sustainability reports"
+    ],
+    "fundingType": "N/A",
+    "compensationType": "Equity",
+    "upfrontCost": "No Upfront Cost",
+    "featured": true,
+    "dateAdded": "2026-06-28T14:55:02.000Z",
+    "logoUrl": "/images/uhpc_rice_husks.png",
+    "postedBy": "Williams Ochieng",
+    "isVerified": true,
+    "status": "Verified",
+    "isEscrow": true,
+    "escrowAmount": 8000,
+    "fundedAmount": 0
+  },
+  {
+    "id": "startup-qatar-investment-program-2026",
+    "slug": "startup-qatar-investment-program",
+    "title": "Startup Qatar Investment Program",
+    "provider": "Qatar Development Bank (QDB) / Invest Qatar",
+    "category": "StartupFunding",
+    "description": "QDB program attracting tech startups to launch or expand in Qatar. Offers up to $1.1M (START) or $5.5M (GROW), plus visas, co-working, R&D grants, mentoring, and relocation support.",
+    "fullDescription": "The Startup Qatar Investment Program, provided by Qatar Development Bank (QDB) and Invest Qatar, aims to attract high-growth tech startups to establish or expand operations in Qatar.\n\nThe program offers milestone-based funding for seed and growth-stage companies, alongside incentives and support services aligned with Startup Qatar subsidies.\n\n────────────────────────────────────\n WHO IT IS FOR\n────────────────────────────────────\n\n1. START — Startups launching in Qatar\nFor entrepreneurs with a Proof of Concept (PoC) or Minimum Viable Product (MVP) seeking funding to establish operations in the Qatari market.\nFunding: up to $1.1 million.\n\n2. GROW — Established startups expanding to Qatar\nFor already established startups seeking funding to expand operations into Qatar.\nFunding: up to $5.5 million.\n\nNote: Funding is trenched based on mutually agreed milestones.\n\n────────────────────────────────────\n PROGRAM BENEFITS\n────────────────────────────────────\n\n• Registration and license renewal cost waivers\n• Flexible work and entrepreneur visa issuance\n• Subsidized co-working spaces\n• Talent and internship support\n• Access to innovation and R&D grants\n• Adoption of tech solutions by respective industries\n• Skilling, training, and mentoring support\n• Exhibition and product showcase opportunities\n• Subsidized housing / relocation support\n\n────────────────────────────────────\n RELATED QATAR ECOSYSTEM\n────────────────────────────────────\n\n• Qatar Financial Centre (QFC) — streamlined business registration\n• Venture capital network via Invest Qatar Gateway (15+ active VC funds)\n• Jusour residency program for entrepreneurs and executives\n• Startup Qatar AI Compute Credits for AI-driven startups\n• Invest Qatar Gateway — partnerships, opportunities, and setup support\n\nOfficial portal: https://startupqatar.qa/en",
+    "deadline": "Rolling",
+    "location": "Qatar",
+    "eligibility": {
+      "educationLevel": "All",
+      "fieldOfStudy": [
+        "Climate Tech",
+        "AgriTech",
+        "B2B SaaS",
+        "Energy Tech",
+        "HealthTech",
+        "FinTech",
+        "Marketplaces",
+        "EduTech",
+        "SportsTech",
+        "Supply Chain Tech",
+        "Cybersecurity",
+        "AI & Machine Learning",
+        "IoT & Big Data",
+        "PropTech",
+        "Robotics & Drones"
+      ],
+      "requirements": [
+        "Tech startup with a high-growth, innovative, knowledge-based business model.",
+        "START track: PoC or MVP and plan to launch operations in Qatar.",
+        "GROW track: established startup seeking to expand into the Qatari market.",
+        "Open to all innovative and disruptive startups; priority sectors listed are not exhaustive.",
+        "Funding released in tranches against mutually agreed milestones."
+      ]
+    },
+    "benefits": [
+      "START: up to $1.1M for startups launching in Qatar",
+      "GROW: up to $5.5M for established startups expanding to Qatar",
+      "Registration and licensing cost waivers",
+      "Entrepreneur and flexible work visa support",
+      "Subsidized co-working and housing / relocation support",
+      "R&D grants, mentoring, and talent/internship support",
+      "Market access through industry adoption of tech solutions",
+      "Exhibition and showcase opportunities for products and technologies"
+    ],
+    "thematicAreas": [
+      {
+        "heading": "Priority sectors",
+        "topics": [
+          "Climate Tech",
+          "AgriTech",
+          "B2B SaaS",
+          "Energy Tech",
+          "HealthTech",
+          "FinTech",
+          "Marketplaces",
+          "EduTech",
+          "SportsTech",
+          "Supply Chain Tech",
+          "Cybersecurity",
+          "AI & ML",
+          "IoT & Big Data",
+          "PropTech",
+          "Robotics & Drones"
+        ]
+      },
+      {
+        "heading": "Funding tracks",
+        "topics": [
+          "START — up to $1.1M (launch in Qatar)",
+          "GROW — up to $5.5M (expand to Qatar)"
+        ]
+      }
+    ],
+    "applicationType": "Platform Link",
+    "applicationLink": "https://www.f6s.com/sqinvestmentprogram/apply",
+    "contactLink": "https://startupqatar.qa/en",
+    "fundingType": "Fully Funded",
+    "compensationType": "N/A",
+    "upfrontCost": "No Upfront Cost",
+    "featured": true,
+    "dateAdded": "2026-06-27",
+    "logoUrl": "/images/startup_qatar.png",
+    "postedBy": "Opportunities Kenya Admin",
+    "isVerified": true,
+    "status": "Verified",
+    "verificationAudit": {
+      "reviewedAt": "2026-06-27T00:00:00.000Z",
+      "reviewedBy": "Opportunities Kenya Admin",
+      "proofLinks": [
+        "https://startupqatar.qa/en",
+        "https://www.f6s.com/sqinvestmentprogram/apply"
+      ],
+      "riskFlags": []
+    }
+  },
   {
   "id": "boston-university-presidential-scholarship-2026",
   "title": "Boston University Presidential Scholarship 2026",

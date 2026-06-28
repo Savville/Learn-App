@@ -98,7 +98,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const handleBookmark = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const token = localStorage.getItem('user_token');
     if (!token) {
       setShowLogin(true);
@@ -125,7 +125,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
             savedList = savedList.filter((id: string) => id !== opportunity.id);
           }
           localStorage.setItem('saved_bookmarks', JSON.stringify(savedList));
-        } catch (e) {}
+        } catch (e) { }
       }
     } catch (err) {
       console.error(err);
@@ -142,110 +142,110 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   return (
     <>
       <Link
-      to={`/opportunity/${toSlug(opportunity.title)}`}
-      onClick={handleCardClick}
-      className={`group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${urgency.label === 'Depleted' ? 'grayscale opacity-75' : ''}`}
-    >
-      <article className="h-full flex flex-col pt-0">
-        {/* Header Image */}
-        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-          <img
-            src={opportunity.logoUrl}
-            alt={`${opportunity.category} opportunity from ${opportunity.provider}`}
-            loading="lazy"
-            decoding="async"
-            onError={handleImageError}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          {urgency.label === 'Expired' && (
-            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 pointer-events-none">
-              <span className="bg-gray-800 text-white font-bold tracking-widest uppercase px-4 py-2 rounded shadow-lg transform -rotate-12 border-2 border-dashed border-gray-400">
-                Expired
-              </span>
-            </div>
-          )}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
-            <button 
-              onClick={handleBookmark}
-              className={`p-2 rounded-full backdrop-blur-md transition-all shadow-sm ${isSaved ? 'bg-[#131ADF] text-white' : 'bg-white/90 text-slate-500 hover:text-[#131ADF]'}`}
-              title="Save for later"
-            >
-              <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
-            </button>
-            <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-gray-700 text-xs font-bold uppercase tracking-wider shadow-sm">
-              {opportunity.category}
-            </span>
-          </div>
-          {verificationLabel && (
-            <div className="absolute top-4 left-4">
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${verificationLabel === 'Verified' ? 'bg-green-600 text-white' : verificationLabel === 'Rejected' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'}`}>
-                {verificationLabel}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
-          <h3 className="text-gray-900 font-bold mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
-            {opportunity.title}
-          </h3>
-
-          <div className="flex flex-col mb-3">
-            {opportunity.postedBy && (
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs uppercase tracking-widest text-gray-400 font-bold">
-                  Posted by {opportunity.postedBy}
+        to={`/opportunity/${toSlug(opportunity.title)}`}
+        onClick={handleCardClick}
+        className={`group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${urgency.label === 'Depleted' ? 'grayscale opacity-75' : ''}`}
+      >
+        <article className="h-full flex flex-col pt-0">
+          {/* Header Image */}
+          <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+            <img
+              src={opportunity.logoUrl}
+              alt={`${opportunity.category} opportunity from ${opportunity.provider}`}
+              loading="lazy"
+              decoding="async"
+              onError={handleImageError}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            {urgency.label === 'Expired' && (
+              <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 pointer-events-none">
+                <span className="bg-gray-800 text-white font-bold tracking-widest uppercase px-4 py-2 rounded shadow-lg transform -rotate-12 border-2 border-dashed border-gray-400">
+                  Expired
                 </span>
-                {verificationLabel === 'Verified' && (
-                  <CheckCircle className="w-4 h-4 text-blue-500" />
-                )}
               </div>
             )}
-            <p className="text-blue-600 text-sm font-semibold">{opportunity.provider}</p>
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <button
+                onClick={handleBookmark}
+                className={`p-2 rounded-full backdrop-blur-md transition-all shadow-sm ${isSaved ? 'bg-[#131ADF] text-white' : 'bg-white/90 text-slate-500 hover:text-[#131ADF]'}`}
+                title="Save for later"
+              >
+                <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
+              </button>
+              <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-gray-700 text-xs font-bold uppercase tracking-wider shadow-sm">
+                {opportunity.category}
+              </span>
+            </div>
+            {verificationLabel && (
+              <div className="absolute top-4 left-4">
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${verificationLabel === 'Verified' ? 'bg-green-600 text-white' : verificationLabel === 'Rejected' ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'}`}>
+                  {verificationLabel}
+                </span>
+              </div>
+            )}
           </div>
 
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">{opportunity.description}</p>
+          {/* Content */}
+          <div className="p-6">
+            <h3 className="text-gray-900 font-bold mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
+              {opportunity.title}
+            </h3>
 
-          <div className="flex items-center justify-between mt-auto mb-4">
-            {/* Deadline */}
-            <div className={`flex items-center gap-1 text-sm font-medium ${urgency.textColor}`}>
-              <Calendar className="w-4 h-4" />
-              <span>{urgency.label}</span>
-            </div>
-
-            {/* Social Proof */}
-            <div className="flex items-center gap-1.5 text-xs font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100 shadow-sm">
-              {isHot ? (
-                <>
-                  <Flame className="w-3.5 h-3.5 text-orange-500" />
-                  <span className="text-orange-600">{views} viewed</span>
-                </>
-              ) : (
-                <>
-                  <Users className="w-3.5 h-3.5 text-blue-500" />
-                  <span className="text-blue-600">{views} viewed</span>
-                </>
+            <div className="flex flex-col mb-3">
+              {opportunity.postedBy && (
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-xs uppercase tracking-widest text-gray-400 font-bold">
+                    Posted by {opportunity.postedBy}
+                  </span>
+                  {verificationLabel === 'Verified' && (
+                    <CheckCircle className="w-4 h-4 text-blue-500" />
+                  )}
+                </div>
               )}
+              <p className="text-blue-600 text-sm font-semibold">{opportunity.provider}</p>
             </div>
-          </div>
 
-          {/* View Button */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-blue-600 font-bold text-sm group-hover:gap-3 transition-all">
-              <span>View Details & Apply</span>
-              <ArrowRight className="w-4 h-4" />
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">{opportunity.description}</p>
+
+            <div className="flex items-center justify-between mt-auto mb-4">
+              {/* Deadline */}
+              <div className={`flex items-center gap-1 text-sm font-medium ${urgency.textColor}`}>
+                <Calendar className="w-4 h-4" />
+                <span>{urgency.label}</span>
+              </div>
+
+              {/* Social Proof */}
+              <div className="flex items-center gap-1.5 text-xs font-semibold bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100 shadow-sm">
+                {isHot ? (
+                  <>
+                    <Flame className="w-3.5 h-3.5 text-orange-500" />
+                    <span className="text-orange-600">{views} viewed</span>
+                  </>
+                ) : (
+                  <>
+                    <Users className="w-3.5 h-3.5 text-blue-500" />
+                    <span className="text-blue-600">{views} viewed</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* View Button */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-blue-600 font-bold text-sm group-hover:gap-3 transition-all">
+                <span>View Details & Apply</span>
+                <ArrowRight className="w-4 h-4" />
+              </div>
             </div>
           </div>
-        </div>
-      </article>
-    </Link>
+        </article>
+      </Link>
 
       <Dialog open={showLogin} onOpenChange={setShowLogin}>
         <DialogContent className="sm:max-w-[425px] p-0 border-0 overflow-hidden bg-transparent shadow-none">
           <div className="bg-white rounded-2xl overflow-hidden shadow-xl">
             <div className="p-6">
-              <OTPLoginForm 
+              <OTPLoginForm
                 onSuccess={handleLoginSuccess}
                 title="Sign in to Save"
                 subtitle="You need to sign in to save opportunities to your Tracker."
