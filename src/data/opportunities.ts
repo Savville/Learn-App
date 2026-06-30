@@ -990,7 +990,7 @@ No Japanese language skills required. All interns with outstanding performance m
     "dateAdded": "2026-06-28"
   },
   {
-    "id": "undp-digital-ai-innovation-internship-2026",
+    "id": "undp-digital-ai-and-innovation-internship-2026",
     "title": "UNDP Digital AI and Innovation Internship 2026",
     "provider": "United Nations Development Programme (UNDP)",
     "category": "Internship",
