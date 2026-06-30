@@ -988,6 +988,66 @@ No Japanese language skills required. All interns with outstanding performance m
     "logoUrl": "/images/liquidity_arena.png",
     "featured": true,
     "dateAdded": "2026-06-28"
+  },
+  {
+    "id": "undp-digital-ai-innovation-internship-2026",
+    "title": "UNDP Digital AI and Innovation Internship 2026",
+    "provider": "United Nations Development Programme (UNDP)",
+    "category": "Internship",
+    "description": "An international remote paid internship with the UNDP Digital AI and Innovation Hub, focusing on digital transformation, AI, data governance, and systems transformation.",
+    "fullDescription": "The UNDP Digital AI and Innovation Internship 2026 is offered by the Digital AI and Innovation (DAI) Hub under the Bureau for Policy and Programme Support (BPPS). The DAI Hub serves as UNDP’s central platform for advancing digitalization, innovation, data governance, and systems transformation across development programmes. Through this international remote internship, participants will contribute to projects that help governments, organizations, and communities use digital technologies and artificial intelligence to address development challenges. Interns will assist with research, data analysis, programme delivery, communications activities, capacity-building initiatives, and digital product design.",
+    "deadline": "2026-09-30T23:59:59.000Z",
+    "location": "Remote",
+    "eligibility": {
+      "educationLevel": "Both",
+      "fieldOfStudy": [
+        "Digital Transformation",
+        "Artificial Intelligence",
+        "Innovation",
+        "Data",
+        "Public Policy",
+        "Communications"
+      ],
+      "requirements": [
+        "Must be enrolled in a graduate degree programme, in the final year of a bachelor’s degree, or recently graduated (within one year).",
+        "Interest in digital transformation, AI, innovation, data, policy, communications, or related fields.",
+        "Previous experience or knowledge in one of the internship workstreams is desirable.",
+        "Fluency in English.",
+        "Applicants from all nationalities are encouraged to apply."
+      ]
+    },
+    "benefits": [
+      "Monthly stipend from UNDP.",
+      "Experience working with the United Nations Development Programme.",
+      "Home-based and offers flexible remote working opportunities.",
+      "Develop professional, technical, and communication skills.",
+      "Exposure to international development programmes and global initiatives.",
+      "Practical experience in research, policy development, and project implementation."
+    ],
+    "applicationType": "Platform Link",
+    "applicationLink": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/33001/apply/email",
+    "fundingType": "Paid Internship",
+    "compensationType": "Stipend",
+    "upfrontCost": "No Upfront Cost",
+    "thematicAreas": [
+      {
+        "heading": "Responsibilities",
+        "topics": [
+          "Conduct research and prepare analytical content on innovation, AI, and systems transformation",
+          "Support digital, data, and AI initiatives",
+          "Assist with data collection, analysis, visualization",
+          "Contribute to policy briefs and guidance notes",
+          "Strategic communications, outreach, and partnership development",
+          "Digital product design, testing, and implementation"
+        ]
+      }
+    ],
+    "logoUrl": "/images/UNDP.jpg",
+    "featured": true,
+    "dateAdded": "2026-06-30T00:00:00.000Z",
+    "isVerified": true,
+    "status": "Verified",
+    "postedBy": "Opportunities Kenya Admin"
   }
 ];
 

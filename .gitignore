@@ -56,6 +56,7 @@ TODO.md
 # Personal folders
 Tech Content/
 /OPPORTUNITIES/
+Opportunities/
 /DOCS/
 backend/scripts/
 scripts/final_sync.js
@@ -63,8 +64,6 @@ scripts/sync_seed.js
 scripts/sync_seed.py
 scripts/sync_seed_v2.py
 scripts/generate-sitemap.mjs
-
-
 
 # Package manager lock files (optional - uncomment if you want to ignore)
 # package-lock.json
@@ -84,6 +83,8 @@ public/Opportunities Kenya Logo 3.png
 public/Opportunities Kenya Logo.png
 public/poster admin UI.png
 
-
 # Temporary Scripts
 scripts/temp/
+
+# Backend Scripts
+backend/seed.js
