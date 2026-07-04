@@ -17,6 +17,9 @@ import {
   yesistTemplate
 } from '../services/emailService.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { cacheInvalidatePrefix } from '../config/cache.js';
+
+const CACHE_PREFIX = '/api/opportunities';
 
 // Resolve the project root (3 levels up from backend/src/routes/)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -732,6 +735,8 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
     // Update pending status
     await db.collection('pending_opportunities').updateOne({ _id: pendingDoc._id }, { $set: { status: 'Verified', approvedAt: new Date(), reviewedAt: new Date(), reviewedBy, proofLinks } });
 
+    cacheInvalidatePrefix(CACHE_PREFIX);
+
     // Fetch active subscribers to send the new opportunity alert if it's not an edit
     if (!oppToPublish.editOf) {
       const subscribers = await db
@@ -1012,6 +1017,7 @@ router.put('/opportunities/:id', verifyAdminKey, async (req, res) => {
       return res.status(404).json({ error: 'Opportunity not found.' });
     }
 
+    cacheInvalidatePrefix(CACHE_PREFIX);
     res.json({ message: 'Opportunity updated successfully.' });
   } catch (error) {
     console.error('âŒ Update opportunity error:', error);
@@ -1034,6 +1040,7 @@ router.delete('/opportunities/:id', verifyAdminKey, async (req, res) => {
       return res.status(404).json({ error: 'Opportunity not found.' });
     }
 
+    cacheInvalidatePrefix(CACHE_PREFIX);
     res.json({ message: 'Opportunity deleted successfully.' });
   } catch (error) {
     console.error('âŒ Delete opportunity error:', error);
