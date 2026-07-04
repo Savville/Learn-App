@@ -1273,7 +1273,8 @@ router.get('/crowdfund/ledger', verifyAdminKey, async (req, res) => {
           totalRaised: 0,
           txCount: 0,
           status: 'Active',
-          contributions: []
+          contributions: [],
+          payoutRequests: opp?.payoutRequests || []
         };
       }
 
@@ -1298,6 +1299,30 @@ router.get('/crowdfund/ledger', verifyAdminKey, async (req, res) => {
     }
 
     res.json(Object.values(ledgerMap));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/admin/crowdfund/payout-requests/:postId/:requestId/mark-paid
+router.put('/crowdfund/payout-requests/:postId/:requestId/mark-paid', verifyAdminKey, async (req, res) => {
+  try {
+    const { postId, requestId } = req.params;
+    const db = getDB();
+    const { ObjectId } = await import('mongodb');
+
+    // Update in opportunities collection
+    await db.collection('opportunities').updateOne(
+      { id: postId, 'payoutRequests._id': new ObjectId(requestId) },
+      { $set: { 'payoutRequests.$.status': 'paid', 'payoutRequests.$.paidAt': new Date() } }
+    );
+    // Also try updating pending_opportunities just in case
+    await db.collection('pending_opportunities').updateOne(
+      { 'opportunity.id': postId, 'opportunity.payoutRequests._id': new ObjectId(requestId) },
+      { $set: { 'opportunity.payoutRequests.$.status': 'paid', 'opportunity.payoutRequests.$.paidAt': new Date() } }
+    );
+
+    res.json({ message: 'Payout request marked as paid.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

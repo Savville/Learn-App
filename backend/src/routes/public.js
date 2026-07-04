@@ -1182,6 +1182,63 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Creator submits a Payout Request (Crowdfunding Expenses)
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/me/posts/:id/payout-request', verifyUserToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { expenseType, vendorName, reason, amount, paybillNumber, receiptUrl } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+
+    if (!expenseType || !vendorName || !reason || !amount || !paybillNumber) {
+      return res.status(400).json({ error: 'Missing required payout request fields.' });
+    }
+
+    // Verify ownership
+    const opp = await db.collection('opportunities').findOne({ id });
+    const pendingOpp = await db.collection('pending_opportunities').findOne({ 'opportunity.id': id });
+    const posterEmail = opp?.reporter?.email || pendingOpp?.reporter?.email;
+    
+    if (!opp && !pendingOpp) {
+      return res.status(404).json({ error: 'Opportunity not found.' });
+    }
+    if (posterEmail !== email) {
+      return res.status(403).json({ error: 'You do not own this project.' });
+    }
+
+    const { ObjectId } = await import('mongodb');
+    const newRequest = {
+      _id: new ObjectId(),
+      expenseType,
+      vendorName,
+      reason,
+      amount: Number(amount),
+      paybillNumber,
+      receiptUrl: receiptUrl || null,
+      status: 'pending',
+      requestedAt: new Date()
+    };
+
+    // Add to the opportunity's payoutRequests array
+    await db.collection('opportunities').updateOne(
+      { id },
+      { $push: { payoutRequests: newRequest } }
+    );
+    // Also update pending collection if it's there
+    await db.collection('pending_opportunities').updateOne(
+      { 'opportunity.id': id },
+      { $push: { 'opportunity.payoutRequests': newRequest } }
+    );
+
+    res.status(201).json({ message: 'Payout request submitted successfully.', request: newRequest });
+  } catch (err) {
+    console.error('Error submitting payout request:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Daraja B2C Webhook Callback
 router.post('/payments/mpesa/b2c/result', async (req, res) => {
   try {

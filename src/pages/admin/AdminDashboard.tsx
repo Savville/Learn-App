@@ -433,6 +433,39 @@ export default function AdminDashboard() {
     setActionLoading(null);
   };
 
+  const handleMarkPayoutRequestPaid = async (postId: string, requestId: string) => {
+    if (!window.confirm(`Are you sure you have already sent this payment via M-PESA? This will mark the request as Paid.`)) return;
+    
+    setActionLoading(`mark_paid_${requestId}`);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/crowdfund/payout-requests/${postId}/${requestId}/mark-paid`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to mark as paid');
+      showAlert({ title: 'Success', message: `✅ ${data.message}`, type: 'success' });
+      
+      // Update UI state
+      setLedgerItems(prev => prev.map(l => {
+        if (l.opportunityId === postId && l.payoutRequests) {
+          return {
+            ...l,
+            payoutRequests: l.payoutRequests.map((r: any) => 
+              r._id === requestId ? { ...r, status: 'paid' } : r
+            )
+          };
+        }
+        return l;
+      }));
+    } catch (e: any) {
+      showAlert({ title: 'Error', message: `❌ Error: ${e.message}`, type: 'error' });
+    }
+    setActionLoading(null);
+  };
+
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
@@ -1863,6 +1896,64 @@ export default function AdminDashboard() {
                                         <td className="px-4 py-2 font-medium">{c.name}</td>
                                         <td className="px-4 py-2 font-mono">{c.phone}</td>
                                         <td className="px-4 py-2 text-right text-slate-900 font-semibold">{c.amount.toLocaleString()}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Payout Requests List */}
+                          {item.payoutRequests && item.payoutRequests.length > 0 && (
+                            <div className="mt-6 border border-purple-200 rounded-md overflow-hidden flex flex-col">
+                              <div className="bg-purple-50 px-4 py-2 border-b border-purple-200 flex justify-between items-center">
+                                <span className="text-xs font-bold text-purple-700 uppercase tracking-wider flex items-center gap-2">
+                                  <DollarSign className="w-4 h-4" /> Payout Requests ({item.payoutRequests.length})
+                                </span>
+                              </div>
+                              <div className="max-h-60 overflow-y-auto">
+                                <table className="w-full text-sm text-left text-slate-600">
+                                  <thead className="bg-purple-50/50 text-xs uppercase text-slate-500 font-semibold sticky top-0 shadow-[0_1px_0_#e9d5ff]">
+                                    <tr>
+                                      <th className="px-4 py-2">Details</th>
+                                      <th className="px-4 py-2">Vendor / Recipient</th>
+                                      <th className="px-4 py-2 text-right">Amount</th>
+                                      <th className="px-4 py-2">Status / Action</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-purple-100">
+                                    {item.payoutRequests.map((r: any, i: number) => (
+                                      <tr key={r._id || i} className="hover:bg-purple-50/30">
+                                        <td className="px-4 py-3">
+                                          <div className="font-medium text-slate-900">{r.expenseType === 'vendor' ? 'Vendor Payment' : 'Contingency/Transport'}</div>
+                                          <div className="text-xs text-slate-500 mt-1">{r.reason}</div>
+                                          {r.receiptUrl && (
+                                            <a href={r.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-1 inline-block font-medium">View Receipt ↗</a>
+                                          )}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                          <div className="font-medium">{r.vendorName}</div>
+                                          <div className="text-xs font-mono text-slate-500 mt-1">Paybill: {r.paybillNumber}</div>
+                                        </td>
+                                        <td className="px-4 py-3 text-right text-slate-900 font-bold text-base">KES {Number(r.amount).toLocaleString()}</td>
+                                        <td className="px-4 py-3">
+                                          {r.status === 'paid' ? (
+                                            <span className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-full w-fit">
+                                              <CheckCircle className="w-3 h-3" /> Paid
+                                            </span>
+                                          ) : (
+                                            <Button 
+                                              size="sm" 
+                                              variant="outline" 
+                                              className="border-purple-200 text-purple-700 hover:bg-purple-100 h-8 text-xs font-bold"
+                                              onClick={() => handleMarkPayoutRequestPaid(item.opportunityId, r._id)}
+                                              disabled={actionLoading === `mark_paid_${r._id}`}
+                                            >
+                                              {actionLoading === `mark_paid_${r._id}` ? '...' : 'Mark as Paid'}
+                                            </Button>
+                                          )}
+                                        </td>
                                       </tr>
                                     ))}
                                   </tbody>
