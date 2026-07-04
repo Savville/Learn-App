@@ -1255,8 +1255,10 @@ router.post('/reports/:id/email-postmortem', verifyAdminKey, async (req, res) =>
 router.get('/crowdfund/ledger', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
-    // Get all completed crowdfund transactions
-    const txs = await db.collection('transactions').find({ type: 'crowdfund', status: 'completed' }).toArray();
+    // Get ALL crowdfund transactions to calculate stats, payouts, and refunds
+    const txs = await db.collection('transactions').find({ 
+      type: { $in: ['crowdfund', 'crowdfund_payout', 'crowdfund_refund'] },
+    }).toArray();
     
     // Group by opportunityId
     const ledgerMap = {};
@@ -1265,18 +1267,36 @@ router.get('/crowdfund/ledger', verifyAdminKey, async (req, res) => {
         const opp = await db.collection('opportunities').findOne({ id: tx.opportunityId });
         ledgerMap[tx.opportunityId] = {
           opportunityId: tx.opportunityId,
-          title: opp?.title || 'Unknown Project',
-          category: opp?.category || 'Unknown',
-          contactEmail: opp?.contactEmail || opp?.reporter?.email,
+          title: opp?.title || tx.opportunityTitle || 'Unknown Project',
+          category: opp?.category || tx.opportunityCategory || 'Unknown',
+          contactEmail: opp?.contactEmail || opp?.reporter?.email || tx.posterEmail || 'N/A',
           totalRaised: 0,
           txCount: 0,
-          transactions: []
+          status: 'Active',
+          contributions: []
         };
       }
-      ledgerMap[tx.opportunityId].totalRaised += Number(tx.amountPaid || tx.amount || 0);
-      ledgerMap[tx.opportunityId].txCount++;
-      ledgerMap[tx.opportunityId].transactions.push(tx);
+
+      if (tx.type === 'crowdfund' && tx.status === 'completed') {
+        ledgerMap[tx.opportunityId].totalRaised += Number(tx.amountPaid || tx.amount || 0);
+        ledgerMap[tx.opportunityId].txCount++;
+        ledgerMap[tx.opportunityId].contributions.push({
+          name: tx.contributorName || 'Anonymous',
+          phone: tx.contributorPhone || tx.phone || 'N/A',
+          amount: Number(tx.amountPaid || tx.amount || 0),
+          date: tx.createdAt || tx.completedAt
+        });
+      }
+
+      if (tx.type === 'crowdfund_payout') {
+        ledgerMap[tx.opportunityId].status = 'Paid Out';
+      }
+
+      if (tx.type === 'crowdfund_refund') {
+        ledgerMap[tx.opportunityId].status = 'Refunded';
+      }
     }
+
     res.json(Object.values(ledgerMap));
   } catch (error) {
     res.status(500).json({ error: error.message });

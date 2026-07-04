@@ -405,7 +405,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error(data.error || 'Payout failed');
       showAlert({ title: 'Success', message: `✅ ${data.message}`, type: 'success' });
       // Update UI state
-      setLedgerItems(prev => prev.map(l => l.opportunityId === opportunityId ? { ...l, totalRaised: 0 } : l));
+      setLedgerItems(prev => prev.map(l => l.opportunityId === opportunityId ? { ...l, status: 'Paid Out' } : l));
     } catch (e: any) {
       showAlert({ title: 'Error', message: `❌ Error: ${e.message}`, type: 'error' });
     }
@@ -426,7 +426,7 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error(data.error || 'Refund failed');
       showAlert({ title: 'Success', message: `✅ ${data.message}`, type: 'success' });
       // Update UI state
-      setLedgerItems(prev => prev.map(l => l.opportunityId === opportunityId ? { ...l, totalRaised: 0 } : l));
+      setLedgerItems(prev => prev.map(l => l.opportunityId === opportunityId ? { ...l, status: 'Refunded' } : l));
     } catch (e: any) {
       showAlert({ title: 'Error', message: `❌ Error: ${e.message}`, type: 'error' });
     }
@@ -1827,11 +1827,44 @@ export default function AdminDashboard() {
                   <Card key={item.opportunityId} className="border-slate-200 shadow-sm">
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
-                        <div>
-                          <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 mb-2">{item.category}</Badge>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100">{item.category}</Badge>
+                            <Badge variant="outline" className={`
+                              ${item.status === 'Paid Out' ? 'text-green-600 border-green-200 bg-green-50' : ''}
+                              ${item.status === 'Refunded' ? 'text-red-600 border-red-200 bg-red-50' : ''}
+                              ${item.status === 'Active' ? 'text-blue-600 border-blue-200 bg-blue-50' : ''}
+                            `}>
+                              {item.status}
+                            </Badge>
+                          </div>
                           <h3 className="text-lg font-bold text-slate-900">{item.title}</h3>
                           <p className="text-sm text-slate-500 font-mono mt-1">ID: {item.opportunityId}</p>
                           <p className="text-sm text-slate-600 mt-1">Creator/Contact: {item.contactEmail || 'N/A'}</p>
+                          
+                          {/* Contributors List */}
+                          {item.contributions && item.contributions.length > 0 && (
+                            <div className="mt-6 border border-slate-200 rounded-md overflow-hidden">
+                              <table className="w-full text-sm text-left text-slate-600">
+                                <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
+                                  <tr>
+                                    <th className="px-4 py-2">Contributor Name</th>
+                                    <th className="px-4 py-2">Phone / M-PESA</th>
+                                    <th className="px-4 py-2 text-right">Amount (KES)</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                  {item.contributions.map((c: any, i: number) => (
+                                    <tr key={i} className="hover:bg-slate-50">
+                                      <td className="px-4 py-2 font-medium">{c.name}</td>
+                                      <td className="px-4 py-2 font-mono">{c.phone}</td>
+                                      <td className="px-4 py-2 text-right text-slate-900 font-semibold">{c.amount.toLocaleString()}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="flex flex-col gap-2 p-4 bg-slate-50 rounded-lg border border-slate-100 w-full lg:w-64">
@@ -1842,16 +1875,16 @@ export default function AdminDashboard() {
                           <div className="flex flex-col gap-2 mt-2 pt-3 border-t border-slate-200">
                             <Button 
                               onClick={() => handleCrowdfundPayout(item.opportunityId)}
-                              disabled={actionLoading === `payout_${item.opportunityId}`}
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                              disabled={actionLoading === `payout_${item.opportunityId}` || item.status === 'Paid Out' || item.status === 'Refunded'}
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm disabled:opacity-50"
                             >
                               <DollarSign className="w-4 h-4 mr-2" /> Payout to Creator
                             </Button>
                             <Button 
                               onClick={() => handleCrowdfundRefund(item.opportunityId)}
-                              disabled={actionLoading === `refund_${item.opportunityId}`}
+                              disabled={actionLoading === `refund_${item.opportunityId}` || item.status === 'Refunded' || item.status === 'Paid Out'}
                               variant="outline" 
-                              className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                              className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
                             >
                               <AlertTriangle className="w-4 h-4 mr-2" /> Refund Contributors
                             </Button>

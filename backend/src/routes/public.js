@@ -965,6 +965,9 @@ router.post('/payments/crowdfund', async (req, res) => {
     // Log transaction so the webhook can find it
     await db.collection('transactions').insertOne({
       opportunityId,
+      opportunityTitle: liveOpp.title,
+      opportunityCategory: liveOpp.category,
+      posterEmail: liveOpp.contactEmail || liveOpp.reporter?.email || 'N/A',
       contributorName: isAnonymous ? 'Anonymous' : (name || 'Anonymous'),
       contributorPhone: phone,
       amount,
