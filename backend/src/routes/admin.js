@@ -1027,6 +1027,9 @@ router.delete('/opportunities/:id', verifyAdminKey, async (req, res) => {
 
     const result = await db.collection('opportunities').deleteOne({ id: id });
 
+    // Also remove the corresponding pending post so it doesn't show up in users' dashboards
+    await db.collection('pending_opportunities').deleteOne({ 'opportunity.id': id });
+
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: 'Opportunity not found.' });
     }

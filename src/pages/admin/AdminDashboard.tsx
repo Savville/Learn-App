@@ -41,6 +41,9 @@ export default function AdminDashboard() {
   const [reportLoading, setReportLoading] = useState(false);
   const [expandedReportId, setExpandedReportId] = useState<string | null>(null);
   
+  // Delete State
+  const [oppToDelete, setOppToDelete] = useState<{id: string, title: string} | null>(null);
+  
   // Comms State
   const [lastN, setLastN] = useState<number>(5);
   const [lastDigestSent, setLastDigestSent] = useState<string | null>(localStorage.getItem('lastDigestSent') || null);
@@ -185,8 +188,13 @@ export default function AdminDashboard() {
     setActionLoading(null);
   };
 
-  const handleDeleteOpp = async (id: string, title: string) => {
-    if (!window.confirm(`Are you sure you want to completely delete "${title}"?`)) return;
+  const handleDeleteOpp = (id: string, title: string) => {
+    setOppToDelete({ id, title });
+  };
+
+  const confirmDeleteOpp = async () => {
+    if (!oppToDelete) return;
+    const { id } = oppToDelete;
     setActionLoading(`delete_${id}`);
     try {
       const token = localStorage.getItem('adminToken');
@@ -199,6 +207,7 @@ export default function AdminDashboard() {
         if (editingOpp && editingOpp.id === id) {
           setEditingOpp(null);
         }
+        setOppToDelete(null);
       } else {
         const errorData = await res.json();
         showAlert({ title: 'Error', message: 'Error deleting: ' + errorData.error, type: 'error' });
@@ -1858,6 +1867,35 @@ export default function AdminDashboard() {
         ) : null}
       </div>
 
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!oppToDelete} onOpenChange={(open) => !open && setOppToDelete(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-red-600 gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Opportunity
+            </DialogTitle>
+            <DialogDescription className="py-4 text-slate-700">
+              Are you sure you want to completely delete <strong>"{oppToDelete?.title}"</strong>? 
+              <br /><br />
+              This action cannot be undone. However, any existing applications or messages associated with this opportunity will be retained.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" onClick={() => setOppToDelete(null)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              className="bg-red-600 hover:bg-red-700"
+              onClick={confirmDeleteOpp}
+              disabled={actionLoading === `delete_${oppToDelete?.id}`}
+            >
+              {actionLoading === `delete_${oppToDelete?.id}` ? 'Deleting...' : 'Delete Permanently'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
