@@ -174,10 +174,13 @@ export function About() {
               <strong>3. Subcontracting and Escrow:</strong> For gig and subcontracting opportunities involving escrow or direct payments, Opportunities Kenya acts as a facilitator. We are not liable for disputes over deliverable quality. Users must resolve disputes through our provided mediation channels in good faith.
             </p>
             <p>
-              <strong>4. Intellectual Property:</strong> All content, logos, and materials provided by Opportunities Kenya are protected by intellectual property laws. Users may not copy, reproduce, or distribute any platform content without explicit permission.
+              <strong>4. Crowdfunding & Refunds:</strong> Contributions made to community projects or hackathons are pooled together. In the event a project is deemed unsustainable, fraudulent, or if the original creator requests cancellation, Opportunities Kenya will initiate a group refund, returning the contributed funds to all backers simultaneously.
             </p>
             <p>
-              <strong>5. Privacy & Data Use:</strong> We respect your privacy. User data is collected and used strictly to improve platform matchmaking, facilitate applications, and track analytics. We do not sell your personal data to third parties.
+              <strong>5. Intellectual Property:</strong> All content, logos, and materials provided by Opportunities Kenya are protected by intellectual property laws. Users may not copy, reproduce, or distribute any platform content without explicit permission.
+            </p>
+            <p>
+              <strong>6. Privacy & Data Use:</strong> We respect your privacy. User data is collected and used strictly to improve platform matchmaking, facilitate applications, and track analytics. We do not sell your personal data to third parties.
             </p>
           </div>
         </section>

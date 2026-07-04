@@ -1844,25 +1844,30 @@ export default function AdminDashboard() {
                           
                           {/* Contributors List */}
                           {item.contributions && item.contributions.length > 0 && (
-                            <div className="mt-6 border border-slate-200 rounded-md overflow-hidden">
-                              <table className="w-full text-sm text-left text-slate-600">
-                                <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-semibold border-b border-slate-200">
-                                  <tr>
-                                    <th className="px-4 py-2">Contributor Name</th>
-                                    <th className="px-4 py-2">Phone / M-PESA</th>
-                                    <th className="px-4 py-2 text-right">Amount (KES)</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                  {item.contributions.map((c: any, i: number) => (
-                                    <tr key={i} className="hover:bg-slate-50">
-                                      <td className="px-4 py-2 font-medium">{c.name}</td>
-                                      <td className="px-4 py-2 font-mono">{c.phone}</td>
-                                      <td className="px-4 py-2 text-right text-slate-900 font-semibold">{c.amount.toLocaleString()}</td>
+                            <div className="mt-6 border border-slate-200 rounded-md overflow-hidden flex flex-col">
+                              <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Contributors ({item.contributions.length})</span>
+                              </div>
+                              <div className="max-h-48 overflow-y-auto">
+                                <table className="w-full text-sm text-left text-slate-600">
+                                  <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-semibold sticky top-0 shadow-[0_1px_0_#e2e8f0]">
+                                    <tr>
+                                      <th className="px-4 py-2 bg-slate-50">Contributor Name</th>
+                                      <th className="px-4 py-2 bg-slate-50">Phone / M-PESA</th>
+                                      <th className="px-4 py-2 bg-slate-50 text-right">Amount (KES)</th>
                                     </tr>
-                                  ))}
-                                </tbody>
-                              </table>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100">
+                                    {item.contributions.map((c: any, i: number) => (
+                                      <tr key={i} className="hover:bg-slate-50">
+                                        <td className="px-4 py-2 font-medium">{c.name}</td>
+                                        <td className="px-4 py-2 font-mono">{c.phone}</td>
+                                        <td className="px-4 py-2 text-right text-slate-900 font-semibold">{c.amount.toLocaleString()}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
                             </div>
                           )}
                         </div>
