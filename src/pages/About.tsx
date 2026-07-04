@@ -177,7 +177,7 @@ export function About() {
               <strong>4. Crowdfunding & Refunds:</strong> Contributions made to community projects or hackathons are pooled together. In the event a project is deemed unsustainable, fraudulent, or if the original creator requests cancellation, Opportunities Kenya will initiate a group refund, returning the contributed funds to all backers simultaneously.
             </p>
             <p>
-              <strong>5. Intellectual Property:</strong> All content, logos, and materials provided by Opportunities Kenya are protected by intellectual property laws. Users may not copy, reproduce, or distribute any platform content without explicit permission.
+              <strong>5. Intellectual Property & Third-Party Content:</strong> Opportunities Kenya acts as an aggregator for public educational and professional opportunities. We do not claim ownership over third-party opportunity listings, external company names, or logos, which remain the property of their respective trademark owners and are shared for informational purposes. However, our original platform design, custom code, and proprietary Opportunities Kenya branding are protected by intellectual property laws.
             </p>
             <p>
               <strong>6. Privacy & Data Use:</strong> We respect your privacy. User data is collected and used strictly to improve platform matchmaking, facilitate applications, and track analytics. We do not sell your personal data to third parties.
