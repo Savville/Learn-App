@@ -1428,6 +1428,221 @@ router.get('/endorsement/:opportunityId', async (req, res) => {
   }
 });
 
+router.get('/fix-ownership', async (req, res) => {
+  try {
+    const db = getDB();
+    const targetEmail = 'ochiwilliampotieno@gmail.com';
+    const result = await db.collection('opportunities').updateMany(
+      {
+        $or: [
+          { title: { $regex: 'UHPC', $options: 'i' } },
+          { title: { $regex: 'AGRO', $options: 'i' } },
+          { category: 'Crowdfund' },
+          { isEscrow: true, 'reporter.email': { $exists: false } }
+        ]
+      },
+      { 
+        $set: { 
+          'reporter.email': targetEmail, 
+          'reporter.name': 'William', 
+          contactEmail: targetEmail 
+        } 
+      }
+    );
+    res.json({ message: 'Success', matched: result.matchedCount, modified: result.modifiedCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/seed-opportunities', async (req, res) => {
+  try {
+    const db = getDB();
+    
+    
+    // Delete expired opportunities
+    await db.collection('opportunities').deleteMany({
+      id: { $in: [
+        'arice-scholarship-program-2026-27',
+        'london-metropolitan-sanctuary-scholarship-2026',
+        'hamad-bin-khalifa-university-scholarship-2026',
+        'sbw-berlin-scholarship-in-germany-2026',
+        'vice-chancellor-international-excellence-scholarship-2026'
+      ]}
+    });
+
+    // Wipe out old duplicate Google Internships
+    await db.collection('opportunities').deleteMany({
+      title: { $regex: 'Google Student Researcher Internship', $options: 'i' }
+    });
+
+    const newOpps = [
+      {
+        id: 'boston-university-presidential-scholarship-2026',
+        title: 'Boston University Presidential Scholarship 2026',
+        provider: 'Boston University',
+        category: 'Scholarship',
+        description: 'A prestigious $25,000/year scholarship for high-achieving international students to pursue their undergraduate degree in the USA.',
+        fullDescription: 'Are you looking for a high-value undergraduate scholarship in the USA? The Boston University Presidential Scholarship 2026 is an excellent opportunity for international students who want to study at one of the most prestigious universities in the United States. This funded scholarship in USA helps talented students from all over the world pursue their undergraduate degree at Boston University. The scholarship focuses on academic excellence, leadership potential, and active participation in extracurricular activities. It also supports cultural exchange by bringing students from different countries into one diverse academic environment.',
+        deadline: '2026-12-01T23:59:59.000Z',
+        location: 'Boston, USA',
+        eligibility: { educationLevel: 'UnderGrad', requirements: ['International applicants eligible', 'Top 5% of graduating class', 'Strong SAT/ACT scores'] },
+        benefits: ['$25,000 per academic year', 'Study at a top-ranked university'],
+        applicationType: 'Platform Link',
+        applicationLink: 'https://www.bu.edu/admissions/apply/',
+        fundingType: 'Partially Funded',
+        compensationType: 'N/A',
+        upfrontCost: 'No Upfront Cost',
+        featured: true,
+        dateAdded: '2026-07-05T10:00:00.000Z',
+        logoUrl: '/images/boston_university.png',
+        postedBy: 'Opportunities Kenya Admin',
+        contactEmail: 'admin@opportunities.ke',
+        reporter: { name: 'Opportunities Kenya Admin', email: 'admin@opportunities.ke' },
+        isVerified: true,
+        status: 'Verified'
+      },
+      {
+        id: 'bond-university-leadership-scholarships-2026',
+        title: 'Bond University Leadership Scholarships 2026 in Australia',
+        provider: 'Bond University',
+        category: 'Scholarship',
+        description: 'Bond University Leadership Scholarships 2026 offer an excellent opportunity for students with outstanding academic performance, leadership experience, and community involvement.',
+        fullDescription: 'Bond University Leadership Scholarships 2026 offer an excellent opportunity for students with outstanding academic performance, leadership experience, and community involvement. These undergraduate scholarships in Australia aim to support talented students who want to pursue higher education at Bond University. The Bond University scholarships for undergraduates provides a 25% tuition fee remission for eligible undergraduate degree programs.',
+        deadline: '2026-08-31T23:59:59.000Z',
+        location: 'Australia',
+        eligibility: { educationLevel: 'UnderGrad', requirements: ['International applicants eligible', 'Outstanding academic performance', 'Leadership experience'] },
+        benefits: ['25% tuition fee remission'],
+        applicationType: 'Platform Link',
+        applicationLink: 'https://student-bond.studylink.com/index.cfm',
+        fundingType: 'Partially Funded',
+        compensationType: 'N/A',
+        upfrontCost: 'No Upfront Cost',
+        featured: true,
+        dateAdded: '2026-07-05T10:00:00.000Z',
+        logoUrl: '/images/bond_university.png',
+        postedBy: 'Tracy',
+        contactEmail: 'tracy@opportunities.ke',
+        reporter: { name: 'Tracy', email: 'tracy@opportunities.ke' },
+        isVerified: true,
+        status: 'Verified'
+      },
+      {
+        id: 'ellison-undergraduate-scholars-program-2027',
+        title: 'Ellison Undergraduate Scholars Program 2027 in UK',
+        provider: 'Ellison Institute of Technology (EIT) / University of Oxford',
+        category: 'Scholarship',
+        description: 'The Ellison Scholars Program is a fully funded scholarship in UK for outstanding students from around the world who want to create a positive global impact through science, research, and innovation.',
+        fullDescription: 'Applications are open for the Ellison Undergraduate Scholars Program 2027 in UK. The Ellison Scholars Program is a fully funded scholarship in UK for outstanding students from around the world who want to create a positive global impact through science, research, and innovation. The Ellison Institute of Technology (EIT) offers this international scholarship in partnership with the University of Oxford. Through this undergraduate scholarship, students will study at one of the world’s top universities while working on innovative EIT projects that focus on solving major global challenges.',
+        deadline: '2026-07-31T23:59:59.000Z',
+        location: 'UK',
+        eligibility: { educationLevel: 'UnderGrad', requirements: ['International applicants eligible', 'Passion for science, research, and innovation'] },
+        benefits: ['Fully Funded undergraduate study at the University of Oxford', 'Hands-on research and innovation experience'],
+        applicationType: 'Platform Link',
+        applicationLink: 'https://eit.org/education-and-scholarships/undergraduate#Eligibility',
+        fundingType: 'Fully Funded',
+        compensationType: 'Stipend',
+        upfrontCost: 'No Upfront Cost',
+        featured: true,
+        dateAdded: '2026-07-05T10:00:00.000Z',
+        logoUrl: '/images/UK_ellison.jpg',
+        postedBy: 'Kevin',
+        contactEmail: 'kevin@opportunities.ke',
+        reporter: { name: 'Kevin', email: 'kevin@opportunities.ke' },
+        isVerified: true,
+        status: 'Verified'
+      },
+      {
+        id: 'salford-international-excellence-scholarship-2026',
+        title: 'Salford International Excellence Scholarship 2026 in UK',
+        provider: 'University of Salford',
+        category: 'Scholarship',
+        description: 'The University of Salford in Manchester, UK is offering this International Excellence Award for international students from all over the world.',
+        fullDescription: 'Applications are open for the Salford International Excellence Scholarship 2026. The University of Salford in Manchester, UK is offering this International Excellence Award for international students from all over the world. This international scholarship is a partially funded scholarship in United Kingdom available for undergraduate and master’s degree programs. The Salford International Excellence Scholarship 2026 provides financial support to talented international students who show leadership potential.',
+        deadline: '2026-07-14T23:59:59.000Z',
+        location: 'UK',
+        eligibility: { educationLevel: 'Both', requirements: ['International applicants eligible', 'Leadership potential'] },
+        benefits: ['Tuition fee waiver ranging from £3000 to £3500'],
+        applicationType: 'Platform Link',
+        applicationLink: 'https://www.salford.ac.uk/international/scholarships/global-gold-excellence-scholarship',
+        fundingType: 'Partially Funded',
+        compensationType: 'N/A',
+        upfrontCost: 'No Upfront Cost',
+        featured: true,
+        dateAdded: '2026-07-05T10:00:00.000Z',
+        logoUrl: '/images/salford_scholarship.png',
+        postedBy: 'Victor',
+        contactEmail: 'victor@opportunities.ke',
+        reporter: { name: 'Victor', email: 'victor@opportunities.ke' },
+        isVerified: true,
+        status: 'Verified'
+      },
+      {
+        id: 'google-student-researcher-internship-2026',
+        title: 'Google Student Researcher Internship 2026',
+        provider: 'Google',
+        category: 'Internship',
+        description: "Become a Student Researcher! The Google Student Researcher Internship in USA is a paid internship for bachelor's and master's students.",
+        fullDescription: "Become a Student Researcher! The Google Student Researcher Internship in USA is a paid internship for bachelor's and master's students. Work alongside world-class researchers and engineers to solve real-world problems. The internship offers an excellent opportunity to gain practical experience, develop your technical skills, and contribute to cutting-edge projects at Google.",
+        deadline: '2026-12-31T23:59:59.000Z',
+        location: 'USA (Multiple Locations)',
+        eligibility: { educationLevel: 'Both', requirements: ["Currently enrolled in a Bachelor's or Master's degree program", 'Strong programming skills in C++, Java, or Python', 'Experience with data structures and algorithms'] },
+        benefits: ['Paid internship', 'Relocation assistance (if eligible)', 'Mentorship from Google engineers'],
+        applicationType: 'Platform Link',
+        applicationLink: 'https://careers.google.com/students/',
+        fundingType: 'Paid Internship',
+        compensationType: 'Paid',
+        upfrontCost: 'No Upfront Cost',
+        featured: true,
+        dateAdded: '2026-07-05T10:00:00.000Z',
+        logoUrl: '/images/google.jpg',
+        postedBy: 'Stephen',
+        contactEmail: 'stephen@opportunities.ke',
+        reporter: { name: 'Stephen', email: 'stephen@opportunities.ke' },
+        isVerified: true,
+        status: 'Verified'
+      },
+      {
+        id: 'cyprus-science-university-scholarship',
+        title: 'Cyprus Science University Scholarship',
+        provider: 'Cyprus Science University',
+        category: 'Scholarship',
+        description: 'International students can apply for the Cyprus Science University Scholarship. The institute is offering scholarships for international students to pursue undergraduate or postgraduate degree programs.',
+        fullDescription: "International students can apply for the Cyprus Science University Scholarship. The institute is offering scholarships for international students to pursue undergraduate or postgraduate degree programs. The university provides many ways to get financial help in your studies. This time Cyprus Science University is offering partially funded scholarships to support international students to help them with financial burden and promote education. The scholarship award will depend on student's SAT scores and the program they are enrolled for. All the international undergraduate students are entitled to receive up to 60% scholarship for undergraduate courses, and Postgraduate international students will receive up to 50% scholarship. Cyprus Science University is accredited by higher education authorities of Northern Cyprus and Turkey. It is an excellent chance to study in a European country next to Turkey.",
+        deadline: '2026-08-31T23:59:59.000Z',
+        location: 'Cyprus',
+        eligibility: { educationLevel: 'Both', requirements: ['International applicants eligible'] },
+        benefits: ['Up to 60% scholarship for undergraduate courses', 'Up to 50% scholarship for postgraduate courses'],
+        applicationType: 'Platform Link',
+        applicationLink: 'https://csu.edu.tr/',
+        fundingType: 'Partially Funded',
+        compensationType: 'N/A',
+        upfrontCost: 'No Upfront Cost',
+        featured: true,
+        dateAdded: '2026-07-05T10:00:00.000Z',
+        logoUrl: '/images/cyprus_science_university.jpg',
+        postedBy: 'Hillary',
+        contactEmail: 'hillary@opportunities.ke',
+        reporter: { name: 'Hillary', email: 'hillary@opportunities.ke' },
+        isVerified: true,
+        status: 'Verified'
+      }
+    ];
+
+    for (const opp of newOpps) {
+      await db.collection('opportunities').updateOne(
+        { id: opp.id },
+        { $set: opp },
+        { upsert: true }
+      );
+    }
+    
+    res.json({ message: 'Successfully seeded 6 opportunities. Old Google entries deleted.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
 
 // Refurbished
