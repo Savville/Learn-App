@@ -19,13 +19,14 @@ const CATEGORY_IMAGES: Record<string, string[]> = {
   Fellowship: ['/images/fellowship.avif'],
   Attachment: ['/images/attachment.jpeg'],
   Internship: ['/images/internship.avif'],
-  Grant: ['/images/grant.avif'],
+  Grant: ['/images/grant_1.png', '/images/grant_2.png', '/images/grant.avif'],
   Conference: ['/images/conference.jpeg', '/images/tech.avif'],
   CallForPapers: ['/images/call-for-papers.png', '/images/tech.avif'],
-  Challenge: ['/images/tech.avif'],
+  Challenge: ['/images/generic_other.png', '/images/tech.avif'],
   Hackathon: ['/images/hackathon.jpg', '/images/tech.avif'],
   Project: ['/images/tech.avif'],
-  Event: ['/images/community.jpg', '/images/tech.avif']
+  Event: ['/images/community.jpg', '/images/tech.avif'],
+  StartupFunding: ['/images/startup_1.png', '/images/startup_2.png']
 };
 
 export const getDynamicImageUrl = (category: string, id: string, providedUrl?: string, title?: string) => {
