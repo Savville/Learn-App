@@ -11,12 +11,12 @@ export const GIG_CATEGORIES: OpportunityCategory[] = ['Gig', 'Job'];
 
 export const ACADEMIC_CAREER_CATEGORIES: OpportunityCategory[] = [
   'Internship', 'Attachment', 'Conference', 'CallForPapers', 'Event', 'Volunteer',
-  'Scholarship', 'Fellowship', 'Grant',
+  'Scholarship', 'Fellowship',
 ];
 
-export const INNOVATION_CATEGORIES: OpportunityCategory[] = ['Hackathon', 'Challenge', 'StartupFunding'];
+export const INNOVATION_CATEGORIES: OpportunityCategory[] = ['Grant', 'StartupFunding'];
 
-export const PROJECT_CATEGORIES: OpportunityCategory[] = ['StudentProject', 'Project', 'ResearchCollaboration'];
+export const PROJECT_CATEGORIES: OpportunityCategory[] = ['StudentProject', 'Project', 'ResearchCollaboration', 'Hackathon', 'Challenge'];
 
 export const PARSER_CATEGORY_LIST =
   'CallForPapers, Internship, Grant, Conference, Scholarship, Fellowship, Attachment, Hackathon, Event, Volunteer, Challenge, Project, StudentProject, ResearchCollaboration, Gig, Job, Partnership, StartupFunding, Other';
@@ -32,9 +32,9 @@ export const ALL_CATEGORY_OPTIONS: { value: OpportunityCategory | 'Other'; label
   { value: 'Volunteer', label: 'Volunteer Programmes', tab: 'academic_career' },
   { value: 'Scholarship', label: 'Scholarships', tab: 'academic_career' },
   { value: 'Fellowship', label: 'Fellowships', tab: 'academic_career' },
-  { value: 'Grant', label: 'Academic Grants', tab: 'academic_career' },
-  { value: 'Hackathon', label: 'Hackathons', tab: 'innovation' },
-  { value: 'Challenge', label: 'Industry Challenges', tab: 'innovation' },
+  { value: 'Grant', label: 'Grants', tab: 'innovation' },
+  { value: 'Hackathon', label: 'Hackathons', tab: 'projects' },
+  { value: 'Challenge', label: 'Industry Challenges', tab: 'projects' },
   { value: 'StartupFunding', label: 'Startup Funding', tab: 'innovation' },
   { value: 'Project', label: 'Community Projects', tab: 'projects' },
   { value: 'StudentProject', label: 'Student Projects', tab: 'projects' },
@@ -153,8 +153,8 @@ export const BROWSE_TABS: { id: TabId; label: string; description: string }[] = 
   { id: 'all', label: 'All', description: 'Opportunities' },
   { id: 'jobs', label: 'Jobs', description: 'Jobs & Microgigs' },
   { id: 'academic_career', label: 'Academic & Career', description: 'Academic & Career' },
-  { id: 'innovation', label: 'Innovation', description: 'Innovation & Tech' },
-  { id: 'projects', label: 'Projects', description: 'Student & Community Projects' },
+  { id: 'innovation', label: 'Grants', description: 'Grants & Funding' },
+  { id: 'projects', label: 'Projects/Hackathons', description: 'Projects & Hackathons' },
 ];
 
 export function categoryMatchesTab(category: string, tab: TabId): boolean {

@@ -25,9 +25,9 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
 
     // ── Tab category buckets (must match frontend constants exactly) ──────────
     const GIG_CATEGORIES        = ['Gig', 'Job'];
-    const CAREER_CATEGORIES     = ['Internship', 'Attachment', 'Conference', 'CallForPapers', 'Event', 'Volunteer', 'Scholarship', 'Fellowship', 'Grant'];
-    const INNOVATION_CATEGORIES = ['Hackathon', 'Challenge', 'StartupFunding'];
-    const PROJECT_CATEGORIES    = ['StudentProject', 'Project', 'ResearchCollaboration'];
+    const CAREER_CATEGORIES     = ['Internship', 'Attachment', 'Conference', 'CallForPapers', 'Event', 'Volunteer', 'Scholarship', 'Fellowship'];
+    const INNOVATION_CATEGORIES = ['Grant', 'StartupFunding'];
+    const PROJECT_CATEGORIES    = ['StudentProject', 'Project', 'ResearchCollaboration', 'Hackathon', 'Challenge'];
 
     // ── Build filter using $and so status check is never overwritten ──────────
     // The $or for status verification is anchored in an $and clause, ensuring

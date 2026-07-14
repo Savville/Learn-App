@@ -102,6 +102,17 @@ export function Opportunities() {
   const [selectedFunding, setSelectedFunding] = useState(searchParams.get('funding') || 'all');
   const [showFilters, setShowFilters] = useState(false);
 
+  // Sync state to URL search parameters so history works seamlessly
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (activeTab !== 'all') params.tab = activeTab;
+    if (searchQuery) params.search = searchQuery;
+    if (selectedType !== 'all') params.type = selectedType;
+    if (selectedLevel !== 'all') params.level = selectedLevel;
+    if (selectedFunding !== 'all') params.funding = selectedFunding;
+    
+    setSearchParams(params, { replace: true });
+  }, [activeTab, searchQuery, selectedType, selectedLevel, selectedFunding, setSearchParams]);
   const currentTab = [...TABS, ...RIGHT_TABS].find(t => t.id === activeTab) ?? TABS[0];
 
   useSEO({
@@ -246,7 +257,8 @@ export function Opportunities() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setSearchParams({ search: searchQuery, type: selectedType, level: selectedLevel, funding: selectedFunding, tab: activeTab });
+    // Search is automatically handled by the useEffect syncing state to URL,
+    // and the other useEffect fetching data based on state dependencies.
   };
 
   const hasActiveFilters = selectedType !== 'all' || selectedLevel !== 'all' || selectedFunding !== 'all' || searchQuery !== '' || activeTab !== 'all';

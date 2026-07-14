@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight, Calendar, CheckCircle, Users, Flame, Bookmark } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
 import { OTPLoginForm } from './OTPLoginForm';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -83,11 +83,12 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   });
   const [showLogin, setShowLogin] = React.useState(false);
   const { showAlert } = useAlert();
+  const location = useLocation();
   const urgency = calculateUrgency(opportunity.deadline);
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
 
   // Real metrics from DB tracking for new posts, deterministic fake for older hardcoded posts
-  const seed = opportunity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const seed = opportunity.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
   const views = opportunity.views ? opportunity.views : (20 + (seed % 21));
   const isHot = views > 30;
 
@@ -158,6 +159,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
     <>
       <Link
         to={`/opportunity/${toSlug(opportunity.title)}`}
+        state={{ from: location.pathname + location.search }}
         onClick={handleCardClick}
         className={`group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${urgency.label === 'Depleted' ? 'grayscale opacity-75' : ''}`}
       >
