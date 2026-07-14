@@ -11,41 +11,62 @@ const CACHE_PREFIX = '/api/opportunities';
 router.get('/', cacheMiddleware(300), async (req, res) => {
   try {
     const db = getDB();
-    const { category, level, fundingType, search, tab } = req.query;
+
+    // ── SECURITY: Cast all query params to strings to prevent NoSQL operator injection ──
+    const category    = req.query.category    ? String(req.query.category)    : undefined;
+    const level       = req.query.level       ? String(req.query.level)       : undefined;
+    const fundingType = req.query.fundingType ? String(req.query.fundingType) : undefined;
+    const search      = req.query.search      ? String(req.query.search)      : undefined;
+    const tab         = req.query.tab         ? String(req.query.tab)         : undefined;
+
     const page  = Math.max(1, parseInt(req.query.page)  || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 12));
     const skip  = (page - 1) * limit;
 
-    const filter = {
-      $or: [
-        { status: { $exists: false } },
-        { status: 'Verified' }
-      ]
-    };
-    
-    // ── Tab category buckets (must match frontend constants exactly) ───────────
-    const GIG_CATEGORIES      = ['Gig', 'Job'];
-    const CAREER_CATEGORIES   = ['Internship', 'Attachment', 'Project', 'Hackathon', 'Challenge'];
-    const ACADEMIC_CATEGORIES = ['Scholarship', 'Fellowship', 'Conference', 'Grant', 'CallForPapers', 'Event', 'Volunteer'];
+    // ── Tab category buckets (must match frontend constants exactly) ──────────
+    const GIG_CATEGORIES        = ['Gig', 'Job'];
+    const CAREER_CATEGORIES     = ['Internship', 'Attachment', 'Conference', 'CallForPapers', 'Event', 'Volunteer', 'Scholarship', 'Fellowship', 'Grant'];
+    const INNOVATION_CATEGORIES = ['Hackathon', 'Challenge', 'StartupFunding'];
+    const PROJECT_CATEGORIES    = ['StudentProject', 'Project', 'ResearchCollaboration'];
 
-    if (tab === 'gigs')          filter.category = { $in: GIG_CATEGORIES };
-    else if (tab === 'career')   filter.category = { $in: CAREER_CATEGORIES };
-    else if (tab === 'academic') filter.category = { $in: ACADEMIC_CATEGORIES };
-    // tab === 'all' or undefined → no category filter applied
+    // ── Build filter using $and so status check is never overwritten ──────────
+    // The $or for status verification is anchored in an $and clause, ensuring
+    // that search text filters cannot accidentally replace it (old bug).
+    const must = [
+      { $or: [{ status: { $exists: false } }, { status: 'Verified' }] },
+    ];
 
-    if (category && category !== 'all') filter.category = category;
-    if (level && level !== 'all') filter['eligibility.educationLevel'] = level;
-    if (fundingType && fundingType !== 'all') filter.fundingType = fundingType;
-    // SECURITY: Escape regex special chars to prevent ReDoS
+    // Tab → category bucket
+    if (tab === 'jobs')             must.push({ category: { $in: GIG_CATEGORIES } });
+    else if (tab === 'academic_career') must.push({ category: { $in: CAREER_CATEGORIES } });
+    else if (tab === 'innovation')  must.push({ category: { $in: INNOVATION_CATEGORIES } });
+    else if (tab === 'projects')    must.push({ category: { $in: PROJECT_CATEGORIES } });
+    // tab === 'all' or undefined → no category bucket restriction
+
+    // Specific category override (e.g. user picked 'Scholarship' from dropdown)
+    if (category && category !== 'all') must.push({ category: category });
+
+    // Education level
+    if (level && level !== 'all') must.push({ 'eligibility.educationLevel': level });
+
+    // Funding type
+    if (fundingType && fundingType !== 'all') must.push({ fundingType: fundingType });
+
+    // Full-text search — uses its own $or, safely nested inside $and
     if (search) {
       if (search.length > 100) return res.status(400).json({ error: 'Search query too long.' });
+      // SECURITY: Escape regex special chars to prevent ReDoS
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      filter.$or = [
-        { title:       { $regex: escaped, $options: 'i' } },
-        { description: { $regex: escaped, $options: 'i' } },
-        { provider:    { $regex: escaped, $options: 'i' } }
-      ];
+      must.push({
+        $or: [
+          { title:       { $regex: escaped, $options: 'i' } },
+          { description: { $regex: escaped, $options: 'i' } },
+          { provider:    { $regex: escaped, $options: 'i' } },
+        ],
+      });
     }
+
+    const filter = must.length === 1 ? must[0] : { $and: must };
 
     const [data, total] = await Promise.all([
       db.collection('opportunities').find(filter).sort({ dateAdded: -1 }).skip(skip).limit(limit).toArray(),

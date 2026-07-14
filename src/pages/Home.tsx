@@ -12,36 +12,20 @@ export function Home() {
     description: 'Discover scholarships, fellowships, internships, grants and more — curated for African students and young professionals.',
     url: '/'
   });
-  const featuredOpportunities = [...opportunities].filter(opp => opp.featured).slice(0, 3);
-  const latestOpportunities = [...opportunities].sort((a, b) => new Date(b.dateAdded || 0).getTime() - new Date(a.dateAdded || 0).getTime()).slice(0, 6);
+  const featured = [...opportunities].filter(opp => opp.featured);
+  const featuredOpportunities = (featured.length > 0 ? featured : [...opportunities].sort((a, b) => new Date(b.dateAdded || 0).getTime() - new Date(a.dateAdded || 0).getTime())).slice(0, 6);
 
   return (
     <div>
       <Hero />
-      
+
       {/* Featured Opportunities */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-gray-900 mb-4">Featured Opportunities</h2>
-            <p className="text-gray-600">Hand-picked opportunities you don't want to miss</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredOpportunities.map(opportunity => (
-              <OpportunityCard key={opportunity.id} opportunity={opportunity} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Latest Opportunities */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-gray-900 mb-2">Latest Opportunities</h2>
-              <p className="text-gray-600">Recently added opportunities</p>
+              <h2 className="text-gray-900 mb-2 font-extrabold tracking-tight">Featured Opportunities</h2>
+              <p className="text-gray-800 font-semibold text-lg">Hand-picked opportunities you don't want to miss</p>
             </div>
             <Link
               to="/opportunities"
@@ -53,7 +37,7 @@ export function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {latestOpportunities.map(opportunity => (
+            {featuredOpportunities.map(opportunity => (
               <OpportunityCard key={opportunity.id} opportunity={opportunity} />
             ))}
           </div>

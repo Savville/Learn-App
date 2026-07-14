@@ -75,10 +75,12 @@ const applyFilters = (
       opp.provider.toLowerCase().includes(q) ||
       opp.description.toLowerCase().includes(q);
 
-    const matchesTab = categoryMatchesTab(opp.category, activeTab);
+    // Guard: category must be a non-empty string before tab matching
+    const matchesTab = opp.category ? categoryMatchesTab(opp.category, activeTab) : activeTab === 'all';
 
     const matchesType    = selectedType === 'all' || opp.category === selectedType;
-    const matchesLevel   = selectedLevel === 'all' || opp.eligibility.educationLevel === selectedLevel;
+    // Guard: eligibility may be absent on some DB records
+    const matchesLevel   = selectedLevel === 'all' || opp.eligibility?.educationLevel === selectedLevel;
     const matchesFunding = selectedFunding === 'all' || opp.fundingType === selectedFunding;
 
     return matchesSearch && matchesTab && matchesType && matchesLevel && matchesFunding;
@@ -225,19 +227,19 @@ export function Opportunities() {
   const countFor = (categoryValue: string) =>
     localOpportunities.filter(o => {
       const inTab =
-        activeTab === 'jobs' ? GIG_CATEGORIES.includes(o.category) :
-        activeTab === 'academic_career' ? ACADEMIC_CAREER_CATEGORIES.includes(o.category) :
-        activeTab === 'innovation' ? INNOVATION_CATEGORIES.includes(o.category) :
-        activeTab === 'projects' ? PROJECT_CATEGORIES.includes(o.category) :
+        activeTab === 'jobs' ? GIG_CATEGORIES.includes(o.category as any) :
+        activeTab === 'academic_career' ? ACADEMIC_CAREER_CATEGORIES.includes(o.category as any) :
+        activeTab === 'innovation' ? INNOVATION_CATEGORIES.includes(o.category as any) :
+        activeTab === 'projects' ? PROJECT_CATEGORIES.includes(o.category as any) :
         true;
       return inTab && o.category === categoryValue;
     }).length;
 
   const totalForTab =
-    activeTab === 'jobs' ? localOpportunities.filter(o => GIG_CATEGORIES.includes(o.category)).length :
-    activeTab === 'academic_career' ? localOpportunities.filter(o => ACADEMIC_CAREER_CATEGORIES.includes(o.category)).length :
-    activeTab === 'innovation' ? localOpportunities.filter(o => INNOVATION_CATEGORIES.includes(o.category)).length :
-    activeTab === 'projects' ? localOpportunities.filter(o => PROJECT_CATEGORIES.includes(o.category)).length :
+    activeTab === 'jobs' ? localOpportunities.filter(o => GIG_CATEGORIES.includes(o.category as any)).length :
+    activeTab === 'academic_career' ? localOpportunities.filter(o => ACADEMIC_CAREER_CATEGORIES.includes(o.category as any)).length :
+    activeTab === 'innovation' ? localOpportunities.filter(o => INNOVATION_CATEGORIES.includes(o.category as any)).length :
+    activeTab === 'projects' ? localOpportunities.filter(o => PROJECT_CATEGORIES.includes(o.category as any)).length :
     localOpportunities.length;
 
   const filteredOpportunities = opportunities;

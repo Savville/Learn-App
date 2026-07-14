@@ -158,10 +158,13 @@ export const BROWSE_TABS: { id: TabId; label: string; description: string }[] = 
 ];
 
 export function categoryMatchesTab(category: string, tab: TabId): boolean {
+  // Coerce to string and normalise — prevents null/array/undefined leaking into all tabs
+  const cat = (typeof category === 'string' ? category : String(category ?? '')).trim();
+  if (!cat) return false;
   if (tab === 'all') return true;
-  if (tab === 'jobs') return GIG_CATEGORIES.includes(category as OpportunityCategory);
-  if (tab === 'academic_career') return ACADEMIC_CAREER_CATEGORIES.includes(category as OpportunityCategory);
-  if (tab === 'innovation') return INNOVATION_CATEGORIES.includes(category as OpportunityCategory);
-  if (tab === 'projects') return PROJECT_CATEGORIES.includes(category as OpportunityCategory);
-  return true;
+  if (tab === 'jobs') return GIG_CATEGORIES.includes(cat as OpportunityCategory);
+  if (tab === 'academic_career') return ACADEMIC_CAREER_CATEGORIES.includes(cat as OpportunityCategory);
+  if (tab === 'innovation') return INNOVATION_CATEGORIES.includes(cat as OpportunityCategory);
+  if (tab === 'projects') return PROJECT_CATEGORIES.includes(cat as OpportunityCategory);
+  return false;
 }

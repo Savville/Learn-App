@@ -112,6 +112,12 @@ async function seedDatabase() {
     const db = client.db('learn_opportunities');
     const collection = db.collection('opportunities');
 
+    // Wipe the entire database to prevent duplicates and old entries from persisting
+    console.log('Wiping all existing opportunities from the database...');
+    const deleteResult = await collection.deleteMany({});
+    console.log(`✅ Deleted ${deleteResult.deletedCount} old opportunities`);
+
+
     let inserted = 0;
     let updated = 0;
 
