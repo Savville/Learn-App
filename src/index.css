@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+/* ── Core Web Vitals: Prevent Cumulative Layout Shift (CLS) ── */
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Reserve space for scrollbar to prevent layout shift */
+  scrollbar-gutter: stable;
+}
+
+/* Prevent FOIT/FOUT for custom fonts */
+@font-face {
+  font-family: 'Inknut Antiqua';
+  src: url('https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@700&display=swap') format('woff2');
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Ensure images don't cause layout shifts */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Prevent link underline jumps */
+a {
+  text-decoration-skip-ink: auto;
+}
+
 :root {
   --font-size: 16px;
   --background: #fff;
