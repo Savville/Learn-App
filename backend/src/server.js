@@ -20,6 +20,7 @@ import portfolioRoutes from './routes/portfolio.js';
 import feedRoutes from './routes/feed.js';
 import sitemapRoutes from './routes/sitemap.js';
 import testEmailRoutes from './routes/test-email.js';
+import parseAgnesRoutes from './routes/parse-agnes.js';
 
 dotenv.config();
 
@@ -122,6 +123,7 @@ app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/sitemap', sitemapRoutes);
 app.use('/api/test-email', testEmailRoutes);
+app.use('/admin/parse-agnes', parseAgnesRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

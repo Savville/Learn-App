@@ -25,7 +25,7 @@ const CACHE_PREFIX = '/api/opportunities';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
 
-// â”€â”€ Multer Configuration for Image Uploads â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Multer Configuration for Image Uploads â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const dest = path.join(PROJECT_ROOT, 'public', 'images', 'opportunities');
@@ -53,7 +53,7 @@ const upload = multer({
   }
 });
 
-// â”€â”€ Interest-matching helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Interest-matching helper â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 // Returns true when any subscriber interest keyword (category name or subfield)
 // appears in the opportunity's title, description, or fieldOfStudy array.
 function interestMatchesOpportunity(opp, interests) {
@@ -213,11 +213,11 @@ router.get('/subscriber-categories', verifyAdminKey, async (req, res) => {
   }
 });
 
-// POST /api/admin/send-digest  â€” send branded digest to all active subscribers
+// POST /api/admin/send-digest  â€" send branded digest to all active subscribers
 // Body (all optional):
-//   { opportunityIds: ["id1","id2",...] }  â†’ specific opps
-//   { lastN: 5 }                            â†’ last N added (default 5)
-//   {}                                      â†’ last 5 added
+//   { opportunityIds: ["id1","id2",...] }  â†' specific opps
+//   { lastN: 5 }                            â†' last N added (default 5)
+//   {}                                      â†' last 5 added
 router.post('/send-digest', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
@@ -334,7 +334,7 @@ router.post('/send-custom-digest', verifyAdminKey, async (req, res) => {
 // POST /api/admin/send-personalized-digest
 // Sends each active subscriber opportunities matched to their interests.
 // Subscribers with no interests saved receive the full pool as a general digest.
-// Body (optional): { lastN: 10 }  â€” how many recent opportunities to pull (default 10)
+// Body (optional): { lastN: 10 }  â€" how many recent opportunities to pull (default 10)
 router.post('/send-personalized-digest', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
@@ -378,7 +378,7 @@ router.post('/send-personalized-digest', verifyAdminKey, async (req, res) => {
           oppsToSend = filtered;
           isPersonalized = true;
         } else {
-          // No keyword match â€” fall back to full pool so they still get something
+          // No keyword match â€" fall back to full pool so they still get something
           oppsToSend = allOpps;
           isPersonalized = false;
         }
@@ -411,7 +411,7 @@ router.post('/send-personalized-digest', verifyAdminKey, async (req, res) => {
   }
 });
 
-const SEANGAPO_SUBJECT = 'From Seangapo Floods to Real Solutions â€“ Nairobi\'s Solvable Water Crisis';
+const SEANGAPO_SUBJECT = 'From Seangapo Floods to Real Solutions â€" Nairobi\'s Solvable Water Crisis';
 
 // POST /api/admin/send-seangapo-test
 // Sends the Seangapo broadcast to a single test address only.
@@ -455,7 +455,7 @@ router.post('/send-seangapo-broadcast', verifyAdminKey, async (req, res) => {
   }
 });
 
-const YESIST_SUBJECT = '24 Hours Remaining â€” IEEE Africa Entrepreneurship Summit Hackathon 2026';
+const YESIST_SUBJECT = '24 Hours Remaining â€" IEEE Africa Entrepreneurship Summit Hackathon 2026';
 
 // POST /api/admin/send-yesist-broadcast
 // Accepts { emails: [...] } and sends the YESIST hackathon broadcast to that list.
@@ -500,7 +500,7 @@ router.post('/upsert-opportunities', verifyAdminKey, async (req, res) => {
   }
 });
 
-// GET /api/admin/list-gemini-models â€” returns models your API key can use (for debugging)
+// GET /api/admin/list-gemini-models â€" returns models your API key can use (for debugging)
 router.get('/list-gemini-models', verifyAdminKey, async (req, res) => {
   try {
     if (!process.env.GEMINI_API_KEY) {
@@ -632,7 +632,7 @@ router.post('/parse-opportunity', verifyAdminKey, async (req, res) => {
   }
 });
 
-// â”€â”€ Pending Opportunities (Inbox) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Pending Opportunities (Inbox) â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 // GET /api/admin/pending
 router.get('/pending', verifyAdminKey, async (req, res) => {
@@ -853,7 +853,7 @@ router.post('/user-reports/:id/judgment', verifyAdminKey, async (req, res) => {
   }
 });
 
-// â”€â”€ Organization Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Organization Management â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 // GET /api/admin/organizations
 router.get('/organizations', verifyAdminKey, async (req, res) => {
@@ -982,7 +982,7 @@ router.post('/organization-requests/reject/:id', verifyAdminKey, async (req, res
   }
 });
 
-// â”€â”€ Opportunity Content Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ Opportunity Content Management â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 // GET /api/admin/opportunities
 router.get('/opportunities', verifyAdminKey, async (req, res) => {
@@ -1048,7 +1048,7 @@ router.delete('/opportunities/:id', verifyAdminKey, async (req, res) => {
   }
 });
 
-// â”€â”€ NEW ESCROW DISPUTE ADMIN ROUTES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€ NEW ESCROW DISPUTE ADMIN ROUTES â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 router.get('/disputes', verifyAdminKey, async (req, res) => {
   try {
@@ -1128,7 +1128,7 @@ router.put('/conversations/:convId/resolve', verifyAdminKey, async (req, res) =>
   }
 });
 
-// â”€â”€â”€â”€â”€â”// POST /api/admin/applications/:appId/pay-doer — admin initiates M-PESA payment to job doer
+// â"€â"€â"€â"€â"€â"// POST /api/admin/applications/:appId/pay-doer â€" admin initiates M-PESA payment to job doer
 router.post('/applications/:appId/pay-doer', verifyAdminKey, async (req, res) => {
   try {
     const { appId } = req.params;
@@ -1423,17 +1423,18 @@ router.post('/crowdfund/refund/:opportunityId', verifyAdminKey, async (req, res)
 // Phase 6: Transaction Viewer (Recent First)
 // ==========================================
 
-// GET /api/admin/transactions — View all transactions sorted by newest first
+// GET /api/admin/transactions â€" View ALL transactions sorted by newest first
 router.get('/transactions', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     const { type, status, limit: limitStr } = req.query;
-    const limit = parseInt(limitStr) || 100;
+    // Default to 200 transactions, but allow fetching all with limit=0 or very high
+    const limit = limitStr && parseInt(limitStr) > 0 ? parseInt(limitStr) : 200;
 
     // Build query filter
     const query = {};
-    if (type) query.type = type;
-    if (status) query.status = status;
+    if (type && type !== 'all') query.type = type;
+    if (status && status !== 'all') query.status = status;
 
     // Build sort: newest first
     const sort = { createdAt: -1 };
@@ -1444,9 +1445,12 @@ router.get('/transactions', verifyAdminKey, async (req, res) => {
       .limit(limit)
       .toArray();
 
-    // Aggregate stats (unfiltered count + totals)
+    // Get total count (unfiltered)
     const totalCount = await db.collection('transactions').countDocuments();
+
+    // Aggregate stats (by status)
     const stats = await db.collection('transactions').aggregate([
+      { $match: query },
       { $group: { _id: "$status", count: { $sum: 1 }, totalAmount: { $sum: { $toDouble: "$amount" } } } },
       { $project: { _id: 0, status: "$_id", count: 1, totalAmount: { $round: ["$totalAmount", 2] } } },
       { $sort: { count: -1 } }
@@ -1454,6 +1458,7 @@ router.get('/transactions', verifyAdminKey, async (req, res) => {
 
     // Type breakdown
     const typeBreakdown = await db.collection('transactions').aggregate([
+      { $match: query },
       { $group: { _id: "$type", count: { $sum: 1 }, totalAmount: { $sum: { $toDouble: "$amount" } } } },
       { $project: { _id: 0, type: "$_id", count: 1, totalAmount: { $round: ["$totalAmount", 2] } } },
       { $sort: { count: -1 } }
@@ -1470,7 +1475,7 @@ router.get('/transactions', verifyAdminKey, async (req, res) => {
   }
 });
 
-// GET /api/admin/transactions/search/:amount — Find transactions by exact amount
+// GET /api/admin/transactions/search/:amount â€" Find transactions by exact amount
 router.get('/transactions/search/:amount', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
@@ -1478,7 +1483,7 @@ router.get('/transactions/search/:amount', verifyAdminKey, async (req, res) => {
     const transactions = await db.collection('transactions')
       .find({ amount: amount })
       .sort({ createdAt: -1 })
-      .limit(50)
+      .limit(100)
       .toArray();
     res.json({ transactions, count: transactions.length, searchAmount: amount });
   } catch (error) {
@@ -1504,5 +1509,3 @@ router.get('/kyc/:filename', verifyAdminKey, (req, res) => {
 });
 
 export default router;
-
-// Refurbished
