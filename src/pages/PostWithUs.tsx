@@ -548,21 +548,29 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
               ? (editingPostId ? 'Update your live opportunity instantly.' : 'Reach thousands of top-tier African students and young professionals instantly.')
               : 'Manage your active opportunities and download applications.'}
           </p>
-          <>
-            <button
-              onClick={() => { setViewMode('post'); setEditingPostId(null); }}
-              className={`px-8 py-4 rounded-full font-bold transition-all text-lg ${viewMode === 'post' && !editingPostId ? 'bg-white text-gray-900 shadow-md' : 'bg-transparent text-white hover:bg-white/10'}`}
-            >
-              Post Opportunity
-            </button>
-            <button
-              onClick={() => { setViewMode('manage'); setEditingPostId(null); }}
-              className={`px-8 py-4 flex items-center justify-center rounded-full font-bold transition-all text-lg ${viewMode === 'manage' ? 'bg-white text-gray-900 shadow-md' : 'bg-transparent text-white hover:bg-white/10'}`}
-            >
-              <LayoutDashboard className="w-5 h-5 mr-2" />
-              Manage Dashboard
-            </button>
-          </>
+          <div className="mt-8 flex justify-center">
+            <div className="inline-flex rounded-full bg-white/10 border border-white/20 p-1.5 backdrop-blur-sm">
+              <button
+                onClick={() => { setViewMode('post'); setEditingPostId(null); }}
+                className={`px-8 py-4 rounded-full font-bold transition-all text-lg ${viewMode === 'post' && !editingPostId
+                  ? 'bg-white text-gray-900 shadow-md'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+                  }`}
+              >
+                Post Opportunity
+              </button>
+              <button
+                onClick={() => { setViewMode('manage'); setEditingPostId(null); }}
+                className={`px-8 py-4 rounded-full font-bold transition-all text-lg flex items-center gap-2 ${viewMode === 'manage'
+                  ? 'bg-white text-gray-900 shadow-md'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+                  }`}
+              >
+                <LayoutDashboard className="w-5 h-5" />
+                Manage Dashboard
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
