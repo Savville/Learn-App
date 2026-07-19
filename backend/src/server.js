@@ -19,6 +19,7 @@ import messageRoutes from './routes/messages.js';
 import portfolioRoutes from './routes/portfolio.js';
 import feedRoutes from './routes/feed.js';
 import sitemapRoutes from './routes/sitemap.js';
+import testEmailRoutes from './routes/test-email.js';
 
 dotenv.config();
 
@@ -120,6 +121,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/sitemap', sitemapRoutes);
+app.use('/api/test-email', testEmailRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {
