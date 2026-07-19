@@ -13,7 +13,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'https://opportunitieskenya.liv
 
 // Images served from Vercel public folder
 const BANNER_URL = `${FRONTEND_URL}/Email%20Banner.png`;
-const FOOTER_URL  = `${FRONTEND_URL}/Email%20Footer.png`;
+const FOOTER_URL = `${FRONTEND_URL}/Email%20Footer.png`;
 
 // Shared HTML wrapper
 const wrapEmail = (body) => `
@@ -35,13 +35,13 @@ const ctaButton = (text, url) => `
   ">${text}</a>`;
 
 const categoryColours = {
-  Internship:    { bg: '#dbeafe', text: '#1e40af' },
-  Scholarship:   { bg: '#dcfce7', text: '#166534' },
-  Grant:         { bg: '#fef9c3', text: '#854d0e' },
-  Conference:    { bg: '#f3e8ff', text: '#6b21a8' },
+  Internship: { bg: '#dbeafe', text: '#1e40af' },
+  Scholarship: { bg: '#dcfce7', text: '#166534' },
+  Grant: { bg: '#fef9c3', text: '#854d0e' },
+  Conference: { bg: '#f3e8ff', text: '#6b21a8' },
   CallForPapers: { bg: '#ffe4e6', text: '#9f1239' },
-  Hackathon:     { bg: '#ffedd5', text: '#9a3412' },
-  Other:         { bg: '#f1f5f9', text: '#475569' },
+  Hackathon: { bg: '#ffedd5', text: '#9a3412' },
+  Other: { bg: '#f1f5f9', text: '#475569' },
 };
 
 const categoryBadge = (cat) => {
@@ -59,12 +59,12 @@ const welcomeTemplate = () => wrapEmail(`
     <p style="color:#475569;line-height:1.7;margin:0 0 8px;"><strong>You'll receive:</strong></p>
     <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin-bottom:24px;">
       ${[
-        ['Scholarships','Local & international funding opportunities'],
-        ['Internships','Paid & fully funded work experience'],
-        ['Grants','Research and project funding'],
-        ['Conferences','Summits, workshops & training programmes'],
-        ['Call for Papers','Research publication & fellowship calls'],
-      ].map(([title,desc]) => `
+    ['Scholarships', 'Local & international funding opportunities'],
+    ['Internships', 'Paid & fully funded work experience'],
+    ['Grants', 'Research and project funding'],
+    ['Conferences', 'Summits, workshops & training programmes'],
+    ['Call for Papers', 'Research publication & fellowship calls'],
+  ].map(([title, desc]) => `
         <tr>
           <td style="padding:8px 12px 8px 0;vertical-align:top;">
             <strong style="color:#0f2744;font-size:14px;">${title}</strong><br/>
@@ -129,13 +129,18 @@ const deadlineReminderTemplate = (opportunity, daysLeft) => wrapEmail(`
   </div>`);
 
 // Send helpers
-async function sendEmail({ to, subject, html }) {
+// Global Reply-To: all outbound emails route replies to this Gmail inbox
+const REPLY_TO = 'opportunitieskenyalive@gmail.com';
+
+async function sendEmail({ to, subject, html, cc, bcc }) {
   return resend.emails.send({
     from: FROM,
     to,
-    reply_to: 'opportunitieskenyalive@gmail.com',
+    reply_to: REPLY_TO,
     subject,
     html,
+    ...(cc ? { cc } : {}),
+    ...(bcc ? { bcc } : {}),
   });
 }
 
