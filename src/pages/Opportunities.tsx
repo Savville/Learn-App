@@ -19,45 +19,45 @@ import {
 
 // Funding options tailored per tab
 const JOBS_FUNDING_OPTIONS = [
-  { value: 'all',              label: 'All Pay Types' },
-  { value: 'Paid Internship',  label: 'Paid' },
+  { value: 'all', label: 'All Pay Types' },
+  { value: 'Paid Internship', label: 'Paid' },
   { value: 'Partially Funded', label: 'Partially Paid' },
-  { value: 'Unpaid Internship',label: 'Unpaid' },
+  { value: 'Unpaid Internship', label: 'Unpaid' },
 ];
 const ACADEMIC_CAREER_FUNDING_OPTIONS = [
-  { value: 'all',              label: 'All Funding Types' },
-  { value: 'Fully Funded',     label: 'Fully Funded' },
+  { value: 'all', label: 'All Funding Types' },
+  { value: 'Fully Funded', label: 'Fully Funded' },
   { value: 'Partially Funded', label: 'Partially Funded' },
-  { value: 'Paid Internship',  label: 'Paid / Stipend' },
-  { value: 'Stipend',          label: 'Stipend' },
-  { value: 'Unpaid Internship',label: 'Unpaid' },
-  { value: 'Unpaid',           label: 'Unpaid' },
+  { value: 'Paid Internship', label: 'Paid / Stipend' },
+  { value: 'Stipend', label: 'Stipend' },
+  { value: 'Unpaid Internship', label: 'Unpaid' },
+  { value: 'Unpaid', label: 'Unpaid' },
 ];
 const INNOVATION_FUNDING_OPTIONS = [
-  { value: 'all',              label: 'All Funding Types' },
-  { value: 'Fully Funded',     label: 'Fully Funded' },
+  { value: 'all', label: 'All Funding Types' },
+  { value: 'Fully Funded', label: 'Fully Funded' },
   { value: 'Partially Funded', label: 'Partially Funded' },
 ];
 const PROJECTS_FUNDING_OPTIONS = [
-  { value: 'all',              label: 'All Types' },
-  { value: 'Fully Funded',     label: 'Fully Funded' },
+  { value: 'all', label: 'All Types' },
+  { value: 'Fully Funded', label: 'Fully Funded' },
   { value: 'Partially Funded', label: 'Partially Funded' },
 ];
 const ALL_FUNDING_OPTIONS = [
-  { value: 'all',              label: 'All Funding Types' },
-  { value: 'Fully Funded',     label: 'Fully Funded' },
+  { value: 'all', label: 'All Funding Types' },
+  { value: 'Fully Funded', label: 'Fully Funded' },
   { value: 'Partially Funded', label: 'Partially Funded' },
-  { value: 'Paid Internship',  label: 'Paid Internship' },
-  { value: 'Stipend',          label: 'Stipend' },
-  { value: 'Unpaid',           label: 'Unpaid' },
+  { value: 'Paid Internship', label: 'Paid Internship' },
+  { value: 'Stipend', label: 'Stipend' },
+  { value: 'Unpaid', label: 'Unpaid' },
 ];
 
 const TABS = BROWSE_TABS;
 
 const RIGHT_TABS: { id: string; label: string; description: string }[] = [
-  { id: 'applied',  label: 'Tracker',               description: 'Tracker' },
-  { id: 'inbox',    label: 'Inbox',                 description: 'Inbox' },
-  { id: 'portfolio', label: 'Portfolio',            description: 'Portfolio' },
+  { id: 'applied', label: 'Tracker', description: 'Tracker' },
+  { id: 'inbox', label: 'Inbox', description: 'Inbox' },
+  { id: 'portfolio', label: 'Portfolio', description: 'Portfolio' },
 ];
 
 const applyFilters = (
@@ -78,9 +78,9 @@ const applyFilters = (
     // Guard: category must be a non-empty string before tab matching
     const matchesTab = opp.category ? categoryMatchesTab(opp.category, activeTab) : activeTab === 'all';
 
-    const matchesType    = selectedType === 'all' || opp.category === selectedType;
+    const matchesType = selectedType === 'all' || opp.category === selectedType;
     // Guard: eligibility may be absent on some DB records
-    const matchesLevel   = selectedLevel === 'all' || opp.eligibility?.educationLevel === selectedLevel;
+    const matchesLevel = selectedLevel === 'all' || opp.eligibility?.educationLevel === selectedLevel;
     const matchesFunding = selectedFunding === 'all' || opp.fundingType === selectedFunding;
 
     return matchesSearch && matchesTab && matchesType && matchesLevel && matchesFunding;
@@ -95,11 +95,13 @@ const applyFilters = (
 
 export function Opportunities() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab]       = useState<TabId>((searchParams.get('tab') as TabId) || 'all');
-  const [searchQuery, setSearchQuery]   = useState(searchParams.get('search') || '');
-  const [selectedType, setSelectedType]       = useState(searchParams.get('type') || 'all');
-  const [selectedLevel, setSelectedLevel]     = useState(searchParams.get('level') || 'all');
+  const [activeTab, setActiveTab] = useState<TabId>((searchParams.get('tab') as TabId) || 'all');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [selectedType, setSelectedType] = useState(searchParams.get('type') || 'all');
+  const [selectedLevel, setSelectedLevel] = useState(searchParams.get('level') || 'all');
   const [selectedFunding, setSelectedFunding] = useState(searchParams.get('funding') || 'all');
+  const [selectedTaskType, setSelectedTaskType] = useState(searchParams.get('task_type') || 'all');
+  const [selectedUrgency, setSelectedUrgency] = useState(searchParams.get('urgency') || 'all');
   const [showFilters, setShowFilters] = useState(false);
 
   // Sync state to URL search parameters so history works seamlessly
@@ -110,9 +112,11 @@ export function Opportunities() {
     if (selectedType !== 'all') params.type = selectedType;
     if (selectedLevel !== 'all') params.level = selectedLevel;
     if (selectedFunding !== 'all') params.funding = selectedFunding;
-    
+    if (selectedTaskType !== 'all') params.task_type = selectedTaskType;
+    if (selectedUrgency !== 'all') params.urgency = selectedUrgency;
+
     setSearchParams(params, { replace: true });
-  }, [activeTab, searchQuery, selectedType, selectedLevel, selectedFunding, setSearchParams]);
+  }, [activeTab, searchQuery, selectedType, selectedLevel, selectedFunding, selectedTaskType, selectedUrgency, setSearchParams]);
   const currentTab = [...TABS, ...RIGHT_TABS].find(t => t.id === activeTab) ?? TABS[0];
 
   useSEO({
@@ -122,11 +126,11 @@ export function Opportunities() {
   });
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [loading, setLoading]       = useState(true);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore]       = useState(false);
-  const [page, setPage]             = useState(1);
-  const [error, setError]           = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
   // Sync from URL params
   useEffect(() => {
@@ -134,6 +138,8 @@ export function Opportunities() {
     setSelectedType(searchParams.get('type') || 'all');
     setSelectedLevel(searchParams.get('level') || 'all');
     setSelectedFunding(searchParams.get('funding') || 'all');
+    setSelectedTaskType(searchParams.get('task_type') || 'all');
+    setSelectedUrgency(searchParams.get('urgency') || 'all');
     setActiveTab((searchParams.get('tab') as TabId) || 'all');
     setPage(1);
   }, [searchParams]);
@@ -153,13 +159,13 @@ export function Opportunities() {
   };
 
   const buildParams = (pageNum: number) => ({
-    category:    selectedType !== 'all' ? selectedType : undefined,
-    level:       selectedLevel !== 'all' ? selectedLevel : undefined,
+    category: selectedType !== 'all' ? selectedType : undefined,
+    level: selectedLevel !== 'all' ? selectedLevel : undefined,
     fundingType: selectedFunding !== 'all' ? selectedFunding : undefined,
-    search:      searchQuery || undefined,
-    tab:         activeTab !== 'all' ? activeTab : undefined,
-    page:        pageNum,
-    limit:       100,
+    search: searchQuery || undefined,
+    tab: activeTab !== 'all' ? activeTab : undefined,
+    page: pageNum,
+    limit: 100,
   });
 
   const mergeLogos = (opps: Opportunity[]) =>
@@ -207,7 +213,7 @@ export function Opportunities() {
       setLoadingMore(true);
       const nextPage = page + 1;
       const response = await opportunitiesAPI.getAll(buildParams(nextPage));
-      const result   = response.data;
+      const result = response.data;
       const items: Opportunity[] = Array.isArray(result) ? result : result.data;
       const pages: number = result.pages ?? 1;
       const apiFiltered = applyFilters(mergeLogos(items), searchQuery, selectedType, selectedLevel, selectedFunding, activeTab);
@@ -229,29 +235,29 @@ export function Opportunities() {
   // Derive funding options for the current tab
   const visibleFundingOptions =
     activeTab === 'jobs' ? JOBS_FUNDING_OPTIONS :
-    activeTab === 'academic_career' ? ACADEMIC_CAREER_FUNDING_OPTIONS :
-    activeTab === 'innovation' ? INNOVATION_FUNDING_OPTIONS :
-    activeTab === 'projects' ? PROJECTS_FUNDING_OPTIONS :
-    ALL_FUNDING_OPTIONS;
+      activeTab === 'academic_career' ? ACADEMIC_CAREER_FUNDING_OPTIONS :
+        activeTab === 'innovation' ? INNOVATION_FUNDING_OPTIONS :
+          activeTab === 'projects' ? PROJECTS_FUNDING_OPTIONS :
+            ALL_FUNDING_OPTIONS;
 
   // Count local opportunities per category, scoped to the current tab
   const countFor = (categoryValue: string) =>
     localOpportunities.filter(o => {
       const inTab =
         activeTab === 'jobs' ? GIG_CATEGORIES.includes(o.category as any) :
-        activeTab === 'academic_career' ? ACADEMIC_CAREER_CATEGORIES.includes(o.category as any) :
-        activeTab === 'innovation' ? INNOVATION_CATEGORIES.includes(o.category as any) :
-        activeTab === 'projects' ? PROJECT_CATEGORIES.includes(o.category as any) :
-        true;
+          activeTab === 'academic_career' ? ACADEMIC_CAREER_CATEGORIES.includes(o.category as any) :
+            activeTab === 'innovation' ? INNOVATION_CATEGORIES.includes(o.category as any) :
+              activeTab === 'projects' ? PROJECT_CATEGORIES.includes(o.category as any) :
+                true;
       return inTab && o.category === categoryValue;
     }).length;
 
   const totalForTab =
     activeTab === 'jobs' ? localOpportunities.filter(o => GIG_CATEGORIES.includes(o.category as any)).length :
-    activeTab === 'academic_career' ? localOpportunities.filter(o => ACADEMIC_CAREER_CATEGORIES.includes(o.category as any)).length :
-    activeTab === 'innovation' ? localOpportunities.filter(o => INNOVATION_CATEGORIES.includes(o.category as any)).length :
-    activeTab === 'projects' ? localOpportunities.filter(o => PROJECT_CATEGORIES.includes(o.category as any)).length :
-    localOpportunities.length;
+      activeTab === 'academic_career' ? localOpportunities.filter(o => ACADEMIC_CAREER_CATEGORIES.includes(o.category as any)).length :
+        activeTab === 'innovation' ? localOpportunities.filter(o => INNOVATION_CATEGORIES.includes(o.category as any)).length :
+          activeTab === 'projects' ? localOpportunities.filter(o => PROJECT_CATEGORIES.includes(o.category as any)).length :
+            localOpportunities.length;
 
   const filteredOpportunities = opportunities;
 
@@ -261,23 +267,25 @@ export function Opportunities() {
     // and the other useEffect fetching data based on state dependencies.
   };
 
-  const hasActiveFilters = selectedType !== 'all' || selectedLevel !== 'all' || selectedFunding !== 'all' || searchQuery !== '' || activeTab !== 'all';
+  const hasActiveFilters = selectedType !== 'all' || selectedLevel !== 'all' || selectedFunding !== 'all' || selectedTaskType !== 'all' || selectedUrgency !== 'all' || searchQuery !== '' || activeTab !== 'all';
 
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedType('all');
     setSelectedLevel('all');
     setSelectedFunding('all');
+    setSelectedTaskType('all');
+    setSelectedUrgency('all');
     setActiveTab('all');
     setSearchParams({});
   };
 
   const searchPlaceholder =
-    activeTab === 'jobs'            ? 'Search microgigs, jobs...' :
-    activeTab === 'academic_career' ? 'Search scholarships, internships, fellowships...' :
-    activeTab === 'innovation'      ? 'Search hackathons, challenges, startup funding...' :
-    activeTab === 'projects'        ? 'Search student and community projects...' :
-    'Search by title, organization, or keyword...';
+    activeTab === 'jobs' ? 'Search microgigs, jobs...' :
+      activeTab === 'academic_career' ? 'Search scholarships, internships, fellowships...' :
+        activeTab === 'innovation' ? 'Search hackathons, challenges, startup funding...' :
+          activeTab === 'projects' ? 'Search student and community projects...' :
+            'Search by title, organization, or keyword...';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -286,20 +294,19 @@ export function Opportunities() {
 
           {/* Tab Navigation */}
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap bg-white/10 p-1 rounded-lg w-full mb-8 gap-1 items-stretch sm:items-center backdrop-blur-sm">
-              {TABS.map(tab => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`px-4 sm:px-6 py-3 rounded-md font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${
-                    activeTab === tab.id
-                      ? 'bg-white text-blue-900 shadow-md scale-105'
-                      : 'text-white hover:bg-white/20'
+            {TABS.map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => handleTabChange(tab.id)}
+                className={`px-4 sm:px-6 py-3 rounded-md font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === tab.id
+                  ? 'bg-white text-blue-900 shadow-md scale-105'
+                  : 'text-white hover:bg-white/20'
                   }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-6">
@@ -342,11 +349,11 @@ export function Opportunities() {
                   onChange={(e) => setSelectedType(e.target.value)}
                 >
                   <option value="all" className="text-gray-900 bg-white">
-                    {activeTab === 'jobs'            ? `All Types (${totalForTab})` :
-                     activeTab === 'academic_career' ? `All Academic & Career Types (${totalForTab})` :
-                     activeTab === 'innovation'      ? `All Innovation Types (${totalForTab})` :
-                     activeTab === 'projects'        ? `All Project Types (${totalForTab})` :
-                     `All Types (${totalForTab})`}
+                    {activeTab === 'jobs' ? `All Types (${totalForTab})` :
+                      activeTab === 'academic_career' ? `All Academic & Career Types (${totalForTab})` :
+                        activeTab === 'innovation' ? `All Innovation Types (${totalForTab})` :
+                          activeTab === 'projects' ? `All Project Types (${totalForTab})` :
+                            `All Types (${totalForTab})`}
                   </option>
                   {visibleCategoryOptions.map(opt => (
                     <option key={opt.value} value={opt.value} className="text-gray-900 bg-white">
@@ -361,11 +368,11 @@ export function Opportunities() {
                   value={selectedLevel}
                   onChange={(e) => setSelectedLevel(e.target.value)}
                 >
-                  <option value="all"       className="text-gray-900 bg-white">All Levels</option>
+                  <option value="all" className="text-gray-900 bg-white">All Levels</option>
                   <option value="UnderGrad" className="text-gray-900 bg-white">Undergraduate</option>
-                  <option value="PostGrad"  className="text-gray-900 bg-white">Postgraduate</option>
-                  <option value="Both"      className="text-gray-900 bg-white">Practitioners</option>
-                  <option value="All"       className="text-gray-900 bg-white">All (Everyone)</option>
+                  <option value="PostGrad" className="text-gray-900 bg-white">Postgraduate</option>
+                  <option value="Both" className="text-gray-900 bg-white">Practitioners</option>
+                  <option value="All" className="text-gray-900 bg-white">All (Everyone)</option>
                 </select>
 
                 {/* Funding / Pay Type Filter — adapts to tab */}
@@ -379,6 +386,28 @@ export function Opportunities() {
                       {opt.label}
                     </option>
                   ))}
+                </select>
+
+                {/* Task Type Filter */}
+                <select
+                  className="px-4 py-2 rounded-sm border border-white/30 outline-none cursor-pointer bg-white/20 text-white font-medium backdrop-blur-sm hover:bg-white/30 transition-colors"
+                  value={selectedTaskType}
+                  onChange={(e) => setSelectedTaskType(e.target.value)}
+                >
+                  <option value="all" className="text-gray-900 bg-white">All Locations</option>
+                  <option value="online" className="text-gray-900 bg-white">Online Only</option>
+                  <option value="on_ground" className="text-gray-900 bg-white">On-Ground Only</option>
+                </select>
+
+                {/* Urgency Filter */}
+                <select
+                  className="px-4 py-2 rounded-sm border border-white/30 outline-none cursor-pointer bg-white/20 text-white font-medium backdrop-blur-sm hover:bg-white/30 transition-colors"
+                  value={selectedUrgency}
+                  onChange={(e) => setSelectedUrgency(e.target.value)}
+                >
+                  <option value="all" className="text-gray-900 bg-white">Any Deadline</option>
+                  <option value="urgent" className="text-gray-900 bg-white">Closing This Week</option>
+                  <option value="immediate" className="text-gray-900 bg-white">Immediate / Ongoing</option>
                 </select>
 
                 {hasActiveFilters && (

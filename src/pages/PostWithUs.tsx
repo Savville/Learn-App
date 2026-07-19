@@ -79,7 +79,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
   const [orgRequest, setOrgRequest] = useState({ name: '', organization: '', email: '', telephone: '', description: '' });
   const [requestStatus, setRequestStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  
+
   // OTP Verification State
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState('');
@@ -308,26 +308,26 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
           // 1. Get upload signature from backend
           const sigRes = await fetch(`${API_BASE}/messages/upload-signature`);
           if (sigRes.ok) {
-             const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
-             
-             // 2. Upload to Cloudinary
-             const formData = new FormData();
-             formData.append("file", coverImage);
-             formData.append("api_key", apiKey);
-             formData.append("timestamp", timestamp.toString());
-             formData.append("signature", signature);
-             
-             const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
-               method: "POST",
-               body: formData,
-             });
-             
-             if (uploadRes.ok) {
-               const data = await uploadRes.json();
-               imageUrl = data.secure_url;
-             } else {
-               console.warn("Cloudinary upload failed, falling back to default.");
-             }
+            const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
+
+            // 2. Upload to Cloudinary
+            const formData = new FormData();
+            formData.append("file", coverImage);
+            formData.append("api_key", apiKey);
+            formData.append("timestamp", timestamp.toString());
+            formData.append("signature", signature);
+
+            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+              method: "POST",
+              body: formData,
+            });
+
+            if (uploadRes.ok) {
+              const data = await uploadRes.json();
+              imageUrl = data.secure_url;
+            } else {
+              console.warn("Cloudinary upload failed, falling back to default.");
+            }
           }
         } catch (err) {
           console.warn("Upload process failed:", err);
@@ -480,7 +480,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
       setError('Identity details are required to submit.');
       return;
     }
-    
+
     // Check if the typed email is already verified in this session
     const verifiedEmail = localStorage.getItem('user_email');
     if (verifiedEmail && verifiedEmail.toLowerCase() === reporter.email.toLowerCase()) {
@@ -548,6 +548,11 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
               ? (editingPostId ? 'Update your live opportunity instantly.' : 'Reach thousands of top-tier African students and young professionals instantly.')
               : 'Manage your active opportunities and download applications.'}
           </p>
+          {viewMode === 'post' && !editingPostId && (
+            <p className="text-blue-200 text-sm mt-4 max-w-2xl mx-auto">
+              Post any task â€” data entry, social media, event support, research, transcription, or traditional opportunities like scholarships and internships.
+            </p>
+          )}
           <div className="mt-8 flex justify-center gap-4">
             <button
               onClick={() => { setViewMode('post'); setEditingPostId(null); }}
@@ -815,56 +820,56 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                       </select>
                     </div>
                     {!categoryHidesFunding(parsedData.basicInfo.category) && (
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
-                        Funding type
-                      </span>
-                      <select
-                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
-                        value={parsedData.basicInfo.fundingType || ''}
-                        onChange={(e) => handleBasicInfoEdit('fundingType', e.target.value)}
-                      >
-                        <option value="">Select funding type...</option>
-                        <option value="Fully Funded">Fully Funded</option>
-                        <option value="Partially Funded">Partially Funded</option>
-                        <option value="Self Funded">Self Funded</option>
-                        <option value="Grant / Venture Backed">Grant / Venture Backed</option>
-                        <option value="Not Applicable">Not Applicable</option>
-                      </select>
-                    </div>
+                      <div className="space-y-1.5">
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
+                          Funding type
+                        </span>
+                        <select
+                          className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
+                          value={parsedData.basicInfo.fundingType || ''}
+                          onChange={(e) => handleBasicInfoEdit('fundingType', e.target.value)}
+                        >
+                          <option value="">Select funding type...</option>
+                          <option value="Fully Funded">Fully Funded</option>
+                          <option value="Partially Funded">Partially Funded</option>
+                          <option value="Self Funded">Self Funded</option>
+                          <option value="Grant / Venture Backed">Grant / Venture Backed</option>
+                          <option value="Not Applicable">Not Applicable</option>
+                        </select>
+                      </div>
                     )}
                     {!categoryHidesCompensation(parsedData.basicInfo.category) && (
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
-                        Compensation
-                      </span>
-                      <select
-                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
-                        value={parsedData.basicInfo.compensationType || 'N/A'}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('compensationType', e.target.value)}
-                      >
-                        <option value="Paid">Paid (Salary/Wage)</option>
-                        <option value="Stipend">Stipend / Allowance</option>
-                        <option value="Unpaid">Unpaid</option>
-                        <option value="Equity">Equity / Profit Sharing</option>
-                        <option value="N/A">Not Applicable</option>
-                      </select>
-                    </div>
+                      <div className="space-y-1.5">
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
+                          Compensation
+                        </span>
+                        <select
+                          className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
+                          value={parsedData.basicInfo.compensationType || 'N/A'}
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('compensationType', e.target.value)}
+                        >
+                          <option value="Paid">Paid (Salary/Wage)</option>
+                          <option value="Stipend">Stipend / Allowance</option>
+                          <option value="Unpaid">Unpaid</option>
+                          <option value="Equity">Equity / Profit Sharing</option>
+                          <option value="N/A">Not Applicable</option>
+                        </select>
+                      </div>
                     )}
                     {!categoryHidesUpfrontCost(parsedData.basicInfo.category) && (
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
-                        Upfront Cost
-                      </span>
-                      <select
-                        className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
-                        value={parsedData.basicInfo.upfrontCost || 'No Upfront Cost'}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('upfrontCost', e.target.value)}
-                      >
-                        <option value="No Upfront Cost">No Upfront Cost</option>
-                        <option value="Has Upfront Cost">Has Upfront Cost</option>
-                      </select>
-                    </div>
+                      <div className="space-y-1.5">
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
+                          Upfront Cost
+                        </span>
+                        <select
+                          className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
+                          value={parsedData.basicInfo.upfrontCost || 'No Upfront Cost'}
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleBasicInfoEdit('upfrontCost', e.target.value)}
+                        >
+                          <option value="No Upfront Cost">No Upfront Cost</option>
+                          <option value="Has Upfront Cost">Has Upfront Cost</option>
+                        </select>
+                      </div>
                     )}
 
                     {categoryShowsProjectFunding(parsedData.basicInfo.category) && (
@@ -945,7 +950,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                         )}
                       </div>
                     )}
-                    
+
                     <div className="space-y-1.5 md:col-span-2">
                       <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
                         Short description
@@ -1306,7 +1311,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                           />
                         </div>
                       </div>
-                      
+
                       <div className="space-y-1.5 mt-4 border-t border-purple-200 pt-4">
                         <h5 className="font-semibold text-purple-900 text-sm">Upload Endorsement (For Internal Verification)</h5>
                         <label className="text-xs text-purple-800 font-medium">Please upload the official endorsement letter/email you received.</label>
@@ -1399,7 +1404,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                       disabled={isPublishing || !parsedData}
                     >
                       {isPublishing ? 'Submitting...' : editingPostId ? 'Submit Edit Request' : 'Submit for Verification'}
-                     </Button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1436,17 +1441,17 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                 </label>
               </div>
               <div className="flex gap-3 mt-8">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => { setShowOTP(false); setAuthLoading(false); }} 
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => { setShowOTP(false); setAuthLoading(false); }}
                   className="flex-1 py-3 h-auto rounded-xl font-bold"
                   disabled={authLoading}
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="flex-1 py-3 h-auto rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white"
                   disabled={authLoading || otp.length < 4}
                 >
@@ -1469,7 +1474,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">Success!</h3>
             <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-              {editingPostId 
+              {editingPostId
                 ? 'Your edit request was submitted successfully! Please wait for our admins to review and approve the changes.'
                 : 'Opportunity submitted successfully! Please wait for approval to be posted publicly.'}
             </p>

@@ -27,50 +27,45 @@ export function Header() {
               Opportunities Kenya
             </span>
           </div>
-    
+
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <Link
               to="/"
-              className={`transition-colors ${
-                isActive('/') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
-              }`}
+              className={`transition-colors ${isActive('/') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                }`}
             >
               Home
             </Link>
             <Link
               to="/opportunities"
-              className={`transition-colors ${
-                isActive('/opportunities') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
-              }`}
+              className={`transition-colors ${isActive('/opportunities') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                }`}
             >
               Opportunities
             </Link>
             <Link
               to="/about"
-              className={`transition-colors ${
-                isActive('/about') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
-              }`}
+              className={`transition-colors ${isActive('/about') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                }`}
             >
-              About
+              About & Services
             </Link>
             <Link
               to="/contact"
-              className={`transition-colors flex items-center h-full ${
-                isActive('/contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
-              }`}
+              className={`transition-colors flex items-center h-full ${isActive('/contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                }`}
             >
               Contact
             </Link>
 
             <Link
               to="/post-with-us"
-              className={`transition-all px-4 py-2 rounded-xl font-medium ${
-                isActive('/post-with-us')
-                  ? 'bg-blue-600 text-white shadow-md' 
+              className={`transition-all px-4 py-2 rounded-xl font-medium ${isActive('/post-with-us')
+                  ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white hover:shadow-md'
-              }`}
+                }`}
             >
               Post With Us
             </Link>
@@ -94,45 +89,40 @@ export function Header() {
             <div className="flex flex-col gap-4">
               <Link
                 to="/"
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  isActive('/') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`px-4 py-2 rounded-lg transition-colors ${isActive('/') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/opportunities"
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  isActive('/opportunities') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`px-4 py-2 rounded-lg transition-colors ${isActive('/opportunities') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Opportunities
               </Link>
               <Link
                 to="/about"
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  isActive('/about') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`px-4 py-2 rounded-lg transition-colors ${isActive('/about') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                About
+                About & Services
               </Link>
               <Link
                 to="/contact"
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  isActive('/contact') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`px-4 py-2 rounded-lg transition-colors ${isActive('/contact') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
               </Link>
               <Link
                 to="/post-with-us"
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isActive('/post-with-us') ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/post-with-us') ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white'
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Post With Us
