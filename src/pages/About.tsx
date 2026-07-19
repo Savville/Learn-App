@@ -73,7 +73,7 @@ export function About() {
           <img
             src="/Opportunities Kenya Logo 2.png"
             alt="Opportunities Kenya Logo"
-            className="h-10 w-auto object-contain mb-4 drop-shadow-md"
+            style={{ height: '48px', width: 'auto', display: 'block', margin: '0 auto 16px' }}
           />
           <h2 className="text-2xl font-bold text-blue-900 tracking-tight text-center">Opportunities Kenya</h2>
           <p className="text-gray-500 text-sm mt-1 text-center">Your Gateway to Scholarly Excellence</p>

@@ -18,7 +18,7 @@ export function Header() {
             <img
               src="/Opportunities Kenya Logo 2.png"
               alt="Opportunities Kenya"
-              className="h-10 w-auto"
+              style={{ height: '32px', width: 'auto', display: 'block' }}
             />
             <span
               className="text-blue-900 font-bold"
@@ -63,8 +63,8 @@ export function Header() {
             <Link
               to="/post-with-us"
               className={`transition-all px-4 py-2 rounded-xl font-medium ${isActive('/post-with-us')
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white hover:shadow-md'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white hover:shadow-md'
                 }`}
             >
               Post With Us

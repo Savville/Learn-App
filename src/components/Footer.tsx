@@ -12,7 +12,7 @@ export function Footer() {
               <img
                 src="/Opportunities Kenya Logo 2.png"
                 alt="Opportunities Kenya"
-                className="h-10 w-auto"
+                style={{ height: '32px', width: 'auto', display: 'block' }}
               />
               <span
                 className="text-white font-bold"
