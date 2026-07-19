@@ -2,23 +2,22 @@ import { Hero } from '../components/Hero';
 import { OpportunityCard } from '../components/OpportunityCard';
 import { Newsletter } from '../components/Newsletter';
 import { opportunities } from '../data/opportunities';
-import { ArrowRight, Briefcase, Monitor, MapPin, Code, PenTool, Headphones, Palette, Megaphone, ClipboardCheck, GraduationCap, Truck, FileText, Search, Building2 } from 'lucide-react';
+import { ArrowRight, Briefcase, Monitor, MapPin, Code, PenTool, Headphones, Palette, Megaphone, ClipboardCheck, GraduationCap, Truck, FileText, Search, Building2, Users, HandHeart, Sparkles, Globe, Lightbulb, Calendar, UserCheck, Wallet } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
 
-const categoryPills = [
-  { icon: ClipboardCheck, label: 'Data Entry', query: 'category=Gig&compensation=Paid' },
-  { icon: FileText, label: 'Transcription', query: 'category=Gig' },
-  { icon: Megaphone, label: 'Social Media', query: 'category=Gig' },
-  { icon: PenTool, label: 'Writing', query: 'category=Gig' },
-  { icon: Search, label: 'Research', query: 'category=Gig' },
-  { icon: Palette, label: 'Design', query: 'category=Gig' },
-  { icon: Code, label: 'Tech', query: 'category=Gig' },
-  { icon: Headphones, label: 'Support', query: 'category=Gig' },
-  { icon: GraduationCap, label: 'Internships', query: 'category=Internship' },
-  { icon: Monitor, label: 'Online Tasks', query: 'task_type=online' },
-  { icon: MapPin, label: 'On-Ground', query: 'task_type=on_ground' },
-  { icon: Briefcase, label: 'Scholarships', query: 'category=Scholarship' },
+// Categories displayed as overview badges (not clickable buttons)
+const platformCategories = [
+  { icon: Wallet, label: 'Grants & Funding', desc: 'Micro-grants, venture funding, and seed capital for student projects' },
+  { icon: GraduationCap, label: 'Internships', desc: 'Paid and unpaid internships with established organizations' },
+  { icon: Monitor, label: 'Online Tasks', desc: 'Data entry, transcription, social media, research — work from anywhere' },
+  { icon: MapPin, label: 'On-Ground Work', desc: 'Event support, delivery, property scouting, brand ambassador roles' },
+  { icon: Users, label: 'Call for Agents', desc: 'Campus representative and student agent opportunities nationwide' },
+  { icon: Calendar, label: 'Events & Participants', desc: 'Hackathons, conferences, workshops, and community gatherings' },
+  { icon: HandHeart, label: 'Equity Contributions', desc: 'Fund student projects in exchange for equity or recognition' },
+  { icon: Lightbulb, label: 'Project Collaborations', desc: 'Join forces with fellow students on innovative research and builds' },
+  { icon: UserCheck, label: 'Call for Volunteers', desc: 'Contribute your time and skills to causes that matter' },
+  { icon: Globe, label: 'Scholarships', desc: 'Fully and partially funded academic programs worldwide' },
 ];
 
 const howItWorksStudents = [
@@ -49,26 +48,50 @@ export function Home() {
     <div>
       <Hero />
 
-      {/* Category Pills */}
-      <section className="py-10 bg-white border-b">
+      {/* Platform Overview — What We Post */}
+      <section className="py-16 bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center text-gray-500 text-sm font-semibold uppercase tracking-wider mb-6">
-            What kind of tasks are you looking for?
-          </h2>
-          <div className="flex flex-wrap justify-center gap-2">
-            {categoryPills.map((pill) => {
-              const Icon = pill.icon;
+          <div className="text-center mb-12">
+            <h2 className="text-gray-900 mb-3 font-extrabold tracking-tight text-3xl">What We Post on This Platform</h2>
+            <p className="text-gray-600 max-w-3xl mx-auto text-lg leading-relaxed">
+              Opportunities Kenya curates and verifies a wide range of opportunities for students, young professionals, and partnering organizations.
+              Whether you're looking for paid work, academic funding, project collaboration, or a way to source talented student workers — we connect you.
+            </p>
+          </div>
+
+          {/* Category Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {platformCategories.map((cat) => {
+              const Icon = cat.icon;
               return (
-                <Link
-                  key={pill.label}
-                  to={`/opportunities?${pill.query}`}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-full text-sm font-medium text-gray-700 hover:text-blue-700 transition-colors"
+                <div
+                  key={cat.label}
+                  className="group flex items-start gap-3 p-5 bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-200 rounded-xl transition-all"
                 >
-                  <Icon className="w-4 h-4" />
-                  {pill.label}
-                </Link>
+                  <div className="w-10 h-10 bg-blue-100 group-hover:bg-blue-200 text-blue-700 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">{cat.label}</h3>
+                    <p className="text-xs text-gray-500 leading-relaxed">{cat.desc}</p>
+                  </div>
+                </div>
               );
             })}
+          </div>
+
+          {/* CTA Row */}
+          <div className="text-center mt-10">
+            <p className="text-gray-600 mb-4 text-sm">
+              Browse all opportunities or use the filters above to find exactly what you need.
+            </p>
+            <Link
+              to="/opportunities"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors"
+            >
+              Browse All Opportunities
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
