@@ -188,7 +188,7 @@ router.get('/subscriber-categories', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     const subscribers = await db.collection('subscribers').find({ unsubscribed: { $ne: true } }).toArray();
-    
+
     let totalActive = subscribers.length;
     let categories = {};
 
@@ -827,9 +827,9 @@ router.post('/user-reports/:id/judgment', verifyAdminKey, async (req, res) => {
     const db = getDB();
     const { id } = req.params;
     const { action } = req.body; // 'dismiss', 'warn', 'suspend'
-    
+
     const { ObjectId } = await import('mongodb');
-    
+
     const report = await db.collection('user_reports').findOne({ _id: new ObjectId(id) });
     if (!report) return res.status(404).json({ error: 'Report not found' });
 
@@ -840,9 +840,9 @@ router.post('/user-reports/:id/judgment', verifyAdminKey, async (req, res) => {
         { $set: { suspended: true, suspendedAt: new Date(), suspendReason: report.reason } }
       );
     }
-    
+
     // Note: 'warn' could be hooked up to send an email via emailService here in the future
-    
+
     await db.collection('user_reports').updateOne(
       { _id: new ObjectId(id) },
       { $set: { status: 'resolved', judgment: action, resolvedAt: new Date() } }
@@ -1104,7 +1104,7 @@ router.put('/conversations/:convId/resolve', verifyAdminKey, async (req, res) =>
     }
 
     const conversation = await db.collection('conversations').findOne({ _id: new ObjectId(convId) });
-    
+
     if (conversation) {
       // Notify both parties
       const notificationData = {
@@ -1200,7 +1200,7 @@ router.get('/reports/:id/postmortem', verifyAdminKey, async (req, res) => {
     if (!opp) return res.status(404).json({ error: 'Opportunity not found' });
 
     const apps = await db.collection('applications').find({ opportunityId: oppId }).toArray();
-    
+
     // Aggregation for breakdown
     const educationCount = {};
     const fieldCount = {};
@@ -1237,12 +1237,12 @@ router.post('/reports/:id/email-postmortem', verifyAdminKey, async (req, res) =>
   try {
     const oppId = req.params.id;
     const { posterEmail } = req.body;
-    
+
     console.log(`\n\x1b[35m[POST-MORTEM REPORT EMAILED]\x1b[0m`);
     console.log(`To: ${posterEmail}`);
     console.log(`Subject: Analytics Report for Opportunity ${oppId}`);
     res.json({ message: 'Report emailed to ' + posterEmail });
-  } catch(e) {
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
@@ -1256,10 +1256,10 @@ router.get('/crowdfund/ledger', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     // Get ALL crowdfund transactions to calculate stats, payouts, and refunds
-    const txs = await db.collection('transactions').find({ 
+    const txs = await db.collection('transactions').find({
       type: { $in: ['crowdfund', 'crowdfund_payout', 'crowdfund_refund'] },
     }).toArray();
-    
+
     // Group by opportunityId
     const ledgerMap = {};
     for (const tx of txs) {
@@ -1333,14 +1333,14 @@ router.post('/crowdfund/payout/:opportunityId', verifyAdminKey, async (req, res)
   try {
     const { opportunityId } = req.params;
     const { mpesaNumber } = req.body;
-    
+
     if (!mpesaNumber || !/^2547\d{8}$/.test(mpesaNumber.toString())) {
       return res.status(400).json({ error: 'Valid M-PESA number is required' });
     }
 
     const db = getDB();
     const txs = await db.collection('transactions').find({ opportunityId, type: 'crowdfund', status: 'completed' }).toArray();
-    
+
     if (txs.length === 0) return res.status(400).json({ error: 'No completed transactions found for this project.' });
 
     let totalRaised = 0;
@@ -1379,11 +1379,11 @@ router.post('/crowdfund/refund/:opportunityId', verifyAdminKey, async (req, res)
     const { opportunityId } = req.params;
     const db = getDB();
     const txs = await db.collection('transactions').find({ opportunityId, type: 'crowdfund', status: 'completed' }).toArray();
-    
+
     if (txs.length === 0) return res.status(400).json({ error: 'No completed transactions found for this project.' });
 
     const { initiateB2CPayout } = await import('../services/mpesaService.js');
-    
+
     let successCount = 0;
     let failCount = 0;
 
@@ -1414,6 +1414,78 @@ router.post('/crowdfund/refund/:opportunityId', verifyAdminKey, async (req, res)
     }
 
     res.json({ message: `Refunds initiated: ${successCount} successful, ${failCount} failed.` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==========================================
+// Phase 6: Transaction Viewer (Recent First)
+// ==========================================
+
+// GET /api/admin/transactions — View ALL transactions sorted by newest first
+router.get('/transactions', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { type, status, limit: limitStr } = req.query;
+    // Default to 200 transactions, but allow fetching all with limit=0 or very high
+    const limit = limitStr && parseInt(limitStr) > 0 ? parseInt(limitStr) : 200;
+
+    // Build query filter
+    const query = {};
+    if (type && type !== 'all') query.type = type;
+    if (status && status !== 'all') query.status = status;
+
+    // Build sort: newest first
+    const sort = { createdAt: -1 };
+
+    const transactions = await db.collection('transactions')
+      .find(query)
+      .sort(sort)
+      .limit(limit)
+      .toArray();
+
+    // Get total count (unfiltered)
+    const totalCount = await db.collection('transactions').countDocuments();
+
+    // Aggregate stats (by status)
+    const stats = await db.collection('transactions').aggregate([
+      { $match: query },
+      { $group: { _id: "$status", count: { $sum: 1 }, totalAmount: { $sum: { $toDouble: "$amount" } } } },
+      { $project: { _id: 0, status: "$_id", count: 1, totalAmount: { $round: ["$totalAmount", 2] } } },
+      { $sort: { count: -1 } }
+    ]).toArray();
+
+    // Type breakdown
+    const typeBreakdown = await db.collection('transactions').aggregate([
+      { $match: query },
+      { $group: { _id: "$type", count: { $sum: 1 }, totalAmount: { $sum: { $toDouble: "$amount" } } } },
+      { $project: { _id: 0, type: "$_id", count: 1, totalAmount: { $round: ["$totalAmount", 2] } } },
+      { $sort: { count: -1 } }
+    ]).toArray();
+
+    res.json({
+      transactions,
+      pagination: { total: totalCount, returned: transactions.length, limit },
+      stats,
+      typeBreakdown
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/transactions/search/:amount — Find transactions by exact amount
+router.get('/transactions/search/:amount', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const amount = parseFloat(req.params.amount);
+    const transactions = await db.collection('transactions')
+      .find({ amount: amount })
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .toArray();
+    res.json({ transactions, count: transactions.length, searchAmount: amount });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

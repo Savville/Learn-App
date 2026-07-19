@@ -118,7 +118,7 @@ export default function AdminDashboard() {
         fetch(`${API_BASE}/admin/chat-oversight`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/subscriber-categories`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_BASE}/admin/crowdfund/ledger`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/transactions?type=&status=&limit=50`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/transactions?type=all&status=all&limit=0`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (oppsRes.ok) setPending(await oppsRes.json());
@@ -2082,18 +2082,18 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3">
                             <Badge variant="outline" className={`text-[11px] font-bold ${tx.type === 'escrow' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                tx.type === 'crowdfund' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                                  tx.type === 'crowdfund_payout' || tx.type === 'payment' ? 'bg-green-50 text-green-700 border-green-200' :
-                                    tx.type === 'crowdfund_refund' ? 'bg-red-50 text-red-700 border-red-200' :
-                                      'bg-slate-50 text-slate-700 border-slate-200'
+                              tx.type === 'crowdfund' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                tx.type === 'crowdfund_payout' || tx.type === 'payment' ? 'bg-green-50 text-green-700 border-green-200' :
+                                  tx.type === 'crowdfund_refund' ? 'bg-red-50 text-red-700 border-red-200' :
+                                    'bg-slate-50 text-slate-700 border-slate-200'
                               }`}>
                               {tx.type || 'unknown'}
                             </Badge>
                           </td>
                           <td className="px-4 py-3">
                             <Badge variant="outline" className={`text-[11px] font-bold ${tx.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
-                                tx.status === 'pending' ? 'bg-amber-100 text-amber-700 border-amber-200' :
-                                  'bg-red-100 text-red-700 border-red-200'
+                              tx.status === 'pending' ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                                'bg-red-100 text-red-700 border-red-200'
                               }`}>
                               {tx.status || 'unknown'}
                             </Badge>
