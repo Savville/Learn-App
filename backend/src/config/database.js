@@ -51,6 +51,14 @@ export async function connectDB() {
     await authOtps.createIndex({ email: 1 });
     await authOtps.createIndex({ createdAt: 1 }, { expireAfterSeconds: 600 });
 
+    // Transaction indexes for fast webhook lookups and admin viewer
+    const transactions = db.collection('transactions');
+    await transactions.createIndex({ checkoutRequestId: 1 }, { sparse: true });
+    await transactions.createIndex({ conversationId: 1 }, { sparse: true });
+    await transactions.createIndex({ opportunityId: 1, createdAt: -1 });
+    await transactions.createIndex({ type: 1, status: 1 });
+    await transactions.createIndex({ amount: 1 });
+
     console.log('✅ Indexes ensured');
     return db;
   } catch (error) {
