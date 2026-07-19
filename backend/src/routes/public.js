@@ -1754,4 +1754,73 @@ router.get('/seed-opportunities', async (req, res) => {
 
 export default router;
 
+// =========================================================
+// ESCROW FUNDED NOTIFICATION — POST /api/public/escrow-funded
+// =========================================================
+// Called when an escrow transaction completes.
+// Notifies the applicant (job doer) via email that the poster
+// has deposited funds and the job is now active.
+router.post('/escrow-funded', async (req, res) => {
+  try {
+    const { conversationId, amount, applicantEmail, opportunityTitle } = req.body;
+
+    if (!conversationId || !applicantEmail) {
+      return res.status(400).json({ error: 'conversationId and applicantEmail required' });
+    }
+
+    const db = getDB();
+
+    // Fetch conversation to get applicant name
+    const conv = await db.collection('conversations').findOne({ _id: conversationId });
+    const applicantName = conv?.applicantName || 'Applicant';
+
+    // Send email notification
+    if (applicantEmail) {
+      try {
+        await sendEscrowFundedEmail({
+          to: applicantEmail,
+          applicantName,
+          opportunityTitle: opportunityTitle || (conv?.opportunityTitle || 'the opportunity'),
+          amount: amount || 'the deposited amount',
+        });
+        console.log(`[ESCROW] Notification sent to ${applicantEmail}`);
+      } catch (emailErr) {
+        console.error('[ESCROW] Email send failed:', emailErr.message);
+      }
+    }
+
+    res.json({ success: true, message: 'Escrow funded notification processed' });
+  } catch (error) {
+    console.error('Escrow funded error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Helper: Send escrow-funded email using Resend
+async function sendEscrowFundedEmail({ to, applicantName, opportunityTitle, amount }) {
+  const { Resend } = await import('resend');
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
+  await resend.emails.send({
+    from: 'Opportunities Kenya <noreply@opportunitieskenya.live>',
+    to,
+    subject: `âœ… Escrow Funded: ${opportunityTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #0933ed;">Payment Received âœ…</h2>
+        <p>Hi <strong>${applicantName}</strong>,</p>
+        <p>Great news! The poster has successfully deposited <strong>KES ${amount}</strong> into escrow for:</p>
+        <div style="background: #f0f4ff; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <h3 style="margin: 0; color: #0933ed;">${opportunityTitle}</h3>
+        </div>
+        <p>The job is now <strong style="color: green;">ACTIVE</strong> and you can start applying!</p>
+        <br/>
+        <a href="https://opportunitieskenya.live" style="display: inline-block; background: #0933ed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">View Your Dashboard</a>
+        <br/><br/>
+        <p style="color: #666; font-size: 12px;">Opportunities Kenya â€” Connecting talent with opportunity.</p>
+      </div>
+    `,
+  });
+}
+
 // Refurbished

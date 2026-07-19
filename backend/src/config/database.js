@@ -58,6 +58,8 @@ export async function connectDB() {
     await transactions.createIndex({ opportunityId: 1, createdAt: -1 });
     await transactions.createIndex({ type: 1, status: 1 });
     await transactions.createIndex({ amount: 1 });
+    await transactions.createIndex({ userId: 1, createdAt: -1 }, { sparse: true });
+    await transactions.createIndex({ status: 1, createdAt: -1 });
 
     console.log('✅ Indexes ensured');
     return db;
