@@ -45,6 +45,14 @@ coverage/
 *.lcov
 .nyc_output/
 
+# Temporary test scripts (root)
+scratch.js
+scratch2.js
+update_local_opps.js
+fixDetails.js
+fixSyntax.cjs
+fixTypes.js
+
 # Temporary files
 *.tmp
 *.temp
