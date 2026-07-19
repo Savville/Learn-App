@@ -488,10 +488,16 @@ export function Opportunities() {
           <div className="text-center py-16">
             <div className="text-gray-400 mb-4"><Search className="w-16 h-16 mx-auto" /></div>
             <h3 className="text-xl text-gray-900 mb-2 font-semibold">No opportunities found</h3>
-            <p className="text-gray-600 mb-6">Try adjusting your filters or search query</p>
-            <button onClick={clearFilters} className="px-6 py-3 bg-blue-900 text-white rounded-sm hover:bg-blue-800 transition-colors font-medium">
-              Clear Filters
-            </button>
+            <p className="text-gray-600 mb-2">Nothing matches your current filters.</p>
+            <p className="text-gray-500 mb-6 text-sm">Try adjusting your filters or browse other opportunities.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button onClick={clearFilters} className="px-6 py-3 bg-blue-900 text-white rounded-sm hover:bg-blue-800 transition-colors font-medium">
+                Clear All Filters
+              </button>
+              <Link to="/opportunities" className="px-6 py-3 border-2 border-blue-900 text-blue-900 rounded-sm hover:bg-blue-50 transition-colors font-medium">
+                Browse All Opportunities
+              </Link>
+            </div>
           </div>
         )}
       </div>

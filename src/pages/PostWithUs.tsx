@@ -548,12 +548,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
               ? (editingPostId ? 'Update your live opportunity instantly.' : 'Reach thousands of top-tier African students and young professionals instantly.')
               : 'Manage your active opportunities and download applications.'}
           </p>
-          {viewMode === 'post' && !editingPostId && (
-            <p className="text-blue-200 text-sm mt-4 max-w-2xl mx-auto">
-              Post any task â€” data entry, social media, event support, research, transcription, or traditional opportunities like scholarships and internships.
-            </p>
-          )}
-          <div className="mt-8 flex justify-center gap-4">
+          <>
             <button
               onClick={() => { setViewMode('post'); setEditingPostId(null); }}
               className={`px-8 py-4 rounded-full font-bold transition-all text-lg ${viewMode === 'post' && !editingPostId ? 'bg-white text-gray-900 shadow-md' : 'bg-transparent text-white hover:bg-white/10'}`}
@@ -567,7 +562,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
               <LayoutDashboard className="w-5 h-5 mr-2" />
               Manage Dashboard
             </button>
-          </div>
+          </>
         </div>
       </div>
 
@@ -1414,86 +1409,90 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
       </div>
 
       {/* OTP Verification Modal */}
-      {showOTP && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl transform scale-100 animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Verify Your Email</h3>
-            <p className="text-sm text-gray-600 mb-6">
-              To prevent spam and impersonation, we've sent a 4-digit code to <span className="font-bold">{reporter.email}</span>.
-            </p>
-            <form onSubmit={handleVerifyOTP} className="space-y-4">
-              <div>
-                <label className="block text-sm font-extrabold text-slate-800 mb-2">Enter Access Code</label>
-                <Input
-                  required
-                  type="text"
-                  maxLength={4}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="e.g. 1234"
-                  className="w-full px-5 py-3 rounded-xl border border-gray-200 text-center tracking-[0.5em] font-mono text-xl outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
-                />
-              </div>
-              <div className="flex items-start gap-2 mt-4 pb-2">
-                <input type="checkbox" id="termsPost" required defaultChecked className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
-                <label htmlFor="termsPost" className="text-sm text-gray-600">
-                  I agree to the <Link to="/about#terms" target="_blank" className="text-blue-600 hover:underline font-medium">Terms and Conditions</Link>
-                </label>
-              </div>
-              <div className="flex gap-3 mt-8">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => { setShowOTP(false); setAuthLoading(false); }}
-                  className="flex-1 py-3 h-auto rounded-xl font-bold"
-                  disabled={authLoading}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1 py-3 h-auto rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white"
-                  disabled={authLoading || otp.length < 4}
-                >
-                  {authLoading ? 'Verifying...' : 'Verify & Submit'}
-                </Button>
-              </div>
-            </form>
+      {
+        showOTP && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl transform scale-100 animate-in zoom-in-95 duration-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Verify Your Email</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                To prevent spam and impersonation, we've sent a 4-digit code to <span className="font-bold">{reporter.email}</span>.
+              </p>
+              <form onSubmit={handleVerifyOTP} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2">Enter Access Code</label>
+                  <Input
+                    required
+                    type="text"
+                    maxLength={4}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="e.g. 1234"
+                    className="w-full px-5 py-3 rounded-xl border border-gray-200 text-center tracking-[0.5em] font-mono text-xl outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                  />
+                </div>
+                <div className="flex items-start gap-2 mt-4 pb-2">
+                  <input type="checkbox" id="termsPost" required defaultChecked className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
+                  <label htmlFor="termsPost" className="text-sm text-gray-600">
+                    I agree to the <Link to="/about#terms" target="_blank" className="text-blue-600 hover:underline font-medium">Terms and Conditions</Link>
+                  </label>
+                </div>
+                <div className="flex gap-3 mt-8">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => { setShowOTP(false); setAuthLoading(false); }}
+                    className="flex-1 py-3 h-auto rounded-xl font-bold"
+                    disabled={authLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 py-3 h-auto rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={authLoading || otp.length < 4}
+                  >
+                    {authLoading ? 'Verifying...' : 'Verify & Submit'}
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl transform scale-100 animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+      {
+        showSuccessModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl transform scale-100 animate-in zoom-in-95 duration-200 text-center">
+              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Success!</h3>
+              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+                {editingPostId
+                  ? 'Your edit request was submitted successfully! Please wait for our admins to review and approve the changes.'
+                  : 'Opportunity submitted successfully! Please wait for approval to be posted publicly.'}
+              </p>
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  // If they were editing, maybe optionally reload or navigate
+                  if (editingPostId) window.location.reload();
+                }}
+                className="w-full py-4 text-xl font-bold text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                style={{ backgroundColor: '#0933ed', borderRadius: '10px' }}
+              >
+                Got it, thanks!
+              </button>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">Success!</h3>
-            <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-              {editingPostId
-                ? 'Your edit request was submitted successfully! Please wait for our admins to review and approve the changes.'
-                : 'Opportunity submitted successfully! Please wait for approval to be posted publicly.'}
-            </p>
-            <button
-              onClick={() => {
-                setShowSuccessModal(false);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                // If they were editing, maybe optionally reload or navigate
-                if (editingPostId) window.location.reload();
-              }}
-              className="w-full py-4 text-xl font-bold text-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
-              style={{ backgroundColor: '#0933ed', borderRadius: '10px' }}
-            >
-              Got it, thanks!
-            </button>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
 

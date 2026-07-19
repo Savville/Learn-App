@@ -53,7 +53,7 @@ export function Home() {
       <section className="py-10 bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-center text-gray-500 text-sm font-semibold uppercase tracking-wider mb-6">
-            What kind of work are you looking for?
+            What kind of tasks are you looking for?
           </h2>
           <div className="flex flex-wrap justify-center gap-2">
             {categoryPills.map((pill) => {
@@ -169,6 +169,35 @@ export function Home() {
               <OpportunityCard key={opportunity.id} opportunity={opportunity} />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Companies That Have Posted With Us */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-gray-900 mb-3 font-extrabold tracking-tight text-2xl">Companies That Have Posted With Us</h2>
+          <p className="text-gray-600 mb-10 max-w-xl mx-auto">
+            We work with organizations that value student talent. These companies have posted tasks and opportunities through our platform.
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-12 mb-10">
+            <img
+              src="/images/Safal_Group.jpg"
+              alt="Safal Group"
+              className="h-16 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+            />
+            <img
+              src="/images/hazina.png"
+              alt="Hazina"
+              className="h-16 w-auto object-contain opacity-80 hover:opacity-100 transition-colors grayscale hover:grayscale-0"
+            />
+          </div>
+          <Link
+            to="/post-with-us"
+            className="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors"
+          >
+            Post Your First Task
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 

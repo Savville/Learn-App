@@ -85,14 +85,14 @@ export function Hero() {
 
         {/* Trust Bar */}
         <div className="max-w-4xl mx-auto mb-10">
-          <div className="flex flex-wrap justify-center gap-6 text-blue-200 text-sm font-medium">
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10 text-blue-200 text-sm font-medium">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-              500+ Students Active
+              350+ Students Registered
             </span>
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-              200+ Tasks Posted Weekly
+              10+ Tasks Posted Weekly
             </span>
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
