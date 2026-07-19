@@ -1,6 +1,7 @@
-import { Target, Eye, Heart, Users, Briefcase, Monitor, MapPin, CheckCircle } from 'lucide-react';
+import { Target, Eye, Heart, Users, Briefcase, Monitor, MapPin, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { useSEO } from '../hooks/useSEO';
+import { StructuredData } from '../components/StructuredData';
 
 export function About() {
   const [activeTab, setActiveTab] = useState<'online' | 'onground'>('online');
@@ -10,8 +11,50 @@ export function About() {
     description: 'Opportunities Kenya connects companies with vetted student talent for data annotation, transcription, social media, research, event support and more. Cost-effective, escrow-protected.',
     url: '/about'
   });
+  const faqs = [
+    {
+      question: "What is Opportunities Kenya?",
+      answer: "Opportunities Kenya is an open innovation platform and talent subcontracting hub that connects Kenya's top university students, graduates, and practitioners with corporate challenges, paid gigs, internships, scholarships, and global career opportunities."
+    },
+    {
+      question: "How does the platform work for students?",
+      answer: "Students can browse opportunities, apply to gigs and internships, submit applications for scholarships, collaborate on projects, and receive escrow-protected payments via M-Pesa for completed work."
+    },
+    {
+      question: "How does the platform work for companies?",
+      answer: "Companies can post tasks, describe budgets and deadlines, review student applications within hours, hire the best candidates, and release payments securely via escrow after approval."
+    },
+    {
+      question: "Is payment protected?",
+      answer: "Yes. For gig and subcontracting opportunities, we offer escrow-protected payments. Funds are held securely until the work is approved and delivered. Payments are processed via M-Pesa."
+    },
+    {
+      question: "What services can students offer?",
+      answer: "Students can offer a wide range of services including data entry, data annotation, web scraping, transcription, captioning, blog writing, translation, social media management, research, literature reviews, logo design, web development, customer support, event support, delivery services, and more."
+    },
+    {
+      question: "How do I apply for an opportunity?",
+      answer: "Browse the opportunities page, filter by category, level, and funding type, then click on any opportunity to view details and apply using the provided application link or our internal application form."
+    },
+    {
+      question: "Can international organizations post opportunities?",
+      answer: "Yes. Opportunities Kenya accepts postings from international organizations looking to connect with talented African students and young professionals for remote and on-ground opportunities."
+    },
+    {
+      question: "How do I subscribe to newsletters?",
+      answer: "You can subscribe to our newsletter from the homepage or the contact page. Select your preferred tasking area and study area to receive relevant opportunities directly in your inbox."
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <StructuredData
+        type="faqPage"
+        title="About — Opportunities Kenya"
+        description="Opportunities Kenya connects companies with vetted student talent for data annotation, transcription, social media, research, event support and more."
+        url="https://opportunitieskenya.live/about"
+        faqs={faqs}
+      />
       {/* Hero Section */}
       <div className="bg-[#131ADF] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">

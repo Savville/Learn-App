@@ -17,6 +17,7 @@ import adminRoutes from './routes/admin.js';
 import publicRoutes from './routes/public.js';
 import messageRoutes from './routes/messages.js';
 import portfolioRoutes from './routes/portfolio.js';
+import feedRoutes from './routes/feed.js';
 
 dotenv.config();
 
@@ -68,7 +69,7 @@ app.use(cors({
       'http://localhost:5173',
       'http://localhost:5174'
     ];
-    
+
     // Allow dynamic Vercel preview deployments
     const isVercelPreview = origin && origin.endsWith('.vercel.app');
 
@@ -116,6 +117,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/feed', feedRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {
@@ -130,7 +132,7 @@ app.get('/api/health', (req, res) => {
 // Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Internal Server Error',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });

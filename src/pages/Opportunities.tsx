@@ -6,6 +6,7 @@ import { Search, Filter } from 'lucide-react';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 import { useSEO } from '../hooks/useSEO';
+import { StructuredData } from '../components/StructuredData';
 import {
   type TabId,
   GIG_CATEGORIES,
@@ -124,6 +125,12 @@ export function Opportunities() {
     description: 'Browse scholarships, fellowships, microgigs, internships and more curated for African students and young professionals.',
     url: '/opportunities'
   });
+
+  const breadcrumbs = [
+    { name: 'Home', url: 'https://opportunitieskenya.live' },
+    { name: 'Opportunities', url: 'https://opportunitieskenya.live/opportunities' },
+    { name: currentTab.description },
+  ];
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -289,6 +296,13 @@ export function Opportunities() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <StructuredData
+        type="breadcrumbList"
+        title={`${currentTab.description} — Opportunities Kenya`}
+        description="Browse scholarships, fellowships, microgigs, internships and more curated for African students and young professionals."
+        url="https://opportunitieskenya.live/opportunities"
+        breadcrumbs={breadcrumbs}
+      />
       <div className="bg-[#131ADF]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 

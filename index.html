@@ -1,45 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <link rel="icon" href="/Opportunities Kenya Logo 2.png" />
-      <link rel="apple-touch-icon" href="/Opportunities%20Kenya%20Logo%202.png" />
-      <meta name="theme-color" content="#16a34a" />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link href="https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@700&display=swap" rel="stylesheet" />
-      <title>Opportunities Kenya</title>
-    <meta name="description" content="Discover scholarships, fellowships, internships, grants and more — curated for African students and young professionals." />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/Opportunities Kenya Logo 2.png" />
+  <link rel="apple-touch-icon" href="/Opportunities%20Kenya%20Logo%202.png" />
+  <meta name="theme-color" content="#16a34a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@700&display=swap" rel="stylesheet" />
 
-    <!-- Open Graph (WhatsApp, Facebook, LinkedIn previews) -->
-    <meta property="og:title" content="Opportunities Kenya" />
-    <meta property="og:description" content="Discover scholarships, fellowships, internships, grants and more — curated for African students and young professionals." />
-    <meta property="og:image" content="https://opportunitieskenya.live/Opportunities%20Kenya%20Logo%202.png" />
-    <meta property="og:url" content="https://opportunitieskenya.live" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Opportunities Kenya" />
+  <!-- SEO Meta Tags -->
+  <title>Opportunities Kenya — Find Gigs, Internships, Scholarships & More</title>
+  <meta name="description"
+    content="Discover paid micro-gigs, internships, scholarships, grants, and freelance opportunities for African students and young professionals. Companies source vetted student talent. Escrow-protected payments." />
+  <meta name="keywords"
+    content="opportunities Kenya, gigs, internships, scholarships, grants, freelancing, students, young professionals, Africa, escrow, M-Pesa" />
+  <meta name="author" content="Opportunities Kenya" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://opportunitieskenya.live" />
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Opportunities Kenya" />
-    <meta name="twitter:description" content="Discover scholarships, fellowships, internships, grants and more — curated for African students and young professionals." />
-    <meta name="twitter:image" content="https://opportunitieskenya.live/Opportunities%20Kenya%20Logo%202.png" />
-      
-      <!-- Google Analytics -->
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-EXF3DYCS7N"></script>
-      <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-EXF3DYCS7N');
-      </script>
-    </head>
+  <!-- RSS Feed -->
+  <link rel="alternate" type="application/rss+xml" title="Opportunities Kenya RSS Feed"
+    href="https://opportunitieskenya.live/api/feed" />
 
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+  <!-- Open Graph (WhatsApp, Facebook, LinkedIn previews) -->
+  <meta property="og:title" content="Opportunities Kenya — Find Gigs, Internships, Scholarships & More" />
+  <meta property="og:description"
+    content="Discover paid micro-gigs, internships, scholarships, grants, and freelance opportunities for African students and young professionals. Companies source vetted student talent." />
+  <meta property="og:image" content="https://opportunitieskenya.live/Opportunities%20Kenya%20Logo%202.png" />
+  <meta property="og:url" content="https://opportunitieskenya.live" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Opportunities Kenya" />
+  <meta property="og:locale" content="en_KE" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Opportunities Kenya — Find Gigs, Internships, Scholarships & More" />
+  <meta name="twitter:description"
+    content="Discover paid micro-gigs, internships, scholarships, grants, and freelance opportunities for African students and young professionals." />
+  <meta name="twitter:image" content="https://opportunitieskenya.live/Opportunities%20Kenya%20Logo%202.png" />
+
+  <!-- Google Search Console Verification -->
+  <meta name="google-site-verification" content="[YOUR_VERIFICATION_CODE]" />
+
+  <!-- Meta Pixel Code -->
+  <script>
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () {
+        n.callMethod ?
+        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+      };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+      n.queue = []; n = t = b.createElement(e); n = s = b.getElementsByTagName(e)[0];
+      n.async = !0; s.parentNode.insertBefore(n, s)
+    }(window, document, 'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '[YOUR_PIXEL_ID]');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=[YOUR_PIXEL_ID]&ev=PageView&noscript=1" /></noscript>
+  <!-- End Meta Pixel Code -->
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EXF3DYCS7N"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-EXF3DYCS7N');
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
