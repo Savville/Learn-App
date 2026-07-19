@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, AlertCircle, Info, CheckCircle2, Building2, User, Camera, Plus, Trash2, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { Sparkles, AlertCircle, Info, CheckCircle2, Building2, User, Camera, Plus, Trash2, LayoutDashboard, ShieldCheck, Loader2 } from 'lucide-react';
 import { FormField, ApplicationForm } from '@/data/opportunities';
 import { PosterDashboard } from '@/components/PosterDashboard';
 import {
@@ -63,6 +63,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
     websiteOrSocial: '',
   });
   const [isParsing, setIsParsing] = useState(false);
+  const [parseProgress, setParseProgress] = useState(0);
   const [isPublishing, setIsPublishing] = useState(false);
   const [parsedData, setParsedData] = useState<ParsedOpportunityData | null>(null);
   const [coverImage, setCoverImage] = useState<File | null>(null);
@@ -174,19 +175,41 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
     }, 150);
   };
 
+  // Clean garbled UTF-8 characters from AI responses
+  function cleanText(str: string): string {
+    if (!str) return str;
+    return str
+      .replace(/â€"/g, '"')      // smart quotes
+      .replace(/â€˜/g, "'")      // left single quote
+      .replace(/â€™/g, "'")      // right single quote
+      .replace(/â€œ/g, '"')      // left double quote
+      .replace(/â€/g, '"')      // right double quote
+      .replace(/â€¦/g, '...')    // ellipsis
+      .replace(/â€"/g, '-')      // em dash
+      .replace(/â€“/g, '-')      // en dash
+      .replace(/[^\x20-\x7E\u00A0-\u010F]/g, ''); // remove other non-printable
+  }
+
   const handleParse = async () => {
     if (!reporter.name || !reporter.organization || !reporter.role || !reporter.telephone || !reporter.email) {
       setError('Please provide your full identity details first.');
       return;
     }
     setIsParsing(true);
+    setParseProgress(0);
     setError(null);
     setParsedData(null);
     setPublishedSlug(null);
+
+    // Simulate progress updates while waiting for AI
+    const progressInterval = setInterval(() => {
+      setParseProgress(prev => Math.min(prev + 15, 90));
+    }, 800);
+
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
-      // Use Agnes AI 2.0 Flash for parsing (faster, more reliable)
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout for Agnes AI
+
       const response = await fetch(`${API_BASE}/public/parse-agnes`, {
         method: 'POST',
         headers: {
@@ -196,7 +219,9 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearInterval(progressInterval);
+      setParseProgress(100);
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -204,9 +229,18 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
         throw new Error(msg);
       }
 
-      setParsedData(data);
+      // Clean any garbled UTF-8 characters from AI response
+      const cleanedData: ParsedOpportunityData = {
+        ...data,
+        extractedFeatures: data.extractedFeatures?.map((f: any) => ({
+          ...f,
+          value: cleanText(f.value),
+          feature: cleanText(f.feature),
+        })),
+      };
+      setParsedData(cleanedData);
 
-      if (data.suggestCustomForm) {
+      if (cleanedData.suggestCustomForm) {
         setCustomForm({
           isEnabled: true,
           fields: [
@@ -755,7 +789,12 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                       className="flex-1 rounded-2xl h-14 text-lg font-bold shadow hover:shadow-md transition-shadow"
                       style={{ backgroundColor: '#0933ed', color: '#ffffff' }}
                     >
-                      {isParsing ? 'Extracting...' : 'AI Extract Data'}
+                      {isParsing ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Extracting... {parseProgress}%
+                        </>
+                      ) : 'AI Extract Data'}
                     </Button>
                     <div className="hidden sm:flex items-center justify-center px-4 self-center">
                       <span className="text-gray-400 text-sm font-bold uppercase tracking-widest leading-none">OR</span>
@@ -1083,7 +1122,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                         handleFeatureEdit(idx, 'value', e.target.value)
                                       }
-                                      placeholder="Leave blank or editâ€¦"
+                                      placeholder="Leave blank or edit"
                                     />
                                   )}
                                 </td>
@@ -1110,7 +1149,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                                         size="sm"
                                         className="rounded-lg border-blue-200 text-blue-700 hover:bg-blue-50 bg-blue-50/30"
                                       >
-                                        Use â€œVisit main pageâ€
+                                        Use "Visit main page"
                                       </Button>
                                     )}
                                     {feat.feature === 'Deadline' && !feat.value && (
@@ -1125,7 +1164,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                                         size="sm"
                                         className="rounded-lg border-blue-200 text-blue-700 hover:bg-blue-50 bg-blue-50/30"
                                       >
-                                        Use â€œRollingâ€ template
+                                        Use "Rolling" template
                                       </Button>
                                     )}
                                   </div>
