@@ -1,4 +1,4 @@
-import { Target, Eye, Heart, Users, Briefcase, Monitor, MapPin, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Target, Eye, Heart, Users, Briefcase, Monitor, MapPin, CheckCircle, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { useSEO } from '../hooks/useSEO';
 import { StructuredData } from '../components/StructuredData';
@@ -745,6 +745,34 @@ export function About() {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <section id="faq" className="bg-white rounded-2xl p-8 shadow-sm mb-16 scroll-mt-24">
+          <div className="text-center mb-10">
+            <h2 className="text-gray-900 mb-3 text-3xl font-bold">Frequently Asked Questions</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Everything you need to know about Opportunities Kenya. Can't find what you're looking for?{' '}
+              <a href="mailto:opportunitieskenyalive@gmail.com" className="text-blue-600 underline font-semibold">
+                Contact us
+              </a>
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              { q: "What is Opportunities Kenya?", a: "Opportunities Kenya is an open innovation platform and talent subcontracting hub that connects Kenya's top university students, graduates, and practitioners with corporate challenges, paid gigs, internships, scholarships, and global career opportunities." },
+              { q: "How does the platform work for students?", a: "Students can browse opportunities, apply to gigs and internships, submit applications for scholarships, collaborate on projects, and receive escrow-protected payments via M-Pesa for completed work." },
+              { q: "How does the platform work for companies?", a: "Companies can post tasks, describe budgets and deadlines, review student applications within hours, hire the best candidates, and release payments securely via escrow after approval." },
+              { q: "Is payment protected?", a: "Yes. For gig and subcontracting opportunities, we offer escrow-protected payments. Funds are held securely until the work is approved and delivered. Payments are processed via M-Pesa." },
+              { q: "What services can students offer?", a: "Students can offer a wide range of services including data entry, data annotation, web scraping, transcription, captioning, blog writing, translation, social media management, research, literature reviews, logo design, web development, customer support, event support, delivery services, and more." },
+              { q: "How do I apply for an opportunity?", a: "Browse the opportunities page, filter by category, level, and funding type, then click on any opportunity to view details and apply using the provided application link or our internal application form." },
+              { q: "Can international organizations post opportunities?", a: "Yes. Opportunities Kenya accepts postings from international organizations looking to connect with talented African students and young professionals for remote and on-ground opportunities." },
+              { q: "How do I subscribe to newsletters?", a: "You can subscribe to our newsletter from the homepage. Select your preferred tasking area and study area to receive relevant opportunities directly in your inbox." }
+            ].map((faq, index) => (
+              <FAQItem key={index} question={faq.q} answer={faq.a} />
+            ))}
+          </div>
+        </section>
+
         {/* Terms of Usage */}
         <section id="terms" className="bg-white rounded-2xl p-8 shadow-sm mb-16 scroll-mt-24">
           <h2 className="text-gray-900 mb-6">Terms of Usage</h2>
@@ -795,6 +823,28 @@ export function About() {
           </div>
         </section>
       </div>
+    </div>
+  );
+}
+
+// FAQ Accordion Item Component
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-6 py-4 text-left bg-white hover:bg-gray-50 transition-colors"
+      >
+        <span className="font-semibold text-gray-900 pr-4">{question}</span>
+        <ChevronDown className={`w-5 h-5 text-gray-500 flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      {isOpen && (
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <p className="text-gray-700 leading-relaxed">{answer}</p>
+        </div>
+      )}
     </div>
   );
 }
