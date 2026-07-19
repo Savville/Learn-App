@@ -49,6 +49,26 @@ const categoryBadge = (cat) => {
   return `<span style="background:${c.bg};color:${c.text};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:0.05em;">${cat}</span>`;
 };
 
+// Shared reply CTA button used across email templates
+const replyCTA = () => `
+  <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:18px 20px;margin:24px 0;text-align:center;">
+    <p style="color:#0369a1;font-size:14px;font-weight:700;margin:0 0 8px;font-family:Arial,sans-serif;">Have a question or opportunity to share?</p>
+    <a href="mailto:opportunitieskenyalive@gmail.com" style="
+      display:inline-block;
+      background:#0284c7;
+      color:#ffffff;
+      padding:10px 24px;
+      border-radius:6px;
+      text-decoration:none;
+      font-weight:700;
+      font-size:14px;
+      font-family:Arial,sans-serif;
+    ">Reply to This Email</a>
+    <p style="color:#0ea5e9;font-size:12px;margin:8px 0 0;font-family:Arial,sans-serif;">
+      or email us directly at <a href="mailto:opportunitieskenyalive@gmail.com" style="color:#0284c7;">opportunitieskenyalive@gmail.com</a>
+    </p>
+  </div>`;
+
 const welcomeTemplate = () => wrapEmail(`
   <div style="padding:32px 28px;">
     <h2 style="color:#0f2744;font-size:20px;margin:0 0 12px;">Welcome aboard!</h2>
@@ -73,6 +93,7 @@ const welcomeTemplate = () => wrapEmail(`
         </tr>`).join('')}
     </table>
     ${ctaButton('Browse All Opportunities', `${FRONTEND_URL}/opportunities`)}
+    ${replyCTA()}
   </div>`);
 
 const opportunityCard = (opp) => `
