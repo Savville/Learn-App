@@ -2,7 +2,7 @@ import { Hero } from '../components/Hero';
 import { OpportunityCard } from '../components/OpportunityCard';
 import { Newsletter } from '../components/Newsletter';
 import { opportunities } from '../data/opportunities';
-import { ArrowRight, Briefcase, Monitor, MapPin, Code, PenTool, Headphones, Palette, Megaphone, ClipboardCheck, GraduationCap, Truck, FileText, Search, Building2, Users, HandHeart, Sparkles, Globe, Lightbulb, Calendar, UserCheck, Wallet } from 'lucide-react';
+import { ArrowRight, Briefcase, Monitor, MapPin, Code, PenTool, Headphones, Palette, Megaphone, ClipboardCheck, GraduationCap, Truck, FileText, Search, Building2, Users, HandHeart, Sparkles, Globe, Lightbulb, Calendar, UserCheck, Wallet, UsersRound, Hammer, Shovel, Tent, HardDrive, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
 
@@ -80,18 +80,58 @@ export function Home() {
             })}
           </div>
 
-          {/* CTA Row */}
-          <div className="text-center mt-10">
-            <p className="text-gray-600 mb-4 text-sm">
-              Browse all opportunities or use the filters above to find exactly what you need.
-            </p>
-            <Link
-              to="/opportunities"
-              className="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors"
-            >
-              Browse All Opportunities
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+          {/* Callout: Students Can Also Post */}
+          <div className="mt-10 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-8">
+              <div className="flex items-start gap-4 mb-5">
+                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Students Can Post Too</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    This platform isn't just for browsing. You can also <strong className="text-blue-700">post your own projects and requests</strong> — reach hundreds of students and young professionals instantly.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-6">
+                <div className="flex items-center gap-2.5 text-sm text-gray-700 bg-white rounded-lg px-3 py-2.5 border border-gray-100">
+                  <UsersRound className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>Recruit collaborators for your student project</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-gray-700 bg-white rounded-lg px-3 py-2.5 border border-gray-100">
+                  <Wallet className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>Seek equity contributions for your startup idea</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-gray-700 bg-white rounded-lg px-3 py-2.5 border border-gray-100">
+                  <UserCheck className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>Call for volunteers — events, research, builds</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-gray-700 bg-white rounded-lg px-3 py-2.5 border border-gray-100">
+                  <Hammer className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>Request labour or resources for community projects</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-gray-700 bg-white rounded-lg px-3 py-2.5 border border-gray-100">
+                  <HardDrive className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>Find co-founders or technical partners</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-gray-700 bg-white rounded-lg px-3 py-2.5 border border-gray-100">
+                  <Wrench className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>Offer your own skills and services to others</span>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <Link
+                  to="/post-with-us"
+                  className="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors"
+                >
+                  Post Your Project or Request
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
