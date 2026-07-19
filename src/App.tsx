@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { healthAPI } from './services/api';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -107,6 +108,7 @@ export default function App() {
       <AlertProvider>
         <BrowserRouter>
           <AppContent />
+          <Analytics />
         </BrowserRouter>
       </AlertProvider>
     </ErrorBoundary>
