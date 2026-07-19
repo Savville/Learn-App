@@ -172,7 +172,7 @@ async function checkDarajaStatus(checkoutRequestId, expectedType, db) {
 
   const { querySTKPush } = await import('../services/mpesaService.js');
   const queryRes = await querySTKPush(checkoutRequestId);
-  
+
   if (queryRes.success && queryRes.data) {
     const resultCode = String(queryRes.data.ResultCode);
     if (resultCode === "0") {
@@ -234,10 +234,10 @@ router.post('/upload-image', upload.single('coverImage'), async (req, res) => {
     const base64Image = req.file.buffer.toString('base64');
     const formData = new URLSearchParams();
     formData.append('image', base64Image);
-    
+
     // Using the ImgBB API key
     const IMGBB_API_KEY = process.env.IMGBB_API_KEY || '3c9815af4ede90b33765fe8fa05dcb65';
-    
+
     const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
       method: 'POST',
       body: formData,
@@ -367,6 +367,111 @@ router.post('/parse-opportunity', async (req, res) => {
     res.json(parsedData);
   } catch (error) {
     res.status(500).json({ error: "Failed to parse text", details: error.message });
+  }
+});
+
+// ── Agnes AI 2.0 Flash parsing endpoint (public) ─────────────────────────────
+// Faster, more reliable alternative to Gemini. Uses OpenAI-compatible API.
+router.post('/parse-agnes', async (req, res) => {
+  try {
+    const { rawText } = req.body;
+    if (!rawText) return res.status(400).json({ error: 'rawText is required.' });
+    if (!process.env.OPENAI_API_KEY) return res.status(500).json({ error: 'OPENAI_API_KEY missing.' });
+
+    const openai = (await import('openai')).default || (await import('openai'));
+    const Client = openai.OpenAI || openai;
+    const client = new Client({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL || 'https://apihub.agnes-ai.com/v1'
+    });
+
+    const prompt = `You are an expert data extractor for a student and professional opportunities portal.
+Analyze the following raw text and extract key data points to create an opportunity listing.
+
+Categorize the opportunity into one of these: 'CallForPapers', 'Internship', 'Grant', 'Conference', 'Scholarship', 'Fellowship', 'Attachment', 'Hackathon', 'Event', 'Volunteer', 'Challenge', 'Project', 'StudentProject', 'Gig', 'Job', 'Partnership', 'StartupFunding', 'Other'.
+
+Category guidance:
+- 'Challenge' = open industry brief (inspiration for capstone/research; NOT a poster-submitted student/community project).
+- 'StudentProject' = student-led initiative posted by a student (may seek collaboration or crowdfunding).
+- 'Project' = community initiative posted by an organization or group.
+- 'StartupFunding' = startup grants, seed funding, accelerator programs for ventures.
+- Do NOT use 'Challenge' for student crowdfunding posts.
+
+For missing information like deadlines, if the text says something generic like "End of September", extract that. If the application link is missing, return an empty string "".
+
+Special Rules for Categories:
+- If the category is 'Event', you MUST extract 'Date' and 'Time' as specific features in the extractedFeatures array.
+- If the category is 'Project' or 'StudentProject', you MUST extract 'Timeline' as a feature in the extractedFeatures array. Any other complex project requirements (like daily availability duration) should just be merged nicely into the description.
+- Extract 'Venue' or 'Location' as the 'Location' feature.
+
+Respond ONLY with a valid JSON object using the following structure. Do not include markdown formatting like \`\`\`json.
+
+{
+  "basicInfo": {
+    "title": "...",
+    "provider": "...",
+    "category": "...",
+    "description": "...",
+    "fullDescription": "...",
+    "fundingType": "Fully Funded | Partially Funded | Paid Internship | Unpaid Internship | N/A",
+    "compensationType": "Paid | Stipend | Unpaid | N/A",
+    "upfrontCost": "No Upfront Cost | Has Upfront Cost"
+  },
+  "extractedFeatures": [
+    {
+      "feature": "Application Link",
+      "value": "URL or empty",
+      "importance": "High",
+      "notes": "Critical for applying"
+    },
+    {
+      "feature": "Deadline",
+      "value": "Date or extracted vague string",
+      "importance": "High",
+      "notes": ""
+    },
+    {
+      "feature": "Location",
+      "value": "...",
+      "importance": "Medium",
+      "notes": ""
+    }
+  ],
+  "eligibilityRequirements": ["Requirement 1", "Requirement 2"],
+  "benefits": ["Benefit 1", "Benefit 2"],
+  "thematicAreas": [
+    {
+      "heading": "...",
+      "topics": ["topic 1", "topic 2"]
+    }
+  ],
+  "suggestCustomForm": false
+}
+
+Intelligence Rules for New Fields:
+- compensationType: Use 'Paid' if a salary is mentioned, 'Stipend' for fixed pocket money/allowance, 'Unpaid' if zero payment, and 'N/A' for conferences/events.
+- upfrontCost: Set to 'No Upfront Cost' ONLY if the text explicitly says travel/visa are covered, if it's remote, or if it is local to Kenya with zero fees.
+- If the opportunity is international and doesn't mention airfare/visa coverage, set upfrontCost to 'Has Upfront Cost'.
+- suggestCustomForm: Set to true ONLY IF category is 'Job' or 'Internship' AND there is NO clear external application URL detected in the text. This allows the poster to build an internal form.
+
+Raw Text to analyze:
+"""
+${rawText}
+"""`;
+
+    const response = await client.chat.completions.create({
+      model: 'agnes-2.0-flash',
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
+      temperature: 0.3
+    });
+
+    const responseText = response.choices[0]?.message?.content || '';
+    const cleaned = responseText.replace(/```[\s\S]*?```/g, '').trim();
+    const parsedData = JSON.parse(cleaned);
+    res.json(parsedData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to parse via Agnes AI", details: error.message });
   }
 });
 
@@ -926,9 +1031,9 @@ router.post('/payments/deposit', verifyUserToken, async (req, res) => {
       createdAt: new Date(),
     });
 
-    res.json({ 
+    res.json({
       message: 'STK Push sent to your phone. Enter PIN to complete deposit.',
-      checkoutRequestId: result.data.CheckoutRequestID 
+      checkoutRequestId: result.data.CheckoutRequestID
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -977,9 +1082,9 @@ router.post('/payments/crowdfund', async (req, res) => {
       createdAt: new Date(),
     });
 
-    res.json({ 
+    res.json({
       message: 'STK Push sent to your phone. Enter PIN to contribute.',
-      checkoutRequestId: result.data.CheckoutRequestID 
+      checkoutRequestId: result.data.CheckoutRequestID
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -991,7 +1096,7 @@ router.get('/opportunities/:id/contributors', async (req, res) => {
   try {
     const db = getDB();
     const opportunityId = req.params.id;
-    
+
     const contributors = await db.collection('transactions').aggregate([
       { $match: { opportunityId, type: 'crowdfund', status: 'completed' } },
       { $group: { _id: "$contributorName", amount: { $sum: "$amount" } } },
@@ -1021,7 +1126,7 @@ router.get('/payments/status/:checkoutRequestId', verifyUserToken, async (req, r
   try {
     const db = getDB();
     const tx = await db.collection('transactions').findOne({ checkoutRequestId: req.params.checkoutRequestId });
-    
+
     if (!tx) return res.status(404).json({ error: 'Transaction not found' });
     if (tx.posterEmail !== req.user.email) return res.status(403).json({ error: 'Unauthorized to view this transaction' });
 
@@ -1123,7 +1228,7 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
       opportunityId,
       status: 'approved'
     });
-    
+
     if (!application) {
       return res.status(404).json({ error: 'Approved application not found for this job.' });
     }
@@ -1165,11 +1270,13 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
     // Mark release as requested on the application
     await db.collection('applications').updateOne(
       { _id: new ObjectId(applicationId) },
-      { $set: {
-        escrowReleaseRequested: true,
-        escrowReleaseRequestedAt: new Date(),
-        updatedAt: new Date()
-      }}
+      {
+        $set: {
+          escrowReleaseRequested: true,
+          escrowReleaseRequestedAt: new Date(),
+          updatedAt: new Date()
+        }
+      }
     );
 
     res.json({
@@ -1200,7 +1307,7 @@ router.post('/me/posts/:id/payout-request', verifyUserToken, async (req, res) =>
     const opp = await db.collection('opportunities').findOne({ id });
     const pendingOpp = await db.collection('pending_opportunities').findOne({ 'opportunity.id': id });
     const posterEmail = opp?.reporter?.email || pendingOpp?.reporter?.email;
-    
+
     if (!opp && !pendingOpp) {
       return res.status(404).json({ error: 'Opportunity not found.' });
     }
@@ -1257,9 +1364,9 @@ router.post('/payments/mpesa/b2c/result', async (req, res) => {
     // ResultCode 0 means Success
     if (callbackData.ResultCode === 0) {
       const { ObjectId } = await import('mongodb');
-      
+
       const receiptNo = callbackData.TransactionID;
-      
+
       await db.collection('transactions').updateOne(
         { conversationId },
         { $set: { status: 'completed', receiptNo, completedAt: new Date() } }
@@ -1282,20 +1389,20 @@ router.post('/payments/mpesa/b2c/result', async (req, res) => {
         link: '/applied'
       });
       console.log(`[B2C Payout] Success for ${existingTx.recipientEmail}. Receipt: ${receiptNo}`);
-      
+
     } else {
       // Failed B2C transaction
       await db.collection('transactions').updateOne(
         { conversationId },
         { $set: { status: 'failed', failReason: callbackData.ResultDesc, completedAt: new Date() } }
       );
-      
+
       const { ObjectId } = await import('mongodb');
       await db.collection('applications').updateOne(
         { _id: new ObjectId(existingTx.applicationId) },
         { $set: { escrowReleaseRequested: false, updatedAt: new Date() } } // Reset so they can try again
       );
-      
+
       console.log(`[B2C Payout] Failed for ${existingTx.recipientEmail}: ${callbackData.ResultDesc}`);
     }
 
@@ -1341,10 +1448,10 @@ router.put('/me/notifications/:id/read', verifyUserToken, async (req, res) => {
     const email = req.user.email;
     const { id } = req.params;
     const db = getDB();
-    
+
     // Validate ObjectID if possible, or just string match if it's not ObjectID
     const query = { _id: new (require('mongodb').ObjectId)(id), email: email.toLowerCase() };
-    
+
     await db.collection('notifications').updateOne(query, { $set: { isRead: true } });
     res.json({ success: true });
   } catch (error) {
@@ -1441,12 +1548,12 @@ router.get('/fix-ownership', async (req, res) => {
           { isEscrow: true, 'reporter.email': { $exists: false } }
         ]
       },
-      { 
-        $set: { 
-          'reporter.email': targetEmail, 
-          'reporter.name': 'William', 
-          contactEmail: targetEmail 
-        } 
+      {
+        $set: {
+          'reporter.email': targetEmail,
+          'reporter.name': 'William',
+          contactEmail: targetEmail
+        }
       }
     );
     res.json({ message: 'Success', matched: result.matchedCount, modified: result.modifiedCount });
@@ -1458,17 +1565,19 @@ router.get('/fix-ownership', async (req, res) => {
 router.get('/seed-opportunities', async (req, res) => {
   try {
     const db = getDB();
-    
-    
+
+
     // Delete expired opportunities
     await db.collection('opportunities').deleteMany({
-      id: { $in: [
-        'arice-scholarship-program-2026-27',
-        'london-metropolitan-sanctuary-scholarship-2026',
-        'hamad-bin-khalifa-university-scholarship-2026',
-        'sbw-berlin-scholarship-in-germany-2026',
-        'vice-chancellor-international-excellence-scholarship-2026'
-      ]}
+      id: {
+        $in: [
+          'arice-scholarship-program-2026-27',
+          'london-metropolitan-sanctuary-scholarship-2026',
+          'hamad-bin-khalifa-university-scholarship-2026',
+          'sbw-berlin-scholarship-in-germany-2026',
+          'vice-chancellor-international-excellence-scholarship-2026'
+        ]
+      }
     });
 
     // Wipe out old duplicate Google Internships
@@ -1636,7 +1745,7 @@ router.get('/seed-opportunities', async (req, res) => {
         { upsert: true }
       );
     }
-    
+
     res.json({ message: 'Successfully seeded 6 opportunities. Old Google entries deleted.' });
   } catch (error) {
     res.status(500).json({ error: error.message });

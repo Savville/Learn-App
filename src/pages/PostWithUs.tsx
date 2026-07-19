@@ -186,7 +186,8 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
-      const response = await fetch(`${API_BASE}/public/parse-opportunity`, {
+      // Use Agnes AI 2.0 Flash for parsing (faster, more reliable)
+      const response = await fetch(`${API_BASE}/public/parse-agnes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

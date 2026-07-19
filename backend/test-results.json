@@ -1,0 +1,77 @@
+[
+  {
+    "file": "ADB.txt",
+    "gemini": {
+      "success": false,
+      "title": null,
+      "provider": null,
+      "category": null,
+      "fundingType": null,
+      "description": null,
+      "deadline": null,
+      "applicationLink": null,
+      "error": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent: fetch failed"
+    },
+    "agnes": {
+      "success": true,
+      "title": "ADB Internship Program 2026",
+      "provider": "Asian Development Bank",
+      "category": "Internship",
+      "fundingType": "Paid Internship",
+      "description": "The Asian Development Bank offers a paid international internship for master's or PhD students and r...",
+      "deadline": "March 16, 2026",
+      "applicationLink": "https://adb.taleo.net/careersection/2/jobsearch.ftl?lang=en",
+      "error": null
+    }
+  },
+  {
+    "file": "Afrika Kommiti.txt",
+    "gemini": {
+      "success": false,
+      "title": null,
+      "provider": null,
+      "category": null,
+      "fundingType": null,
+      "description": null,
+      "deadline": null,
+      "applicationLink": null,
+      "error": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent: fetch failed"
+    },
+    "agnes": {
+      "success": true,
+      "title": "2026/2028 AFRIKA KOMMT! Fellowship Programme",
+      "provider": "AFRIKA KOMMT!",
+      "category": "Fellowship",
+      "fundingType": "Paid Internship",
+      "description": "This one-year fellowship connects visionary young African leaders with leading German companies like...",
+      "deadline": "March 22, 2026",
+      "applicationLink": null,
+      "error": null
+    }
+  },
+  {
+    "file": "Australia Awards Scholarships 2027.txt",
+    "gemini": {
+      "success": false,
+      "title": null,
+      "provider": null,
+      "category": null,
+      "fundingType": null,
+      "description": null,
+      "deadline": null,
+      "applicationLink": null,
+      "error": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent: fetch failed"
+    },
+    "agnes": {
+      "success": true,
+      "title": "Australia Awards Scholarships 2027",
+      "provider": "Australian Government",
+      "category": "Scholarship",
+      "fundingType": "Fully Funded",
+      "description": "The Australia Awards Scholarships 2027 is a fully funded program for students from Asia, the Middle ...",
+      "deadline": "April 30, 2026",
+      "applicationLink": null,
+      "error": null
+    }
+  }
+]
