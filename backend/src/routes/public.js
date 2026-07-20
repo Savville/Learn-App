@@ -223,6 +223,32 @@ async function handleSuccessfulPayment(checkoutRequestId, db, resultDesc) {
         { $set: { status: 'approved', escrowFunded: true, updatedAt: new Date() } }
       );
     }
+
+    // âš¡ NEW: Notify applicant that escrow is funded
+    if (tx.opportunityId && tx.posterEmail) {
+      try {
+        const opp = await db.collection('opportunities').findOne({ id: tx.opportunityId });
+        const conversations = await db.collection('conversations').find({
+          opportunityId: tx.opportunityId,
+          posterEmail: tx.posterEmail
+        }).toArray();
+        const latestConv = conversations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+
+        if (latestConv) {
+          const applicantEmail = latestConv.applicantEmail;
+          const applicantName = latestConv.applicantName || 'Applicant';
+          await sendEscrowFundedEmail({
+            to: applicantEmail,
+            applicantName,
+            opportunityTitle: opp?.title || 'the opportunity',
+            amount: tx.amount,
+          });
+          console.log(`[ESCROW] Notification sent to ${applicantEmail} for ${tx.opportunityId}`);
+        }
+      } catch (notifErr) {
+        console.error('[ESCROW] Failed to send notification:', notifErr.message);
+      }
+    }
   }
 }
 
