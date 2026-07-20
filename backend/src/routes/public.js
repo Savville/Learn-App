@@ -1028,6 +1028,9 @@ router.post('/payments/deposit', verifyUserToken, async (req, res) => {
       checkoutRequestId: result.data.CheckoutRequestID,
       status: 'pending',
       type: 'escrow',
+      callbackRetryCount: 0,
+      lastCallbackAttempt: null,
+      callbackPayloadLog: [],
       createdAt: new Date(),
     });
 
@@ -1079,6 +1082,9 @@ router.post('/payments/crowdfund', async (req, res) => {
       checkoutRequestId: result.data.CheckoutRequestID,
       status: 'pending',
       type: 'crowdfund',
+      callbackRetryCount: 0,
+      lastCallbackAttempt: null,
+      callbackPayloadLog: [],
       createdAt: new Date(),
     });
 
@@ -1182,11 +1188,31 @@ router.post('/payments/mpesa/callback', async (req, res) => {
       await handleSuccessfulPayment(checkoutRequestId, db, 'Completed via Webhook');
     } else {
       // Payment Failed or User Cancelled
+      const retryCount = (existingTx.callbackRetryCount || 0) + 1;
       await db.collection('transactions').updateOne(
         { checkoutRequestId },
-        { $set: { status: 'failed', failReason: callbackData.ResultDesc, completedAt: new Date() } }
+        {
+          $set: {
+            status: 'failed',
+            failReason: callbackData.ResultDesc,
+            completedAt: new Date(),
+            callbackRetryCount: retryCount,
+            lastCallbackAttempt: new Date(),
+          },
+          $push: {
+            callbackPayloadLog: {
+              $each: [{
+                timestamp: new Date(),
+                resultCode: callbackData.ResultCode,
+                resultDesc: callbackData.ResultDesc,
+                fullPayload: JSON.parse(JSON.stringify(callbackData)).substring(0, 2000)
+              }],
+              $slice: -50 // Keep last 50 payloads
+            }
+          }
+        }
       );
-      console.log(`[M-PESA] Payment failed for ${checkoutRequestId}: ${callbackData.ResultDesc}`);
+      console.log(`[M-PESA] Payment failed for ${checkoutRequestId}: ${callbackData.ResultDesc} (retry #${retryCount})`);
     }
 
     res.status(200).send('Webhook Processed');
@@ -1753,6 +1779,32 @@ router.get('/seed-opportunities', async (req, res) => {
 });
 
 export default router;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN DEBUG: M-PESA Payment Callback Diagnostics
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/admin/payments/debug', async (req, res) => {
+  try {
+    const db = getDB();
+    const pendingTransactions = await db.collection('transactions')
+      .find({ status: 'pending' }).sort({ createdAt: -1 }).toArray();
+    const failedTransactions = await db.collection('transactions')
+      .find({ status: 'failed' }).sort({ completedAt: -1 }).toArray();
+    const transactionsWithLogs = await db.collection('transactions')
+      .find({ callbackPayloadLog: { $exists: true, $ne: [] } })
+      .project({ callbackPayloadLog: 1, checkoutRequestId: 1, status: 1, type: 1, callbackRetryCount: 1, lastCallbackAttempt: 1, failReason: 1, createdAt: 1 }).toArray();
+    res.json({
+      pendingCount: pendingTransactions.length,
+      pending: pendingTransactions.map(t => ({ checkoutRequestId: t.checkoutRequestId, type: t.type, amount: t.amount, phone: t.phone || t.contributorPhone, callbackRetryCount: t.callbackRetryCount || 0, lastCallbackAttempt: t.lastCallbackAttempt, createdAt: t.createdAt })),
+      failedCount: failedTransactions.length,
+      failed: failedTransactions.slice(0, 50).map(t => ({ checkoutRequestId: t.checkoutRequestId, type: t.type, amount: t.amount, failReason: t.failReason, callbackRetryCount: t.callbackRetryCount || 0, lastCallbackAttempt: t.lastCallbackAttempt, completedAt: t.completedAt })),
+      payloadLogs: transactionsWithLogs.map(t => ({ checkoutRequestId: t.checkoutRequestId, type: t.type, status: t.status, callbackRetryCount: t.callbackRetryCount || 0, lastCallbackAttempt: t.lastCallbackAttempt, failReason: t.failReason, payloadCount: t.callbackPayloadLog?.length || 0, lastPayload: t.callbackPayloadLog?.[t.callbackPayloadLog.length - 1] }))
+    });
+  } catch (error) {
+    console.error('Payments debug error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // =========================================================
 // ESCROW FUNDED NOTIFICATION — POST /api/public/escrow-funded
