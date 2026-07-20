@@ -27,6 +27,8 @@ export default function AdminDashboard() {
   const [txStats, setTxStats] = useState<any[]>([]);
   const [txTypeBreakdown, setTxTypeBreakdown] = useState<any[]>([]);
   const [txPagination, setTxPagination] = useState<any>(null);
+  const [txRevenue, setTxRevenue] = useState<any>(null);
+  const [txCallbackDiag, setTxCallbackDiag] = useState<any>(null);
   const [txFilter, setTxFilter] = useState<{ type: string; status: string }>({ type: '', status: '' });
   const [txLoading, setTxLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats' | 'ledger' | 'transactions'>('opps');
@@ -141,6 +143,8 @@ export default function AdminDashboard() {
         setTxStats(txData.stats || []);
         setTxTypeBreakdown(txData.typeBreakdown || []);
         setTxPagination(txData.pagination || null);
+        setTxRevenue(txData.revenue || null);
+        setTxCallbackDiag(txData.callbackDiagnostics || null);
       }
     } catch (e) {
       console.error(e);
@@ -2036,17 +2040,63 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* Type Breakdown */}
-            {txTypeBreakdown.length > 0 && (
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <p className="text-xs font-bold uppercase text-slate-500 mb-2">By Type</p>
-                <div className="flex flex-wrap gap-3">
-                  {txTypeBreakdown.map((t: any) => (
-                    <Badge key={t.type} variant="outline" className="bg-white text-slate-700 border-slate-300">
-                      {t.type}: {t.count} (KES {t.totalAmount?.toLocaleString() || 0})
-                    </Badge>
-                  ))}
-                </div>
+            {/* Revenue Summary */}
+            {txRevenue && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="border-green-200 bg-green-50/50 shadow-sm">
+                  <CardContent className="p-4">
+                    <p className="text-xs uppercase font-semibold text-green-700">Escrow Gross</p>
+                    <p className="text-xl font-bold text-green-800">KES {Number(txRevenue.escrowGross || 0).toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-blue-200 bg-blue-50/50 shadow-sm">
+                  <CardContent className="p-4">
+                    <p className="text-xs uppercase font-semibold text-blue-700">Platform Fee (5%)</p>
+                    <p className="text-xl font-bold text-blue-800">KES {txRevenue.platformFeeEarned?.toLocaleString() || 0}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-orange-200 bg-orange-50/50 shadow-sm">
+                  <CardContent className="p-4">
+                    <p className="text-xs uppercase font-semibold text-orange-700">M-PESA Fees (2%)</p>
+                    <p className="text-xl font-bold text-orange-800">KES {txRevenue.mpesaFeesPaid?.toLocaleString() || 0}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-emerald-200 bg-emerald-50/50 shadow-sm">
+                  <CardContent className="p-4">
+                    <p className="text-xs uppercase font-semibold text-emerald-700">Net Revenue</p>
+                    <p className="text-xl font-bold text-emerald-800">KES {txRevenue.netRevenue?.toLocaleString() || 0}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Callback Diagnostics */}
+            {txCallbackDiag && (txCallbackDiag.pendingCount > 0 || txCallbackDiag.failedByType?.length > 0) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="border-amber-200 bg-amber-50/50 shadow-sm">
+                  <CardContent className="p-4">
+                    <p className="text-xs uppercase font-semibold text-amber-700 mb-2">Pending Transactions</p>
+                    <p className="text-2xl font-bold text-amber-900">{txCallbackDiag.pendingCount}</p>
+                    {txCallbackDiag.pendingWithPriorCallbacks > 0 && (
+                      <p className="text-xs text-amber-600 mt-1">{txCallbackDiag.pendingWithPriorCallbacks} with prior callback attempts</p>
+                    )}
+                  </CardContent>
+                </Card>
+                {txCallbackDiag.failedByType?.length > 0 && (
+                  <Card className="border-red-200 bg-red-50/50 shadow-sm">
+                    <CardContent className="p-4">
+                      <p className="text-xs uppercase font-semibold text-red-700 mb-2">Failed by Type</p>
+                      <div className="space-y-1">
+                        {txCallbackDiag.failedByType.map((f: any) => (
+                          <div key={f.type} className="flex justify-between text-sm">
+                            <span className="text-red-800">{f.type}</span>
+                            <span className="font-bold text-red-900">{f.count} failed</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             )}
 
