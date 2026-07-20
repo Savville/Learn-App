@@ -1428,15 +1428,12 @@ router.get('/transactions', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
     const { type, status, limit: limitStr } = req.query;
-    // Default to 200 transactions, but allow fetching all with limit=0 or very high
     const limit = limitStr && parseInt(limitStr) > 0 ? parseInt(limitStr) : 200;
 
-    // Build query filter
     const query = {};
     if (type && type !== 'all') query.type = type;
     if (status && status !== 'all') query.status = status;
 
-    // Build sort: newest first
     const sort = { createdAt: -1 };
 
     const transactions = await db.collection('transactions')
@@ -1445,10 +1442,9 @@ router.get('/transactions', verifyAdminKey, async (req, res) => {
       .limit(limit)
       .toArray();
 
-    // Get total count (unfiltered)
     const totalCount = await db.collection('transactions').countDocuments();
 
-    // Aggregate stats (by status)
+    // Status stats
     const stats = await db.collection('transactions').aggregate([
       { $match: query },
       { $group: { _id: "$status", count: { $sum: 1 }, totalAmount: { $sum: { $toDouble: "$amount" } } } },
@@ -1464,11 +1460,73 @@ router.get('/transactions', verifyAdminKey, async (req, res) => {
       { $sort: { count: -1 } }
     ]).toArray();
 
+    // âš¡ NEW: Platform revenue summary (5% platform fee on completed escrow + payout txns)
+    const revenueStats = await db.collection('transactions').aggregate([
+      { $match: { ...query, status: 'completed' } },
+      {
+        $group: {
+          _id: { type: "$type" },
+          grossAmount: { $sum: { $toDouble: "$amount" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $project: { _id: 0, type: "$_id.type", grossAmount: { $round: ["$grossAmount", 2] }, count: 1 } }
+    ]).toArray();
+
+    // Compute platform fees
+    const escrowCompleted = revenueStats.find(r => r.type === 'escrow');
+    const payoutCompleted = revenueStats.find(r => r.type === 'payout');
+    const platformFeeRate = 0.05;
+    const mpesaFeeRate = 0.02;
+
+    const escrowGross = escrowCompleted?.grossAmount || 0;
+    const platformFeeEarned = Math.round(escrowGross * platformFeeRate);
+    const mpesaFeesPaid = Math.round((escrowGross - platformFeeEarned) * mpesaFeeRate);
+    const netRevenue = platformFeeEarned - mpesaFeesPaid;
+
+    // âš¡ NEW: Callback diagnostics (failed transactions with retry info)
+    const failedTxs = await db.collection('transactions').aggregate([
+      { $match: { ...query, status: 'failed' } },
+      {
+        $group: {
+          _id: "$type",
+          count: { $sum: 1 },
+          maxRetries: { $max: { $ifNull: ["$callbackRetryCount", 0] } },
+          avgRetries: { $avg: { $ifNull: ["$callbackRetryCount", 0] } }
+        }
+      },
+      { $project: { _id: 0, type: "$_id", count: 1, maxRetries: 1, avgRetries: { $round: ["$avgRetries", 1] } } }
+    ]).toArray();
+
+    // âš¡ NEW: Pending transactions awaiting callback
+    const pendingCount = await db.collection('transactions').countDocuments({
+      ...query,
+      status: 'pending'
+    });
+
+    const pendingWithCallbacks = await db.collection('transactions').countDocuments({
+      ...query,
+      status: 'pending',
+      callbackRetryCount: { $gt: 0 }
+    });
+
     res.json({
       transactions,
       pagination: { total: totalCount, returned: transactions.length, limit },
       stats,
-      typeBreakdown
+      typeBreakdown,
+      revenue: {
+        escrowGross: escrowGross,
+        platformFeeEarned,
+        mpesaFeesPaid,
+        netRevenue,
+        breakdown: revenueStats
+      },
+      callbackDiagnostics: {
+        failedByType: failedTxs,
+        pendingCount,
+        pendingWithPriorCallbacks: pendingWithCallbacks
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
