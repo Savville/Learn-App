@@ -1,5 +1,5 @@
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { useEffect, useState, type JSX, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useState, useRef, type JSX, type FormEvent, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -191,6 +191,7 @@ export function OpportunityDetails() {
   const [contributeAmount, setContributeAmount] = useState('');
   const [contributePhone, setContributePhone] = useState('');
   const [isContributing, setIsContributing] = useState(false);
+  const lastContributionTime = useRef(0);
   const [contributeError, setContributeError] = useState<string | null>(null);
   const [contributeSuccess, setContributeSuccess] = useState(false);
   const [pendingCheckoutId, setPendingCheckoutId] = useState<string | null>(null);
@@ -263,6 +264,14 @@ export function OpportunityDetails() {
   const handleContributeSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!opportunity) return;
+
+    // Debounce: prevent duplicate STK pushes within 3 seconds
+    const now = Date.now();
+    if (now - lastContributionTime.current < 3000) {
+      setContributeError('Please wait a moment before trying again. Duplicate submissions are prevented.');
+      return;
+    }
+    lastContributionTime.current = now;
 
     setIsContributing(true);
     setContributeError(null);
@@ -599,10 +608,10 @@ export function OpportunityDetails() {
                     }
                     return opportunity.projectProposalUrl || null;
                   };
-                  
+
                   const proposalUrl = getProposalUrl(opportunity.title);
                   if (!proposalUrl) return null;
-                  
+
                   return (
                     <div className="mt-4">
                       <a
@@ -657,13 +666,13 @@ export function OpportunityDetails() {
             <div className={`grid grid-cols-1 gap-4 mb-8 ${opportunity.compensationType && opportunity.compensationType !== 'N/A' ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
               {opportunity.compensationType && opportunity.compensationType !== 'N/A' && (
                 <div className={`p-4 rounded-xl border flex flex-col justify-center ${opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend' || opportunity.compensationType === 'Equity'
-                    ? 'bg-blue-50 border-blue-100'
-                    : 'bg-slate-50 border-slate-200'
+                  ? 'bg-blue-50 border-blue-100'
+                  : 'bg-slate-50 border-slate-200'
                   }`}>
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Compensation</p>
                   <p className={`text-lg font-bold ${opportunity.compensationType === 'Paid' || opportunity.compensationType === 'Stipend' || opportunity.compensationType === 'Equity'
-                      ? 'text-blue-700'
-                      : 'text-slate-700'
+                    ? 'text-blue-700'
+                    : 'text-slate-700'
                     }`}>
                     {opportunity.compensationType}
                   </p>
@@ -672,14 +681,14 @@ export function OpportunityDetails() {
 
               {!isProjectCategory(opportunity.category) && (
                 <div className={`p-4 rounded-xl border flex flex-col justify-center ${opportunity.upfrontCost === 'Has Upfront Cost'
-                    ? 'bg-amber-50 border-amber-100'
-                    : 'bg-green-50 border-green-100'
+                  ? 'bg-amber-50 border-amber-100'
+                  : 'bg-green-50 border-green-100'
                   }`}>
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Application Cost</p>
                   <div className="flex items-center gap-2">
                     <p className={`text-lg font-bold ${opportunity.upfrontCost === 'Has Upfront Cost'
-                        ? 'text-amber-700'
-                        : 'text-green-700'
+                      ? 'text-amber-700'
+                      : 'text-green-700'
                       }`}>
                       {opportunity.upfrontCost}
                     </p>
