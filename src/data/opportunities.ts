@@ -15,6 +15,18 @@ export interface ApplicationForm {
   fields: FormField[];
 }
 
+export interface VerificationAudit {
+  reviewedAt?: string;
+  reviewedBy?: string;
+  proofLinks?: string[];
+}
+
+export interface InstitutionalEndorsement {
+  institutionName?: string;
+  contactTitle?: string;
+  evidenceUrl?: string;
+}
+
 export interface Opportunity {
   id: string;
   title: string;
@@ -51,6 +63,11 @@ export interface Opportunity {
   isVerified?: boolean;
   status?: 'Unverified' | 'Verified' | 'Rejected';
   applicationForm?: ApplicationForm;
+  verificationAudit?: VerificationAudit;
+  projectProposalUrl?: string;
+  institutionalEndorsement?: InstitutionalEndorsement;
+  funderRecognition?: string;
+  thematicAreas?: { heading: string; topics: string[] }[];
 }
 
 export const opportunities: Opportunity[] = [
