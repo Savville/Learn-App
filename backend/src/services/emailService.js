@@ -318,23 +318,44 @@ export async function sendNewOpportunityEmail(subscribers, opportunity) {
   }
 }
 
-export async function sendDigestEmail(emails, opportunities) {
-  const results = { success: 0, failed: 0 };
-  for (const email of emails) {
-    try {
-      await sendEmail({
-        to: email,
-        subject: `${opportunities.length} New Opportunities on Opportunities Kenya`,
-        html: digestTemplate(opportunities),
-      });
-      results.success++;
-      await new Promise(r => setTimeout(r, 100));
-    } catch (error) {
-      console.error(`Digest failed for ${email}:`, error.message);
-      results.failed++;
+/**
+ * Send digest emails in staggered batches to avoid rate limits.
+ * Each batch of BATCH_SIZE emails is sent with a small delay between batches.
+ * @param {string[]} emails - Array of subscriber email addresses
+ * @param {object} opportunities - Opportunity data for the email template
+ * @param {object} opts - Optional config { batchSize, batchDelayMs }
+ */
+export async function sendDigestEmail(emails, opportunities, opts = {}) {
+  const { batchSize = 25, batchDelayMs = 2000 } = opts;
+  const results = { success: 0, failed: 0, batches: 0 };
+  const batches = [];
+  for (let i = 0; i < emails.length; i += batchSize) {
+    batches.push(emails.slice(i, i + batchSize));
+  }
+  for (let b = 0; b < batches.length; b++) {
+    const batch = batches[b];
+    const batchNum = b + 1;
+    console.log(`[Digest] Sending batch ${batchNum}/${batches.length} (${batch.length} emails)`);
+    await Promise.all(batch.map(async (email) => {
+      try {
+        await sendEmail({
+          to: email,
+          subject: `${opportunities.length} New Opportunities on Opportunities Kenya`,
+          html: digestTemplate(opportunities),
+        });
+        results.success++;
+      } catch (error) {
+        console.error(`Digest failed for ${email}:`, error.message);
+        results.failed++;
+      }
+    }));
+    results.batches = batches.length;
+    // Stagger delay between batches (skip after last batch)
+    if (b < batches.length - 1) {
+      await new Promise(r => setTimeout(r, batchDelayMs));
     }
   }
-  console.log(`Digest: ${results.success} sent, ${results.failed} failed`);
+  console.log(`Digest: ${results.success} sent, ${results.failed} failed across ${results.batches} batches`);
   return results;
 }
 
@@ -619,19 +640,34 @@ const seangapoTemplate = () => wrapEmail(`
 
   </div>`);
 
-export async function sendBroadcastEmail(emails, subject, html) {
-  const results = { success: 0, failed: 0 };
-  for (const email of emails) {
-    try {
-      await sendEmail({ to: email, subject, html });
-      results.success++;
-      await new Promise(r => setTimeout(r, 200));
-    } catch (error) {
-      console.error(`Broadcast failed for ${email}:`, error.message);
-      results.failed++;
+/**
+ * Send broadcast emails in staggered batches.
+ */
+export async function sendBroadcastEmail(emails, subject, html, opts = {}) {
+  const { batchSize = 50, batchDelayMs = 1500 } = opts;
+  const results = { success: 0, failed: 0, batches: 0 };
+  const batches = [];
+  for (let i = 0; i < emails.length; i += batchSize) {
+    batches.push(emails.slice(i, i + batchSize));
+  }
+  for (let b = 0; b < batches.length; b++) {
+    const batch = batches[b];
+    console.log(`[Broadcast] Sending batch ${b + 1}/${batches.length} (${batch.length} emails)`);
+    await Promise.all(batch.map(async (email) => {
+      try {
+        await sendEmail({ to: email, subject, html });
+        results.success++;
+      } catch (error) {
+        console.error(`Broadcast failed for ${email}:`, error.message);
+        results.failed++;
+      }
+    }));
+    if (b < batches.length - 1) {
+      await new Promise(r => setTimeout(r, batchDelayMs));
     }
   }
-  console.log(`Broadcast: ${results.success} sent, ${results.failed} failed`);
+  results.batches = batches.length;
+  console.log(`Broadcast: ${results.success} sent, ${results.failed} failed across ${results.batches} batches`);
   return results;
 }
 
