@@ -20,7 +20,7 @@ const applyAutoCensor = (text) => {
 router.get('/upload-signature', async (req, res) => {
   try {
     const timestamp = Math.round(new Date().getTime() / 1000);
-    
+
     // Check if Cloudinary is configured
     if (!process.env.CLOUDINARY_API_SECRET) {
       return res.status(500).json({ error: 'Cloudinary is not configured on the server.' });
@@ -30,7 +30,7 @@ router.get('/upload-signature', async (req, res) => {
       { timestamp: timestamp },
       process.env.CLOUDINARY_API_SECRET
     );
-    
+
     res.json({
       signature,
       timestamp,
@@ -44,18 +44,26 @@ router.get('/upload-signature', async (req, res) => {
 });
 
 // GET /api/messages/:conversationId
-// Get messages for a specific conversation
+// Get messages for a specific conversation (paginated, max 100 per page)
 router.get('/:conversationId', async (req, res) => {
   try {
     const db = getDB();
     const { conversationId } = req.params;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+    const skip = (page - 1) * limit;
 
     const messages = await db.collection('messages')
       .find({ conversationId: new ObjectId(conversationId) })
       .sort({ createdAt: 1 })
+      .skip(skip)
+      .limit(limit)
       .toArray();
 
-    res.json(messages);
+    const total = await db.collection('messages')
+      .countDocuments({ conversationId: new ObjectId(conversationId) });
+
+    res.json({ data: messages, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
     console.error('Error fetching messages:', error);
     res.status(500).json({ error: 'Failed to fetch messages' });
@@ -63,26 +71,34 @@ router.get('/:conversationId', async (req, res) => {
 });
 
 // GET /api/messages/user/:email
-// Get all conversations for a specific user
+// Get all conversations for a specific user (paginated, max 50 per page)
 router.get('/user/:email', async (req, res) => {
   try {
     const db = getDB();
     const { email } = req.params;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
 
     const conversations = await db.collection('conversations')
       .find({ participants: email })
       .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .toArray();
+
+    const total = await db.collection('conversations')
+      .countDocuments({ participants: email });
 
     // Fetch basic gig details to display in the inbox list
     const enrichedConversations = await Promise.all(
       conversations.map(async (conv) => {
-        const query = (typeof conv.gigId === 'string') 
-          ? { id: conv.gigId } 
+        const query = (typeof conv.gigId === 'string')
+          ? { id: conv.gigId }
           : { _id: conv.gigId };
-        
+
         const gig = await db.collection('opportunities').findOne(query);
-        
+
         let status = conv.status;
         if (gig && (gig.category === 'Partnership' || gig.compensationType === 'Equity')) {
           status = 'partnership';
@@ -98,7 +114,7 @@ router.get('/user/:email', async (req, res) => {
       })
     );
 
-    res.json(enrichedConversations);
+    res.json({ data: enrichedConversations, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
     console.error('Error fetching user conversations:', error);
     res.status(500).json({ error: 'Failed to fetch conversations' });
@@ -119,7 +135,7 @@ router.post('/', async (req, res) => {
     // Look up the gig to double check its type
     const gigQuery = (typeof gigId === 'string' && gigId.length !== 24) ? { id: gigId } : { _id: new ObjectId(gigId) };
     const gig = await db.collection('opportunities').findOne(gigQuery);
-    
+
     // Force partnership mode if gig is Partnership or Equity
     const isActuallyPartnership = isPartnership || (gig && (gig.category === 'Partnership' || gig.compensationType === 'Equity'));
 
@@ -153,7 +169,7 @@ router.post('/', async (req, res) => {
     };
 
     await db.collection('messages').insertOne(newMessage);
-    
+
     // Update the conversation's updatedAt
     await db.collection('conversations').updateOne(
       { _id: convId },
@@ -193,8 +209,8 @@ router.put('/:id', async (req, res) => {
 
     await db.collection('messages').updateOne(
       { _id: new ObjectId(id) },
-      { 
-        $set: { 
+      {
+        $set: {
           content: censoredContent,
           originalContent: content,
           isEdited: true,
@@ -267,7 +283,7 @@ router.post('/:conversationId/hire', async (req, res) => {
     const db = getDB();
     const { conversationId } = req.params;
     const { employerPhone, amount = 1 } = req.body;
-    
+
     // Integrate with MPesa to fund the escrow.
     if (employerPhone) {
       // Amount is hardcoded or received from body. For now, testing with passing an amount.
@@ -337,16 +353,16 @@ router.post('/:conversationId/dispute', async (req, res) => {
     const db = getDB();
     const { conversationId } = req.params;
     const { reason, initiatorEmail } = req.body;
-    
+
     await db.collection('conversations').updateOne(
       { _id: new ObjectId(conversationId) },
-      { 
-        $set: { 
-          status: 'disputed', 
+      {
+        $set: {
+          status: 'disputed',
           disputeReason: reason,
           disputeInitiator: initiatorEmail,
-          updatedAt: new Date() 
-        } 
+          updatedAt: new Date()
+        }
       }
     );
     res.json({ success: true, message: 'Dispute opened. Admin will review the case.' });
@@ -363,12 +379,12 @@ router.post('/:conversationId/report', async (req, res) => {
     const db = getDB();
     const { conversationId } = req.params;
     const { reason, details, reporterEmail } = req.body;
-    
+
     const conv = await db.collection('conversations').findOne({ _id: new ObjectId(conversationId) });
     if (!conv) {
       return res.status(404).json({ error: 'Conversation not found' });
     }
-    
+
     const reportedUser = conv.participants.find(p => p !== reporterEmail);
 
     await db.collection('user_reports').insertOne({
@@ -395,12 +411,12 @@ router.post('/:conversationId/mute', async (req, res) => {
     const db = getDB();
     const { conversationId } = req.params;
     const { email } = req.body; // User who is muting
-    
+
     await db.collection('conversations').updateOne(
       { _id: new ObjectId(conversationId) },
       { $addToSet: { mutedBy: email } }
     );
-    
+
     res.json({ success: true, message: 'Conversation muted.' });
   } catch (error) {
     console.error('Error muting conversation:', error);

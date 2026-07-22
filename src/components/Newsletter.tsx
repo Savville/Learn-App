@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { subscribersAPI } from '../services/api';
 
 // Tasking areas — displayed as multi-select chips (6 per row on desktop)
+// Deduplicated: removed duplicates that appeared at indices 38-51 from the original list
 const TASKING_AREAS = [
   'Data Entry', 'Transcription', 'Social Media', 'Content Writing',
   'Research', 'Graphic Design', 'Web Development', 'Bug Testing / QA',
@@ -15,10 +16,7 @@ const TASKING_AREAS = [
   'Competitor Analysis', 'Survey Design', 'Logo Design', 'Flyer & Poster Design',
   'Social Media Graphics', 'Presentation Design', 'Excel Automation', 'WordPress Setup',
   'Live Chat Support', 'Email Support', 'Appointment Scheduling', 'Package Delivery',
-  'Grocery Shopping', 'Inventory Counting', 'Hostel Scouting', 'Property Photography',
-  'Facility Inspection', 'Brand Ambassador', 'Flyer Distribution', 'Product Sampling',
-  'Street Marketing', 'Shop Assistant', 'Sales Agent', 'Price Tagging',
-  'Campus Ambassador', 'Student Recruiter', 'Orientation Guide',
+  'Grocery Shopping', 'Inventory Counting', 'Facility Inspection', 'Street Marketing',
 ];
 
 // Study areas — displayed as a multi-column dropdown
@@ -120,7 +118,7 @@ export function Newsletter() {
                 <span className="text-white/60 text-sm ml-2">(select all that apply)</span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {TASKING_AREAS.map((task) => {
+                {[...new Set(TASKING_AREAS)].map((task) => {
                   const isSelected = selectedTasks.includes(task);
                   return (
                     <button
@@ -128,8 +126,8 @@ export function Newsletter() {
                       type="button"
                       onClick={() => toggleTask(task)}
                       className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${isSelected
-                          ? 'bg-white text-blue-700 border-white shadow-md'
-                          : 'bg-white/10 text-white/80 border-white/30 hover:bg-white/20 hover:text-white'
+                        ? 'bg-white text-blue-700 border-white shadow-md'
+                        : 'bg-white/10 text-white/80 border-white/30 hover:bg-white/20 hover:text-white'
                         }`}
                     >
                       {isSelected && '✓ '}{task}
@@ -171,8 +169,8 @@ export function Newsletter() {
                           <label
                             key={area}
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm font-medium transition-colors ${isSelected
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'text-gray-700 hover:bg-gray-50'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'text-gray-700 hover:bg-gray-50'
                               }`}
                           >
                             <input
@@ -274,8 +272,8 @@ export function Newsletter() {
                 type="submit"
                 disabled={loading || totalSelections === 0}
                 className={`px-10 py-4 rounded-xl transition-all font-bold tracking-wide text-lg border-2 ${totalSelections === 0
-                    ? 'bg-white/30 text-white/60 cursor-not-allowed border-transparent'
-                    : 'bg-white text-blue-700 shadow-md hover:bg-gray-100 hover:shadow-xl border-white'
+                  ? 'bg-white/30 text-white/60 cursor-not-allowed border-transparent'
+                  : 'bg-white text-blue-700 shadow-md hover:bg-gray-100 hover:shadow-xl border-white'
                   } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 {loading ? 'Subscribing...' : 'Subscribe'}

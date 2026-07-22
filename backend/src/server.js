@@ -39,7 +39,9 @@ app.use(helmet());
 // Gzip compression
 app.use(compression());
 
-// Rate limiting — 1000 requests per IP per 15 min (global)
+// ── Rate Limiting ────────────────────────────────────────────────────────────
+
+// Global: 1000 requests per IP per 15 min
 app.use('/api/', rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
@@ -47,6 +49,29 @@ app.use('/api/', rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many requests. Please slow down.' }
 }));
+
+// STRICHER: Payment endpoints — max 10 requests per IP per 1 min (prevents STK spam)
+const paymentLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many payment requests. Please wait 1 minute before trying again.' },
+  skipSuccessfulRequests: false,
+});
+app.use('/api/public/payments/deposit', paymentLimiter);
+app.use('/api/public/payments/crowdfund', paymentLimiter);
+
+// STRICHER: Parse endpoint — max 15 requests per IP per 1 min (stays within Agnes AI 20 RPM free tier)
+const parseLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Parsing requests limited. Please wait before submitting another opportunity.' },
+  skipSuccessfulRequests: false,
+});
+app.use('/admin/parse-agnes', parseLimiter);
 
 // SECURITY: Strict rate limit for admin login — max 5 attempts per IP per 15 minutes.
 // Prevents brute-force password attacks on the admin panel.
@@ -58,6 +83,27 @@ const adminLoginLimiter = rateLimit({
   message: { error: 'Too many login attempts. Please wait 15 minutes and try again.' },
   skipSuccessfulRequests: true // Only count failed attempts toward the limit
 });
+
+// ── Request Timeout Middleware ───────────────────────────────────────────────
+// Prevents long-running requests from consuming Render free-tier resources.
+// 30s timeout for normal API routes, 60s for heavy operations (parsing).
+function timeoutMiddleware(ms) {
+  return (req, res, next) => {
+    if (!req.timeoutId) {
+      req.timeoutId = setTimeout(() => {
+        res.status(408).json({ error: `Request timed out. Please try again.` });
+        req.destroy();
+      }, ms);
+    }
+    // Clear timeout when response finishes
+    res.on('finish', () => {
+      if (req.timeoutId) clearTimeout(req.timeoutId);
+    });
+    next();
+  };
+}
+app.use('/api/', timeoutMiddleware(30000));
+// Parsing endpoint gets longer timeout (handled per-route below)
 
 // Middleware
 app.use(cors({

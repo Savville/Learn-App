@@ -61,6 +61,27 @@ export async function connectDB() {
     await transactions.createIndex({ userId: 1, createdAt: -1 }, { sparse: true });
     await transactions.createIndex({ status: 1, createdAt: -1 });
 
+    // ── Message/Index Optimization ─────────────────────────────────────────────
+    // Messages: queried by conversationId for timeline loading
+    await db.collection('messages').createIndex({ conversationId: 1, createdAt: 1 });
+
+    // Conversations: queried by participant email with sort by recency
+    // The 'participants' field is an array of email strings — single-field index enables $in / equality match
+    await db.collection('conversations').createIndex({ participants: 1, updatedAt: -1 });
+
+    // User reports: queried by reportedUser/reportedBy for moderation queue
+    await db.collection('user_reports').createIndex({ reportedBy: 1, createdAt: -1 });
+    await db.collection('user_reports').createIndex({ reportedUser: 1, status: 1 });
+
+    // Portfolios: queried by email for profile lookups
+    await db.collection('portfolios').createIndex({ email: 1 }, { unique: true });
+
+    // Ads: queried by active status + date for listing
+    await db.collection('ads').createIndex({ isActive: 1, scheduledAt: -1 });
+
+    // Analytics events: queried by date for dashboard charts
+    await db.collection('analytics_events').createIndex({ eventType: 1, timestamp: -1 });
+
     console.log('✅ Indexes ensured');
     return db;
   } catch (error) {
