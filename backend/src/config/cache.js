@@ -5,6 +5,8 @@
  */
 
 const store = new Map();
+export let cacheHits = 0;
+export let cacheMisses = 0;
 
 /**
  * Set a value in cache.
@@ -57,9 +59,11 @@ export function cacheMiddleware(ttlSeconds = 300) {
     const cached = cacheGet(key);
 
     if (cached) {
+      cacheHits++;
       res.setHeader('X-Cache', 'HIT');
       return res.json(cached);
     }
+    cacheMisses++;
 
     // Intercept res.json to store the response in cache
     const originalJson = res.json.bind(res);
@@ -68,6 +72,7 @@ export function cacheMiddleware(ttlSeconds = 300) {
         cacheSet(key, body, ttlSeconds);
       }
       res.setHeader('X-Cache', 'MISS');
+      cacheMisses++;
       return originalJson(body);
     };
 

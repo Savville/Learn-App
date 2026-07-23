@@ -18,6 +18,7 @@ import {
 } from '../services/emailService.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { cacheInvalidatePrefix } from '../config/cache.js';
+import { auditLog } from '../middleware/auditLog.js';
 
 const CACHE_PREFIX = '/api/opportunities';
 
@@ -140,43 +141,80 @@ router.get('/stats', verifyAdminKey, async (req, res) => {
 });
 
 // GET /api/admin/chat-oversight
+// Enhanced: enriches conversations with live opportunity data (title, slug, deadline, category).
 router.get('/chat-oversight', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
 
-    // Get all conversations
+    // ── 1. All conversations ────────────────────────────────────────────────
     const conversations = await db.collection('conversations').find({}).toArray();
 
-    // Group by opportunityId to get active chats per opportunity
-    const oppMap = {};
-    let totalMessages = 0;
+    // ── 2. Batch message counts via aggregation (1 query instead of N) ─────
+    const conversationIds = conversations.map(c => c._id);
+    const msgCounts = await db.collection('messages').aggregate([
+      { $match: { conversationId: { $in: conversationIds.map(i => i.toString()) } } },
+      { $group: { _id: "$conversationId", count: { $sum: 1 } } }
+    ]).toArray();
 
+    // Build lookup map: conversationId -> count
+    const countMap = {};
+    let totalMessages = 0;
+    for (const mc of msgCounts) {
+      countMap[mc._id] = mc.count;
+      totalMessages += mc.count;
+    }
+
+    // ── 3. Fetch live opportunities to enrich with real title/metadata ────
+    const oppIds = [...new Set(conversations.map(c => c.opportunityId))];
+    const liveOpps = await db.collection('opportunities').find(
+      { id: { $in: oppIds } }
+    ).project({ id: 1, title: 1, slug: 1, deadline: 1, category: 1, postedBy: 1 }).toArray();
+    const oppLookup = {};
+    for (const o of liveOpps) {
+      oppLookup[o.id] = o;
+    }
+
+    // ── 4. Group by opportunityId to get active chats per opportunity ──────
+    const oppMap = {};
     for (const conv of conversations) {
       const oppId = conv.opportunityId;
+      const live = oppLookup[oppId];
       if (!oppMap[oppId]) {
-        oppMap[oppId] = { count: 0, title: conv.opportunityTitle || oppId, posterEmail: conv.posterEmail };
+        oppMap[oppId] = {
+          count: 0,
+          title: live?.title || conv.opportunityTitle || oppId || 'Unknown Opportunity',
+          posterEmail: conv.posterEmail || live?.postedBy || 'N/A',
+          category: live?.category || '',
+          deadline: live?.deadline ? new Date(live.deadline).toLocaleDateString() : ''
+        };
       }
       oppMap[oppId].count += 1;
-
-      // Count messages in this conversation
-      const msgCount = await db.collection('messages').countDocuments({ conversationId: conv._id.toString() });
-      totalMessages += msgCount;
     }
 
     const activeChatsByOpportunity = Object.values(oppMap).sort((a, b) => b.count - a.count);
+
+    // ── 5. Enriched conversation list ─────────────────────────────────────
+    const enrichedConversations = conversations.map(c => {
+      const live = oppLookup[c.opportunityId];
+      return {
+        id: c._id.toString(),
+        opportunityId: c.opportunityId,
+        opportunityTitle: live?.title || c.opportunityTitle || 'Unknown Opportunity',
+        opportunitySlug: live?.slug || '',
+        opportunityCategory: live?.category || c.opportunityCategory || '',
+        posterEmail: c.posterEmail || '',
+        applicantEmail: c.applicantEmail || '',
+        status: c.status || 'active',
+        startedAt: c.createdAt,
+        messageCount: countMap[c._id.toString()] || 0
+      };
+    });
 
     res.json({
       totalConversations: conversations.length,
       totalMessages,
       activeChatsByOpportunity,
-      allConversations: conversations.map(c => ({
-        id: c._id,
-        opportunityTitle: c.opportunityTitle,
-        posterEmail: c.posterEmail,
-        applicantEmail: c.applicantEmail,
-        status: c.status,
-        createdAt: c.createdAt
-      }))
+      allConversations: enrichedConversations
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -258,6 +296,8 @@ router.post('/send-digest', verifyAdminKey, async (req, res) => {
 
     // 3. Send
     const results = await sendDigestEmail(emails, opportunities);
+
+    auditLog(req, 'send_digest', { targetId: 'digest-all', changes: { subscriberCount: emails.length, opportunityCount: opportunities.length } });
 
     res.json({
       message: 'Digest sent.',
@@ -758,6 +798,7 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
       });
     }
 
+    await auditLog(req, 'approve_opportunity', { targetId: oppToPublish.id, changes: { category: oppToPublish.category } });
     res.json({ message: 'Opportunity approved and published. Email alert triggered!', url: `/opportunity/${oppToPublish.id}` });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -777,6 +818,7 @@ router.post('/reject/:id', verifyAdminKey, async (req, res) => {
       { _id: new ObjectId(id) },
       { $set: { status: 'Rejected', rejectedAt: new Date(), reviewedAt: new Date(), reviewedBy } }
     );
+    await auditLog(req, 'reject_opportunity', { targetId: id, changes: { reviewedBy } });
     res.json({ message: 'Opportunity rejected.' });
   } catch (error) {
     res.status(500).json({ error: error.message });

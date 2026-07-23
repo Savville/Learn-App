@@ -1805,11 +1805,15 @@ export default function AdminDashboard() {
                   <div className="divide-y divide-slate-100">
                     {chatOversight.activeChatsByOpportunity.map((item: any, idx: number) => (
                       <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
-                        <div>
-                          <p className="font-semibold text-slate-900">{item.title}</p>
-                          <p className="text-xs text-slate-500">Posted by: {item.posterEmail}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-900 truncate">{item.title}</p>
+                          <div className="flex items-center gap-3 mt-1">
+                            <p className="text-xs text-slate-500">By: {item.posterEmail || 'N/A'}</p>
+                            {item.category && <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 border-slate-200 bg-slate-50">{item.category}</Badge>}
+                            {item.deadline && <p className="text-xs text-slate-400">Deadline: {item.deadline}</p>}
+                          </div>
                         </div>
-                        <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold px-3 py-1 text-sm border-none">
+                        <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1 text-sm border border-blue-200">
                           {item.count} Active {item.count === 1 ? 'Chat' : 'Chats'}
                         </Badge>
                       </div>
@@ -1829,8 +1833,10 @@ export default function AdminDashboard() {
                   <thead className="text-xs text-slate-500 uppercase bg-slate-50/80">
                     <tr>
                       <th className="px-6 py-3 font-semibold">Opportunity</th>
+                      <th className="px-6 py-3 font-semibold">Category</th>
                       <th className="px-6 py-3 font-semibold">Poster</th>
                       <th className="px-6 py-3 font-semibold">Applicant (Doer)</th>
+                      <th className="px-6 py-3 font-semibold">Messages</th>
                       <th className="px-6 py-3 font-semibold">Status</th>
                       <th className="px-6 py-3 font-semibold">Started</th>
                     </tr>
@@ -1838,11 +1844,26 @@ export default function AdminDashboard() {
                   <tbody className="divide-y divide-slate-100 bg-white">
                     {chatOversight?.allConversations?.map((conv: any, idx: number) => (
                       <tr key={idx} className="hover:bg-slate-50/50">
-                        <td className="px-6 py-4 font-medium text-slate-900 max-w-[200px] truncate" title={conv.opportunityTitle}>
-                          {conv.opportunityTitle || 'Unknown'}
+                        <td className="px-6 py-4 font-medium text-slate-900 max-w-[220px] truncate" title={conv.opportunityTitle}>
+                          {conv.opportunityTitle || 'Unknown Opportunity'}
+                          {conv.opportunitySlug && (
+                            <a href={`/opportunity/${conv.opportunitySlug}`} target="_blank" rel="noopener noreferrer" className="ml-1 text-blue-400 hover:text-blue-600">
+                              <ExternalLink className="w-3 h-3 inline" />
+                            </a>
+                          )}
                         </td>
-                        <td className="px-6 py-4 text-slate-600">{conv.posterEmail}</td>
-                        <td className="px-6 py-4 text-slate-600">{conv.applicantEmail}</td>
+                        <td className="px-6 py-4">
+                          {conv.opportunityCategory ? (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-slate-50">{conv.opportunityCategory}</Badge>
+                          ) : (
+                            <span className="text-slate-300">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-slate-600 text-xs max-w-[120px] truncate" title={conv.posterEmail}>{conv.posterEmail || 'N/A'}</td>
+                        <td className="px-6 py-4 text-slate-600 text-xs max-w-[120px] truncate" title={conv.applicantEmail}>{conv.applicantEmail || 'N/A'}</td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="font-bold text-slate-700">{conv.messageCount || 0}</span>
+                        </td>
                         <td className="px-6 py-4">
                           <Badge variant="outline" className={`
                             ${conv.status === 'completed' ? 'text-green-600 border-green-200 bg-green-50' : ''}
@@ -1852,8 +1873,8 @@ export default function AdminDashboard() {
                             {conv.status || 'active'}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4 text-slate-500 text-xs">
-                          {new Date(conv.createdAt).toLocaleDateString()}
+                        <td className="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">
+                          {conv.startedAt ? new Date(conv.startedAt).toLocaleDateString() : '—'}
                         </td>
                       </tr>
                     ))}

@@ -21,6 +21,8 @@ import feedRoutes from './routes/feed.js';
 import sitemapRoutes from './routes/sitemap.js';
 import testEmailRoutes from './routes/test-email.js';
 import parseAgnesRoutes from './routes/parse-agnes.js';
+import healthRoutes from './routes/health.js';
+import { auditLog } from './middleware/auditLog.js';
 
 dotenv.config();
 
@@ -156,6 +158,9 @@ app.post('/api/admin/login', adminLoginLimiter, (req, res) => {
   const token = generateAdminToken();
   res.json({ token, expiresIn: '8h' });
 });
+
+// Health checks (public, no auth required)
+app.use('/api/health', healthRoutes);
 
 // Routes
 app.use('/api/opportunities', opportunitiesRoutes);

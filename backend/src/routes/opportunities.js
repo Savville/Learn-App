@@ -13,21 +13,21 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
     const db = getDB();
 
     // ── SECURITY: Cast all query params to strings to prevent NoSQL operator injection ──
-    const category    = req.query.category    ? String(req.query.category)    : undefined;
-    const level       = req.query.level       ? String(req.query.level)       : undefined;
+    const category = req.query.category ? String(req.query.category) : undefined;
+    const level = req.query.level ? String(req.query.level) : undefined;
     const fundingType = req.query.fundingType ? String(req.query.fundingType) : undefined;
-    const search      = req.query.search      ? String(req.query.search)      : undefined;
-    const tab         = req.query.tab         ? String(req.query.tab)         : undefined;
+    const search = req.query.search ? String(req.query.search) : undefined;
+    const tab = req.query.tab ? String(req.query.tab) : undefined;
 
-    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 12));
-    const skip  = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     // ── Tab category buckets (must match frontend constants exactly) ──────────
-    const GIG_CATEGORIES        = ['Gig', 'Job'];
-    const CAREER_CATEGORIES     = ['Internship', 'Attachment', 'Conference', 'CallForPapers', 'Event', 'Volunteer', 'Scholarship', 'Fellowship'];
+    const GIG_CATEGORIES = ['Gig', 'Job'];
+    const CAREER_CATEGORIES = ['Internship', 'Attachment', 'Conference', 'CallForPapers', 'Event', 'Volunteer', 'Scholarship', 'Fellowship'];
     const INNOVATION_CATEGORIES = ['Grant', 'StartupFunding'];
-    const PROJECT_CATEGORIES    = ['StudentProject', 'Project', 'ResearchCollaboration', 'Hackathon', 'Challenge'];
+    const PROJECT_CATEGORIES = ['StudentProject', 'Project', 'ResearchCollaboration', 'Hackathon', 'Challenge'];
 
     // ── Build filter using $and so status check is never overwritten ──────────
     // The $or for status verification is anchored in an $and clause, ensuring
@@ -37,10 +37,10 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
     ];
 
     // Tab → category bucket
-    if (tab === 'jobs')             must.push({ category: { $in: GIG_CATEGORIES } });
+    if (tab === 'jobs') must.push({ category: { $in: GIG_CATEGORIES } });
     else if (tab === 'academic_career') must.push({ category: { $in: CAREER_CATEGORIES } });
-    else if (tab === 'innovation')  must.push({ category: { $in: INNOVATION_CATEGORIES } });
-    else if (tab === 'projects')    must.push({ category: { $in: PROJECT_CATEGORIES } });
+    else if (tab === 'innovation') must.push({ category: { $in: INNOVATION_CATEGORIES } });
+    else if (tab === 'projects') must.push({ category: { $in: PROJECT_CATEGORIES } });
     // tab === 'all' or undefined → no category bucket restriction
 
     // Specific category override (e.g. user picked 'Scholarship' from dropdown)
@@ -59,9 +59,9 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       must.push({
         $or: [
-          { title:       { $regex: escaped, $options: 'i' } },
+          { title: { $regex: escaped, $options: 'i' } },
           { description: { $regex: escaped, $options: 'i' } },
-          { provider:    { $regex: escaped, $options: 'i' } },
+          { provider: { $regex: escaped, $options: 'i' } },
         ],
       });
     }
@@ -85,11 +85,14 @@ router.get('/:id', async (req, res) => {
     const cacheKey = `${CACHE_PREFIX}/${req.params.id}`;
     const cached = cacheGet(cacheKey);
 
-    // Always increment view count in the background
+    // Always increment view count in the background (non-blocking, errors are safe to ignore)
     getDB().collection('opportunities').updateOne(
       { id: req.params.id },
       { $inc: { views: 1 } }
-    ).catch(() => {});
+    ).catch(err => {
+      // Silent failure expected — view count is non-critical analytics
+      console.error('[view-count] failed:', err.message);
+    });
 
     if (cached) {
       res.setHeader('X-Cache', 'HIT');
