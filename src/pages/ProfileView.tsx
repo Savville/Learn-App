@@ -1,13 +1,39 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-    MapPin, Star, Users, Globe, Github, Linkedin, ExternalLink,
-    ArrowLeft, MessageSquare, Briefcase, CheckCircle, Loader2,
+    MapPin, Globe, Github, Linkedin, ExternalLink,
+    ArrowLeft, MessageSquare, Briefcase,
     ShieldCheck
 } from 'lucide-react';
 import { getProfileByEmail } from '../services/profilesAPI';
 import type { Profile, ProfileProject } from '../services/profilesAPI';
 import { useSEO } from '../hooks/useSEO';
+
+// Shared banner images — same pool used in ProfileCard
+const BANNER_IMAGES = [
+    '/images/community.jpg',
+    '/images/tech.avif',
+    '/images/internship.avif',
+    '/images/conference.jpeg',
+    '/images/gig_1.png',
+];
+
+function getBannerIndex(email: string): number {
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+        hash = email.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash) % BANNER_IMAGES.length;
+}
+
+function getInitials(name: string): string {
+    return name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+}
 
 export function ProfileView() {
     const { email } = useParams<{ email: string }>();
@@ -65,7 +91,7 @@ export function ProfileView() {
                     </div>
                     <h3 className="text-xl text-gray-900 mb-2 font-semibold">Profile Not Found</h3>
                     <p className="text-gray-600 mb-6">{error || 'The profile you\'re looking for doesn\'t exist.'}</p>
-                    <button onClick={() => navigate('/profiles')} className="px-6 py-3 bg-blue-900 text-white rounded-xl hover:bg-blue-800 transition-colors font-medium">
+                    <button onClick={() => navigate('/profiles')} className="px-6 py-3 bg-blue-900 text-white rounded-[7px] hover:bg-blue-800 transition-colors font-medium">
                         Browse All Profiles
                     </button>
                 </div>
@@ -73,30 +99,9 @@ export function ProfileView() {
         );
     }
 
-    const gradientIdx = Math.abs(
-        profile.email.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-    ) % 8;
-
-    const gradients = [
-        'from-blue-600 to-indigo-700',
-        'from-purple-600 to-pink-700',
-        'from-emerald-600 to-teal-700',
-        'from-orange-600 to-red-700',
-        'from-cyan-600 to-blue-700',
-        'from-rose-600 to-purple-700',
-        'from-violet-600 to-indigo-700',
-        'from-amber-600 to-orange-700',
-    ];
-
-    function getInitials(name: string): string {
-        return name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    }
-
+    const bannerIdx = getBannerIndex(profile.email);
+    const initials = getInitials(profile.name);
+    const hasAvatar = !!profile.avatar;
     const links = (profile.links || { github: '', linkedin: '', website: '', other1: '', other2: '' }) as any;
 
     return (
@@ -115,10 +120,10 @@ export function ProfileView() {
                 })}
             </script>
 
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-gray-50 pb-12">
                 {/* Back Button */}
                 <div className="bg-white border-b border-slate-200">
-                    <div className="max-w-6xl mx-auto px-4 py-3">
+                    <div className="max-w-4xl mx-auto px-4 py-3">
                         <button
                             onClick={() => navigate(-1)}
                             className="flex items-center gap-2 text-sm text-slate-600 hover:text-blue-700 transition-colors"
@@ -129,75 +134,60 @@ export function ProfileView() {
                     </div>
                 </div>
 
-                {/* Hero Banner */}
-                <div className={`bg-gradient-to-r ${gradients[gradientIdx]}`}>
-                    <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
-                        <div className="flex flex-col sm:flex-row items-start gap-6">
-                            {/* Avatar */}
-                            {profile.avatar ? (
+                {/* Banner — matches card style: fixed height, content-centered */}
+                <div className="max-w-4xl mx-auto px-4 mt-6">
+                    <div className="relative h-48 bg-gray-100 rounded-[7px] overflow-hidden border border-gray-200">
+                        <img
+                            src={BANNER_IMAGES[bannerIdx]}
+                            alt={`${profile.name} banner`}
+                            className="w-full h-full object-cover"
+                        />
+                        {/* Avatar — perfectly circular, pulled up into banner */}
+                        <div className="absolute bottom-0 left-6 translate-y-1/2">
+                            {hasAvatar ? (
                                 <img
                                     src={profile.avatar}
                                     alt={profile.name}
-                                    className="w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover shrink-0"
+                                    className="w-24 h-24 rounded-full border-3 border-white shadow-lg object-cover"
                                 />
                             ) : (
-                                <div className="w-28 h-28 rounded-full border-4 border-white shadow-lg bg-white flex items-center justify-center shrink-0">
-                                    <span className={`text-3xl font-bold bg-gradient-to-r ${gradients[gradientIdx]} bg-clip-text text-transparent`}>
-                                        {getInitials(profile.name)}
-                                    </span>
+                                <div className="w-24 h-24 rounded-full border-3 border-white bg-blue-900 flex items-center justify-center shadow-lg">
+                                    <span className="text-2xl font-bold text-white">{initials}</span>
                                 </div>
                             )}
+                        </div>
+                    </div>
 
-                            {/* Info */}
-                            <div className="flex-1 text-white">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h1 className="text-2xl sm:text-3xl font-bold">{profile.name}</h1>
-                                    {profile.isFeatured && (
-                                        <span className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                                            Featured
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-lg text-white/90 font-medium mb-2">{profile.title || 'Professional'}</p>
-                                {profile.location && (
-                                    <div className="flex items-center gap-1.5 text-white/80 text-sm mb-3">
-                                        <MapPin className="w-4 h-4" />
-                                        {profile.location}
-                                    </div>
-                                )}
-                                <div className="flex items-center gap-4 text-sm">
-                                    {profile.rating && (
+                    {/* Info — sits below banner */}
+                    <div className="pt-16 pb-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900 mb-0.5">{profile.name}</h1>
+                                <p className="text-blue-700 font-medium text-sm mb-2">{profile.title || 'Professional'}</p>
+                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                    {profile.location && (
                                         <div className="flex items-center gap-1">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                            <span className="font-bold">{profile.rating}</span>
-                                            <span className="text-white/70">({profile.totalClients || 0} clients)</span>
+                                            <MapPin className="w-3 h-3" />
+                                            <span>{profile.location.split(',')[0]}</span>
                                         </div>
                                     )}
-                                    {profile.rate && (
-                                        <div className="text-white/90 font-semibold">
-                                            KES {profile.rate}/hr
-                                        </div>
-                                    )}
-                                    {profile.totalClients && (
-                                        <div className="flex items-center gap-1 text-white/80">
-                                            <Users className="w-4 h-4" />
-                                            {profile.totalClients} completed
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-1">
+                                        <Briefcase className="w-3 h-3" />
+                                        <span>{profile.totalClients || 0} jobs</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <span>{profile.projects?.length || 0} postings</span>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-3 shrink-0">
-                                <Link
-                                    to={`/inbox`}
-                                    state={{ toEmail: profile.email, introText: `Hi ${profile.name.split(' ')[0]}, I'd like to discuss a project...` }}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-xl hover:bg-white/30 transition-colors font-medium text-sm"
-                                >
-                                    <MessageSquare className="w-4 h-4" />
-                                    Message
-                                </Link>
-                            </div>
+                            <Link
+                                to={`/inbox`}
+                                state={{ toEmail: profile.email, introText: `Hi ${profile.name.split(' ')[0]}, I'd like to discuss a project...` }}
+                                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-[5px] hover:bg-blue-700 transition-colors font-medium text-sm shrink-0 self-start"
+                            >
+                                <MessageSquare className="w-4 h-4" />
+                                Message
+                            </Link>
                         </div>
                     </div>
                 </div>

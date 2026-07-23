@@ -6,12 +6,12 @@ interface ProfileCardProps {
     profile: Profile;
 }
 
-// Banner images pool for profiles
+// Shared banner images — same pool used in ProfileView
 const BANNER_IMAGES = [
-    '/images/internship.avif',
-    '/images/job_1.png',
-    '/images/tech.avif',
     '/images/community.jpg',
+    '/images/tech.avif',
+    '/images/internship.avif',
+    '/images/conference.jpeg',
     '/images/gig_1.png',
 ];
 
@@ -35,39 +35,42 @@ function getInitials(name: string): string {
 export function ProfileCard({ profile }: ProfileCardProps) {
     const bannerIdx = getBannerIndex(profile.email);
     const initials = getInitials(profile.name);
-    const locationName = profile.location?.split(',')[0] || '';
+    const hasAvatar = !!profile.avatar;
 
     return (
         <div className="group bg-white rounded-[7px] border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-            {/* Banner Image */}
-            <div className="relative h-28 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+            {/* Banner Image Area */}
+            <div className="relative h-28 bg-gray-100">
                 <img
                     src={BANNER_IMAGES[bannerIdx]}
                     alt={`${profile.name} banner`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                {/* Avatar overlay on banner */}
-                {profile.avatar ? (
-                    <img
-                        src={profile.avatar}
-                        alt={profile.name}
-                        className="absolute bottom-[-24px] left-4 w-16 h-16 rounded-[5px] border-2 border-white object-cover shadow-sm"
-                    />
-                ) : (
-                    <div className="absolute bottom-[-24px] left-4 w-16 h-16 rounded-[5px] border-2 border-white bg-white flex items-center justify-center shadow-sm">
-                        <span className="text-lg font-bold text-blue-900">{initials}</span>
-                    </div>
-                )}
+
+                {/* Avatar — positioned over banner, perfectly circular, pulled up into it */}
+                <div className="absolute bottom-0 left-4 translate-y-1/2">
+                    {hasAvatar ? (
+                        <img
+                            src={profile.avatar}
+                            alt={profile.name}
+                            className="w-16 h-16 rounded-full border-2 border-white shadow-sm object-cover"
+                        />
+                    ) : (
+                        <div className="w-16 h-16 rounded-full border-2 border-white bg-blue-900 flex items-center justify-center shadow-sm">
+                            <span className="text-base font-bold text-white">{initials}</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Content */}
-            <div className="pt-20 pb-4 px-4">
-                {/* Stats row — below banner, above name */}
+            {/* Content — starts below avatar area */}
+            <div className="pt-10 pb-4 px-4">
+                {/* Stats row — location, jobs, postings */}
                 <div className="flex items-center gap-3 mb-2 text-xs text-gray-500">
-                    {locationName && (
+                    {profile.location && (
                         <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            <span>{locationName}</span>
+                            <span>{profile.location.split(',')[0]}</span>
                         </div>
                     )}
                     <div className="flex items-center gap-1">
@@ -81,10 +84,10 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                 </div>
 
                 {/* Name & Title */}
-                <h3 className="text-gray-900 font-bold text-base mb-0.5 truncate group-hover:text-blue-600 transition-colors">
+                <h3 className="text-gray-900 font-bold text-sm mb-0.5 truncate group-hover:text-blue-600 transition-colors">
                     {profile.name}
                 </h3>
-                <p className="text-blue-700 text-sm font-medium mb-3 truncate">
+                <p className="text-blue-700 text-xs font-medium mb-2 truncate">
                     {profile.title || 'Professional'}
                 </p>
 
@@ -110,7 +113,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                 {/* View Button */}
                 <Link
                     to={`/profile/${profile.email}`}
-                    className="block w-full text-center px-3 py-2 bg-blue-600 text-white text-sm font-semibold rounded-[5px] hover:bg-blue-700 transition-colors"
+                    className="block w-full text-center px-3 py-2 bg-blue-600 text-white text-xs font-semibold rounded-[5px] hover:bg-blue-700 transition-colors"
                 >
                     View Profile
                 </Link>
