@@ -126,7 +126,7 @@ router.get('/user/:email', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const db = getDB();
-    const { conversationId, gigId, senderEmail, receiverEmail, content, isPartnership, replyTo } = req.body;
+    const { conversationId, gigId, senderEmail, receiverEmail, content, isPartnership, replyTo, senderName } = req.body;
 
     if (!content) {
       return res.status(400).json({ error: 'Message content is required' });
@@ -144,11 +144,43 @@ router.post('/', async (req, res) => {
 
     let convId = conversationId ? new ObjectId(conversationId) : null;
 
+    // Resolve display names from portfolios collection (fallback to email prefix)
+    function resolveName(email) {
+      if (!email) return '';
+      const cachedName = req.resolvedNames?.[email.toLowerCase()];
+      if (cachedName) return cachedName;
+      const namePrefix = email.split('@')[0];
+      return namePrefix.charAt(0).toUpperCase() + namePrefix.slice(1).replace(/[._]/g, ' ');
+    }
+
+    // Batch-resolve names from portfolios collection (defer to avoid blocking response)
+    const resolvedNames = {};
+    const emailsToResolve = [senderEmail, receiverEmail].filter(Boolean);
+    (async () => {
+      try {
+        for (const email of emailsToResolve) {
+          const profile = await db.collection('portfolios').findOne({ email: email.toLowerCase() }, { projection: { name: 1 } });
+          if (profile?.name?.trim()) {
+            resolvedNames[email.toLowerCase()] = profile.name.trim();
+          } else {
+            resolvedNames[email.toLowerCase()] = resolveName(email);
+          }
+        }
+      } catch (_) { /* best-effort, non-critical */ }
+    })();
+
     // If this is the FIRST message (the pitch), create the conversation
     if (!convId) {
+      const senderDisplayName = senderName || resolvedNames[senderEmail?.toLowerCase()] || resolveName(senderEmail);
+      const receiverDisplayName = senderName ? (receiverEmail.split('@')[0]) : (resolvedNames[receiverEmail?.toLowerCase()] || resolveName(receiverEmail));
       const newConversation = {
         gigId: gigId.length === 24 ? new ObjectId(gigId) : gigId,
+        opportunityId: gigId.length === 24 ? gigId.toString() : gigId,
         participants: [senderEmail, receiverEmail],
+        applicantEmail: senderEmail,
+        posterEmail: receiverEmail,
+        applicantName: senderDisplayName,
+        posterName: receiverDisplayName,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: isActuallyPartnership ? 'partnership' : 'pending', // 'pending' = locked, 'active' = unlocked, 'hired' = escrow funded, 'partnership' = open collaboration
@@ -157,10 +189,13 @@ router.post('/', async (req, res) => {
       convId = convResult.insertedId;
     }
 
+    const displayName = senderName || resolvedNames[senderEmail?.toLowerCase()] || resolveName(senderEmail);
+
     const newMessage = {
       conversationId: convId,
       senderEmail,
       receiverEmail,
+      senderName: displayName,
       content: censoredContent,
       originalContent: content, // Keep the original just in case for admin review (optional)
       createdAt: new Date(),

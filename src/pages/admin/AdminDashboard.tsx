@@ -1859,8 +1859,12 @@ export default function AdminDashboard() {
                             <span className="text-slate-300">—</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-slate-600 text-xs max-w-[120px] truncate" title={conv.posterEmail}>{conv.posterEmail || 'N/A'}</td>
-                        <td className="px-6 py-4 text-slate-600 text-xs max-w-[120px] truncate" title={conv.applicantEmail}>{conv.applicantEmail || 'N/A'}</td>
+                        <td className="px-6 py-4 text-slate-600 text-xs max-w-[120px] truncate" title={conv.posterEmail || conv.posterName}>
+                          {conv.posterName || conv.posterEmail || 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 text-slate-600 text-xs max-w-[120px] truncate" title={conv.applicantEmail || conv.applicantName}>
+                          {conv.applicantName || conv.applicantEmail || 'N/A'}
+                        </td>
                         <td className="px-6 py-4 text-center">
                           <span className="font-bold text-slate-700">{conv.messageCount || 0}</span>
                         </td>
@@ -1874,7 +1878,7 @@ export default function AdminDashboard() {
                           </Badge>
                         </td>
                         <td className="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">
-                          {conv.startedAt ? new Date(conv.startedAt).toLocaleDateString() : '—'}
+                          {conv.startedAt ? new Date(conv.startedAt).toLocaleDateString() : conv.updatedAt ? new Date(conv.updatedAt).toLocaleDateString() : '—'}
                         </td>
                       </tr>
                     ))}

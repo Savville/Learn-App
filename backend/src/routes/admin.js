@@ -164,27 +164,61 @@ router.get('/chat-oversight', verifyAdminKey, async (req, res) => {
       totalMessages += mc.count;
     }
 
-    // ── 3. Fetch live opportunities to enrich with real title/metadata ────
-    const oppIds = [...new Set(conversations.map(c => c.opportunityId))];
-    const liveOpps = await db.collection('opportunities').find(
-      { id: { $in: oppIds } }
-    ).project({ id: 1, title: 1, slug: 1, deadline: 1, category: 1, postedBy: 1 }).toArray();
-    const oppLookup = {};
-    for (const o of liveOpps) {
-      oppLookup[o.id] = o;
+    // ── 3. Collect all gig/opportunity IDs from BOTH gigId AND opportunityId fields ──
+    const allOppIds = [...new Set(conversations.flatMap(c => {
+      const ids = [];
+      if (c.gigId) ids.push(c.gigId);
+      if (c.opportunityId && c.opportunityId !== c.gigId) ids.push(c.opportunityId);
+      return ids;
+    }))];
+
+    // ── 4. Fetch live opportunities by either _id OR id field ──────────────
+    const liveOpps = [];
+    for (const rawId of allOppIds) {
+      // Try string id match first
+      const byId = await db.collection('opportunities').findOne({ id: rawId }, { projection: { id: 1, title: 1, slug: 1, deadline: 1, category: 1, postedBy: 1 } });
+      if (byId) { liveOpps.push(byId); continue; }
+      // Try ObjectId match
+      try {
+        const { ObjectId } = await import('mongodb');
+        const byObjId = await db.collection('opportunities').findOne({ _id: new ObjectId(rawId) }, { projection: { id: 1, title: 1, slug: 1, deadline: 1, category: 1, postedBy: 1 } });
+        if (byObjId) liveOpps.push(byObjId);
+      } catch (_) { /* skip invalid ObjectIds */ }
     }
 
-    // ── 4. Group by opportunityId to get active chats per opportunity ──────
+    // Build lookup by id, _id string, and ObjectId string
+    const oppLookup = {};
+    for (const o of liveOpps) {
+      if (o.id) oppLookup[o.id] = o;
+      oppLookup[o._id.toString()] = o;
+      // Also index by raw gigId if it matches
+      oppLookup[o.title?.toLowerCase()] = o;
+    }
+
+    // ── 5. Helper to resolve opportunity from any ID format ────────────────
+    const { ObjectId } = await import('mongodb');
+    function resolveOpp(conv) {
+      const candidateIds = [conv.opportunityId, conv.gigId].filter(Boolean);
+      for (const cid of candidateIds) {
+        if (oppLookup[cid]) return oppLookup[cid];
+        try {
+          if (oppLookup[new ObjectId(cid).toString()]) return oppLookup[new ObjectId(cid).toString()];
+        } catch (_) { /* skip invalid */ }
+      }
+      return null;
+    }
+
+    // ── 6. Group by gigId to get active chats per opportunity ─────────────
     const oppMap = {};
     for (const conv of conversations) {
-      const oppId = conv.opportunityId;
-      const live = oppLookup[oppId];
+      const oppId = conv.gigId || conv.opportunityId || 'unknown';
+      const live = resolveOpp(conv);
       if (!oppMap[oppId]) {
         oppMap[oppId] = {
           count: 0,
-          title: live?.title || conv.opportunityTitle || oppId || 'Unknown Opportunity',
-          posterEmail: conv.posterEmail || live?.postedBy || 'N/A',
-          category: live?.category || '',
+          title: live?.title || conv.opportunityTitle || 'Unknown Opportunity',
+          posterEmail: conv.posterEmail || conv.posterEmailFallback || live?.postedBy || live?.contactEmail || 'N/A',
+          category: live?.category || conv.opportunityCategory || '',
           deadline: live?.deadline ? new Date(live.deadline).toLocaleDateString() : ''
         };
       }
@@ -193,20 +227,30 @@ router.get('/chat-oversight', verifyAdminKey, async (req, res) => {
 
     const activeChatsByOpportunity = Object.values(oppMap).sort((a, b) => b.count - a.count);
 
-    // ── 5. Enriched conversation list ─────────────────────────────────────
+    // ── 7. Enriched conversation list with participants as poster/applicant ─
     const enrichedConversations = conversations.map(c => {
-      const live = oppLookup[c.opportunityId];
+      const live = resolveOpp(c);
+      // Extract participant emails - first is applicant, second is poster (or vice versa)
+      const participants = Array.isArray(c.participants) ? c.participants : [];
+      const applicantEmail = c.applicantEmail || participants[0] || '';
+      const posterEmail = c.posterEmail || participants[1] || c.posterEmailFallback || '';
+
       return {
         id: c._id.toString(),
-        opportunityId: c.opportunityId,
+        opportunityId: c.gigId || c.opportunityId || '',
         opportunityTitle: live?.title || c.opportunityTitle || 'Unknown Opportunity',
         opportunitySlug: live?.slug || '',
         opportunityCategory: live?.category || c.opportunityCategory || '',
-        posterEmail: c.posterEmail || '',
-        applicantEmail: c.applicantEmail || '',
-        status: c.status || 'active',
+        posterEmail: posterEmail,
+        posterName: c.posterName || posterEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        applicantEmail: applicantEmail,
+        applicantName: c.applicantName || applicantEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        status: c.status || 'pending',
         startedAt: c.createdAt,
-        messageCount: countMap[c._id.toString()] || 0
+        updatedAt: c.updatedAt,
+        messageCount: countMap[c._id.toString()] || 0,
+        disputeReason: c.disputeReason || null,
+        participants: participants
       };
     });
 

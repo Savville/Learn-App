@@ -11,11 +11,11 @@ import { useAlert } from '../contexts/AlertContext';
 export function Inbox() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  
+
   const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>(
     (queryParams.get('tab') as 'chats' | 'notifications') || 'chats'
   );
-  
+
   const [email, setEmail] = useState<string>(localStorage.getItem('user_email') || '');
   const [token, setToken] = useState<string | null>(localStorage.getItem('user_token'));
   const [conversations, setConversations] = useState<any[]>([]);
@@ -42,6 +42,7 @@ export function Inbox() {
   const [showChatMenu, setShowChatMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const cachedSenderName = useRef<string>('');
   const { showAlert } = useAlert();
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -145,10 +146,27 @@ export function Inbox() {
         isPartnership: activeConv.status === 'partnership'
       };
 
+      // Resolve sender name from portfolio (fallback to email prefix)
+      try {
+        const profileRes = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/portfolio/${email}`);
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          const name = profileData.profile?.name || email.split('@')[0];
+          cachedSenderName.current = name;
+          (payload as any).senderName = name;
+        }
+      } catch (_) { /* best-effort */ }
+
+      // Ensure payload has senderName
+      const messagePayload: Record<string, any> = payload;
+      if (!messagePayload.senderName && cachedSenderName.current) {
+        messagePayload.senderName = cachedSenderName.current;
+      }
+
       const msgRes = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(messagePayload)
       });
       if (msgRes.ok) {
         await fetchMessages(activeConv._id);
@@ -249,16 +267,20 @@ export function Inbox() {
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to edit');
-        
+
         setEditingMessage(null);
       } else {
         // Handle Send / Reply
+        // Use cached sender name or derive from email
+        const senderName = cachedSenderName.current || email.split('@')[0];
+
         const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             conversationId: activeConv._id,
             senderEmail: email,
+            senderName,
             receiverEmail,
             content: replyContent,
             isPartnership: activeConv.status === 'partnership',
@@ -289,7 +311,7 @@ export function Inbox() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete message');
-      
+
       // Update local state immediately for better UX
       setMessages(messages.filter(m => m._id !== messageToDelete));
       setMessageToDelete(null);
@@ -345,14 +367,14 @@ export function Inbox() {
 
   const handleDisputeSubmit = async () => {
     if (!activeConv) return;
-    
+
     if (!reportModal.details.trim()) {
       showAlert({ title: 'Missing Information', message: 'Please provide details for the dispute.', type: 'warning' });
       return;
     }
-    
+
     try {
-      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/dispute`, { 
+      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/dispute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reportModal.details, initiatorEmail: email })
@@ -369,23 +391,23 @@ export function Inbox() {
 
   const handleReportSubmit = async () => {
     if (!activeConv) return;
-    
+
     if (!reportModal.details.trim()) {
       showAlert({ title: 'Missing Information', message: 'Please provide details for the report.', type: 'warning' });
       return;
     }
-    
+
     try {
       const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          reason: reportModal.reason, 
-          details: reportModal.details, 
-          reporterEmail: email 
+        body: JSON.stringify({
+          reason: reportModal.reason,
+          details: reportModal.details,
+          reporterEmail: email
         })
       });
-      
+
       if (!res.ok) throw new Error('Failed to submit report');
 
       setReportModal(prev => ({ ...prev, isOpen: false }));
@@ -426,9 +448,9 @@ export function Inbox() {
 
   if (!token) {
     return (
-      <OTPLoginForm 
-        onSuccess={handleLoginSuccess} 
-        title="Inbox Login" 
+      <OTPLoginForm
+        onSuccess={handleLoginSuccess}
+        title="Inbox Login"
         subtitle="Enter your email to receive an access code and view your conversations."
       />
     );
@@ -485,18 +507,18 @@ export function Inbox() {
   return (
     <div className="w-full min-h-screen p-4 md:p-8 relative" style={{ background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }} onClick={() => setContextMenu(null)}>
       {contextMenu && createPortal(
-        <div 
+        <div
           className="fixed z-50 bg-[#131ADF] text-white rounded-lg shadow-2xl border border-blue-400 py-1.5 min-w-[140px] overflow-hidden"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button 
+          <button
             className="w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-blue-600 transition-colors"
             onClick={() => { setReplyingTo({ _id: contextMenu.message._id, content: contextMenu.message.content, senderEmail: contextMenu.message.senderEmail }); setContextMenu(null); }}
           >
             Reply
           </button>
-          <button 
+          <button
             className="w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-blue-600 transition-colors"
             onClick={() => { navigator.clipboard.writeText(contextMenu.message.content); setContextMenu(null); }}
           >
@@ -505,22 +527,22 @@ export function Inbox() {
           {contextMenu.message.senderEmail?.toLowerCase() === email?.toLowerCase() && (
             <>
               {Date.now() - new Date(contextMenu.message.createdAt).getTime() <= 5 * 60 * 1000 && (
-                <button 
+                <button
                   className="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-200 hover:bg-blue-600 hover:text-white transition-colors"
-                  onClick={() => { 
-                    setEditingMessage({ _id: contextMenu.message._id, content: contextMenu.message.content, createdAt: contextMenu.message.createdAt }); 
-                    setReplyContent(contextMenu.message.content); 
-                    setContextMenu(null); 
+                  onClick={() => {
+                    setEditingMessage({ _id: contextMenu.message._id, content: contextMenu.message.content, createdAt: contextMenu.message.createdAt });
+                    setReplyContent(contextMenu.message.content);
+                    setContextMenu(null);
                   }}
                 >
                   Edit Message
                 </button>
               )}
-              <button 
+              <button
                 className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-300 hover:bg-red-600 hover:text-white transition-colors"
-                onClick={() => { 
+                onClick={() => {
                   setMessageToDelete(contextMenu.message._id);
-                  setContextMenu(null); 
+                  setContextMenu(null);
                 }}
               >
                 Delete Message
@@ -532,20 +554,20 @@ export function Inbox() {
       )}
 
       <div className="max-w-6xl mx-auto h-[85vh] min-h-[600px] flex gap-5 md:gap-8">
-        
+
         {/* Left Panel: Contacts List */}
         <div className={`flex-col h-full bg-white rounded-xl w-full md:w-80 shrink-0 overflow-hidden shadow-sm ${activeConv ? 'hidden md:flex' : 'flex'}`}>
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
             <div className="flex bg-gray-100 p-1 rounded-lg w-full relative">
-              <button 
+              <button
                 onClick={() => setActiveTab('chats')}
                 className={`flex-1 py-1.5 text-sm font-semibold rounded-md transition-all ${activeTab === 'chats' ? 'bg-white text-[#131ADF] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 Chats
                 {conversations.length > 0 && <span className="ml-2 text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">{conversations.length}</span>}
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('notifications')}
                 className={`flex-1 py-1.5 text-sm font-semibold rounded-md transition-all ${activeTab === 'notifications' ? 'bg-white text-[#131ADF] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
@@ -565,9 +587,9 @@ export function Inbox() {
             <div className="px-3 pb-3 shrink-0">
               <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
                 <IconSearch />
-                <input 
+                <input
                   type="text"
-                  placeholder="Search..." 
+                  placeholder="Search..."
                   className="bg-transparent border-none outline-none text-sm w-full"
                   style={{ color: GRAY }}
                 />
@@ -609,7 +631,7 @@ export function Inbox() {
                 conversations.map(conv => {
                   const isActive = activeConv?._id === conv._id;
                   const partnerEmail = conv.participants.find((p: string) => p !== email) || 'Unknown';
-                  
+
                   // Deterministic color
                   const seed = partnerEmail.charCodeAt(0) || 0;
                   const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
@@ -639,9 +661,8 @@ export function Inbox() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 mt-1 text-left">
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
-                          isActive ? 'bg-white/10 text-white border-white/20' : 'bg-gray-50 text-gray-600 border-gray-200'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${isActive ? 'bg-white/10 text-white border-white/20' : 'bg-gray-50 text-gray-600 border-gray-200'
+                          }`}>
                           {conv.status}
                         </span>
                       </div>
@@ -652,7 +673,7 @@ export function Inbox() {
             )}
           </div>
         </div>
-        
+
         {/* Main Chat Area */}
         <div className={`flex-col flex-1 min-w-0 h-full gap-5 ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
           {activeConv ? (
@@ -660,8 +681,8 @@ export function Inbox() {
               {/* Chat Header */}
               <div className="bg-white rounded-xl px-4 md:px-8 py-4 md:py-5 flex items-center justify-between shrink-0 shadow-sm border border-[#D1E6FF]">
                 <div className="flex items-center gap-3 md:gap-4">
-                  <button 
-                    onClick={() => setActiveConv(null)} 
+                  <button
+                    onClick={() => setActiveConv(null)}
                     className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
                   >
                     <ArrowLeft className="w-5 h-5" />
@@ -672,7 +693,7 @@ export function Inbox() {
                     const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
                     const avatarColor = colors[seed % colors.length];
                     return (
-                      <button 
+                      <button
                         onClick={() => setShowPortfolioPane(!showPortfolioPane)}
                         onContextMenu={(e) => { e.preventDefault(); setShowPortfolioPane(!showPortfolioPane); }}
                         className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg cursor-pointer hover:scale-105 transition-transform shadow-sm ${avatarColor}`}
@@ -692,7 +713,7 @@ export function Inbox() {
                   </div>
                 </div>
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setShowChatMenu(!showChatMenu)}
                     className="hover:bg-slate-100 p-2 rounded-full transition-colors"
                   >
@@ -702,25 +723,25 @@ export function Inbox() {
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setShowChatMenu(false)} />
                       <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-2 animate-in fade-in zoom-in duration-100">
-                        <button 
+                        <button
                           onClick={() => { setShowPortfolioPane(true); setShowChatMenu(false); }}
                           className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-semibold"
                         >
                           View Profile
                         </button>
-                        <button 
+                        <button
                           onClick={handleMute}
                           className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-semibold"
                         >
                           Mute Notifications
                         </button>
-                        <button 
+                        <button
                           onClick={() => { setReportModal({ isOpen: true, type: 'dispute', reason: 'Non-delivery of work', details: '' }); setShowChatMenu(false); }}
                           className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 font-semibold"
                         >
                           Open Dispute
                         </button>
-                        <button 
+                        <button
                           onClick={() => { setReportModal({ isOpen: true, type: 'report', reason: 'Scam/Fraud', details: '' }); setShowChatMenu(false); }}
                           className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold border-t border-slate-100"
                         >
@@ -775,7 +796,7 @@ export function Inbox() {
                 {messages.map((msg, i) => {
                   const isMe = msg.senderEmail === email;
                   const displayContent = (activeConv.status === 'partnership') ? msg.originalContent : msg.content;
-                  
+
                   const senderEmail = msg.senderEmail;
                   const partnerEmail = activeConv.participants.find((p: string) => p !== email) || 'Unknown';
                   const seed = isMe ? email.charCodeAt(0) || 0 : partnerEmail.charCodeAt(0) || 0;
@@ -783,8 +804,8 @@ export function Inbox() {
                   const avatarColor = isMe ? 'bg-orange-600' : colors[seed % colors.length];
 
                   return (
-                    <div 
-                      key={i} 
+                    <div
+                      key={i}
                       className={`flex items-start gap-4 group ${isMe ? "flex-row-reverse" : "flex-row"}`}
                       onTouchStart={(e) => handleTouchStart(e, msg)}
                       onTouchEnd={handleTouchEnd}
@@ -793,7 +814,7 @@ export function Inbox() {
                         e.preventDefault();
                         let x = e.clientX;
                         let y = e.clientY;
-                        
+
                         // Prevent menu from going off-screen on the right
                         if (x + 160 > window.innerWidth) {
                           x = window.innerWidth - 170;
@@ -802,14 +823,14 @@ export function Inbox() {
                         if (y + 160 > window.innerHeight) {
                           y = window.innerHeight - 170;
                         }
-                        
+
                         setContextMenu({ x, y, message: msg });
                       }}
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 mt-auto shadow-sm ${avatarColor}`}>
                         {senderEmail.charAt(0).toUpperCase()}
                       </div>
-                      
+
                       <div className={`flex flex-col gap-1.5 w-full max-w-xl ${isMe ? "items-end" : "items-start"}`}>
                         <div
                           className="rounded-xl px-5 py-4 text-sm leading-relaxed break-words shadow-sm relative group cursor-context-menu"
@@ -831,7 +852,7 @@ export function Inbox() {
                             {(activeConv.status === 'partnership') ? (
                               <span>{displayContent}</span>
                             ) : (
-                              displayContent.split(/(\[REDACTED.*?\])/).map((part: string, idx: number) => 
+                              displayContent.split(/(\[REDACTED.*?\])/).map((part: string, idx: number) =>
                                 part.startsWith('[REDACTED') ? (
                                   <span key={idx} className={`font-mono text-xs px-2 py-0.5 rounded mx-1 ${isMe ? 'bg-blue-800 text-blue-200' : 'bg-red-100 text-red-800 font-bold'}`}>
                                     {part}
@@ -875,8 +896,8 @@ export function Inbox() {
                         "{editingMessage ? editingMessage.content : replyingTo?.content}"
                       </span>
                     </div>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => { setReplyingTo(null); setEditingMessage(null); setReplyContent(''); }}
                       className="text-gray-400 hover:text-gray-800 font-bold px-3 py-1 rounded-full hover:bg-gray-100 transition-colors"
                     >
@@ -886,12 +907,12 @@ export function Inbox() {
                 )}
                 <form onSubmit={handleSendReply} className="flex items-center gap-4">
                   <textarea
-                    value={replyContent} 
+                    value={replyContent}
                     onChange={e => {
                       setReplyContent(e.target.value);
                       e.target.style.height = 'auto';
                       e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
-                    }} 
+                    }}
                     onKeyDown={e => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -906,19 +927,19 @@ export function Inbox() {
                     style={{ color: GRAY, minHeight: '24px', maxHeight: '150px' }}
                   />
                   <div className="flex items-center gap-4 shrink-0">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isUploading}
                       className="hover:opacity-70 transition-opacity p-2"
                     >
                       {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <IconPaperclip />}
                     </button>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      onChange={handleFileUpload} 
-                      className="hidden" 
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      className="hidden"
                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.ppt,.pptx"
                     />
                     <button type="button" className="hover:opacity-70 transition-opacity p-2"><IconSmile /></button>
@@ -947,14 +968,14 @@ export function Inbox() {
                     Unlock to Reply
                   </button>
                 )}
-                {isEmployer && activeConv.status === 'active' && 
-                 activeConv.gigCompensationType !== 'Equity' && 
-                 activeConv.gigCategory !== 'Partnership' && 
-                 !activeConv.gigTitle?.toLowerCase().includes('equity') && (
-                  <button onClick={handleHire} className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold text-sm shadow-sm">
-                    Fund Escrow & Hire
-                  </button>
-                )}
+                {isEmployer && activeConv.status === 'active' &&
+                  activeConv.gigCompensationType !== 'Equity' &&
+                  activeConv.gigCategory !== 'Partnership' &&
+                  !activeConv.gigTitle?.toLowerCase().includes('equity') && (
+                    <button onClick={handleHire} className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold text-sm shadow-sm">
+                      Fund Escrow & Hire
+                    </button>
+                  )}
                 {isEmployer && activeConv.status === 'completed' && (
                   <>
                     <button onClick={handleApprove} className="px-6 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold text-sm shadow-sm">
@@ -970,7 +991,7 @@ export function Inbox() {
                     Dispute
                   </button>
                 )}
-                
+
                 {/* Applicant Controls */}
                 {!isEmployer && activeConv.status === 'hired' && (
                   <>
@@ -1024,7 +1045,7 @@ export function Inbox() {
                   <h3 className="text-lg font-bold text-gray-900 text-center">{partnerProfile.profile?.name || partnerProfile.profile?.email.split('@')[0]}</h3>
                   <p className="text-xs text-slate-400 mt-1">{partnerProfile.profile?.email}</p>
                 </div>
-                
+
                 {partnerProfile.profile?.bio && (
                   <div className="p-5 border-b border-slate-100">
                     <p className="text-sm text-gray-600 leading-relaxed text-center">{partnerProfile.profile.bio}</p>
@@ -1129,7 +1150,7 @@ export function Inbox() {
 
               <div className="flex flex-col gap-2 mt-2">
                 <label className="text-sm font-bold text-gray-700">Reason</label>
-                <select 
+                <select
                   className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF]"
                   value={reportModal.reason}
                   onChange={(e) => setReportModal({ ...reportModal, reason: e.target.value })}
@@ -1154,7 +1175,7 @@ export function Inbox() {
 
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-gray-700">Provide Details</label>
-                <textarea 
+                <textarea
                   className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF] h-32 resize-none"
                   placeholder="Please provide specific details about what happened..."
                   value={reportModal.details}
@@ -1163,17 +1184,16 @@ export function Inbox() {
               </div>
 
               <div className="flex gap-3 justify-end mt-4">
-                <button 
+                <button
                   onClick={() => setReportModal({ ...reportModal, isOpen: false })}
                   className="px-6 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={handleModalSubmit}
-                  className={`px-6 py-2.5 rounded-xl font-bold text-white transition-colors shadow-sm ${
-                    reportModal.type === 'report' ? 'bg-red-600 hover:bg-red-700 shadow-red-200' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
-                  }`}
+                  className={`px-6 py-2.5 rounded-xl font-bold text-white transition-colors shadow-sm ${reportModal.type === 'report' ? 'bg-red-600 hover:bg-red-700 shadow-red-200' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
+                    }`}
                 >
                   Submit
                 </button>
