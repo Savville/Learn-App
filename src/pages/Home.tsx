@@ -85,7 +85,7 @@ export function Home() {
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-8">
               <div className="flex items-start gap-4 mb-5">
                 <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-6 h-6 text-white" />
+                  <GraduationCap className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-1">Students Can Post Too</h3>
@@ -246,12 +246,12 @@ export function Home() {
             <img
               src="/images/Safal_Group.jpg"
               alt="Safal Group"
-              className="h-16 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+              className="h-16 w-auto object-contain hover:scale-105 transition-transform"
             />
             <img
               src="/images/hazina.png"
               alt="Hazina"
-              className="h-16 w-auto object-contain opacity-80 hover:opacity-100 transition-colors grayscale hover:grayscale-0"
+              className="h-16 w-auto object-contain hover:scale-105 transition-transform"
             />
           </div>
           <Link
