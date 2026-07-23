@@ -806,6 +806,186 @@ db.collection('opportunities').updateOne(...).catch(err => {
 
 ---
 
+## 8. Profiles / Community Page (NEW — July 24, 2026)
+
+> **Status:** Planning → Implementation Phase  
+> **Goal:** Create a social browsing hub where users can discover, connect with, and chat with talent.
+
+### 8.1 Overview
+
+A **Profiles** page replaces the three right-side tabs (Portfolio, Applied/Tracker, Inbox) currently in Opportunities. The new structure:
+
+| Element | Action |
+|---------|--------|
+| AI Search bar (top) | Natural language search via Agnes AI: "Machine learning expert in Nairobi" |
+| Profile cards grid | Trending/Recommended profiles shown as small cards (LinkedIn-style) |
+| Click card → ProfileView | Full profile with bio, skills, projects, proof links, Hire/Chat buttons |
+| Chat flow | Opens Inbox with that person; optional Hire button starts escrow flow (later) |
+
+### 8.2 UI Layout
+
+```
+┌──────────────────────────────────────────────────────┐
+│  🔍 AI Search: "Find ML experts, designers..."      │
+├──────────────────────────────────────────────────────┤
+│  Filters: [All] [Students] [Professionals] [Orgs]   │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  ╔═══════════════════╗  ╔═══════════════════╗        │
+│  ║  [Gradient BG]    ║  ║  [Gradient BG]    ║        │
+│  ║  👤 John M.       ║  ║  👤 Jane K.       ║        │
+│  ║  UX Designer      ║  ║  Data Scientist   ║        │
+│  ║  ⭐ 4.9 | $65/hr  ║  ║  ⭐ 4.8 | $80/hr  ║        │
+│  ║  [Figma][React]   ║  ║  [Python][ML]     ║        │
+│  ║  [Get In Touch]   ║  ║  [Get In Touch]   ║        │
+│  ╚═══════════════════╝  ╚═══════════════════╝        │
+│                                                      │
+└──────────────────────────────────────────────────────┘
+```
+
+### 8.3 Data Model
+
+Reuse & extend existing `portfolio` collection. New fields added:
+
+```javascript
+// Existing portfolio fields (kept)
+{ name, bio, avatar, links: { github, linkedin, website, other1, other2 }, email }
+
+// NEW fields
+{ 
+  title: "Senior UX Designer",           // professional title
+  location: "Nairobi, Kenya",            // geographic area
+  skills: ["Figma", "React", "User Research"],  // expertise tags
+  rate: 65,                              // hourly rate (optional)
+  rating: 4.9,                           // average rating (manual or auto)
+  totalClients: 50,                      // completed projects count
+  isFeatured: false,                     // self-set after login
+  interestAreas: ["Design", "Education"], // matching for recommendations
+  projects: [                            // works/portfolio items
+    {
+      title: "E-Learning Platform Redesign",
+      description: "Redesigned the full UX...",
+      images: ["url1", "url2"],
+      proofLink: "https://github.com/...",
+      status: "completed" | "in-progress",
+      createdAt: Date
+    }
+  ]
+}
+```
+
+### 8.4 Backend API Endpoints
+
+All endpoints go in `backend/src/routes/public.js` (or new `backend/src/routes/profiles.js` imported there).
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/profiles` | None | List all public profiles (paginated) |
+| GET | `/api/profiles/:email` | None | Get single public profile |
+| GET | `/api/profiles/trending` | None | Top 12 profiles by activity/rating |
+| GET | `/api/profiles/recommended/:email` | Token | Personalized recommendations based on interests |
+| POST | `/api/profiles/search/ai` | None | Agnes AI natural language search |
+| PUT | `/api/profiles/:email/featured` | Token | Toggle featured status (own profile only) |
+| POST | `/api/profiles/projects` | Token | Add project to own profile |
+| DELETE | `/api/profiles/projects/:projectId` | Token | Remove project |
+| POST | `/api/profiles/seed-fake` | Admin key | Seed fake profiles for testing |
+
+### 8.5 Frontend Components
+
+| Component | File | Description |
+|-----------|------|-------------|
+| ProfileCard | `src/components/ProfileCard.tsx` | Small card: gradient header, avatar, name, title, skills, rating, CTA |
+| AISearchBar | `src/components/AISearchBar.tsx` | Top search bar with Agnes AI integration |
+| ProfilesPage | `src/pages/Profiles.tsx` | Main browse page with grids + filters |
+| ProfileView | `src/pages/ProfileView.tsx` | Full profile view when clicking a card |
+
+### 8.6 Fake Profiles for Testing
+
+10 Kenyan-named fake profiles with realistic data:
+
+| # | Name | Title | Location | Skills |
+|---|------|-------|----------|--------|
+| 1 | Amina Wanjiku | Data Scientist | Nairobi, Kenya | Python, Machine Learning, R, SQL |
+| 2 | Brian Odhiambo | Full-Stack Developer | Mombasa, Kenya | React, Node.js, MongoDB, AWS |
+| 3 | Charity Mutunga | UX/UI Designer | Nairobi, Kenya | Figma, User Research, Prototyping |
+| 4 | Dennis Karanja | DevOps Engineer | Kiambu, Kenya | Docker, Kubernetes, CI/CD, Terraform |
+| 5 | Elizabeth Achieng | Mobile Developer | Kisumu, Kenya | Flutter, Dart, Firebase, REST APIs |
+| 6 | Farah Hassan | Content Strategist | Nairobi, Kenya | SEO, Copywriting, Analytics |
+| 7 | Geoffrey Mwangi | Machine Learning Engineer | Nairobi, Kenya | TensorFlow, PyTorch, NLP, Computer Vision |
+| 8 | Hannah Nyambura | Graphic Designer | Nakuru, Kenya | Adobe Suite, Branding, Illustration |
+| 9 | Isaac Omondi | Backend Developer | Mombasa, Kenya | Python, Django, PostgreSQL, Redis |
+| 10 | Joyce Wambui | Project Manager | Nairobi, Kenya | Agile, Scrum, Jira, Stakeholder Management |
+
+Images: Use `https://i.pravatar.cc/{id}?img={n}` for 5 of them (images 1-5), rest use CSS-generated colored initials.
+
+### 8.7 Recommended Profiles Algorithm
+
+Since this is Phase 1 (no sophisticated ML), recommend based on:
+1. **Interest area match** — if user's portfolio has `interestAreas`, match against profile `skills` and `interestAreas`
+2. **Activity score** — profiles updated recently get boost
+3. **Featured toggle** — `isFeatured: true` profiles always appear first
+4. **Random shuffle** of non-featured profiles below top picks
+
+Fallback: show top 12 by `rating DESC, totalClients DESC`.
+
+### 8.8 Navigation Changes
+
+| Current | Change | Reason |
+|---------|--------|--------|
+| Remove "Contact" from Header nav | Replace with "Profiles" | Contact info easily accessible via footer |
+| Keep "Post With Us" in Header | No change | Already present, easy to access |
+| Add "Profiles" to MobileNav | New tab with Users icon | Bottom bar navigation |
+
+### 8.9 Opportunities Page Cleanup
+
+Remove these from the right-side tabs row in `Opportunities.tsx`:
+```javascript
+// REMOVE:
+RIGHT_TABS = [
+  { id: 'applied', label: 'Tracker', ... },    // stays as standalone route /applied
+  { id: 'inbox', label: 'Inbox', ... },         // stays as standalone route /inbox  
+  { id: 'portfolio', label: 'Portfolio', ... }, // stays as standalone route /portfolio
+];
+
+// ADD to the left browse tabs row:
+{ id: 'profiles', label: 'Profiles', ... }
+```
+
+### 8.10 Portfolio Enhancement
+
+Add to `src/pages/Portfolio.tsx`:
+- **Projects/Works Section** below bio area
+- Each project: title, description, images, proof link (GitHub, research URL, Google Drive)
+- "Add Project" button → form dialog
+- "Mark as Featured" toggle (sets `isFeatured: true`)
+- Interest Areas input → tags for recommendation matching
+
+### 8.11 Chat Integration
+
+When user clicks "Get In Touch" on a profile card:
+1. Check if conversation exists between logged-in user and profile owner
+2. If yes → Navigate to `/inbox` with pre-selected conversation
+3. If no → Open message composer pre-filled with intro text
+4. "Hire" button → same flow but marks intent to hire (escrow later)
+
+### 8.12 Implementation Order
+
+1. ✅ Plan & document this spec (this doc)
+2. Backend: Add profile API endpoints to `public.js` or new `profiles.js`
+3. Backend: Seed 10 fake profiles
+4. Frontend: Create `ProfileCard.tsx` component
+5. Frontend: Create `AISearchBar.tsx` component
+6. Frontend: Create `Profiles.tsx` page
+7. Frontend: Create `ProfileView.tsx` page
+8. Frontend: Update `App.tsx` routes
+9. Frontend: Update `Header.tsx` (remove Contact, add Profiles)
+10. Frontend: Update `MobileNav.tsx` (add Profiles tab)
+11. Frontend: Update `Opportunities.tsx` (remove right tabs)
+12. Frontend: Enhance `Portfolio.tsx` (projects section)
+13. Wire up chat flow from profile cards
+
+---
+
 ## Appendix: Quick MongoDB Queries
 
 ### Find the 50 KES payment

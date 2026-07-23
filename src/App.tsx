@@ -13,6 +13,8 @@ import { Inbox } from './pages/Inbox';
 import { Subscribe } from './pages/Subscribe';
 import { Tracker } from './pages/Tracker';
 import { Portfolio } from './pages/Portfolio';
+import { Profiles } from './pages/Profiles';
+import { ProfileView } from './pages/ProfileView';
 import { MobileNav } from './components/MobileNav';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
@@ -80,6 +82,8 @@ function AppContent() {
           <Route path="/applied" element={<Tracker />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/subscribe" element={<Subscribe />} />
+          <Route path="/profiles" element={<Profiles />} />
+          <Route path="/profile/:email" element={<ProfileView />} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />

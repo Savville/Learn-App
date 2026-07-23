@@ -53,11 +53,11 @@ export function Header() {
               About & Services
             </Link>
             <Link
-              to="/contact"
-              className={`transition-colors flex items-center h-full ${isActive('/contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+              to="/profiles"
+              className={`transition-colors ${isActive('/profiles') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
                 }`}
             >
-              Contact
+              Profiles
             </Link>
 
             <Link
@@ -112,12 +112,12 @@ export function Header() {
                 About & Services
               </Link>
               <Link
-                to="/contact"
-                className={`px-4 py-2 rounded-lg transition-colors ${isActive('/contact') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                to="/profiles"
+                className={`px-4 py-2 rounded-lg transition-colors ${isActive('/profiles') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Contact
+                Profiles
               </Link>
               <Link
                 to="/post-with-us"

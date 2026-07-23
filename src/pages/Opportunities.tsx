@@ -55,10 +55,8 @@ const ALL_FUNDING_OPTIONS = [
 
 const TABS = BROWSE_TABS;
 
-const RIGHT_TABS: { id: string; label: string; description: string }[] = [
-  { id: 'applied', label: 'Tracker', description: 'Tracker' },
-  { id: 'inbox', label: 'Inbox', description: 'Inbox' },
-  { id: 'portfolio', label: 'Portfolio', description: 'Portfolio' },
+const RIGHT_TABS: { id: string; label: string; href: string }[] = [
+  { id: 'post', label: 'Post With Us', href: '/post-with-us' },
 ];
 
 const applyFilters = (
@@ -118,7 +116,7 @@ export function Opportunities() {
 
     setSearchParams(params, { replace: true });
   }, [activeTab, searchQuery, selectedType, selectedLevel, selectedFunding, selectedTaskType, selectedUrgency, setSearchParams]);
-  const currentTab = [...TABS, ...RIGHT_TABS].find(t => t.id === activeTab) ?? TABS[0];
+  const currentTab = TABS.find(t => t.id === activeTab) ?? TABS[0];
 
   useSEO({
     title: `${currentTab.description} — Opportunities Pathways`,
@@ -435,13 +433,13 @@ export function Opportunities() {
               </div>
             </div>
 
-            {/* Right Tabs (Applied, Inbox) */}
+            {/* Right Tabs — Post With Us */}
             <div className="flex gap-2 shrink-0">
               {RIGHT_TABS.map(tab => (
                 <Link
                   key={tab.id}
-                  to={`/${tab.id}`}
-                  className="px-6 py-2 rounded-md font-semibold transition-all border bg-transparent text-white border-white/30 hover:bg-white/10"
+                  to={tab.href}
+                  className="px-6 py-2 rounded-md font-semibold transition-all border bg-transparent text-white border-white hover:bg-white hover:text-blue-900"
                 >
                   {tab.label}
                 </Link>

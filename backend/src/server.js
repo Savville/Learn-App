@@ -22,6 +22,7 @@ import sitemapRoutes from './routes/sitemap.js';
 import testEmailRoutes from './routes/test-email.js';
 import parseAgnesRoutes from './routes/parse-agnes.js';
 import healthRoutes from './routes/health.js';
+import profilesRoutes from './routes/profiles.js';
 import { auditLog } from './middleware/auditLog.js';
 
 dotenv.config();
@@ -175,6 +176,7 @@ app.use('/api/feed', feedRoutes);
 app.use('/api/sitemap', sitemapRoutes);
 app.use('/api/test-email', testEmailRoutes);
 app.use('/admin/parse-agnes', parseAgnesRoutes);
+app.use('/api', profilesRoutes); // Profiles routes
 
 // Health Check
 app.get('/api/health', (req, res) => {
@@ -198,8 +200,6 @@ app.use((err, req, res, next) => {
 // Start Server
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
-  console.log(`📧 Email Service: ${process.env.RESEND_API_KEY ? 'Resend configured' : 'Not configured'}`);
-  console.log(`🗄️  Database: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
+  console.log(`� Email Service: ${process.env.RESEND_API_KEY ? 'Resend configured' : 'Not configured'}`);
+  console.log(`�🗄️  Database: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
 });
-
-// force reload

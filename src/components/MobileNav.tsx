@@ -1,13 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { Home, Briefcase, PlusCircle, Inbox, ClipboardList } from 'lucide-react';
+import { Home, Briefcase, Users, PlusCircle, Inbox, ClipboardList } from 'lucide-react';
 
 const links = [
-  { name: 'Home',    path: '/',         icon: Home,          exact: true  },
-  { name: 'Browse',  path: '/opportunities', icon: Briefcase, exact: false },
-  { name: 'Post',    path: '/post-with-us',  icon: PlusCircle, exact: false },
-  { name: 'Applied', path: '/applied',       icon: ClipboardList, exact: false },
-  { name: 'Inbox',   path: '/inbox',         icon: Inbox,     exact: false },
+  { name: 'Home', path: '/', icon: Home, exact: true },
+  { name: 'Browse', path: '/opportunities', icon: Briefcase, exact: false },
+  { name: 'Profiles', path: '/profiles', icon: Users, exact: false },
+  { name: 'Post', path: '/post-with-us', icon: PlusCircle, exact: false },
+  { name: 'Applied', path: '/applied', icon: ClipboardList, exact: false },
+  { name: 'Inbox', path: '/inbox', icon: Inbox, exact: false },
 ];
 
 export function MobileNav() {
