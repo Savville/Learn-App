@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
     MapPin, Globe, Github, Linkedin, ExternalLink,
-    ArrowLeft, MessageSquare, Briefcase,
+    ArrowLeft, MessageSquare, Briefcase, Users,
     ShieldCheck
 } from 'lucide-react';
 import { getProfileByEmail } from '../services/profilesAPI';
@@ -102,7 +102,11 @@ export function ProfileView() {
     const bannerIdx = getBannerIndex(profile.email);
     const initials = getInitials(profile.name);
     const hasAvatar = !!profile.avatar;
+    const projectCount = profile.projects ? profile.projects.length : 0;
     const links = (profile.links || { github: '', linkedin: '', website: '', other1: '', other2: '' }) as any;
+
+    const jobsLabel = (profile.totalClients || 0) > 0 ? `${profile.totalClients} jobs` : 'Not started';
+    const postingsLabel = projectCount > 0 ? `${projectCount} postings` : 'Not started';
 
     return (
         <>
@@ -173,10 +177,11 @@ export function ProfileView() {
                                     )}
                                     <div className="flex items-center gap-1">
                                         <Briefcase className="w-3 h-3" />
-                                        <span>{profile.totalClients || 0} jobs</span>
+                                        <span>{jobsLabel}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
-                                        <span>{profile.projects?.length || 0} postings</span>
+                                        <Users className="w-3 h-3" />
+                                        <span>{postingsLabel}</span>
                                     </div>
                                 </div>
                             </div>

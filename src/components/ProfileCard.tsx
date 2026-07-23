@@ -35,21 +35,25 @@ function getInitials(name: string): string {
 export function ProfileCard({ profile }: ProfileCardProps) {
     const bannerIdx = getBannerIndex(profile.email);
     const initials = getInitials(profile.name);
-    const hasAvatar = !!profile.avatar;
+
+    // Display stats — "Not started" if count is 0
+    const jobsLabel = (profile.totalClients || 0) > 0 ? `${profile.totalClients} jobs` : 'Not started';
+    const projectCount = profile.projects ? profile.projects.length : 0;
+    const postingsLabel = projectCount > 0 ? `${projectCount} postings` : 'Not started';
 
     return (
         <div className="group bg-white rounded-[7px] border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
-            {/* Banner Image Area */}
-            <div className="relative h-28 bg-gray-100">
+            {/* Banner Image Area — framed with border */}
+            <div className="relative h-28 bg-gray-100 overflow-hidden">
                 <img
                     src={BANNER_IMAGES[bannerIdx]}
                     alt={`${profile.name} banner`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
 
-                {/* Avatar — positioned over banner, perfectly circular, pulled up into it */}
+                {/* Avatar — positioned exactly at banner boundary, half in banner half in white space */}
                 <div className="absolute bottom-0 left-4 translate-y-1/2">
-                    {hasAvatar ? (
+                    {profile.avatar ? (
                         <img
                             src={profile.avatar}
                             alt={profile.name}
@@ -63,7 +67,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                 </div>
             </div>
 
-            {/* Content — starts below avatar area */}
+            {/* Content — starts below banner */}
             <div className="pt-10 pb-4 px-4">
                 {/* Stats row — location, jobs, postings */}
                 <div className="flex items-center gap-3 mb-2 text-xs text-gray-500">
@@ -75,11 +79,11 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                     )}
                     <div className="flex items-center gap-1">
                         <Briefcase className="w-3 h-3" />
-                        <span>{profile.totalClients || 0} jobs</span>
+                        <span>{jobsLabel}</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
-                        <span>{profile.projects?.length || 0} postings</span>
+                        <span>{postingsLabel}</span>
                     </div>
                 </div>
 
@@ -91,7 +95,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                     {profile.title || 'Professional'}
                 </p>
 
-                {/* Skills tags */}
+                {/* Skills tags — light blue rectangles */}
                 {profile.skills && profile.skills.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-3">
                         {profile.skills.slice(0, 3).map((skill) => (
