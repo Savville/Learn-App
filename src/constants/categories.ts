@@ -1,11 +1,11 @@
 /** Canonical category taxonomy — single source of truth for browse + post flows */
 
-export type TabId = 'all' | 'jobs' | 'academic_career' | 'innovation' | 'projects';
+export type TabId = 'all' | 'providers' | 'jobs' | 'academic_career' | 'innovation' | 'projects';
 
 export type OpportunityCategory =
   | 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship'
   | 'Attachment' | 'Hackathon' | 'Event' | 'Volunteer' | 'Challenge' | 'Project' | 'StudentProject' | 'ResearchCollaboration'
-  | 'Gig' | 'Job' | 'Partnership' | 'StartupFunding' | 'Other';
+  | 'Gig' | 'Job' | 'Partnership' | 'StartupFunding' | 'Other' | 'Provider';
 
 export const GIG_CATEGORIES: OpportunityCategory[] = ['Gig', 'Job'];
 
@@ -40,6 +40,7 @@ export const ALL_CATEGORY_OPTIONS: { value: OpportunityCategory | 'Other'; label
   { value: 'StudentProject', label: 'Student Projects', tab: 'projects' },
   { value: 'ResearchCollaboration', label: 'Research Collaborations', tab: 'projects' },
   { value: 'Partnership', label: 'Partnerships', tab: 'all' },
+  { value: 'Provider', label: 'Providers & Platforms', tab: 'providers' },
   { value: 'Other', label: 'Others', tab: 'all' },
 ];
 
@@ -151,6 +152,7 @@ export function applyCategoryFieldDefaults<T extends Record<string, any>>(catego
 
 export const BROWSE_TABS: { id: TabId; label: string; description: string }[] = [
   { id: 'all', label: 'All', description: 'Opportunities' },
+  { id: 'providers', label: 'Providers', description: 'Opportunity Providers' },
   { id: 'jobs', label: 'Jobs', description: 'Jobs & Microgigs' },
   { id: 'academic_career', label: 'Academic & Career', description: 'Academic & Career' },
   { id: 'innovation', label: 'Grants', description: 'Grants & Funding' },
@@ -166,5 +168,6 @@ export function categoryMatchesTab(category: string, tab: TabId): boolean {
   if (tab === 'academic_career') return ACADEMIC_CAREER_CATEGORIES.includes(cat as OpportunityCategory);
   if (tab === 'innovation') return INNOVATION_CATEGORIES.includes(cat as OpportunityCategory);
   if (tab === 'projects') return PROJECT_CATEGORIES.includes(cat as OpportunityCategory);
+  if (tab === 'providers') return cat === 'Provider';
   return false;
 }

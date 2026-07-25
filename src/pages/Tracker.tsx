@@ -137,8 +137,8 @@ export function Tracker() {
     <div className="bg-white shadow-sm rounded-2xl overflow-hidden mb-8">
       <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild className="mr-2 text-slate-500 hover:text-blue-600">
-             <Link to="/opportunities">← Back</Link>
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="mr-2 text-slate-500 hover:text-blue-600">
+             ← Back
           </Button>
           <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shadow-sm flex-shrink-0">
             <FolderHeart className="w-6 h-6" />

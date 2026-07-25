@@ -52,13 +52,15 @@ export function Header() {
             >
               About & Services
             </Link>
-            <Link
-              to="/profiles"
-              className={`transition-colors ${isActive('/profiles') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
-                }`}
-            >
-              Profiles
-            </Link>
+            {import.meta.env.VITE_ENABLE_PROFILES === 'true' && (
+              <Link
+                to="/profiles"
+                className={`transition-colors ${isActive('/profiles') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
+                  }`}
+              >
+                Profiles
+              </Link>
+            )}
 
             <Link
               to="/post-with-us"
@@ -111,14 +113,16 @@ export function Header() {
               >
                 About & Services
               </Link>
-              <Link
-                to="/profiles"
-                className={`px-4 py-2 rounded-lg transition-colors ${isActive('/profiles') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Profiles
-              </Link>
+              {import.meta.env.VITE_ENABLE_PROFILES === 'true' && (
+                <Link
+                  to="/profiles"
+                  className={`px-4 py-2 rounded-lg transition-colors ${isActive('/profiles') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Profiles
+                </Link>
+              )}
               <Link
                 to="/post-with-us"
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/post-with-us') ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white'

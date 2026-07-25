@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Users, Briefcase } from 'lucide-react';
+import { MapPin, Users, Briefcase, Layers } from 'lucide-react';
 import type { Profile } from '../services/profilesAPI';
 
 interface ProfileCardProps {
@@ -36,52 +36,57 @@ export function ProfileCard({ profile }: ProfileCardProps) {
     const bannerIdx = getBannerIndex(profile.email);
     const initials = getInitials(profile.name);
 
-    // Display stats — "Not started" if count is 0
-    const jobsLabel = (profile.totalClients || 0) > 0 ? `${profile.totalClients} jobs` : 'Not started';
+    // Display stats — fallback to 0 if none
+    const jobsLabel = (profile.totalClients || 0) > 0 ? `${profile.totalClients} jobs` : '0 jobs';
     const projectCount = profile.projects ? profile.projects.length : 0;
-    const postingsLabel = projectCount > 0 ? `${projectCount} postings` : 'Not started';
+    const postingsLabel = projectCount > 0 ? `${projectCount} postings` : '0 postings';
 
     return (
-        <div className="group bg-white rounded-[7px] border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5">
+        <div className="group bg-white rounded-[7px] border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 relative">
             {/* Banner Image Area — framed with border */}
-            <div className="relative h-28 bg-gray-100 overflow-hidden">
+            <div className="h-28 bg-gray-100 overflow-hidden">
                 <img
                     src={BANNER_IMAGES[bannerIdx]}
                     alt={`${profile.name} banner`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-
-                {/* Avatar — positioned exactly at banner boundary, half in banner half in white space */}
-                <div className="absolute bottom-0 left-4 translate-y-1/2">
-                    {profile.avatar ? (
-                        <img
-                            src={profile.avatar}
-                            alt={profile.name}
-                            className="w-16 h-16 rounded-full border-2 border-white shadow-sm object-cover"
-                        />
-                    ) : (
-                        <div className="w-16 h-16 rounded-full border-2 border-white bg-blue-900 flex items-center justify-center shadow-sm">
-                            <span className="text-base font-bold text-white">{initials}</span>
-                        </div>
-                    )}
-                </div>
             </div>
 
-            {/* Content — starts below banner */}
+            {/* Avatar — positioned exactly at banner boundary, half in banner half in white space */}
+            {/* h-28 is 112px. Avatar is h-16 (64px). 112 - 32 = 80px. top-20 is 80px. */}
+            <div className="absolute top-20 left-4 z-10">
+                {profile.avatar ? (
+                    <img
+                        src={profile.avatar}
+                        alt={profile.name}
+                        className="w-16 h-16 rounded-full border-2 border-white shadow-sm object-cover"
+                    />
+                ) : (
+                    <div className="w-16 h-16 rounded-full border-2 border-white bg-blue-900 flex items-center justify-center shadow-sm">
+                        <span className="text-base font-bold text-white">{initials}</span>
+                    </div>
+                )}
+            </div>
+
+            {/* Content — starts just below avatar so there isn't awkward whitespace */}
             <div className="pt-10 pb-4 px-4">
-                {/* Stats row — location, jobs, postings */}
-                <div className="flex items-center gap-3 mb-2 text-xs text-gray-500">
+                {/* Stats row — location, projects, jobs, postings */}
+                <div className="flex items-center gap-2 mb-2 text-[10px] text-gray-500 font-medium">
                     {profile.location && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 shrink-0">
                             <MapPin className="w-3 h-3" />
-                            <span>{profile.location.split(',')[0]}</span>
+                            <span className="truncate max-w-[60px]">{profile.location.split(',')[0]}</span>
                         </div>
                     )}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 shrink-0">
+                        <Layers className="w-3 h-3" />
+                        <span>{projectCount > 0 ? `${projectCount} projects` : '0 projects'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
                         <Briefcase className="w-3 h-3" />
                         <span>{jobsLabel}</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 shrink-0">
                         <Users className="w-3 h-3" />
                         <span>{postingsLabel}</span>
                     </div>

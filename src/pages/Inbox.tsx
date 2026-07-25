@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -65,7 +65,7 @@ export function Inbox() {
       const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/user/${userEmail}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch conversations');
-      setConversations(data);
+      setConversations(data.data || data || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -184,7 +184,7 @@ export function Inbox() {
       const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${convId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setMessages(data);
+      setMessages(data.data || data || []);
     } catch (err: any) {
       console.error(err);
     }
@@ -703,13 +703,27 @@ export function Inbox() {
                       </button>
                     );
                   })()}
-                  <div className="text-left">
-                    <div className="text-lg font-bold" style={{ color: GRAY }}>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-gray-900 leading-tight">
+                        {activeConv.participants.find((p: string) => p !== email)?.split('@')[0]}
+                      </h3>
+                      <Link 
+                        to={`/profile/${activeConv.participants.find((p: string) => p !== email) || ''}`}
+                        className="hidden sm:flex text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full hover:bg-blue-100 transition-colors font-semibold border border-blue-200"
+                      >
+                        View Profile
+                      </Link>
+                    </div>
+                    <p className="text-xs text-blue-600 font-medium truncate max-w-[200px] md:max-w-md">
                       {activeConv.gigTitle}
-                    </div>
-                    <div className="text-sm" style={{ color: MUTED }}>
-                      {activeConv.participants.find((p: string) => p !== email)?.split('@')[0]}
-                    </div>
+                    </p>
+                    <Link 
+                      to={`/profile/${activeConv.participants.find((p: string) => p !== email) || ''}`}
+                      className="sm:hidden text-[10px] text-blue-600 font-medium hover:underline mt-0.5"
+                    >
+                      View Profile
+                    </Link>
                   </div>
                 </div>
                 <div className="relative">

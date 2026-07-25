@@ -15,6 +15,7 @@ import { Tracker } from './pages/Tracker';
 import { Portfolio } from './pages/Portfolio';
 import { Profiles } from './pages/Profiles';
 import { ProfileView } from './pages/ProfileView';
+import { ApplicantsViewer } from './pages/ApplicantsViewer';
 import { MobileNav } from './components/MobileNav';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
@@ -61,6 +62,7 @@ function AppContent() {
   }, [location.pathname, location.hash]);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const showFooter = ['/', '/about', '/contact'].includes(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
@@ -75,7 +77,7 @@ function AppContent() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/post-with-us" element={<PostWithUs />} />
           <Route path="/manage" element={<PostWithUs defaultMode="manage" />} />
-          <Route path="/manage/applicants/:id" element={<PostWithUs defaultMode="manage" />} />
+          <Route path="/manage/applicants/:id" element={<ApplicantsViewer />} />
           {/* /manage/edit/:id reuses PostWithUs which already handles location.state.editPost */}
           <Route path="/manage/edit/:id" element={<PostWithUs defaultMode="post" />} />
           <Route path="/inbox" element={<Inbox />} />
@@ -98,7 +100,7 @@ function AppContent() {
           <Route path="/admin/disputes" element={<AdminDisputes />} />
         </Routes>
       </main>
-      {!isAdminRoute && <Footer />}
+      {showFooter && <Footer />}
       {!isAdminRoute && <MobileNav />}
       <Toaster />
     </div>

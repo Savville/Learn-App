@@ -62,6 +62,12 @@ export interface Opportunity {
   postedBy?: string;
   isVerified?: boolean;
   status?: 'Unverified' | 'Verified' | 'Rejected';
+  providerItems?: {
+    title: string;
+    deadline: string;
+    prize: string;
+    link: string;
+  }[];
   applicationForm?: ApplicationForm;
   verificationAudit?: VerificationAudit;
   projectProposalUrl?: string;
@@ -71,6 +77,54 @@ export interface Opportunity {
 }
 
 export const opportunities: Opportunity[] = [
+  {
+    "title": "Zindi Hackathons & Competitions",
+    "provider": "Zindi Africa",
+    "category": "Provider",
+    "description": "Participate in Africa's premier data science competitions and hackathons to solve real-world problems.",
+    "fullDescription": "### Zindi Competitions\n\nThe following are the latest data science competitions from Zindi Africa.",
+    "providerItems": [
+      { "title": "Google WAXAL ASR Challenge", "deadline": "Aug 3, 2026", "prize": "$10 000 USD", "link": "https://zindi.africa/competitions/google-waxal-asr-challenge" },
+      { "title": "GeoAI Aquaculture Pond Identification Challenge", "deadline": "Aug 17, 2026", "prize": "1000 CHF", "link": "https://zindi.africa/competitions/geoai-aquaculture-pond-identification-challenge" },
+      { "title": "A Step Ahead of Drought: Forecasting Global Water Storage Challenge", "deadline": "Sep 14, 2026", "prize": "€2 000 EUR", "link": "https://zindi.africa/competitions/one-step-ahead-of-drought-forecasting-global-water-storage-challenge" },
+      { "title": "R.O.A.D. Barbados Historic Handwriting Challenge", "deadline": "Oct 5, 2026", "prize": "$25 000 USD", "link": "https://zindi.africa/competitions/road-barbados-historic-handwriting-challenge" },
+      { "title": "Bias Bounty Mapping Equity Challenge", "deadline": "Nov 1, 2026", "prize": "$10 000 USD", "link": "https://zindi.africa/competitions/bias-bounty-mapping-equity-challenge" },
+      { "title": "University Hackathon by USIU-A: African Credit Scoring Challenge", "deadline": "Jul 25, 2026", "prize": "500 Points", "link": "https://zindi.africa/competitions/african-credit-scoring-challenge1" },
+      { "title": "Bootcamp Challenge by Ngao Labs : Recommendation Engine Creation Challenge", "deadline": "Jul 27, 2026", "prize": "500 Points", "link": "https://zindi.africa/competitions/bootcamp-challenge-by-ngao-labs-recommendation-engine-creation-challenge" },
+      { "title": "Cassava AI Root Cause Detective Hackathon", "deadline": "Aug 2, 2026", "prize": "$2 000 USD", "link": "https://zindi.africa/competitions/cassava-ai-root-cause-detective-hackathon" },
+      { "title": "July Study Jam Series: African Credit Scoring Challenge", "deadline": "Aug 9, 2026", "prize": "500 Points", "link": "https://zindi.africa/competitions/july-study-jam-series-african-credit-scoring-challenge" },
+      { "title": "Multilingual Health Question Answering in Low-Resource African Languages Challenge", "deadline": "Jun 22, 2026", "prize": "$5 000 USD", "link": "https://zindi.africa/competitions/multilingual-health-question-answering-in-low-resource-african-languages-challenge" }
+    ],
+    "deadline": "Ongoing",
+    "location": "Online",
+    "eligibility": {
+      "educationLevel": "All",
+      "requirements": [
+        "Data Scientists",
+        "Machine Learning Engineers",
+        "Anyone interested in AI"
+      ]
+    },
+    "benefits": [
+      "Cash Prizes",
+      "Zindi Points",
+      "Skill Building"
+    ],
+    "applicationType": "Platform Link",
+    "applicationLink": "https://zindi.africa/competitions",
+    "fundingType": "Prize",
+    "compensationType": "Paid",
+    "upfrontCost": "No Upfront Cost",
+    "contactLink": "https://zindi.africa/competitions",
+    "logoUrl": "/images/zindi_image.png",
+    "id": "zindi-competitions-aggregator",
+    "isVerified": true,
+    "status": "Verified",
+    "dateAdded": "2026-07-25T12:00:00Z",
+    "featured": true,
+    "postedBy": "Opportunities Kenya Admin",
+    "contactEmail": "admin@opportunities.ke"
+  },
   {
     "title": "MEST AI Startup Program 2027",
     "provider": "MEST",

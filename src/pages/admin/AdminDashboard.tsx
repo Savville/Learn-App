@@ -5,8 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send, MessageCircle } from 'lucide-react';
+import { ProfileView } from '../ProfileView';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send, MessageCircle, Briefcase } from 'lucide-react';
 import { useAlert } from '@/contexts/AlertContext';
+import { PosterDashboard } from '@/components/PosterDashboard';
 
 const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -31,7 +33,7 @@ export default function AdminDashboard() {
   const [txCallbackDiag, setTxCallbackDiag] = useState<any>(null);
   const [txFilter, setTxFilter] = useState<{ type: string; status: string }>({ type: '', status: '' });
   const [txLoading, setTxLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats' | 'ledger' | 'transactions'>('opps');
+  const [activeTab, setActiveTab] = useState<'my-posts' | 'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats' | 'ledger' | 'transactions'>('my-posts');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
@@ -498,7 +500,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden sm:block rounded-full bg-primary/5 px-4 py-1 text-xs font-medium text-primary">
-              Admin tools · {activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'reports' ? 'Reports Inbox' : activeTab === 'manage' ? 'Manage Content' : activeTab === 'escrow' ? 'Escrow Payouts' : 'Organization Management'}
+              Admin tools · {activeTab === 'my-posts' ? 'My Posts' : activeTab === 'opps' ? 'Verification Inbox' : activeTab === 'reports' ? 'Reports Inbox' : activeTab === 'manage' ? 'Manage Content' : activeTab === 'escrow' ? 'Escrow Payouts' : 'Organization Management'}
             </div>
             <Button
               variant="outline"
@@ -534,7 +536,13 @@ export default function AdminDashboard() {
         )}
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-1 border-b border-slate-200">
+        <div className="flex flex-wrap bg-white rounded-t-xl border-b border-slate-200">
+          <button
+            onClick={() => setActiveTab('my-posts')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'my-posts' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <Briefcase className="w-4 h-4" /> My Posts
+          </button>
           <button
             onClick={() => setActiveTab('opps')}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'opps' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
@@ -616,6 +624,10 @@ export default function AdminDashboard() {
 
         {loading ? (
           <p className="text-slate-500 py-10 text-center">Loading data...</p>
+        ) : activeTab === 'my-posts' ? (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[600px]">
+            <PosterDashboard isAdminMode={true} />
+          </div>
         ) : activeTab === 'opps' ? (
           /* Opportunities Tab */
           pending.length === 0 ? (

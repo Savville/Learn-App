@@ -37,7 +37,7 @@ export function Contact() {
       {/* Hero Section */}
       <div className="bg-[#131ADF] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-          <h1 className="mb-6">Get in Touch</h1>
+          <h1 className="text-3xl font-bold mb-6">Get in Touch</h1>
           <p className="text-blue-100 max-w-2xl mx-auto">
             Have questions, suggestions, or want to partner with us? We'd love to hear from you!
           </p>

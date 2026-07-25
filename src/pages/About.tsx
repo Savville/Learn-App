@@ -58,7 +58,7 @@ export function About() {
       {/* Hero Section */}
       <div className="bg-[#131ADF] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-          <h1 className="mb-6">About Opportunities Kenya</h1>
+          <h1 className="text-3xl font-bold mb-6">About Opportunities Kenya</h1>
           <p className="text-blue-100 max-w-2xl mx-auto">
             Empowering Kenya's technical talent by connecting them with paid subcontracting gigs, industry innovation challenges, and global career opportunities.
           </p>

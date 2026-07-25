@@ -80,6 +80,8 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
   const [orgRequest, setOrgRequest] = useState({ name: '', organization: '', email: '', telephone: '', description: '' });
   const [requestStatus, setRequestStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isVerifiedOrg, setIsVerifiedOrg] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
 
   // OTP Verification State
   const [showOTP, setShowOTP] = useState(false);
@@ -92,6 +94,8 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
   // Handle Edit Redirection from Dashboard
   const location = useLocation();
   const navigate = useNavigate();
+  const queryParams = new URLSearchParams(location.search);
+  const isAdminPost = queryParams.get('admin') === 'true';
   const editPost = location.state?.editPost;
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
 
@@ -137,6 +141,63 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
 
   // View Mode
   const [viewMode, setViewMode] = useState<'post' | 'manage'>(defaultMode);
+
+  // Prefill reporter details if logged in
+  useEffect(() => {
+    const userEmail = localStorage.getItem('user_email');
+    const userToken = localStorage.getItem('user_token');
+    
+    if (userEmail && userToken && !editPost) {
+      const prefillIdentity = async () => {
+        try {
+          let profileObj: any = null;
+          // 1. Fetch Profile for isVerifiedOrg
+          try {
+            const profileRes = await fetch(`${API_BASE}/portfolio/${userEmail}`);
+            const profileData = await profileRes.json();
+            if (profileRes.ok && profileData.profile) {
+              profileObj = profileData.profile;
+              setIsVerifiedOrg(!!profileObj.isVerifiedOrg);
+            }
+          } catch (err) {}
+
+          // 2. Fetch past posts
+          const res = await fetch(`${API_BASE}/public/me/posts?filterMode=normal`, {
+            headers: { Authorization: `Bearer ${userToken}` }
+          });
+          const data = await res.json();
+          if (res.ok) {
+            const allPosts = [...(data.live || []), ...(data.pending || [])].sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+            const latest = allPosts.find((p: any) => p.reporter && p.reporter.name);
+            
+            if (latest && latest.reporter) {
+              setReporter({
+                name: latest.reporter.name || '',
+                organization: latest.reporter.organization || '',
+                role: latest.reporter.role || '',
+                telephone: latest.reporter.telephone || '',
+                email: latest.reporter.email || userEmail,
+                websiteOrSocial: ''
+              });
+            } else if (profileObj) {
+              // Fallback to portfolio profile
+              setReporter(prev => ({
+                ...prev,
+                name: profileObj.name || '',
+                telephone: profileObj.telephone || profileObj.phone || '',
+                email: userEmail
+              }));
+            } else {
+              setReporter(prev => ({ ...prev, email: userEmail }));
+            }
+          }
+        } catch (e) {
+          console.error('Failed to prefill identity', e);
+        }
+      };
+      prefillIdentity();
+    }
+  }, [editPost]);
 
   // Sync defaultMode prop if it changes
   useEffect(() => {
@@ -479,7 +540,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ opportunity: finalOpportunity, reporter }),
+        body: JSON.stringify({ opportunity: finalOpportunity, reporter, isAdminPost }),
       });
 
       const publishData = await publishResponse.json();
@@ -548,18 +609,24 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
     e.preventDefault();
     setAuthLoading(true);
     setError(null);
+    const emailToUse = localStorage.getItem('user_token') ? reporter.email : loginEmail;
     try {
       const res = await fetch(`${API_BASE}/public/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: reporter.email, otp })
+        body: JSON.stringify({ email: emailToUse, otp })
       });
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem('user_token', data.token);
         localStorage.setItem('user_email', data.email);
         setShowOTP(false);
-        await executePublish();
+        // If we are logged in from the wall, reload to fetch profile
+        if (!localStorage.getItem('user_token')) {
+           window.location.reload();
+        } else {
+           await executePublish();
+        }
       } else {
         setError(data.error || 'Invalid verification code');
       }
@@ -575,7 +642,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
       <div className="bg-[#131ADF] text-white shadow-md rounded-b-3xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <p className="text-white mb-6 px-4 py-1 uppercase tracking-widest text-sm font-semibold opacity-90 block">For Organizations & Recruiters</p>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-6">
+          <h1 className="text-3xl font-bold text-white mb-6">
             {viewMode === 'post' ? (editingPostId ? 'Edit Opportunity' : 'Post an Opportunity') : 'Your Dashboard'}
           </h1>
           <p className="text-blue-50 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
@@ -609,19 +676,110 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
-        {viewMode === 'manage' ? (
-          <PosterDashboard />
-        ) : (
-          <>
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex items-start gap-3 mt-4">
-              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
-              <p>
-                {editingPostId
-                  ? "You are submitting changes to an already verified live opportunity. An admin will review these changes before they reflect publicly."
-                  : "We manually review submissions, but we do not guarantee every opportunity, especially external postings. Please provide accurate identity and proof details."}
-              </p>
-            </div>
+      {!localStorage.getItem('user_token') ? (
+        <div className="max-w-xl mx-auto mt-12 px-4 relative z-10">
+          <Card className="shadow-2xl border-0 rounded-3xl p-8 sm:p-12 text-center bg-white">
+            <h2 className="text-2xl font-extrabold text-slate-800 mb-2">Login to Continue</h2>
+            <p className="text-gray-600 mb-8">Enter your email to verify your identity. This helps us keep the platform spam-free.</p>
+            
+            {!showOTP ? (
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setAuthLoading(true);
+                setError(null);
+                try {
+                  const res = await fetch(`${API_BASE}/public/auth/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: loginEmail })
+                  });
+                  if (res.ok) setShowOTP(true);
+                  else {
+                    const data = await res.json();
+                    setError(data.error || 'Failed to send code');
+                  }
+                } catch (err) { setError('Network error'); }
+                setAuthLoading(false);
+              }} className="space-y-4 text-left">
+                <div>
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2">Email Address</label>
+                  <Input
+                    required
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="e.g. name@organization.org"
+                    className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                  />
+                </div>
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                <Button type="submit" disabled={authLoading} className="w-full py-4 h-auto rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white mt-4">
+                  {authLoading ? 'Sending...' : 'Send Access Code'}
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setAuthLoading(true);
+                setError(null);
+                try {
+                  const res = await fetch(`${API_BASE}/public/auth/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: loginEmail, otp })
+                  });
+                  const data = await res.json();
+                  if (res.ok) {
+                    localStorage.setItem('user_token', data.token);
+                    localStorage.setItem('user_email', data.email);
+                    setShowOTP(false);
+                    window.location.reload(); // Reload to fetch profile and unlock page
+                  } else {
+                    setError(data.error || 'Invalid code');
+                  }
+                } catch (err) { setError('Network error'); }
+                setAuthLoading(false);
+              }} className="space-y-4 text-left">
+                <div>
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2">Enter 4-Digit Code</label>
+                  <Input
+                    required
+                    type="text"
+                    maxLength={4}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="e.g. 1234"
+                    className="w-full px-5 py-4 rounded-xl border border-gray-200 text-center tracking-[0.5em] font-mono text-xl outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
+                  />
+                  <p className="text-sm text-gray-500 mt-2 text-center">Sent to <span className="font-bold">{loginEmail}</span></p>
+                </div>
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                <div className="flex gap-3 mt-4">
+                  <Button type="button" variant="outline" onClick={() => setShowOTP(false)} className="flex-1 py-4 h-auto rounded-xl font-bold">
+                    Back
+                  </Button>
+                  <Button type="submit" disabled={authLoading || otp.length < 4} className="flex-1 py-4 h-auto rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white">
+                    {authLoading ? 'Verifying...' : 'Verify & Login'}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </Card>
+        </div>
+      ) : (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+          {viewMode === 'manage' ? (
+            <PosterDashboard />
+          ) : (
+            <>
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 flex items-start gap-3 mt-4">
+                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+                <p>
+                  {editingPostId
+                    ? "You are submitting changes to an already verified live opportunity. An admin will review these changes before they reflect publicly."
+                    : "We manually review submissions, but we do not guarantee every opportunity, especially external postings. Please provide accurate identity and proof details."}
+                </p>
+              </div>
 
             {/* STEP 1: Details & Text Input (Hidden during Edit Mode) */}
             {!editingPostId && (
@@ -642,10 +800,13 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[15px] font-extrabold text-slate-800">Organization <span className="text-red-500">*</span></label>
+                      <label className="text-[15px] font-extrabold text-slate-800">
+                        {isVerifiedOrg ? 'Organization' : 'Institution'}
+                        {isVerifiedOrg ? <span className="text-red-500 ml-1">*</span> : <span className="text-gray-400 font-normal ml-1">(Optional)</span>}
+                      </label>
                       <Input
-                        required
-                        placeholder="e.g. IEEE Kenya"
+                        required={isVerifiedOrg}
+                        placeholder={isVerifiedOrg ? "e.g. IEEE Kenya" : "e.g. Kenyatta University"}
                         value={reporter.organization}
                         onChange={(e) => setReporter({ ...reporter, organization: e.target.value })}
                         className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50/50 transition-colors h-auto"
@@ -697,15 +858,22 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
                   </div>
 
                   <div className="pt-6 border-t border-gray-100 mt-6">
-                    <Button
-                      variant="outline"
-                      className="text-blue-600 border-blue-200 hover:bg-blue-50 rounded-xl px-6 py-4 h-auto font-semibold"
-                      onClick={() => setShowOrgRequest(!showOrgRequest)}
-                    >
-                      Post as an Organization?
-                    </Button>
+                    {isVerifiedOrg ? (
+                      <div className="inline-flex items-center gap-2 bg-blue-100/50 text-blue-800 px-5 py-3 rounded-xl font-bold text-sm border border-blue-200">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Verified Organization
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50 rounded-xl px-6 py-4 h-auto font-semibold"
+                        onClick={() => setShowOrgRequest(!showOrgRequest)}
+                      >
+                        Post as an Organization?
+                      </Button>
+                    )}
 
-                    {showOrgRequest && (
+                    {!isVerifiedOrg && showOrgRequest && (
                       <Card className="mt-4 border-blue-100 bg-blue-50/30">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm">Request Official Organization Status</CardTitle>
@@ -1455,6 +1623,7 @@ export function PostWithUs({ defaultMode = 'post' }: { defaultMode?: 'post' | 'm
           </>
         )}
       </div>
+      )}
 
       {/* OTP Verification Modal */}
       {

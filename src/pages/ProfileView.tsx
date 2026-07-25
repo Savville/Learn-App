@@ -3,11 +3,12 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
     MapPin, Globe, Github, Linkedin, ExternalLink,
     ArrowLeft, MessageSquare, Briefcase, Users,
-    ShieldCheck
+    ShieldCheck, Layers
 } from 'lucide-react';
 import { getProfileByEmail } from '../services/profilesAPI';
 import type { Profile, ProfileProject } from '../services/profilesAPI';
 import { useSEO } from '../hooks/useSEO';
+import ReactMarkdown from 'react-markdown';
 
 // Shared banner images — same pool used in ProfileCard
 const BANNER_IMAGES = [
@@ -35,16 +36,21 @@ function getInitials(name: string): string {
         .slice(0, 2);
 }
 
-export function ProfileView() {
-    const { email } = useParams<{ email: string }>();
+export function ProfileView({ emailProp, isSlider = false, bottomActions, fallbackProfile }: { emailProp?: string, isSlider?: boolean, bottomActions?: React.ReactNode, fallbackProfile?: any }) {
+    const { email: paramEmail } = useParams<{ email: string }>();
+    const email = emailProp || paramEmail;
     const navigate = useNavigate();
-    const [profile, setProfile] = useState<Profile | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [profile, setProfile] = useState<Profile | null>(fallbackProfile || null);
+    const [loading, setLoading] = useState(!fallbackProfile);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!email) return;
-        setLoading(true);
+        
+        // Only show full-page loading spinner if we don't have a fallback
+        if (!fallbackProfile) {
+            setLoading(true);
+        }
         setError(null);
 
         getProfileByEmail(email)
@@ -52,12 +58,16 @@ export function ProfileView() {
                 setProfile(res.profile);
             })
             .catch((err) => {
-                setError(err.message);
+                if (fallbackProfile) {
+                    setProfile(fallbackProfile);
+                } else {
+                    setError(err.message);
+                }
             })
             .finally(() => {
                 setLoading(false);
             });
-    }, [email]);
+    }, [email, fallbackProfile]);
 
     // Breadcrumbs for structured data
     const breadcrumbs = profile
@@ -108,6 +118,11 @@ export function ProfileView() {
     const jobsLabel = (profile.totalClients || 0) > 0 ? `${profile.totalClients} jobs` : 'Not started';
     const postingsLabel = projectCount > 0 ? `${projectCount} postings` : 'Not started';
 
+    // Avatar size: w-24 h-24 = 96px, half = 48px
+    // Banner height: h-48 = 192px
+    // Position avatar center at banner bottom → top = 192 - 48 = 144px from card root
+    const AVATAR_HALF = 48;
+
     return (
         <>
             {/* Breadcrumb Structured Data */}
@@ -124,46 +139,56 @@ export function ProfileView() {
                 })}
             </script>
 
-            <div className="min-h-screen bg-gray-50 pb-12">
+            <div className={isSlider ? "bg-gray-50 pb-12 h-full overflow-y-auto" : "min-h-screen bg-gray-50 pb-12"}>
                 {/* Back Button */}
-                <div className="bg-white border-b border-slate-200">
-                    <div className="max-w-4xl mx-auto px-4 py-3">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="flex items-center gap-2 text-sm text-slate-600 hover:text-blue-700 transition-colors"
-                        >
-                            <ArrowLeft className="w-4 h-4" />
-                            Back to Profiles
-                        </button>
+                {!isSlider && (
+                    <div className="bg-white border-b border-slate-200">
+                        <div className="max-w-4xl mx-auto px-4 py-3">
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="flex items-center gap-2 text-sm text-slate-600 hover:text-blue-700 transition-colors"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                Back to previous page
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
 
-                {/* Banner — matches card style: fixed height, content-centered */}
-                <div className="max-w-4xl mx-auto px-4 mt-6">
-                    <div className="relative h-48 bg-gray-100 rounded-[7px] overflow-hidden border border-gray-200">
+                {/* Banner + Avatar wrapper */}
+                <div className="max-w-6xl mx-auto px-6 sm:px-8 mt-6 relative">
+                    {/* Banner Image Area */}
+                    <div className="relative h-48 bg-gray-100 rounded-[7px] border border-gray-200 overflow-hidden">
                         <img
                             src={BANNER_IMAGES[bannerIdx]}
                             alt={`${profile.name} banner`}
                             className="w-full h-full object-cover"
                         />
-                        {/* Avatar — perfectly circular, pulled up into banner */}
-                        <div className="absolute bottom-0 left-6 translate-y-1/2">
-                            {hasAvatar ? (
-                                <img
-                                    src={profile.avatar}
-                                    alt={profile.name}
-                                    className="w-24 h-24 rounded-full border-3 border-white shadow-lg object-cover"
-                                />
-                            ) : (
-                                <div className="w-24 h-24 rounded-full border-3 border-white bg-blue-900 flex items-center justify-center shadow-lg">
-                                    <span className="text-2xl font-bold text-white">{initials}</span>
-                                </div>
-                            )}
-                        </div>
                     </div>
 
-                    {/* Info — sits below banner */}
-                    <div className="pt-16 pb-6">
+                    {/* Avatar — centered at banner bottom edge (banner h-48=192px, avatar r=48px → top=192-48=144px).
+                        The wrapper has mt-6, so absolute positioning is relative to this wrapper which starts at mt-6 position. */}
+                    <div
+                        className="absolute left-6 sm:left-8 z-20"
+                        style={{ top: '144px' }}
+                    >
+                        {hasAvatar ? (
+                            <img
+                                src={profile.avatar}
+                                alt={profile.name}
+                                className="w-24 h-24 rounded-full border-3 border-white shadow-lg object-cover block"
+                            />
+                        ) : (
+                            <div className="w-24 h-24 rounded-full border-3 border-white bg-blue-900 flex items-center justify-center shadow-lg">
+                                <span className="text-2xl font-bold text-white">{initials}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Info — sits below banner with enough padding to clear avatar */}
+                <div className="max-w-6xl mx-auto px-6 sm:px-8 mt-6">
+                    <div className="pt-6 pb-6">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900 mb-0.5">{profile.name}</h1>
@@ -175,6 +200,10 @@ export function ProfileView() {
                                             <span>{profile.location.split(',')[0]}</span>
                                         </div>
                                     )}
+                                    <div className="flex items-center gap-1">
+                                        <Layers className="w-3 h-3" />
+                                        <span>{projectCount > 0 ? `${projectCount} projects` : '0 projects'}</span>
+                                    </div>
                                     <div className="flex items-center gap-1">
                                         <Briefcase className="w-3 h-3" />
                                         <span>{jobsLabel}</span>
@@ -198,10 +227,10 @@ export function ProfileView() {
                 </div>
 
                 {/* Content */}
-                <div className="max-w-6xl mx-auto px-4 py-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="max-w-6xl mx-auto px-6 sm:px-8 py-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Left Column - Main Content */}
-                        <div className="lg:col-span-2 space-y-6">
+                        <div className="md:col-span-2 space-y-6">
                             {/* Bio */}
                             {profile.bio && (
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
@@ -260,7 +289,9 @@ export function ProfileView() {
                                                         {project.status === 'completed' ? 'Completed' : 'In Progress'}
                                                     </span>
                                                 </div>
-                                                <p className="text-sm text-slate-600 mb-3 leading-relaxed">{project.description}</p>
+                                                <div className="text-sm text-slate-600 mb-3 leading-relaxed prose prose-sm max-w-none">
+                                                    <ReactMarkdown>{project.description}</ReactMarkdown>
+                                                </div>
                                                 {project.proofLink && (
                                                     <a
                                                         href={project.proofLink}
@@ -345,6 +376,13 @@ export function ProfileView() {
                     </div>
                 </div>
             </div>
+
+            {/* Sticky Action Bar for Drawer */}
+            {bottomActions && (
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 sm:px-8 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex gap-3 justify-end">
+                    {bottomActions}
+                </div>
+            )}
         </>
     );
 }

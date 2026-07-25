@@ -51,15 +51,19 @@ export function Profiles() {
         loadProfiles();
     };
 
-    // Simple filter logic based on interests/skills
-    const filteredProfiles = activeFilter === 'all'
-        ? profiles
-        : profiles.filter((p) => {
-            if (activeFilter === 'students') {
-                return p.interestAreas?.some((a) =>
-                    ['Education', 'EdTech', 'Research'].includes(a)
-                );
-            }
+    const loggedInEmail = localStorage.getItem('user_email');
+
+    // Simple filter logic based on interests/skills and exclude logged-in user
+    const filteredProfiles = profiles.filter((p) => {
+        if (loggedInEmail && p.email === loggedInEmail) return false;
+
+        if (activeFilter === 'all') return true;
+
+        if (activeFilter === 'students') {
+            return p.interestAreas?.some((a) =>
+                ['Education', 'EdTech', 'Research'].includes(a)
+            );
+        }
             if (activeFilter === 'organizations') {
                 return p.interestAreas?.some((a) =>
                     ['Government', 'NGO', 'Policy'].includes(a)
@@ -70,17 +74,26 @@ export function Profiles() {
         });
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 pb-12">
             {/* Header Bar */}
-            <div className="bg-white border-b border-slate-200 sticky top-16 z-40">
-                <div className="max-w-7xl mx-auto px-4 py-4">
-                    <h1 className="text-xl font-bold text-slate-800 mb-3">Profiles</h1>
+            <div className="bg-[#131ADF] rounded-b-3xl shadow-md mb-8">
+                <div className="max-w-7xl mx-auto px-4 py-8 pb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                        <h1 className="text-3xl font-bold text-white">Profiles</h1>
+                        <div className="flex gap-3 shrink-0 overflow-x-auto pb-1 sm:pb-0">
+                            <Link to="/applied" className="px-5 py-2 text-sm rounded-md font-semibold transition-all border border-white text-white hover:bg-white hover:text-blue-900 whitespace-nowrap">Tracker</Link>
+                            <Link to="/inbox" className="px-5 py-2 text-sm rounded-md font-semibold transition-all border border-white text-white hover:bg-white hover:text-blue-900 whitespace-nowrap">Inbox</Link>
+                            <Link to="/portfolio" className="px-5 py-2 text-sm rounded-md font-semibold transition-all border border-white text-white hover:bg-white hover:text-blue-900 whitespace-nowrap">Portfolio</Link>
+                        </div>
+                    </div>
 
                     {/* AI Search */}
-                    <AISearchBar
-                        onResults={handleAISearchResults}
-                        placeholder="Find talent by skill, location, or description..."
-                    />
+                    <div className="bg-white/10 p-1.5 rounded-xl backdrop-blur-sm border border-white/20 shadow-sm">
+                        <AISearchBar
+                            onResults={handleAISearchResults}
+                            placeholder="Find talent by skill, location, or description..."
+                        />
+                    </div>
                 </div>
             </div>
 

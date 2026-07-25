@@ -782,6 +782,7 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
       riskFlags: pendingDoc.riskFlags || [],
     };
     oppToPublish.reporter = pendingDoc.reporter;
+    oppToPublish.isAdminPost = pendingDoc.isAdminPost;
     // Copy escrow funding state to the live opportunity doc
     if (pendingDoc.isEscrowFunded) {
       oppToPublish.isEscrowFunded = true;
@@ -1649,6 +1650,160 @@ router.get('/kyc/:filename', verifyAdminKey, (req, res) => {
     res.sendFile(filePath);
   } else {
     res.status(404).json({ error: 'KYC Document not found' });
+  }
+});
+
+// ==========================================
+// Phase 6: Platform Summary & User Management
+// ==========================================
+
+// GET /api/admin/platform-summary
+// Lightweight summary of all posts and their applicant stats
+router.get('/platform-summary', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    
+    // Fetch all opportunities (both live and pending)
+    const liveOpps = await db.collection('opportunities').find({}, { projection: { id: 1, _id: 1, title: 1, contactEmail: 1, userEmail: 1, status: 1, createdAt: 1, escrowAmount: 1 } }).toArray();
+    
+    // Fetch applicant counts
+    const apps = await db.collection('applications').aggregate([
+      {
+        $group: {
+          _id: {
+            oppId: "$opportunityId",
+            postId: "$postId"
+          },
+          total: { $sum: 1 },
+          approved: { $sum: { $cond: [{ $eq: ["$status", "approved"] }, 1, 0] } },
+          rejected: { $sum: { $cond: [{ $eq: ["$status", "rejected"] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] } },
+          disputed: { $sum: { $cond: [{ $eq: ["$status", "disputed"] }, 1, 0] } }
+        }
+      }
+    ]).toArray();
+
+    // Map application stats to opportunities
+    const summary = liveOpps.map(opp => {
+      const oppIdStr = opp.id || opp._id.toString();
+      const oppStats = apps.filter(a => a._id.oppId === oppIdStr || a._id.postId === oppIdStr).reduce((acc, curr) => {
+        acc.total += curr.total;
+        acc.approved += curr.approved;
+        acc.rejected += curr.rejected;
+        acc.pending += curr.pending;
+        acc.disputed += curr.disputed;
+        return acc;
+      }, { total: 0, approved: 0, rejected: 0, pending: 0, disputed: 0 });
+
+      return {
+        id: opp.id,
+        _id: opp._id,
+        title: opp.title,
+        posterEmail: opp.contactEmail || opp.userEmail || 'Unknown',
+        escrowAmount: opp.escrowAmount,
+        status: opp.status || 'live',
+        createdAt: opp.createdAt,
+        stats: oppStats
+      };
+    });
+
+    res.json(summary.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/users-overview
+// Fetch all users with basic stats
+router.get('/users-overview', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+
+    // 1. Get all profiles (as our base for "users")
+    const profiles = await db.collection('profiles').find({}, { projection: { email: 1, name: 1, title: 1, createdAt: 1 } }).toArray();
+
+    // 2. Get account status and admin notes from a central 'users' or 'admin_user_data' collection
+    const userRecords = await db.collection('admin_user_data').find({}).toArray();
+
+    // 3. Get application counts per email
+    const appCounts = await db.collection('applications').aggregate([
+      { $group: { _id: "$applicantEmail", count: { $sum: 1 } } }
+    ]).toArray();
+
+    // 4. Get post counts per email
+    const postCounts = await db.collection('opportunities').aggregate([
+      {
+        $group: {
+          _id: { $ifNull: ["$contactEmail", { $ifNull: ["$userEmail", "$reporter.email"] }] },
+          count: { $sum: 1 }
+        }
+      }
+    ]).toArray();
+
+    const overview = profiles.map(profile => {
+      const email = profile.email;
+      const adminData = userRecords.find(u => u.email === email) || {};
+      const apps = appCounts.find(a => a._id === email)?.count || 0;
+      const posts = postCounts.find(p => p._id === email)?.count || 0;
+
+      return {
+        email,
+        name: profile.name,
+        title: profile.title,
+        joinedAt: profile.createdAt,
+        status: adminData.status || 'active',
+        adminNotes: adminData.notes || '',
+        metrics: { applications: apps, posts }
+      };
+    });
+
+    res.json(overview);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/users/:email/status
+// Suspend or unsuspend a user
+router.post('/users/:email/status', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const email = req.params.email;
+    const { status } = req.body; // 'active' or 'suspended'
+
+    if (!['active', 'suspended'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    await db.collection('admin_user_data').updateOne(
+      { email },
+      { $set: { status, updatedAt: new Date() } },
+      { upsert: true }
+    );
+
+    res.json({ success: true, message: `User ${email} is now ${status}` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/users/:email/notes
+// Add an internal admin note
+router.post('/users/:email/notes', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const email = req.params.email;
+    const { notes } = req.body;
+
+    await db.collection('admin_user_data').updateOne(
+      { email },
+      { $set: { notes, updatedAt: new Date() } },
+      { upsert: true }
+    );
+
+    res.json({ success: true, message: `Notes updated for ${email}` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
