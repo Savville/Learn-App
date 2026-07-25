@@ -41,8 +41,8 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
   const navigate = useNavigate();
   const { id: urlPostId } = useParams<{ id: string }>();
   const { showAlert } = useAlert();
-  const [token, setToken] = useState(localStorage.getItem('user_token'));
-  const [email, setEmail] = useState(localStorage.getItem('user_email'));
+  const [token, setToken] = useState(isAdminMode ? localStorage.getItem('adminToken') : localStorage.getItem('user_token'));
+  const [email, setEmail] = useState(isAdminMode ? 'ochiwilliamotieno@gmail.com' : localStorage.getItem('user_email'));
 
   const [livePosts, setLivePosts] = useState<Post[]>([]);
   const [pendingPosts, setPendingPosts] = useState<Post[]>([]);
@@ -193,12 +193,15 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('user_email');
-    setToken(null);
-    setEmail(null);
-    setLivePosts([]);
-    setPendingPosts([]);
+    if (isAdminMode) return; // Admins cannot logout from here
+    if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem('user_token');
+      localStorage.removeItem('user_email');
+      setToken(null);
+      setEmail(null);
+      setLivePosts([]);
+      setPendingPosts([]);
+    }
   };
 
   const handleDeletePending = async () => {
@@ -471,15 +474,28 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
               <Briefcase className="w-7 h-7" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">My Postings Dashboard</h2>
-              <p className="text-gray-500 mt-1">Logged in as <span className="font-medium text-gray-700">{email}</span></p>
+              <h2 className="text-2xl font-bold text-gray-900 truncate pr-4">
+                {isAdminMode ? 'All Platform Posts' : 'My Posts Dashboard'}
+              </h2>
             </div>
-          </div>
-          <div className="flex gap-3">
-
-            <button onClick={handleLogout} className="px-5 py-2.5 rounded-full border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-colors font-semibold flex items-center shadow-sm">
-              <LogOut className="w-4 h-4 mr-2" /> Logout
-            </button>
+            
+            <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+              <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl shrink-0 border border-gray-200">
+                <Mail className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700 truncate max-w-[150px] md:max-w-xs" title={email || ''}>{email}</span>
+              </div>
+              
+              {!isAdminMode && (
+                <Button 
+                  onClick={handleLogout} 
+                  variant="outline" 
+                  className="gap-2 shrink-0 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 

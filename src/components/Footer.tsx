@@ -43,7 +43,7 @@ export function Footer() {
                 Subscribe
               </Link>
               <Link to="/contact" className="hover:text-white transition-colors">
-                Contact
+                Contact Us
               </Link>
               <Link
                 to="/post-with-us"

@@ -1807,4 +1807,173 @@ router.post('/users/:email/notes', verifyAdminKey, async (req, res) => {
   }
 });
 
+// GET /api/admin/messages/bulk
+// Fetch bulk broadcasts
+router.get('/messages/bulk', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const broadcasts = await db.collection('bulk_broadcasts').find().sort({ sentAt: -1 }).toArray();
+    res.json(broadcasts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/disputes/:id/chat
+// Fetch full chat history for a specific gig dispute
+router.get('/disputes/:id/chat', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const disputeId = req.params.id;
+    const { ObjectId } = await import('mongodb');
+
+    const dispute = await db.collection('disputes').findOne({ _id: new ObjectId(disputeId) });
+    if (!dispute) return res.status(404).json({ error: 'Dispute not found' });
+    
+    // Attempt to find conversation by opportunity ID since disputes are gig-based
+    const gigId = dispute.opportunityId;
+    let query = {
+      $or: [
+        { gigId: gigId?.length === 24 ? new ObjectId(gigId) : gigId },
+        { opportunityId: gigId?.length === 24 ? gigId.toString() : gigId }
+      ]
+    };
+    
+    // We can filter by participants if they exist
+    if (dispute.reporterEmail && dispute.disputedPartyEmail) {
+      query.participants = { $all: [dispute.reporterEmail, dispute.disputedPartyEmail] };
+    }
+
+    const conv = await db.collection('conversations').findOne(query);
+
+    if (!conv) {
+      // Fallback: just return empty if no conversation is found, some gigs have no chat
+      return res.json([]);
+    }
+
+    const messages = await db.collection('messages').find({ conversationId: conv._id }).sort({ createdAt: 1 }).toArray();
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/master-sheet
+// Fetch aggregated stats for all opportunities and their applications
+router.get('/master-sheet', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    
+    // Fetch all active opportunities
+    const opportunities = await db.collection('opportunities').find().toArray();
+    
+    // Map them up
+    const sheetData = [];
+    for (const opp of opportunities) {
+      // Find applications for this gig
+      const apps = await db.collection('applications').find({
+        $or: [
+          { opportunityId: opp.id },
+          { opportunityId: opp._id?.toString() }
+        ]
+      }).toArray();
+      
+      const counts = { pending: 0, shortlisted: 0, approved: 0, rejected: 0, hired: 0 };
+      const lists = { pending: [], shortlisted: [], approved: [], rejected: [], hired: [] };
+      
+      for (const app of apps) {
+        const status = app.status || 'pending';
+        // group paid and disputed into 'hired'
+        const category = (status === 'paid' || status === 'disputed') ? 'hired' : 
+                         (counts[status] !== undefined ? status : 'pending');
+                         
+        counts[category]++;
+        if (!lists[category].includes(app.applicantEmail)) {
+          lists[category].push(app.applicantEmail);
+        }
+      }
+      
+      sheetData.push({
+        gigId: opp.id || opp._id?.toString(),
+        title: opp.title,
+        posterEmail: opp.contactEmail || opp.posterEmail || 'Unknown',
+        escrowAmount: opp.escrowAmount || 0,
+        totalApps: apps.length,
+        counts,
+        lists
+      });
+    }
+    
+    // Sort by total applications descending
+    sheetData.sort((a, b) => b.totalApps - a.totalApps);
+    
+    res.json(sheetData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/interactions
+// Fetch interaction stats (views/clicks/CTR) for each opportunity
+router.get('/interactions', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+
+    // 1. Aggregate analytics data
+    const analyticsAggr = await db.collection('analytics').aggregate([
+      {
+        $group: {
+          _id: "$opportunityId",
+          views: {
+            $sum: { $cond: [{ $eq: ["$action", "view"] }, 1, 0] }
+          },
+          clicks: {
+            $sum: { $cond: [{ $eq: ["$action", "click"] }, 1, 0] }
+          }
+        }
+      }
+    ]).toArray();
+
+    // 2. Fetch opportunities to get titles/posters
+    const opportunities = await db.collection('opportunities').find().project({ id: 1, title: 1, posterEmail: 1, contactEmail: 1 }).toArray();
+    
+    // Create a lookup map for opportunities
+    const oppLookup = {};
+    opportunities.forEach(opp => {
+      // Use string keys
+      oppLookup[String(opp.id || opp._id)] = {
+        title: opp.title || 'Unknown Opportunity',
+        posterEmail: opp.contactEmail || opp.posterEmail || 'Unknown'
+      };
+    });
+
+    // 3. Build result array
+    const interactionsData = [];
+    
+    for (const aggr of analyticsAggr) {
+      if (!aggr._id) continue;
+      
+      const oppIdStr = String(aggr._id);
+      const oppInfo = oppLookup[oppIdStr] || { title: 'Unknown (Deleted)', posterEmail: 'Unknown' };
+      
+      const ctr = aggr.views > 0 ? ((aggr.clicks / aggr.views) * 100).toFixed(2) : "0.00";
+
+      interactionsData.push({
+        opportunityId: oppIdStr,
+        title: oppInfo.title,
+        posterEmail: oppInfo.posterEmail,
+        views: aggr.views,
+        clicks: aggr.clicks,
+        ctr: parseFloat(ctr)
+      });
+    }
+
+    // Sort by views descending
+    interactionsData.sort((a, b) => b.views - a.views);
+
+    res.json(interactionsData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 export default router;

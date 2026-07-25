@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ProfileView } from '../ProfileView';
-import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send, MessageCircle, Briefcase } from 'lucide-react';
+import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash2, Settings, Flag, AlertTriangle, DollarSign, ShieldCheck, BarChart2, Mail, Users, TrendingUp, Clock, Gavel, FileText, Calendar, Send, MessageCircle, Briefcase, RefreshCcw } from 'lucide-react';
 import { useAlert } from '@/contexts/AlertContext';
 import { PosterDashboard } from '@/components/PosterDashboard';
 
@@ -33,12 +33,19 @@ export default function AdminDashboard() {
   const [txCallbackDiag, setTxCallbackDiag] = useState<any>(null);
   const [txFilter, setTxFilter] = useState<{ type: string; status: string }>({ type: '', status: '' });
   const [txLoading, setTxLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'my-posts' | 'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats' | 'ledger' | 'transactions'>('my-posts');
+  const [activeTab, setActiveTab] = useState<'my-posts' | 'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats' | 'ledger' | 'transactions' | 'broadcasts' | 'master-sheet' | 'interactions'>('my-posts');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
   const [disputeChat, setDisputeChat] = useState<any[]>([]);
   const [disputeChatLoading, setDisputeChatLoading] = useState(false);
+  const [broadcasts, setBroadcasts] = useState<any[]>([]);
+  const [broadcastsLoading, setBroadcastsLoading] = useState(false);
+  const [masterSheet, setMasterSheet] = useState<any[]>([]);
+  const [masterSheetLoading, setMasterSheetLoading] = useState(false);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [interactionsData, setInteractionsData] = useState<any[]>([]);
+  const [interactionsLoading, setInteractionsLoading] = useState(false);
 
   // Edit State
   const [editingOpp, setEditingOpp] = useState<any | null>(null);
@@ -155,6 +162,57 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchBroadcasts = async () => {
+    setBroadcastsLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/messages/bulk`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setBroadcasts(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setBroadcastsLoading(false);
+    }
+  };
+
+  const fetchMasterSheet = async () => {
+    setMasterSheetLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/master-sheet`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setMasterSheet(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setMasterSheetLoading(false);
+    }
+  };
+
+  const fetchInteractions = async () => {
+    setInteractionsLoading(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/admin/interactions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setInteractionsData(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setInteractionsLoading(false);
+    }
+  };
+
   const handleEditClick = (opp: any) => {
     setEditingOpp(opp);
     setEditForm({ ...opp });
@@ -241,6 +299,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchPending();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'broadcasts') fetchBroadcasts();
+    if (activeTab === 'master-sheet') fetchMasterSheet();
+    if (activeTab === 'interactions') fetchInteractions();
+  }, [activeTab]);
 
   useEffect(() => {
     setReviewFormById(prev => {
@@ -538,6 +602,18 @@ export default function AdminDashboard() {
         {/* Tabs */}
         <div className="flex flex-wrap bg-white rounded-t-xl border-b border-slate-200">
           <button
+            onClick={() => setActiveTab('master-sheet')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'master-sheet' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <FileText className="w-4 h-4" /> Master Sheet
+          </button>
+          <button
+            onClick={() => setActiveTab('interactions')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'interactions' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <BarChart2 className="w-4 h-4" /> Interactions
+          </button>
+          <button
             onClick={() => setActiveTab('my-posts')}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'my-posts' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
           >
@@ -598,6 +674,13 @@ export default function AdminDashboard() {
           >
             <Mail className="w-4 h-4" />
             Comms
+          </button>
+          <button
+            onClick={() => setActiveTab('broadcasts')}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'broadcasts' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            <Send className="w-4 h-4" />
+            Bulk Broadcasts
           </button>
           <button
             onClick={() => setActiveTab('chats')}
@@ -2207,6 +2290,191 @@ export default function AdminDashboard() {
                     Showing {txPagination.returned} of {txPagination.total} transactions
                   </div>
                 )}
+              </Card>
+            )}
+          </div>
+        ) : activeTab === 'broadcasts' ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <Send className="w-6 h-6 text-blue-600" />
+                Bulk Broadcast Logs
+              </h2>
+              <Button onClick={fetchBroadcasts} variant="outline" disabled={broadcastsLoading}>Refresh</Button>
+            </div>
+            
+            {broadcastsLoading ? (
+              <div className="text-center py-12 text-slate-500">Loading broadcasts...</div>
+            ) : broadcasts.length === 0 ? (
+              <div className="bg-white p-12 text-center rounded-xl border border-slate-200 shadow-sm">
+                <Send className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-slate-700">No broadcasts found.</h3>
+                <p className="text-slate-500 text-sm mt-1">When posters send bulk messages to applicants, they will appear here.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {broadcasts.map((bc, idx) => (
+                  <Card key={idx} className="border-slate-200 shadow-sm overflow-hidden">
+                    <div className="bg-blue-50 px-6 py-4 flex justify-between items-center border-b border-blue-100">
+                      <div>
+                        <h4 className="font-bold text-blue-900">{bc.senderName || bc.senderEmail}</h4>
+                        <p className="text-xs font-medium text-blue-700">{bc.receiverEmails?.length || 0} recipients | Gig ID: {bc.gigId}</p>
+                      </div>
+                      <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                        {new Date(bc.sentAt).toLocaleString()}
+                      </Badge>
+                    </div>
+                    <div className="p-6">
+                      <p className="text-sm font-bold text-slate-700 mb-2">Message Content:</p>
+                      <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 whitespace-pre-wrap font-mono">
+                        {bc.content}
+                      </div>
+                      
+                      <div className="mt-4">
+                        <p className="text-xs font-bold text-slate-500 mb-2 uppercase">Recipients:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {bc.receiverEmails?.slice(0, 10).map((email: string, eIdx: number) => (
+                            <span key={eIdx} className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-[10px] text-slate-600 font-medium">
+                              {email}
+                            </span>
+                          ))}
+                          {bc.receiverEmails?.length > 10 && (
+                            <span className="px-2 py-1 bg-slate-50 border border-slate-200 rounded text-[10px] text-slate-500 font-medium italic">
+                              + {bc.receiverEmails.length - 10} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : activeTab === 'master-sheet' ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <FileText className="w-6 h-6 text-indigo-600" />
+                Opportunities Master Sheet
+              </h2>
+              <Button onClick={fetchMasterSheet} variant="outline" disabled={masterSheetLoading}><RefreshCcw className="w-4 h-4 mr-2" />Refresh</Button>
+            </div>
+            
+            {masterSheetLoading ? (
+              <div className="text-center py-12 text-slate-500">Loading master sheet...</div>
+            ) : masterSheet.length === 0 ? (
+              <div className="bg-white p-12 text-center rounded-xl border border-slate-200 shadow-sm">
+                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-slate-700">No data found.</h3>
+              </div>
+            ) : (
+              <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-[11px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-4 py-3 font-semibold">Opportunity</th>
+                        <th className="px-4 py-3 font-semibold">Poster</th>
+                        <th className="px-4 py-3 font-semibold">Escrow</th>
+                        <th className="px-4 py-3 font-semibold text-center">Pending</th>
+                        <th className="px-4 py-3 font-semibold text-center">Shortlisted</th>
+                        <th className="px-4 py-3 font-semibold text-center text-green-700 bg-green-50">Approved</th>
+                        <th className="px-4 py-3 font-semibold text-center text-blue-700 bg-blue-50">Hired</th>
+                        <th className="px-4 py-3 font-semibold text-center">Denied</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {masterSheet.map((row, idx) => (
+                        <React.Fragment key={idx}>
+                          <tr className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setExpandedRow(expandedRow === row.gigId ? null : row.gigId)}>
+                            <td className="px-4 py-3 font-medium text-slate-900 max-w-[200px] truncate" title={row.title}>{row.title}</td>
+                            <td className="px-4 py-3 text-slate-600 max-w-[150px] truncate" title={row.posterEmail}>{row.posterEmail}</td>
+                            <td className="px-4 py-3 font-mono text-xs text-slate-500">{row.escrowAmount ? `KES ${row.escrowAmount.toLocaleString()}` : '—'}</td>
+                            <td className="px-4 py-3 text-center font-bold">{row.counts.pending || '-'}</td>
+                            <td className="px-4 py-3 text-center font-bold text-slate-600">{row.counts.shortlisted || '-'}</td>
+                            <td className="px-4 py-3 text-center font-bold text-green-600 bg-green-50/50">{row.counts.approved || '-'}</td>
+                            <td className="px-4 py-3 text-center font-bold text-blue-600 bg-blue-50/50">{row.counts.hired || '-'}</td>
+                            <td className="px-4 py-3 text-center font-bold text-red-400">{row.counts.rejected || '-'}</td>
+                          </tr>
+                          {expandedRow === row.gigId && (
+                            <tr className="bg-slate-50 border-b-2 border-slate-200">
+                              <td colSpan={8} className="p-4">
+                                <div className="grid grid-cols-5 gap-4">
+                                  {/* Render email lists for each category */}
+                                  {['pending', 'shortlisted', 'approved', 'hired', 'rejected'].map(cat => (
+                                    <div key={cat}>
+                                      <h4 className="text-[10px] font-bold uppercase text-slate-500 mb-2 border-b border-slate-200 pb-1">{cat}</h4>
+                                      {row.lists[cat]?.length > 0 ? (
+                                        <ul className="space-y-1">
+                                          {row.lists[cat].map((email: string, eIdx: number) => (
+                                            <li key={eIdx} className="text-[10px] text-slate-600 font-mono truncate" title={email}>{email}</li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="text-[10px] text-slate-400 italic">None</p>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
+          </div>
+        ) : activeTab === 'interactions' ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <BarChart2 className="w-6 h-6 text-indigo-600" />
+                Interactions & CTR
+              </h2>
+              <Button onClick={fetchInteractions} variant="outline" disabled={interactionsLoading}><RefreshCcw className="w-4 h-4 mr-2" />Refresh</Button>
+            </div>
+            
+            {interactionsLoading ? (
+              <div className="text-center py-12 text-slate-500">Loading interactions...</div>
+            ) : interactionsData.length === 0 ? (
+              <div className="bg-white p-12 text-center rounded-xl border border-slate-200 shadow-sm">
+                <BarChart2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-slate-700">No interaction data found.</h3>
+              </div>
+            ) : (
+              <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-[11px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-4 py-3 font-semibold">Opportunity</th>
+                        <th className="px-4 py-3 font-semibold">Poster</th>
+                        <th className="px-4 py-3 font-semibold text-center">Views</th>
+                        <th className="px-4 py-3 font-semibold text-center">Clicks</th>
+                        <th className="px-4 py-3 font-semibold text-center">CTR</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {interactionsData.map((row, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-3 font-medium text-slate-900 max-w-[300px] truncate" title={row.title}>{row.title}</td>
+                          <td className="px-4 py-3 text-slate-600 max-w-[200px] truncate" title={row.posterEmail}>{row.posterEmail}</td>
+                          <td className="px-4 py-3 text-center font-bold text-slate-700">{row.views.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-center font-bold text-blue-600">{row.clicks.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-center font-bold">
+                            <span className={`px-2 py-1 rounded text-xs ${row.ctr >= 10 ? 'bg-green-100 text-green-800' : row.ctr >= 2 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-800'}`}>
+                              {row.ctr}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </Card>
             )}
           </div>

@@ -40,7 +40,7 @@ export const ALL_CATEGORY_OPTIONS: { value: OpportunityCategory | 'Other'; label
   { value: 'StudentProject', label: 'Student Projects', tab: 'projects' },
   { value: 'ResearchCollaboration', label: 'Research Collaborations', tab: 'projects' },
   { value: 'Partnership', label: 'Partnerships', tab: 'all' },
-  { value: 'Provider', label: 'Providers & Platforms', tab: 'providers' },
+  { value: 'Provider', label: 'Platforms', tab: 'providers' },
   { value: 'Other', label: 'Others', tab: 'all' },
 ];
 
@@ -152,7 +152,7 @@ export function applyCategoryFieldDefaults<T extends Record<string, any>>(catego
 
 export const BROWSE_TABS: { id: TabId; label: string; description: string }[] = [
   { id: 'all', label: 'All', description: 'Opportunities' },
-  { id: 'providers', label: 'Providers', description: 'Opportunity Providers' },
+  { id: 'providers', label: 'Platforms', description: 'Opportunity Platforms' },
   { id: 'jobs', label: 'Jobs', description: 'Jobs & Microgigs' },
   { id: 'academic_career', label: 'Academic & Career', description: 'Academic & Career' },
   { id: 'innovation', label: 'Grants', description: 'Grants & Funding' },

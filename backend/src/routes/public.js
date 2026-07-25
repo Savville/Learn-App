@@ -698,8 +698,8 @@ router.post('/auth/send-otp', async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Generate 4-digit code
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    // Generate 6-digit code
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const db = getDB();
     await db.collection('auth_otps').updateOne(

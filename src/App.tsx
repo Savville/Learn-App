@@ -16,6 +16,8 @@ import { Portfolio } from './pages/Portfolio';
 import { Profiles } from './pages/Profiles';
 import { ProfileView } from './pages/ProfileView';
 import { ApplicantsViewer } from './pages/ApplicantsViewer';
+import { AuthGuard } from './components/AuthGuard';
+import { Login } from './pages/Login';
 import { MobileNav } from './components/MobileNav';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import { AdminLogin } from './pages/admin/AdminLogin';
@@ -76,13 +78,12 @@ function AppContent() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/post-with-us" element={<PostWithUs />} />
-          <Route path="/manage" element={<PostWithUs defaultMode="manage" />} />
-          <Route path="/manage/applicants/:id" element={<ApplicantsViewer />} />
-          {/* /manage/edit/:id reuses PostWithUs which already handles location.state.editPost */}
-          <Route path="/manage/edit/:id" element={<PostWithUs defaultMode="post" />} />
-          <Route path="/inbox" element={<Inbox />} />
-          <Route path="/applied" element={<Tracker />} />
-          <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/manage" element={<AuthGuard><PostWithUs defaultMode="manage" /></AuthGuard>} />
+          <Route path="/manage/applicants/:id" element={<AuthGuard allowAdmin={true}><ApplicantsViewer /></AuthGuard>} />
+          <Route path="/manage/edit/:id" element={<AuthGuard><PostWithUs defaultMode="post" /></AuthGuard>} />
+          <Route path="/inbox" element={<AuthGuard><Inbox /></AuthGuard>} />
+          <Route path="/portfolio" element={<AuthGuard><Portfolio /></AuthGuard>} />
+          <Route path="/login" element={<Login />} />
           <Route path="/subscribe" element={<Subscribe />} />
           <Route path="/profiles" element={<Profiles />} />
           <Route path="/profile/:email" element={<ProfileView />} />

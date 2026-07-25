@@ -9,7 +9,7 @@ export function ApplicantsViewer() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const [token] = useState(localStorage.getItem('user_token'));
+  const [token] = useState(localStorage.getItem('user_token') || localStorage.getItem('adminToken'));
   
   // The post can be passed via router state or we fetch it
   const [post, setPost] = useState<any>(location.state?.post || null);
@@ -17,7 +17,7 @@ export function ApplicantsViewer() {
   const [applicants, setApplicants] = useState<any[]>([]);
   const [loading, setLoading] = useState(!location.state?.post);
   const [loadingApplicants, setLoadingApplicants] = useState(false);
-  const [activeTab, setActiveTab] = useState<'all' | 'shortlisted' | 'rejected' | 'approved'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'shortlisted' | 'rejected' | 'approved' | 'hired'>('all');
 
   const [slidingApplicant, setSlidingApplicant] = useState<any | null>(null);
   const [chatApplicantEmail, setChatApplicantEmail] = useState<string | null>(null);
@@ -27,11 +27,15 @@ export function ApplicantsViewer() {
 
 
 
+
   const [selectedAppIds, setSelectedAppIds] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
 
   const [approvalModal, setApprovalModal] = useState<{ isOpen: boolean, appIds: string[], message: string }>({ isOpen: false, appIds: [], message: 'Welcome aboard! Here are your next steps...' });
   const [isApproving, setIsApproving] = useState(false);
+
+  const [bulkMessageModal, setBulkMessageModal] = useState<{ isOpen: boolean, appIds: string[], message: string }>({ isOpen: false, appIds: [], message: '' });
+  const [isSendingBulk, setIsSendingBulk] = useState(false);
 
   const handleSelectApplicant = (id: string) => {
     const newSet = new Set(selectedAppIds);
@@ -61,6 +65,35 @@ export function ApplicantsViewer() {
       alert(err.message);
     } finally {
       setIsApproving(false);
+    }
+  };
+
+  const handleSendBulkMessage = async () => {
+    setIsSendingBulk(true);
+    try {
+      const receiverEmails = bulkMessageModal.appIds.map(id => {
+        const app = applicants.find(a => a._id === id);
+        return app ? app.applicantEmail : null;
+      }).filter(Boolean);
+
+      const res = await fetch(`${API_BASE}/messages/bulk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          gigId: id,
+          receiverEmails,
+          content: bulkMessageModal.message
+        })
+      });
+      if (!res.ok) throw new Error('Failed to send messages');
+      
+      setBulkMessageModal({ isOpen: false, appIds: [], message: '' });
+      setSelectedAppIds(new Set());
+      alert('Messages sent successfully!');
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSendingBulk(false);
     }
   };
 
@@ -137,6 +170,7 @@ export function ApplicantsViewer() {
     if (activeTab === 'shortlisted' && app.status === 'shortlisted') return true;
     if (activeTab === 'rejected' && app.status === 'rejected') return true;
     if (activeTab === 'approved' && app.status === 'approved') return true;
+    if (activeTab === 'hired' && (app.status === 'paid' || app.status === 'disputed')) return true;
     return false;
   });
 
@@ -259,6 +293,18 @@ export function ApplicantsViewer() {
               </Button>
             </div>
           )}
+          {app.status === 'approved' && (
+            <div className="grid grid-cols-1 gap-2 w-full mt-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full shadow-sm text-slate-600 border-slate-300 hover:bg-slate-50" 
+                onClick={() => handleUpdateApplicantStatus(app._id, 'pending')}
+              >
+                Revert to Pending
+              </Button>
+            </div>
+          )}
         </div>
         
         {app.status === 'approved' && post && (post.isEscrow || post.opportunity?.isEscrow || (post.escrowAmount ?? 0) > 0 || (post.opportunity?.escrowAmount ?? 0) > 0) && (
@@ -352,6 +398,13 @@ export function ApplicantsViewer() {
                 Approved ({applicants.filter(a => a.status === 'approved').length})
               </Button>
               <Button 
+                variant={activeTab === 'hired' ? 'default' : 'ghost'} 
+                onClick={() => setActiveTab('hired')}
+                className={activeTab === 'hired' ? 'bg-white text-blue-900 shadow-md scale-105' : 'text-white hover:bg-white/20'}
+              >
+                Hired ({applicants.filter(a => a.status === 'paid' || a.status === 'disputed').length})
+              </Button>
+              <Button 
                 variant={activeTab === 'rejected' ? 'default' : 'ghost'} 
                 onClick={() => setActiveTab('rejected')}
                 className={activeTab === 'rejected' ? 'bg-white text-blue-900 shadow-md scale-105' : 'text-white hover:bg-white/20'}
@@ -367,7 +420,7 @@ export function ApplicantsViewer() {
 
         
         {/* Bulk Actions */}
-        {filteredApplicants.length > 0 && activeTab !== 'rejected' && activeTab !== 'approved' && (
+        {filteredApplicants.length > 0 && activeTab !== 'rejected' && activeTab !== 'hired' && (
           <div className="bg-white border border-blue-200 rounded-lg p-3 mb-6 flex items-center justify-between shadow-sm animate-in fade-in slide-in-from-top-4">
             {!selectionMode ? (
               <div className="flex items-center gap-3 ml-2 w-full justify-between">
@@ -392,33 +445,46 @@ export function ApplicantsViewer() {
                     setSelectionMode(false);
                     setSelectedAppIds(new Set());
                   }}>Cancel</Button>
-                  <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" disabled={selectedAppIds.size === 0} onClick={() => {
-                    Array.from(selectedAppIds).forEach(id => handleUpdateApplicantStatus(id, 'rejected'));
-                    setSelectedAppIds(new Set());
-                    setSelectionMode(false);
-                  }}>Bulk Decline</Button>
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" disabled={selectedAppIds.size === 0} onClick={() => setApprovalModal({ isOpen: true, appIds: Array.from(selectedAppIds), message: 'Welcome aboard! Here are your next steps...' })}>
-                    Bulk Approve
-                  </Button>
+                  <Button size="sm" variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50" disabled={selectedAppIds.size === 0} onClick={() => setBulkMessageModal({ isOpen: true, appIds: Array.from(selectedAppIds), message: '' })}>Bulk Message</Button>
+                  
+                  {activeTab !== 'approved' && (
+                    <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" disabled={selectedAppIds.size === 0} onClick={() => {
+                      Array.from(selectedAppIds).forEach(id => handleUpdateApplicantStatus(id, 'rejected'));
+                      setSelectedAppIds(new Set());
+                      setSelectionMode(false);
+                    }}>Bulk Decline</Button>
+                  )}
+                  
+                  {activeTab === 'approved' && (
+                    <Button size="sm" variant="outline" className="text-slate-600 border-slate-300 hover:bg-slate-50" disabled={selectedAppIds.size === 0} onClick={() => {
+                      Array.from(selectedAppIds).forEach(id => handleUpdateApplicantStatus(id, 'pending'));
+                      setSelectedAppIds(new Set());
+                      setSelectionMode(false);
+                    }}>Revert to Pending</Button>
+                  )}
+
+                  {activeTab !== 'approved' ? (
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" disabled={selectedAppIds.size === 0} onClick={() => setApprovalModal({ isOpen: true, appIds: Array.from(selectedAppIds), message: 'Welcome aboard! Here are your next steps...' })}>
+                      Bulk Approve
+                    </Button>
+                  ) : (
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={selectedAppIds.size === 0} onClick={() => {
+                      Array.from(selectedAppIds).forEach(id => handleUpdateApplicantStatus(id, 'paid'));
+                      setSelectedAppIds(new Set());
+                      setSelectionMode(false);
+                      alert('Bulk Hire & Escrow initiated! (Simulation)');
+                    }}>
+                      <DollarSign className="w-4 h-4 mr-1" />
+                      Bulk Hire & Escrow
+                    </Button>
+                  )}
                 </div>
               </>
             )}
           </div>
         )}
 
-        {/* Approved Tab Bulk Escrow */}
-        {activeTab === 'approved' && filteredApplicants.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex flex-col sm:flex-row items-center justify-between shadow-sm">
-            <div>
-              <h3 className="font-bold text-blue-900 flex items-center gap-2"><CheckCircle className="w-5 h-5 text-green-600" /> Ready to Hire!</h3>
-              <p className="text-sm text-blue-700 mt-1">You have {filteredApplicants.length} approved applicants. Fund escrow to finalize hiring.</p>
-            </div>
-            <Button className="mt-3 sm:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-5 rounded-xl shadow-md flex items-center gap-2">
-              <DollarSign className="w-5 h-5" />
-              Bulk Escrow & Hire All (KES {(filteredApplicants.length * (post?.escrowAmount || post?.opportunity?.escrowAmount || 0)).toLocaleString()})
-            </Button>
-          </div>
-        )}
+
 
         {loadingApplicants ? (
           <div className="flex items-center justify-center py-20 text-blue-600">
@@ -504,6 +570,37 @@ export function ApplicantsViewer() {
               <Button variant="outline" onClick={() => setApprovalModal({ ...approvalModal, isOpen: false })}>Cancel</Button>
               <Button onClick={handleConfirmApproval} disabled={isApproving} className="bg-green-600 hover:bg-green-700 text-white font-medium">
                 {isApproving ? 'Approving...' : `Approve & Send Message`}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Message Modal */}
+      {bulkMessageModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-lg text-slate-800">Bulk Send Information</h3>
+              <Button variant="ghost" size="icon" onClick={() => setBulkMessageModal({ ...bulkMessageModal, isOpen: false })} className="h-8 w-8 rounded-full">
+                <X className="w-4 h-4 text-slate-500" />
+              </Button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-slate-600 mb-4">
+                Send a general informational message to <strong>{bulkMessageModal.appIds.length}</strong> selected applicant{bulkMessageModal.appIds.length > 1 ? 's' : ''}:
+              </p>
+              <textarea 
+                className="w-full h-32 p-3 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                value={bulkMessageModal.message}
+                onChange={e => setBulkMessageModal({ ...bulkMessageModal, message: e.target.value })}
+                placeholder="Type your message here..."
+              ></textarea>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setBulkMessageModal({ ...bulkMessageModal, isOpen: false })}>Cancel</Button>
+              <Button onClick={handleSendBulkMessage} disabled={isSendingBulk || !bulkMessageModal.message.trim()} className="bg-blue-600 hover:bg-blue-700 text-white font-medium">
+                {isSendingBulk ? 'Sending...' : 'Send Message'}
               </Button>
             </div>
           </div>

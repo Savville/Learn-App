@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { LogOut, UploadCloud, Github, Linkedin, Globe, Link as LinkIcon, DollarSign, CheckCircle, Save, Loader2, User, Plus, X, ChevronDown, ChevronUp, Check, FolderHeart, Briefcase, MapPin } from 'lucide-react';
 import { useAlert } from '../contexts/AlertContext';
 import ReactMarkdown from 'react-markdown';
+import { Tracker } from './Tracker';
 
 interface Project {
   _id?: string;
@@ -59,6 +60,9 @@ export function Portfolio() {
   // Skills UI State
   const [newSkill, setNewSkill] = useState('');
 
+  // Tabs State
+  const [activeTab, setActiveTab] = useState<'profile' | 'applications'>('profile');
+
   const initialLoadRef = useRef(true);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -104,10 +108,12 @@ export function Portfolio() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('user_email');
-    setToken(null);
-    setEmail(null);
+    if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem('user_token');
+      localStorage.removeItem('user_email');
+      setToken(null);
+      setEmail(null);
+    }
   };
 
   const saveProfileToBackend = async (dataToSave: Profile) => {
@@ -222,35 +228,47 @@ export function Portfolio() {
   };
 
   if (!token) {
-    return (
-      <div className="py-8">
-        <OTPLoginForm 
-          onSuccess={handleSuccess} 
-          title="Your Professional Portfolio" 
-          subtitle="Enter your email to manage your profile and view your earnings."
-        />
-      </div>
-    );
+    return null; // AuthGuard handles login
   }
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen pb-12">
       {/* Header */}
       <div className="bg-[#131ADF] rounded-b-3xl shadow-md mb-8">
-        <div className="max-w-6xl mx-auto px-4 py-8 pb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="text-white/80 hover:text-white hover:bg-white/10">
-              ← Back
-            </Button>
-            <h1 className="text-3xl font-bold text-white hidden sm:block">My Profile & Earnings</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            {/* Autosave Indicator */}
-            <div className="flex items-center text-sm font-medium text-white/80 mr-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-sm">
-              {savingStatus === 'saving' && <><Loader2 className="w-4 h-4 mr-1.5 animate-spin text-white" /> Saving...</>}
-              {savingStatus === 'saved' && <><Check className="w-4 h-4 mr-1.5 text-green-300" /> Saved</>}
-              {savingStatus === 'idle' && <span className="text-white/60">Auto-saving</span>}
+        <div className="max-w-6xl mx-auto px-4 py-8 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="text-white/80 hover:text-white hover:bg-white/10">
+                ← Back
+              </Button>
+              <h1 className="text-3xl font-bold text-white hidden sm:block">My Portfolio</h1>
             </div>
+            
+            <div className="flex gap-4 mt-2">
+              <button 
+                onClick={() => setActiveTab('profile')}
+                className={`px-4 py-2 font-bold transition-colors border-b-4 ${activeTab === 'profile' ? 'text-white border-white' : 'text-white/60 border-transparent hover:text-white/80'}`}
+              >
+                Profile & Projects
+              </button>
+              <button 
+                onClick={() => setActiveTab('applications')}
+                className={`px-4 py-2 font-bold transition-colors border-b-4 ${activeTab === 'applications' ? 'text-white border-white' : 'text-white/60 border-transparent hover:text-white/80'}`}
+              >
+                My Applications
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3 self-start mt-2 sm:mt-0">
+            {/* Autosave Indicator */}
+            {activeTab === 'profile' && (
+              <div className="flex items-center text-sm font-medium text-white/80 mr-2 bg-white/10 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-sm">
+                {savingStatus === 'saving' && <><Loader2 className="w-4 h-4 mr-1.5 animate-spin text-white" /> Saving...</>}
+                {savingStatus === 'saved' && <><Check className="w-4 h-4 mr-1.5 text-green-300" /> Saved</>}
+                {savingStatus === 'idle' && <span className="text-white/60">Auto-saving</span>}
+              </div>
+            )}
             <Button variant="outline" size="icon" onClick={handleLogout} className="text-white/80 hover:text-red-400 bg-white/10 border-white/20 hover:bg-white/20 rounded-xl backdrop-blur-sm shadow-sm">
               <LogOut className="w-4 h-4" />
             </Button>
@@ -259,7 +277,9 @@ export function Portfolio() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {loading ? (
+        {activeTab === 'applications' ? (
+          <Tracker />
+        ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-[#131ADF]" />
           </div>
@@ -497,18 +517,25 @@ export function Portfolio() {
                 <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-2 opacity-80">
                     <Briefcase className="w-5 h-5" />
-                    <span className="font-semibold text-sm uppercase tracking-wider">Jobs & Postings</span>
+                    <span className="font-semibold text-sm uppercase tracking-wider">Projects, Jobs & Postings</span>
                   </div>
-                  <div className="flex gap-6 mt-4">
-                    <div>
-                      <p className="text-xs opacity-70 mb-1">Completed Jobs</p>
+                  <div className="flex gap-6 mt-4 w-full">
+                    <div className="flex-1">
+                      <p className="text-xs opacity-70 mb-1 uppercase tracking-wider font-semibold">Projects</p>
+                      <h2 className="text-3xl font-extrabold">
+                        {profile.projects?.length || 0}
+                      </h2>
+                    </div>
+                    <div className="w-px bg-white/20"></div>
+                    <div className="flex-1">
+                      <p className="text-xs opacity-70 mb-1 uppercase tracking-wider font-semibold">Jobs</p>
                       <h2 className="text-3xl font-extrabold">
                         {stats.completedGigsCount}
                       </h2>
                     </div>
                     <div className="w-px bg-white/20"></div>
-                    <div>
-                      <p className="text-xs opacity-70 mb-1">Opportunities Posted</p>
+                    <div className="flex-1">
+                      <p className="text-xs opacity-70 mb-1 uppercase tracking-wider font-semibold">Postings</p>
                       <h2 className="text-3xl font-extrabold">
                         {stats.postedGigsCount || 0}
                       </h2>

@@ -57,9 +57,6 @@ const TABS = BROWSE_TABS;
 
 const RIGHT_TABS: { id: string; label: string; href: string }[] = [
   { id: 'post', label: 'Post With Us', href: '/post-with-us' },
-  { id: 'applied', label: 'Tracker', href: '/applied' },
-  { id: 'inbox', label: 'Inbox', href: '/inbox' },
-  { id: 'portfolio', label: 'Portfolio', href: '/portfolio' },
 ];
 
 const applyFilters = (
@@ -436,7 +433,7 @@ export function Opportunities() {
               </div>
             </div>
 
-            {/* Right Tabs — Post With Us */}
+            {/* Right Tabs */}
             <div className="flex gap-2 shrink-0">
               {RIGHT_TABS.map(tab => (
                 <Link
@@ -447,6 +444,14 @@ export function Opportunities() {
                   {tab.label}
                 </Link>
               ))}
+              {!localStorage.getItem("user_token") && (
+                <Link
+                  to="/login"
+                  className="px-6 py-2 rounded-md font-semibold transition-all border bg-white text-blue-900 border-white hover:bg-gray-100 shadow-sm"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
 

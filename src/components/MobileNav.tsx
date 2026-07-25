@@ -2,22 +2,35 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { Home, Briefcase, Users, PlusCircle, Inbox, ClipboardList } from 'lucide-react';
 
-const links = [
+const publicLinks = [
   { name: 'Home', path: '/', icon: Home, exact: true },
   { name: 'Browse', path: '/opportunities', icon: Briefcase, exact: false },
-  ...(import.meta.env.VITE_ENABLE_PROFILES === 'true' 
-    ? [{ name: 'Profiles', path: '/profiles', icon: Users, exact: false }] 
-    : []),
   { name: 'Post', path: '/post-with-us', icon: PlusCircle, exact: false },
-  { name: 'Applied', path: '/applied', icon: ClipboardList, exact: false },
-  { name: 'Inbox', path: '/inbox', icon: Inbox, exact: false },
 ];
+
+const privateLinks = [
+  { name: 'Browse', path: '/opportunities', icon: Briefcase, exact: false },
+  { name: 'Inbox', path: '/inbox', icon: Inbox, exact: false },
+  { name: 'Manage', path: '/manage', icon: ClipboardList, exact: false },
+  { name: 'Profile', path: '/portfolio', icon: Users, exact: false },
+];
+
+import { useState, useEffect } from 'react';
 
 export function MobileNav() {
   const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('user_token'));
+
+  useEffect(() => {
+    const handleAuthChange = () => setIsLoggedIn(!!localStorage.getItem('user_token'));
+    window.addEventListener('auth-changed', handleAuthChange);
+    return () => window.removeEventListener('auth-changed', handleAuthChange);
+  }, []);
 
   // Never show on admin pages
   if (location.pathname.startsWith('/admin')) return null;
+
+  const currentLinks = isLoggedIn ? privateLinks : publicLinks;
 
   const nav = (
     <nav
@@ -37,7 +50,7 @@ export function MobileNav() {
       }}
       className="flex md:hidden"
     >
-      {links.map((link) => {
+      {currentLinks.map((link) => {
         const Icon = link.icon;
         // exact match for home, startsWith for others — but only against THIS link's path
         const isActive = link.exact

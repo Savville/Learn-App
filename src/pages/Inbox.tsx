@@ -234,12 +234,14 @@ export function Inbox() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('user_email');
-    setToken(null);
-    setEmail('');
-    setConversations([]);
-    setActiveConv(null);
+    if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem('user_token');
+      localStorage.removeItem('user_email');
+      setToken(null);
+      setEmail('');
+      setConversations([]);
+      setActiveConv(null);
+    }
   };
 
   const handleSelectConv = (conv: any) => {
@@ -693,20 +695,19 @@ export function Inbox() {
                     const colors = ['bg-amber-500', 'bg-green-500', 'bg-red-500', 'bg-purple-500', 'bg-indigo-500'];
                     const avatarColor = colors[seed % colors.length];
                     return (
-                      <button
-                        onClick={() => setShowPortfolioPane(!showPortfolioPane)}
-                        onContextMenu={(e) => { e.preventDefault(); setShowPortfolioPane(!showPortfolioPane); }}
+                      <Link
+                        to={`/profile/${partnerEmail}`}
                         className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg cursor-pointer hover:scale-105 transition-transform shadow-sm ${avatarColor}`}
-                        title="View Portfolio"
+                        title="View Profile"
                       >
                         {partnerEmail.charAt(0).toUpperCase()}
-                      </button>
+                      </Link>
                     );
                   })()}
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-gray-900 leading-tight">
-                        {activeConv.participants.find((p: string) => p !== email)?.split('@')[0]}
+                        {partnerProfile?.profile?.name || activeConv.participants.find((p: string) => p !== email)?.split('@')[0]}
                       </h3>
                       <Link 
                         to={`/profile/${activeConv.participants.find((p: string) => p !== email) || ''}`}
@@ -715,10 +716,12 @@ export function Inbox() {
                         View Profile
                       </Link>
                     </div>
-                    <p className="text-xs text-blue-600 font-medium truncate max-w-[200px] md:max-w-md">
-                      {activeConv.gigTitle}
-                    </p>
-                    <Link 
+                    {activeConv.gigTitle && !activeConv.gigTitle.includes('@') && (
+                      <p className="text-xs text-blue-600 font-medium truncate max-w-[200px] md:max-w-md">
+                        {activeConv.gigTitle}
+                      </p>
+                    )}
+                    <Link
                       to={`/profile/${activeConv.participants.find((p: string) => p !== email) || ''}`}
                       className="sm:hidden text-[10px] text-blue-600 font-medium hover:underline mt-0.5"
                     >

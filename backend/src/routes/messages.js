@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 import { sendNewMessageNotification } from '../services/emailService.js';
 import { initiateSTKPush } from '../services/mpesaService.js';
 import { v2 as cloudinary } from 'cloudinary';
+import { verifyUserToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -52,6 +53,11 @@ router.get('/:conversationId', async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
     const skip = (page - 1) * limit;
+
+    // Check if valid ObjectId to prevent BSONError crashes
+    if (!ObjectId.isValid(conversationId)) {
+      return res.json({ data: [], total: 0, page: 1, pages: 0 });
+    }
 
     const messages = await db.collection('messages')
       .find({ conversationId: new ObjectId(conversationId) })
@@ -142,7 +148,7 @@ router.post('/', async (req, res) => {
     // Apply the auto-censor! (Skip censorship if it's a partnership)
     const censoredContent = isActuallyPartnership ? content : applyAutoCensor(content);
 
-    let convId = conversationId ? new ObjectId(conversationId) : null;
+    let convId = (conversationId && ObjectId.isValid(conversationId)) ? new ObjectId(conversationId) : null;
 
     // Resolve display names from portfolios collection (fallback to email prefix)
     function resolveName(email) {
@@ -220,6 +226,95 @@ router.post('/', async (req, res) => {
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// POST /api/messages/bulk
+// Send bulk message to multiple applicants
+router.post('/bulk', verifyUserToken, async (req, res) => {
+  try {
+    const db = getDB();
+    const { gigId, receiverEmails, content, senderName } = req.body;
+    const senderEmail = req.user.email;
+
+    if (!gigId || !receiverEmails || !Array.isArray(receiverEmails) || receiverEmails.length === 0 || !content) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const { ObjectId } = await import('mongodb');
+    const censoredContent = applyAutoCensor(content);
+    
+    // Create a broadcast log entry for admin monitoring
+    await db.collection('bulk_broadcasts').insertOne({
+      gigId,
+      senderEmail,
+      senderName,
+      receiverEmails,
+      content: censoredContent,
+      originalContent: content,
+      sentAt: new Date()
+    });
+
+    const messagesToInsert = [];
+    
+    for (const receiverEmail of receiverEmails) {
+      // Find or create conversation
+      let conv = await db.collection('conversations').findOne({
+        $or: [
+          { gigId: gigId.length === 24 ? new ObjectId(gigId) : gigId },
+          { opportunityId: gigId.length === 24 ? gigId.toString() : gigId }
+        ],
+        participants: { $all: [senderEmail, receiverEmail] }
+      });
+      
+      let convId;
+      if (!conv) {
+        const newConversation = {
+          gigId: gigId.length === 24 ? new ObjectId(gigId) : gigId,
+          opportunityId: gigId.length === 24 ? gigId.toString() : gigId,
+          participants: [senderEmail, receiverEmail],
+          applicantEmail: receiverEmail,
+          posterEmail: senderEmail,
+          applicantName: receiverEmail.split('@')[0],
+          posterName: senderName || senderEmail.split('@')[0],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          status: 'pending', 
+        };
+        const convResult = await db.collection('conversations').insertOne(newConversation);
+        convId = convResult.insertedId;
+      } else {
+        convId = conv._id;
+        await db.collection('conversations').updateOne(
+          { _id: convId },
+          { $set: { updatedAt: new Date() } }
+        );
+      }
+      
+      messagesToInsert.push({
+        conversationId: convId,
+        senderEmail,
+        receiverEmail,
+        senderName: senderName || senderEmail.split('@')[0],
+        content: censoredContent,
+        originalContent: content,
+        createdAt: new Date(),
+        read: false,
+        replyTo: null
+      });
+      
+      // Notify (non-blocking)
+      sendNewMessageNotification(receiverEmail).catch(e => console.error(e));
+    }
+
+    if (messagesToInsert.length > 0) {
+      await db.collection('messages').insertMany(messagesToInsert);
+    }
+
+    res.status(201).json({ success: true, message: `Sent messages to ${receiverEmails.length} applicants` });
+  } catch (error) {
+    console.error('Error sending bulk message:', error);
+    res.status(500).json({ error: 'Failed to send bulk message' });
   }
 });
 
@@ -334,7 +429,8 @@ router.post('/:conversationId/hire', async (req, res) => {
       }
     }
 
-    await db.collection('conversations').updateOne(
+    if (!ObjectId.isValid(conversationId)) return res.status(400).json({ error: 'Invalid ID' });
+    const updated = await db.collection('conversations').updateOne(
       { _id: new ObjectId(conversationId) },
       { $set: { status: 'hired', updatedAt: new Date() } }
     );
