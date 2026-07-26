@@ -114,44 +114,21 @@ export function Tracker() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('user_email');
-    setToken(null);
-    setEmail(null);
-    setApplications([]);
+    if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem('user_token');
+      localStorage.removeItem('user_email');
+      setToken(null);
+      setEmail(null);
+      setApplications([]);
+    }
   };
 
   if (!token) {
-    return (
-      <div className="py-8">
-        <OTPLoginForm 
-          onSuccess={handleSuccess} 
-          title="Track Your Applications" 
-          subtitle="Enter the email address you applied with to securely view your history."
-        />
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="bg-white shadow-sm rounded-2xl overflow-hidden mb-8">
-      <div className="px-8 py-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild className="mr-2 text-slate-500 hover:text-blue-600">
-             <Link to="/opportunities">← Back</Link>
-          </Button>
-          <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shadow-sm flex-shrink-0">
-            <FolderHeart className="w-6 h-6" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Opportunity Tracker</h2>
-            <p className="text-sm text-gray-600">Logged in as {email}</p>
-          </div>
-        </div>
-        <Button variant="outline" size="sm" onClick={handleLogout} className="text-gray-600 border-gray-200 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-colors h-10 px-4 rounded-xl">
-          <LogOut className="w-4 h-4 mr-2" /> Logout
-        </Button>
-      </div>
+    <div className="bg-white shadow-sm rounded-2xl overflow-hidden mb-8 mt-2 border border-slate-100">
 
       <div className="px-8 pt-4 pb-0 flex gap-6 border-b border-slate-100 bg-white">
         <button 

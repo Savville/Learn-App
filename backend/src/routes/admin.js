@@ -782,6 +782,7 @@ router.post('/approve/:id', verifyAdminKey, async (req, res) => {
       riskFlags: pendingDoc.riskFlags || [],
     };
     oppToPublish.reporter = pendingDoc.reporter;
+    oppToPublish.isAdminPost = pendingDoc.isAdminPost;
     // Copy escrow funding state to the live opportunity doc
     if (pendingDoc.isEscrowFunded) {
       oppToPublish.isEscrowFunded = true;
@@ -1652,4 +1653,327 @@ router.get('/kyc/:filename', verifyAdminKey, (req, res) => {
   }
 });
 
+// ==========================================
+// Phase 6: Platform Summary & User Management
+// ==========================================
+
+// GET /api/admin/platform-summary
+// Lightweight summary of all posts and their applicant stats
+router.get('/platform-summary', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    
+    // Fetch all opportunities (both live and pending)
+    const liveOpps = await db.collection('opportunities').find({}, { projection: { id: 1, _id: 1, title: 1, contactEmail: 1, userEmail: 1, status: 1, createdAt: 1, escrowAmount: 1 } }).toArray();
+    
+    // Fetch applicant counts
+    const apps = await db.collection('applications').aggregate([
+      {
+        $group: {
+          _id: {
+            oppId: "$opportunityId",
+            postId: "$postId"
+          },
+          total: { $sum: 1 },
+          approved: { $sum: { $cond: [{ $eq: ["$status", "approved"] }, 1, 0] } },
+          rejected: { $sum: { $cond: [{ $eq: ["$status", "rejected"] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] } },
+          disputed: { $sum: { $cond: [{ $eq: ["$status", "disputed"] }, 1, 0] } }
+        }
+      }
+    ]).toArray();
+
+    // Map application stats to opportunities
+    const summary = liveOpps.map(opp => {
+      const oppIdStr = opp.id || opp._id.toString();
+      const oppStats = apps.filter(a => a._id.oppId === oppIdStr || a._id.postId === oppIdStr).reduce((acc, curr) => {
+        acc.total += curr.total;
+        acc.approved += curr.approved;
+        acc.rejected += curr.rejected;
+        acc.pending += curr.pending;
+        acc.disputed += curr.disputed;
+        return acc;
+      }, { total: 0, approved: 0, rejected: 0, pending: 0, disputed: 0 });
+
+      return {
+        id: opp.id,
+        _id: opp._id,
+        title: opp.title,
+        posterEmail: opp.contactEmail || opp.userEmail || 'Unknown',
+        escrowAmount: opp.escrowAmount,
+        status: opp.status || 'live',
+        createdAt: opp.createdAt,
+        stats: oppStats
+      };
+    });
+
+    res.json(summary.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/users-overview
+// Fetch all users with basic stats
+router.get('/users-overview', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+
+    // 1. Get all profiles (as our base for "users")
+    const profiles = await db.collection('profiles').find({}, { projection: { email: 1, name: 1, title: 1, createdAt: 1 } }).toArray();
+
+    // 2. Get account status and admin notes from a central 'users' or 'admin_user_data' collection
+    const userRecords = await db.collection('admin_user_data').find({}).toArray();
+
+    // 3. Get application counts per email
+    const appCounts = await db.collection('applications').aggregate([
+      { $group: { _id: "$applicantEmail", count: { $sum: 1 } } }
+    ]).toArray();
+
+    // 4. Get post counts per email
+    const postCounts = await db.collection('opportunities').aggregate([
+      {
+        $group: {
+          _id: { $ifNull: ["$contactEmail", { $ifNull: ["$userEmail", "$reporter.email"] }] },
+          count: { $sum: 1 }
+        }
+      }
+    ]).toArray();
+
+    const overview = profiles.map(profile => {
+      const email = profile.email;
+      const adminData = userRecords.find(u => u.email === email) || {};
+      const apps = appCounts.find(a => a._id === email)?.count || 0;
+      const posts = postCounts.find(p => p._id === email)?.count || 0;
+
+      return {
+        email,
+        name: profile.name,
+        title: profile.title,
+        joinedAt: profile.createdAt,
+        status: adminData.status || 'active',
+        adminNotes: adminData.notes || '',
+        metrics: { applications: apps, posts }
+      };
+    });
+
+    res.json(overview);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/users/:email/status
+// Suspend or unsuspend a user
+router.post('/users/:email/status', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const email = req.params.email;
+    const { status } = req.body; // 'active' or 'suspended'
+
+    if (!['active', 'suspended'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    await db.collection('admin_user_data').updateOne(
+      { email },
+      { $set: { status, updatedAt: new Date() } },
+      { upsert: true }
+    );
+
+    res.json({ success: true, message: `User ${email} is now ${status}` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/users/:email/notes
+// Add an internal admin note
+router.post('/users/:email/notes', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const email = req.params.email;
+    const { notes } = req.body;
+
+    await db.collection('admin_user_data').updateOne(
+      { email },
+      { $set: { notes, updatedAt: new Date() } },
+      { upsert: true }
+    );
+
+    res.json({ success: true, message: `Notes updated for ${email}` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/messages/bulk
+// Fetch bulk broadcasts
+router.get('/messages/bulk', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const broadcasts = await db.collection('bulk_broadcasts').find().sort({ sentAt: -1 }).toArray();
+    res.json(broadcasts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/disputes/:id/chat
+// Fetch full chat history for a specific gig dispute
+router.get('/disputes/:id/chat', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const disputeId = req.params.id;
+    const { ObjectId } = await import('mongodb');
+
+    const dispute = await db.collection('disputes').findOne({ _id: new ObjectId(disputeId) });
+    if (!dispute) return res.status(404).json({ error: 'Dispute not found' });
+    
+    // Attempt to find conversation by opportunity ID since disputes are gig-based
+    const gigId = dispute.opportunityId;
+    let query = {
+      $or: [
+        { gigId: gigId?.length === 24 ? new ObjectId(gigId) : gigId },
+        { opportunityId: gigId?.length === 24 ? gigId.toString() : gigId }
+      ]
+    };
+    
+    // We can filter by participants if they exist
+    if (dispute.reporterEmail && dispute.disputedPartyEmail) {
+      query.participants = { $all: [dispute.reporterEmail, dispute.disputedPartyEmail] };
+    }
+
+    const conv = await db.collection('conversations').findOne(query);
+
+    if (!conv) {
+      // Fallback: just return empty if no conversation is found, some gigs have no chat
+      return res.json([]);
+    }
+
+    const messages = await db.collection('messages').find({ conversationId: conv._id }).sort({ createdAt: 1 }).toArray();
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/master-sheet
+// Fetch aggregated stats for all opportunities and their applications
+router.get('/master-sheet', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    
+    // Fetch all active opportunities
+    const opportunities = await db.collection('opportunities').find().toArray();
+    
+    // Map them up
+    const sheetData = [];
+    for (const opp of opportunities) {
+      // Find applications for this gig
+      const apps = await db.collection('applications').find({
+        $or: [
+          { opportunityId: opp.id },
+          { opportunityId: opp._id?.toString() }
+        ]
+      }).toArray();
+      
+      const counts = { pending: 0, shortlisted: 0, approved: 0, rejected: 0, hired: 0 };
+      const lists = { pending: [], shortlisted: [], approved: [], rejected: [], hired: [] };
+      
+      for (const app of apps) {
+        const status = app.status || 'pending';
+        // group paid and disputed into 'hired'
+        const category = (status === 'paid' || status === 'disputed') ? 'hired' : 
+                         (counts[status] !== undefined ? status : 'pending');
+                         
+        counts[category]++;
+        if (!lists[category].includes(app.applicantEmail)) {
+          lists[category].push(app.applicantEmail);
+        }
+      }
+      
+      sheetData.push({
+        gigId: opp.id || opp._id?.toString(),
+        title: opp.title,
+        posterEmail: opp.contactEmail || opp.posterEmail || 'Unknown',
+        escrowAmount: opp.escrowAmount || 0,
+        totalApps: apps.length,
+        counts,
+        lists
+      });
+    }
+    
+    // Sort by total applications descending
+    sheetData.sort((a, b) => b.totalApps - a.totalApps);
+    
+    res.json(sheetData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/interactions
+// Fetch interaction stats (views/clicks/CTR) for each opportunity
+router.get('/interactions', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+
+    // 1. Aggregate analytics data
+    const analyticsAggr = await db.collection('analytics').aggregate([
+      {
+        $group: {
+          _id: "$opportunityId",
+          views: {
+            $sum: { $cond: [{ $eq: ["$action", "view"] }, 1, 0] }
+          },
+          clicks: {
+            $sum: { $cond: [{ $eq: ["$action", "click"] }, 1, 0] }
+          }
+        }
+      }
+    ]).toArray();
+
+    // 2. Fetch opportunities to get titles/posters
+    const opportunities = await db.collection('opportunities').find().project({ id: 1, title: 1, posterEmail: 1, contactEmail: 1 }).toArray();
+    
+    // Create a lookup map for opportunities
+    const oppLookup = {};
+    opportunities.forEach(opp => {
+      // Use string keys
+      oppLookup[String(opp.id || opp._id)] = {
+        title: opp.title || 'Unknown Opportunity',
+        posterEmail: opp.contactEmail || opp.posterEmail || 'Unknown'
+      };
+    });
+
+    // 3. Build result array
+    const interactionsData = [];
+    
+    for (const aggr of analyticsAggr) {
+      if (!aggr._id) continue;
+      
+      const oppIdStr = String(aggr._id);
+      const oppInfo = oppLookup[oppIdStr] || { title: 'Unknown (Deleted)', posterEmail: 'Unknown' };
+      
+      const ctr = aggr.views > 0 ? ((aggr.clicks / aggr.views) * 100).toFixed(2) : "0.00";
+
+      interactionsData.push({
+        opportunityId: oppIdStr,
+        title: oppInfo.title,
+        posterEmail: oppInfo.posterEmail,
+        views: aggr.views,
+        clicks: aggr.clicks,
+        ctr: parseFloat(ctr)
+      });
+    }
+
+    // Sort by views descending
+    interactionsData.sort((a, b) => b.views - a.views);
+
+    res.json(interactionsData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 export default router;

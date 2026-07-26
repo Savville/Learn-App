@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { OTPLoginForm } from './OTPLoginForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock, Clock, CheckCircle } from 'lucide-react';
+import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock, Clock, CheckCircle, X } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ProfileView } from '../pages/ProfileView';
 import { toSlug } from '@/utils/dateUtils';
 import { useAlert } from '@/contexts/AlertContext';
 
@@ -15,6 +16,7 @@ interface Post {
   category: string;
   views?: number;
   clicks?: number;
+  applicantCount?: number;
   dateAdded?: string;
   submittedAt?: string;
   opportunity?: any; // for pending posts structure
@@ -35,12 +37,12 @@ interface Applicant {
   status: string;
 }
 
-export function PosterDashboard() {
+export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
   const navigate = useNavigate();
   const { id: urlPostId } = useParams<{ id: string }>();
   const { showAlert } = useAlert();
-  const [token, setToken] = useState(localStorage.getItem('user_token'));
-  const [email, setEmail] = useState(localStorage.getItem('user_email'));
+  const [token, setToken] = useState(isAdminMode ? localStorage.getItem('adminToken') : localStorage.getItem('user_token'));
+  const [email, setEmail] = useState(isAdminMode ? 'ochiwilliamotieno@gmail.com' : localStorage.getItem('user_email'));
 
   const [livePosts, setLivePosts] = useState<Post[]>([]);
   const [pendingPosts, setPendingPosts] = useState<Post[]>([]);
@@ -55,6 +57,9 @@ export function PosterDashboard() {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loadingApplicants, setLoadingApplicants] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Sliding Profile State
+  const [slidingApplicant, setSlidingApplicant] = useState<{ email: string; app: Applicant; post: Post } | null>(null);
 
   // Auto-fetch applicants if we arrived via direct URL
   useEffect(() => {
@@ -114,7 +119,8 @@ export function PosterDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/public/me/posts`, {
+      const endpoint = isAdminMode ? `${API_BASE}/public/me/posts?filterMode=admin` : `${API_BASE}/public/me/posts?filterMode=normal`;
+      const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${currentToken}` },
       });
       if (res.status === 401) {
@@ -187,12 +193,15 @@ export function PosterDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('user_email');
-    setToken(null);
-    setEmail(null);
-    setLivePosts([]);
-    setPendingPosts([]);
+    if (isAdminMode) return; // Admins cannot logout from here
+    if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem('user_token');
+      localStorage.removeItem('user_email');
+      setToken(null);
+      setEmail(null);
+      setLivePosts([]);
+      setPendingPosts([]);
+    }
   };
 
   const handleDeletePending = async () => {
@@ -465,13 +474,29 @@ export function PosterDashboard() {
               <Briefcase className="w-7 h-7" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">My Postings Dashboard</h2>
-              <p className="text-gray-500 mt-1">Logged in as <span className="font-medium text-gray-700">{email}</span></p>
+              <h2 className="text-2xl font-bold text-gray-900 truncate pr-4">
+                {isAdminMode ? 'All Platform Posts' : 'My Posts Dashboard'}
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+              <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl shrink-0 border border-gray-200">
+                <Mail className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700 truncate max-w-[150px] md:max-w-xs" title={email || ''}>{email}</span>
+              </div>
+              
+              {!isAdminMode && (
+                <Button 
+                  onClick={handleLogout} 
+                  variant="outline" 
+                  className="gap-2 shrink-0 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              )}
             </div>
           </div>
-          <button onClick={handleLogout} className="px-5 py-2.5 rounded-full border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-colors font-semibold flex items-center shadow-sm">
-            <LogOut className="w-4 h-4 mr-2" /> Logout
-          </button>
         </div>
 
         <div className="">
@@ -533,310 +558,89 @@ export function PosterDashboard() {
                         </p>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-                        {(post.isLive || post.status === 'Verified') && (
-                          <Button asChild variant="outline" className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center">
-                            <Link to={`/opportunity/${toSlug(post.title)}`} target="_blank">
-                              View Live <ExternalLink className="w-4 h-4 ml-2 text-gray-400" />
-                            </Link>
-                          </Button>
-                        )}
-
-                        {/* Deposit Escrow Button — only if not yet funded */}
-                        {(post.isEscrow || post.opportunity?.isEscrow) && (
-                          (post.isEscrowFunded || post.opportunity?.isEscrowFunded) ? (
-                            <>
-                              <span className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-50 text-green-700 border border-green-200 flex items-center justify-center gap-1.5 text-sm">
-                                <Lock className="w-4 h-4" /> Escrow Active
-                              </span>
-                              <Button
-                                onClick={() => setPayoutJob(post)}
-                                variant="outline"
-                                className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold border-purple-200 text-purple-700 hover:bg-purple-50 flex items-center justify-center gap-1.5"
-                              >
-                                <DollarSign className="w-4 h-4" /> Request Payout
-                              </Button>
-                            </>
-                          ) : (
-                            <Button
-                              onClick={() => setEscrowJob(post)}
-                              variant="default"
-                              className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow"
-                            >
-                              Deposit KES {post.escrowAmount || post.opportunity?.escrowAmount || 0}
+                      <div className="flex flex-col gap-3 shrink-0 items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
+                        {/* Top Row: Core Actions */}
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-start md:justify-end">
+                          {(post.isLive || post.status === 'Verified') && (
+                            <Button asChild variant="outline" className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center">
+                              <Link to={`/opportunity/${toSlug(post.title)}`} target="_blank">
+                                View Live <ExternalLink className="w-4 h-4 ml-2 text-gray-400" />
+                              </Link>
                             </Button>
-                          )
-                        )}
+                          )}
 
-                        <Button
-                          onClick={() => navigate('/post-with-us', { state: { editPost: post.isLive ? post : post.opportunity || post.originalOpportunity || post } })}
-                          variant="outline"
-                          className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-blue-200 text-blue-700 hover:bg-blue-50"
-                        >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                          Edit
-                        </Button>
-
-                        {!post.isLive && post.status !== 'Verified' && (
                           <Button
-                            onClick={() => {
-                              setPostToDelete(post);
-                              setDeleteError(null);
-                              setTimeout(() => {
-                                document.getElementById('delete-modal-dialog')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                              }, 50);
-                            }}
+                            onClick={() => navigate('/post-with-us', { state: { editPost: post.isLive ? post : post.opportunity || post.originalOpportunity || post } })}
                             variant="outline"
-                            className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                            className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-blue-200 text-blue-700 hover:bg-blue-50"
                           >
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                            Edit
                           </Button>
+
+                          {!post.isLive && post.status !== 'Verified' && (
+                            <Button
+                              onClick={() => {
+                                setPostToDelete(post);
+                                setDeleteError(null);
+                                setTimeout(() => {
+                                  document.getElementById('delete-modal-dialog')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }, 50);
+                              }}
+                              variant="outline"
+                              className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Bottom Row: Applications & Escrow */}
+                        {( ((post.applicationForm?.isEnabled || post.opportunity?.applicationForm?.isEnabled || true) && (post.isLive || post.status === 'Verified')) || (post.isEscrow || post.opportunity?.isEscrow) ) && (
+                          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-start md:justify-end">
+                            {(post.applicationForm?.isEnabled || post.opportunity?.applicationForm?.isEnabled || true) && (post.isLive || post.status === 'Verified') && (
+                              <Link
+                                to={`/manage/applicants/${post.id || post.opportunity?.id}`}
+                                state={{ post }}
+                                className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold transition-all bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center"
+                              >
+                                <Users className="w-4 h-4 mr-2 text-slate-500" />
+                                <span>View Applications: {post.applicantCount || 0}</span>
+                              </Link>
+                            )}
+
+                            {(post.isEscrow || post.opportunity?.isEscrow) && (
+                              (post.isEscrowFunded || post.opportunity?.isEscrowFunded) ? (
+                                <>
+                                  <span className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-50 text-green-700 border border-green-200 flex items-center justify-center gap-1.5 text-sm">
+                                    <Lock className="w-4 h-4" /> Escrow Active
+                                  </span>
+                                  <Button
+                                    onClick={() => setPayoutJob(post)}
+                                    variant="outline"
+                                    className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold border-purple-200 text-purple-700 hover:bg-purple-50 flex items-center justify-center gap-1.5"
+                                  >
+                                    <DollarSign className="w-4 h-4" /> Request Payout
+                                  </Button>
+                                </>
+                              ) : (
+                                <Button
+                                  onClick={() => setEscrowJob(post)}
+                                  variant="default"
+                                  className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow"
+                                >
+                                  Deposit KES {post.escrowAmount || post.opportunity?.escrowAmount || 0}
+                                </Button>
+                              )
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    {/* New Inbox Action Area directly below the posting info */}
-                    {(post.applicationForm?.isEnabled || post.opportunity?.applicationForm?.isEnabled || true) && (post.isLive || post.status === 'Verified') && (
-                      <div className="bg-slate-50/50 border-t border-slate-100 p-4 shrink-0 flex justify-end">
-                        <Button
-                          onClick={() => {
-                            if (expandedPostId !== post.id) fetchApplicants(post.id);
-                            else setExpandedPostId(null);
-                          }}
-                          variant={expandedPostId === post.id ? "default" : "outline"}
-                          className={`w-full sm:w-auto rounded-xl px-6 h-12 font-medium transition-all ${expandedPostId === post.id ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
-                        >
-                          <Mail className={`w-4 h-4 mr-2 ${expandedPostId === post.id ? 'text-white' : 'text-slate-500'}`} />
-                          <span>{expandedPostId === post.id ? 'Close Inbox' : 'Open Inbox'}</span>
-                        </Button>
-                      </div>
-                    )}
 
-                    {/* Applicants Expansion Area */}
-                    {expandedPostId === post.id && (
-                      <div className="bg-white border-t-2 border-blue-500 p-6 md:p-8">
-                        {loadingApplicants ? (
-                          <div className="flex items-center justify-center py-8 text-blue-600">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2" /> Loading applicants...
-                          </div>
-                        ) : applicants.length === 0 ? (
-                          <div className="text-center py-6 text-slate-500">
-                            No applications received yet for this position.
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <h5 className="font-bold text-slate-800 flex items-center gap-2">
-                              <Users className="w-4 h-4" /> Received Applications ({applicants.length})
-                            </h5>
-                            <div className="mt-4">
-                              {(() => {
-                                const isJobOrGig = post.category === 'Job' || post.category === 'Gig' || post.opportunity?.category === 'Job' || post.opportunity?.category === 'Gig';
 
-                                const renderApplicantCard = (app: Applicant, idx: number) => (
-                                  <div key={app._id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative flex flex-col h-full shrink-0">
-                                    <div className="flex items-center justify-between mb-3 border-b border-slate-50 pb-2">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-semibold text-slate-700 text-sm">Applicant {idx + 1}</span>
-                                        {app.status && (
-                                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${app.status === 'approved' || app.status === 'paid' ? 'bg-green-100 text-green-700' :
-                                              app.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                app.status === 'disputed' ? 'bg-red-600 text-white' :
-                                                  app.status === 'shortlisted' ? 'bg-purple-100 text-purple-700' :
-                                                    app.status === 'interviewing' ? 'bg-blue-100 text-blue-700' :
-                                                      app.status.startsWith('resolved_') ? 'bg-blue-600 text-white' :
-                                                        'bg-yellow-100 text-yellow-700'
-                                            }`}>
-                                            {app.status.toUpperCase()}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <span className="text-xs text-slate-400">{new Date(app.appliedAt).toLocaleString()}</span>
-                                    </div>
-                                    <div className="space-y-2 text-sm flex-1">
-                                      <div className="grid grid-cols-[100px_1fr] gap-2">
-                                        <span className="text-slate-500 font-medium">Email:</span>
-                                        <span className="text-slate-900 break-all">
-                                          <a href={`mailto:${app.applicantEmail}`} className="text-blue-600 hover:underline">{app.applicantEmail}</a>
-                                        </span>
-                                      </div>
-                                      {Object.entries(app.applicantData).map(([key, value]) => {
-                                        if (key === 'email') return null; // skip redundant email
-                                        const isUrl = String(value).startsWith('http');
-                                        return (
-                                          <div key={key} className="grid grid-cols-[100px_1fr] gap-2">
-                                            <span className="text-slate-500 font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
-                                            <span className="text-slate-900 break-words">
-                                              {isUrl ? <a href={value as string} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center">View Link <ExternalLink className="w-3 h-3 ml-1" /></a> : value as React.ReactNode}
-                                            </span>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
 
-                                    {/* Actions */}
-                                    <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-2 justify-end">
-                                      {(app.status === 'pending' || !app.status) && (
-                                        <>
-                                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
-                                          {isJobOrGig && <Button variant="outline" size="sm" className="text-purple-600 hover:bg-purple-50 border-purple-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'shortlisted')}>Shortlist</Button>}
-                                          {isJobOrGig ? (
-                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => { setEscrowJob(post); setEscrowApplicant(app); }}>Hire & Deposit Escrow</Button>
-                                          ) : (
-                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
-                                          )}
-                                        </>
-                                      )}
-                                      {app.status === 'shortlisted' && (
-                                        <>
-                                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
-                                          <Button variant="outline" size="sm" className="text-blue-600 hover:bg-blue-50 border-blue-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'interviewing')}>Interview</Button>
-                                          {isJobOrGig ? (
-                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => { setEscrowJob(post); setEscrowApplicant(app); }}>Hire & Deposit Escrow</Button>
-                                          ) : (
-                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
-                                          )}
-                                        </>
-                                      )}
-                                      {app.status === 'interviewing' && (
-                                        <>
-                                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'rejected')}>Reject</Button>
-                                          {isJobOrGig ? (
-                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => { setEscrowJob(post); setEscrowApplicant(app); }}>Hire & Deposit Escrow</Button>
-                                          ) : (
-                                            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleUpdateApplicantStatus(app._id, 'approved')}>Approve</Button>
-                                          )}
-                                        </>
-                                      )}
-                                      {app.status === 'approved' && (
-                                        <>
-                                          {/* Escrow release logic */}
-                                          {(post.isEscrow || post.opportunity?.isEscrow || (post.escrowAmount ?? 0) > 0 || (post.opportunity?.escrowAmount ?? 0) > 0) ? (
-                                            <div className="w-full space-y-2">
-                                              {(() => {
-                                                const escrow = Number(post.escrowAmount || post.opportunity?.escrowAmount || 0);
-                                                const platformFee = Math.ceil(escrow * 0.05);
-                                                const mpesaFee = Math.ceil((escrow - platformFee) * 0.02);
-                                                const netPayable = escrow - platformFee - mpesaFee;
-                                                return (
-                                                  <div className="bg-green-50 rounded-lg border border-green-100 p-3 text-xs space-y-1">
-                                                    <p className="font-bold text-green-800 mb-2 flex items-center gap-1"><Lock className="w-3 h-3" />Escrow Release Preview</p>
-                                                    <div className="flex justify-between text-slate-600"><span>Escrow Total</span><span className="font-semibold">KES {escrow.toLocaleString()}</span></div>
-                                                    <div className="flex justify-between text-slate-500"><span>Platform Fee (5%)</span><span className="text-red-500">− KES {platformFee}</span></div>
-                                                    <div className="flex justify-between text-slate-500"><span>M-PESA Fee (2%)</span><span className="text-red-500">− KES {mpesaFee}</span></div>
-                                                    <div className="flex justify-between border-t border-green-200 pt-1 font-bold text-green-700"><span>They Receive</span><span>KES {netPayable.toLocaleString()}</span></div>
-                                                  </div>
-                                                );
-                                              })()}
-                                              {(app as any).escrowReleaseRequested ? (
-                                                <p className="text-xs text-amber-600 font-medium text-center bg-amber-50 border border-amber-100 rounded-lg p-2 flex items-center justify-center gap-1.5">
-                                                  <Clock className="w-3.5 h-3.5" /> Release requested
-                                                </p>
-                                              ) : (
-                                                <Button size="sm" variant="default" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium" disabled={releaseLoading} onClick={() => handleReleaseEscrow(post, app)}>
-                                                  <DollarSign className="w-3.5 h-3.5 mr-1" />
-                                                  {releaseLoading ? 'Processing...' : 'Release Payment'}
-                                                </Button>
-                                              )}
-                                              {releaseMessage && (
-                                                <p className={`text-xs font-medium text-center ${releaseMessage.includes('✅') || releaseMessage.includes('Net payout') ? 'text-green-600' : 'text-red-500'}`}>
-                                                  {releaseMessage.replace('✅ ', '').replace('❌ ', '')}
-                                                </p>
-                                              )}
-                                            </div>
-                                          ) : (
-                                            <p className="text-xs text-green-600 font-medium my-auto text-right w-full flex items-center justify-end gap-1">
-                                              <CheckCircle className="w-3.5 h-3.5" /> Approved
-                                            </p>
-                                          )}
-                                        </>
-                                      )}
-                                      {app.status === 'rejected' && (
-                                        <p className="text-xs text-red-500 font-medium my-auto text-right w-full">Rejected.</p>
-                                      )}
-                                      {app.status === 'disputed' && (
-                                        <div className="w-full flex items-center justify-between bg-red-50 p-2 rounded border border-red-100">
-                                          <p className="text-xs text-red-700 font-bold">Dispute in Progress</p>
-                                          <p className="text-[10px] text-red-600 text-right max-w-[150px]">Admins are reviewing.</p>
-                                        </div>
-                                      )}
-                                      {app.status.startsWith('resolved_') && (
-                                        <p className="text-xs text-blue-600 font-medium my-auto text-right w-full">Dispute Resolved ({app.status.split('_')[1]})</p>
-                                      )}
-                                      {app.status === 'paid' && (
-                                        <p className="text-xs text-green-600 font-medium my-auto text-right w-full flex items-center justify-end gap-1">
-                                          <CheckCircle className="w-3.5 h-3.5" /> Paid
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-
-                                if (!isJobOrGig) {
-                                  // Standard list/grid for non-jobs
-                                  return (
-                                    <div className="grid gap-4 md:grid-cols-2">
-                                      {applicants.map((app, idx) => renderApplicantCard(app, idx))}
-                                    </div>
-                                  );
-                                }
-
-                                // Kanban layout for Jobs/Gigs
-                                const columns = ['Applied', 'Shortlisted', 'Interviewing', 'Approved', 'Rejected'];
-                                const getColumnForApp = (app: Applicant) => {
-                                  const s = app.status || 'pending';
-                                  if (s === 'pending') return 'Applied';
-                                  if (s === 'shortlisted') return 'Shortlisted';
-                                  if (s === 'interviewing') return 'Interviewing';
-                                  if (s === 'rejected') return 'Rejected';
-                                  return 'Approved'; // handles approved, paid, disputed, resolved_*
-                                };
-
-                                const grouped = columns.reduce((acc, col) => {
-                                  acc[col] = applicants.filter(a => getColumnForApp(a) === col);
-                                  return acc;
-                                }, {} as Record<string, Applicant[]>);
-
-                                return (
-                                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x pt-2">
-                                    {columns.map(col => (
-                                      <div key={col} className="min-w-[320px] w-[320px] flex-shrink-0 bg-slate-50/70 rounded-xl border border-slate-200 p-3 snap-start flex flex-col max-h-[600px]">
-                                        <div className="flex justify-between items-center mb-3 px-1">
-                                          <h6 className="font-bold text-slate-700 capitalize flex items-center gap-2">
-                                            {col}
-                                            <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-full">{grouped[col].length}</span>
-                                          </h6>
-                                          {col === 'Applied' && grouped[col].length > 0 && (
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              onClick={() => {
-                                                if (window.confirm('Reject all pending applicants?')) {
-                                                  grouped[col].forEach(a => handleUpdateApplicantStatus(a._id, 'rejected'));
-                                                }
-                                              }}
-                                              className="h-6 text-[10px] text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
-                                            >
-                                              Reject All
-                                            </Button>
-                                          )}
-                                        </div>
-                                        <div className="flex-1 overflow-y-auto space-y-3 pr-1 pb-1">
-                                          {grouped[col].length === 0 ? (
-                                            <div className="text-center py-6 text-slate-400 text-sm border border-dashed border-slate-300 rounded-lg bg-white/50">No applicants</div>
-                                          ) : (
-                                            grouped[col].map((app, idx) => renderApplicantCard(app, idx))
-                                          )}
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                   </div>
                 ))}
@@ -1124,6 +928,40 @@ export function PosterDashboard() {
         )}
 
       </div>
+
+      {/* Sliding Profile Drawer */}
+      {slidingApplicant && (
+        <div className="fixed inset-0 z-[60] flex justify-end bg-black/40 backdrop-blur-sm transition-opacity" onClick={(e) => { if(e.target === e.currentTarget) setSlidingApplicant(null); }}>
+          <div className="w-full max-w-3xl bg-white shadow-2xl h-full flex flex-col transform transition-transform duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white shadow-sm z-10">
+              <h3 className="font-semibold text-slate-800">Applicant Profile</h3>
+              <Button variant="ghost" size="icon" onClick={() => setSlidingApplicant(null)} className="rounded-full hover:bg-slate-100">
+                <X className="w-5 h-5 text-slate-500" />
+              </Button>
+            </div>
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto bg-slate-50 relative">
+              <ProfileView 
+                emailProp={slidingApplicant.email} 
+                isSlider={true}
+                bottomActions={
+                  (slidingApplicant.app.status === 'pending' || !slidingApplicant.app.status || slidingApplicant.app.status === 'shortlisted') ? (
+                    <>
+                      <Button variant="outline" className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 shadow-sm" onClick={() => { handleUpdateApplicantStatus(slidingApplicant.app._id, 'rejected'); setSlidingApplicant(null); }}>Deny</Button>
+                      {slidingApplicant.post.category === 'Job' || slidingApplicant.post.category === 'Gig' || slidingApplicant.post.opportunity?.category === 'Job' || slidingApplicant.post.opportunity?.category === 'Gig' ? (
+                        <Button variant="default" className="flex-[2] bg-green-600 hover:bg-green-700 text-white shadow-sm font-bold" onClick={() => { setSlidingApplicant(null); setEscrowJob(slidingApplicant.post); setEscrowApplicant(slidingApplicant.app); }}>Hire & Deposit Escrow</Button>
+                      ) : (
+                        <Button variant="default" className="flex-[2] bg-green-600 hover:bg-green-700 text-white shadow-sm font-bold" onClick={() => { handleUpdateApplicantStatus(slidingApplicant.app._id, 'approved'); setSlidingApplicant(null); }}>Approve</Button>
+                      )}
+                    </>
+                  ) : null
+                }
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

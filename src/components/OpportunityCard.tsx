@@ -190,7 +190,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
                 <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
               </button>
               <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-gray-700 text-xs font-bold uppercase tracking-wider shadow-sm">
-                {opportunity.category}
+                {opportunity.category === 'Provider' ? 'Platform' : opportunity.category}
               </span>
             </div>
             {verificationLabel && (

@@ -55,10 +55,8 @@ const ALL_FUNDING_OPTIONS = [
 
 const TABS = BROWSE_TABS;
 
-const RIGHT_TABS: { id: string; label: string; description: string }[] = [
-  { id: 'applied', label: 'Tracker', description: 'Tracker' },
-  { id: 'inbox', label: 'Inbox', description: 'Inbox' },
-  { id: 'portfolio', label: 'Portfolio', description: 'Portfolio' },
+const RIGHT_TABS: { id: string; label: string; href: string }[] = [
+  { id: 'post', label: 'Post With Us', href: '/post-with-us' },
 ];
 
 const applyFilters = (
@@ -118,7 +116,7 @@ export function Opportunities() {
 
     setSearchParams(params, { replace: true });
   }, [activeTab, searchQuery, selectedType, selectedLevel, selectedFunding, selectedTaskType, selectedUrgency, setSearchParams]);
-  const currentTab = [...TABS, ...RIGHT_TABS].find(t => t.id === activeTab) ?? TABS[0];
+  const currentTab = TABS.find(t => t.id === activeTab) ?? TABS[0];
 
   useSEO({
     title: `${currentTab.description} — Opportunities Pathways`,
@@ -295,7 +293,7 @@ export function Opportunities() {
             'Search by title, organization, or keyword...';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-12">
       <StructuredData
         type="breadcrumbList"
         title={`${currentTab.description} — Opportunities Kenya`}
@@ -303,8 +301,8 @@ export function Opportunities() {
         url="https://opportunitieskenya.live/opportunities"
         breadcrumbs={breadcrumbs}
       />
-      <div className="bg-[#131ADF]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-[#131ADF] rounded-b-3xl shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-10">
 
           {/* Tab Navigation */}
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap bg-white/10 p-1 rounded-lg w-full mb-8 gap-1 items-stretch sm:items-center backdrop-blur-sm">
@@ -435,17 +433,25 @@ export function Opportunities() {
               </div>
             </div>
 
-            {/* Right Tabs (Applied, Inbox) */}
+            {/* Right Tabs */}
             <div className="flex gap-2 shrink-0">
               {RIGHT_TABS.map(tab => (
                 <Link
                   key={tab.id}
-                  to={`/${tab.id}`}
-                  className="px-6 py-2 rounded-md font-semibold transition-all border bg-transparent text-white border-white/30 hover:bg-white/10"
+                  to={tab.href}
+                  className="px-6 py-2 rounded-md font-semibold transition-all border bg-transparent text-white border-white hover:bg-white hover:text-blue-900"
                 >
                   {tab.label}
                 </Link>
               ))}
+              {!localStorage.getItem("user_token") && (
+                <Link
+                  to="/login"
+                  className="px-6 py-2 rounded-md font-semibold transition-all border bg-white text-blue-900 border-white hover:bg-gray-100 shadow-sm"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
 

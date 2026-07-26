@@ -1059,6 +1059,39 @@ export function OpportunityDetails() {
               <h2 className="text-gray-900 mb-4 text-xl font-bold">About This Opportunity</h2>
               {renderDescription(opportunity.fullDescription || opportunity.description)}
 
+              {/* Provider Items (Aggregated Listings) */}
+              {opportunity.providerItems && opportunity.providerItems.length > 0 && (
+                <div className="mt-8 space-y-4">
+                  {opportunity.providerItems.map((item, idx) => (
+                    <div key={idx} className="bg-white border-2 border-blue-100 rounded-xl p-5 hover:border-blue-300 transition-colors shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <h4 className="text-lg font-bold text-gray-900 mb-1">{item.title}</h4>
+                        <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-gray-600">
+                          <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md">
+                            <Calendar className="w-4 h-4" />
+                            {item.deadline}
+                          </span>
+                          {item.prize && (
+                            <span className="flex items-center gap-1.5 bg-green-50 text-green-700 px-2.5 py-1 rounded-md">
+                              Prize: {item.prize}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#131ADF] hover:bg-blue-800 text-white font-bold rounded-lg shadow-sm transition-all md:w-auto w-full whitespace-nowrap"
+                      >
+                        View & Apply
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {opportunity.projectProposalUrl && (
                 <div className="mt-6 p-5 bg-purple-50 border border-purple-200 rounded-xl flex items-start gap-4">
                   <div className="bg-purple-100 p-2 rounded-lg text-purple-700">

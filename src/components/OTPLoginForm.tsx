@@ -10,7 +10,7 @@ interface OTPLoginFormProps {
   subtitle?: string;
 }
 
-export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitle = "Enter your email to receive a 4-digit access code." }: OTPLoginFormProps) {
+export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitle = "Enter your email to receive a 6-digit access code." }: OTPLoginFormProps) {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<1 | 2>(1);
@@ -121,7 +121,7 @@ export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitl
         ) : (
           <>
             <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-              We've sent a 4-digit code to <span className="font-bold text-gray-900">{email}</span>.
+              We've sent a 6-digit code to <span className="font-bold text-gray-900">{email}</span>.
             </p>
             <form onSubmit={handleVerifyCode} className="space-y-6">
               <div>
@@ -129,16 +129,16 @@ export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitl
                 <input 
                   type="text" 
                   required 
-                  maxLength={4}
+                  maxLength={6}
                   value={otp} 
                   onChange={e => setOtp(e.target.value.replace(/\D/g, ''))} 
-                  placeholder="1234" 
+                  placeholder="123456" 
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors text-center text-xl tracking-widest"
                 />
               </div>
               <button 
                 type="submit" 
-                disabled={loading || otp.length !== 4}
+                disabled={loading || otp.length !== 6}
                 className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-[#131ADF] text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify & Access'}

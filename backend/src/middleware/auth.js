@@ -51,6 +51,13 @@ export function verifyUserToken(req, res, next) {
   const token = authHeader.slice(7);
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+
+    // Allow admin token to act as the super-admin user
+    if (decoded.role === 'admin') {
+      req.user = { email: 'ochiwilliamotieno@gmail.com', type: 'user' };
+      return next();
+    }
+
     if (decoded.type !== 'user') throw new Error('Invalid token type');
     req.user = decoded;
     return next();

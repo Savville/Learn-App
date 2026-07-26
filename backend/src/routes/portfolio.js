@@ -47,13 +47,17 @@ router.get('/:email', async (req, res) => {
       });
     }
 
+    // Fetch opportunities posted by the user
+    const postedGigsCount = await db.collection('opportunities').countDocuments({ userEmail: normalizedEmail });
+
     res.json({
       success: true,
-      profile: profile || { email: normalizedEmail, name: '', bio: '', avatar: '', links: {} },
+      profile: profile || { email: normalizedEmail, name: '', bio: '', avatar: '', location: '', links: {} },
       stats: {
         totalEarnings: calculatedEarnings,
         completedGigsCount: gigsWithDetails.length,
-        completedGigs: gigsWithDetails
+        completedGigs: gigsWithDetails,
+        postedGigsCount: postedGigsCount
       }
     });
   } catch (error) {
@@ -72,7 +76,7 @@ router.put('/', async (req, res) => {
     if (!email) return res.status(401).json({ error: 'Unauthorized. Email required in x-user-email header.' });
 
     const normalizedEmail = email.trim().toLowerCase();
-    const { name, bio, avatar, links } = req.body;
+    const { name, bio, avatar, location, links, projects, skills } = req.body;
 
     await db.collection('portfolios').updateOne(
       { email: normalizedEmail },
@@ -81,7 +85,10 @@ router.put('/', async (req, res) => {
           name: name || '', 
           bio: bio || '', 
           avatar: avatar || '', 
+          location: location || '',
           links: links || {},
+          projects: projects || [],
+          skills: skills || [],
           updatedAt: new Date()
         } 
       },

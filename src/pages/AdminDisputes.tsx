@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert, CheckCircle2, RefreshCcw } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, RefreshCcw, MessageSquare, X } from 'lucide-react';
 import { useAlert } from '../contexts/AlertContext';
 
 interface DisputedApplication {
@@ -22,6 +22,7 @@ export function AdminDisputes() {
   const [disputes, setDisputes] = useState<DisputedApplication[]>([]);
   const [loading, setLoading] = useState(false);
   const { showAlert } = useAlert();
+  const [chatModal, setChatModal] = useState<{isOpen: boolean, disputeId: string | null, messages: any[]}>({isOpen: false, disputeId: null, messages: []});
 
   const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -60,6 +61,19 @@ export function AdminDisputes() {
       
       showAlert({ title: 'Success', message: `Application is now ${resolution}.`, type: 'success' });
       setDisputes(prev => prev.filter(d => d._id !== appId));
+    } catch (err: any) {
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
+    }
+  };
+
+  const handleViewChat = async (disputeId: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/admin/disputes/${disputeId}/chat`, {
+        headers: { 'x-api-key': adminKey }
+      });
+      if (!res.ok) throw new Error('Failed to fetch chat history');
+      const messages = await res.json();
+      setChatModal({ isOpen: true, disputeId, messages });
     } catch (err: any) {
       showAlert({ title: 'Error', message: err.message, type: 'error' });
     }
@@ -161,6 +175,13 @@ export function AdminDisputes() {
                        >
                          Log: Employer Refunded
                        </Button>
+                       <Button 
+                         variant="secondary"
+                         onClick={() => handleViewChat(dispute._id)}
+                         className="flex items-center gap-2"
+                       >
+                         <MessageSquare className="w-4 h-4" /> View Chat
+                       </Button>
                      </div>
                   </div>
 
@@ -170,6 +191,36 @@ export function AdminDisputes() {
           </div>
         )}
       </div>
+
+      {/* Chat History Modal */}
+      {chatModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col h-[80vh] animate-in zoom-in-95">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2"><MessageSquare className="w-5 h-5"/> Chat History</h3>
+              <Button variant="ghost" size="icon" onClick={() => setChatModal({ isOpen: false, disputeId: null, messages: [] })} className="h-8 w-8 rounded-full">
+                <X className="w-4 h-4 text-slate-500" />
+              </Button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50 flex flex-col gap-4">
+              {chatModal.messages.length === 0 ? (
+                <div className="text-center text-slate-500 py-10">No chat history found for this dispute.</div>
+              ) : (
+                chatModal.messages.map((msg, idx) => (
+                  <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-sm text-blue-700">{msg.senderName} <span className="font-normal text-slate-500">({msg.senderEmail})</span></span>
+                      <span className="text-xs text-slate-400">{new Date(msg.createdAt).toLocaleString()}</span>
+                    </div>
+                    <p className="text-sm text-slate-700 whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -575,9 +575,9 @@ router.post('/submit-opportunity', async (req, res) => {
 
     const normalizedReporter = {
       ...reporter,
-      name: reporter.name.trim(),
-      organization: reporter.organization.trim(),
-      role: reporter.role.trim(),
+      name: req.body.isAdminPost ? 'Admin' : reporter.name.trim(),
+      organization: req.body.isAdminPost ? 'Opportunities Kenya' : reporter.organization.trim(),
+      role: req.body.isAdminPost ? 'Platform Administrator' : reporter.role.trim(),
       telephone: reporter.telephone.trim(),
       email: reporter.email.trim().toLowerCase(),
       websiteOrSocial: reporter.websiteOrSocial.trim(),
@@ -602,6 +602,7 @@ router.post('/submit-opportunity', async (req, res) => {
       reporter: normalizedReporter,
       opportunity,
       isOrganizationPost,
+      isAdminPost: !!req.body.isAdminPost,
       orgName,
       status: 'Unverified',
       reviewState: 'Unverified',
@@ -697,8 +698,8 @@ router.post('/auth/send-otp', async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Generate 4-digit code
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    // Generate 6-digit code
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const db = getDB();
     await db.collection('auth_otps').updateOne(
@@ -779,18 +780,45 @@ router.get('/me/applications', verifyUserToken, async (req, res) => {
 router.get('/me/posts', verifyUserToken, async (req, res) => {
   try {
     const email = req.user.email;
+    const { filterMode } = req.query;
     const db = getDB();
+
+    const query = { 'reporter.email': email };
+    
+    // Fused Logic: if filterMode === 'admin', show ALL posts for this email (God Mode).
+    // If filterMode === 'normal' (or anything else), show only non-admin posts.
+    if (filterMode !== 'admin') {
+      query.isAdminPost = { $ne: true };
+    }
 
     // Find jobs in raw opportunities and pending_opportunities
     const livePosts = await db.collection('opportunities')
-      .find({ 'reporter.email': email }) // Assuming you saved reporter info or contactEmail
+      .find(query) // Assuming you saved reporter info or contactEmail
       .toArray();
 
     // Because in our submit route we saved reporter: { email } to pending_opportunities and might not have persisted reporter to the main opportunities initially,
     // let's grab from both to be safe, or just look up anything linked to their email string. We track submitted stuff.
     const pendingPosts = await db.collection('pending_opportunities')
-      .find({ 'reporter.email': email })
+      .find(query)
       .toArray();
+
+    // Fetch applicant counts
+    const postIds = [
+      ...livePosts.map(p => p.id).filter(Boolean),
+      ...pendingPosts.map(p => p.opportunity?.id || p.id).filter(Boolean)
+    ];
+
+    const applicationCounts = await db.collection('applications')
+      .aggregate([
+        { $match: { $or: [{ opportunityId: { $in: postIds } }, { postId: { $in: postIds } }] } },
+        { $group: { _id: { $ifNull: ['$opportunityId', '$postId'] }, count: { $sum: 1 } } }
+      ]).toArray();
+
+    const countMap = {};
+    applicationCounts.forEach(c => { countMap[c._id] = c.count; });
+
+    livePosts.forEach(p => { p.applicantCount = countMap[p.id] || 0; });
+    pendingPosts.forEach(p => { p.applicantCount = countMap[p.opportunity?.id || p.id] || 0; });
 
     res.json({ live: livePosts, pending: pendingPosts });
   } catch (error) {
@@ -812,16 +840,39 @@ router.get('/me/posts/:id/applicants', verifyUserToken, async (req, res) => {
     // NOTE: If your opportunity object doesn't strictly have `reporter.email` attached to the live document, 
     // you might need to check pending_opportunities for ownership. Let's do that:
     const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': id });
-    if (originalPending?.reporter?.email !== email && opp.contactEmail !== email) {
+    const isOwner = originalPending?.reporter?.email === email || opp.contactEmail === email || opp.reporter?.email === email;
+    if (!isOwner) {
       return res.status(403).json({ error: 'You do not own this post' });
     }
 
     const applicants = await db.collection('applications')
-      .find({ opportunityId: id })
+      .find({ 
+        $or: [
+          { opportunityId: id },
+          { postId: id }
+        ]
+      })
       .sort({ appliedAt: -1 })
       .toArray();
 
-    res.json(applicants);
+    // Attach portfolio stats
+    const applicantEmails = applicants.map(a => a.applicantEmail).filter(Boolean);
+    const portfolios = await db.collection('portfolios').find({ email: { $in: applicantEmails } }).toArray();
+    const portfolioMap = portfolios.reduce((acc, p) => {
+      acc[p.email] = {
+        projects: p.projects?.length || 0,
+        jobs: p.jobs?.length || 0,
+        postings: 0 // We don't have postings in portfolio, defaulting to 0 for now
+      };
+      return acc;
+    }, {});
+
+    const enrichedApplicants = applicants.map(a => ({
+      ...a,
+      stats: portfolioMap[a.applicantEmail] || { projects: 0, jobs: 0, postings: 0 }
+    }));
+
+    res.json(enrichedApplicants);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -875,7 +926,7 @@ router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
         return res.status(403).json({ error: 'Only the applicant can raise a dispute.' });
       }
 
-      const oppId = application.opportunityId;
+      const oppId = application.opportunityId || application.postId;
       const opp = await db.collection('opportunities').findOne({ id: oppId });
       const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': oppId });
 
@@ -894,11 +945,23 @@ router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
 
     } else {
       // For all other statuses ('approved', 'rejected', 'paid'), ONLY the poster can trigger them.
-      const oppId = application.opportunityId;
+      const oppId = application.opportunityId || application.postId;
       const opp = await db.collection('opportunities').findOne({ id: oppId });
       const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': oppId });
 
-      if (originalPending?.reporter?.email !== email && opp?.contactEmail !== email) {
+      // Check ownership in order of reliability:
+      // 1. posterContactEmail stored directly on the application (most reliable)
+      // 2. opp.contactEmail (live opportunity)
+      // 3. opp.reporter.email (live opportunity uploaded with reporter info)
+      // 4. originalPending.reporter.email (pending opportunity)
+      const posterEmails = [
+        application.posterContactEmail,
+        opp?.contactEmail,
+        opp?.reporter?.email,
+        originalPending?.reporter?.email,
+      ].filter(Boolean);
+
+      if (!posterEmails.includes(email)) {
         return res.status(403).json({ error: 'You do not own the post this application is for' });
       }
 
@@ -989,6 +1052,7 @@ router.post('/opportunities/:id/apply', async (req, res) => {
     await db.collection('applications').insertOne({
       opportunityId: id,
       opportunityTitle: opportunity.title,
+      posterContactEmail: opportunity.contactEmail || opportunity.reporter?.email || null,
       applicantEmail: normalizedEmail,
       applicantData: data,
       status: 'pending',
