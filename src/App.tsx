@@ -82,6 +82,7 @@ function AppContent() {
           <Route path="/manage/applicants/:id" element={<AuthGuard allowAdmin={true}><ApplicantsViewer /></AuthGuard>} />
           <Route path="/manage/edit/:id" element={<AuthGuard><PostWithUs defaultMode="post" /></AuthGuard>} />
           <Route path="/inbox" element={<AuthGuard><Inbox /></AuthGuard>} />
+          <Route path="/applied" element={<AuthGuard><Tracker /></AuthGuard>} />
           <Route path="/portfolio" element={<AuthGuard><Portfolio /></AuthGuard>} />
           <Route path="/login" element={<Login />} />
           <Route path="/subscribe" element={<Subscribe />} />
