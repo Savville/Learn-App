@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   Loader2,
 } from "lucide-react";
-import { FormField, ApplicationForm } from "@/data/opportunities";
+import { FormField, ApplicationForm, TrackForm, Milestone } from "@/data/opportunities";
 import { PosterDashboard } from "@/components/PosterDashboard";
 import {
   POST_WITH_US_CATEGORY_GROUPS,
@@ -115,6 +115,7 @@ export function PostWithUs({
   const [customForm, setCustomForm] = useState<ApplicationForm>({
     isEnabled: false,
     fields: [],
+    tracks: [],
   });
 
   // Handle Edit Redirection from Dashboard
@@ -1608,14 +1609,13 @@ export function PostWithUs({
                         </label>
                       </div>
 
-                      {customForm.isEnabled && (
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                          <p className="mb-4 text-xs text-slate-500">
-                            Configure the fields applicants need to fill. An
-                            "Email Address" step will be automatically enforced
-                            for verification.
-                          </p>
-                          <div className="mb-4 space-y-3">
+                       {customForm.isEnabled && (
+                         <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                           <p className="mb-2 text-xs font-semibold text-slate-700">Default Fields (Auto-included)</p>
+                           <p className="mb-4 text-xs text-slate-500">
+                             Name, Phone Number (visible to admin only for verification before escrow), Email, and Application Message are automatically collected from every applicant. Add additional fields below.
+                           </p>
+                           <div className="mb-4 space-y-3">
                             {customForm.fields.map((field, idx) => (
                               <div
                                 key={field.id}
@@ -1715,30 +1715,505 @@ export function PostWithUs({
                               </div>
                             ))}
                           </div>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => {
-                              setCustomForm({
-                                ...customForm,
-                                fields: [
-                                  ...customForm.fields,
-                                  {
-                                    id: Date.now().toString(),
-                                    key: "new_field",
-                                    label: "New Field",
-                                    type: "text",
-                                    required: false,
-                                  },
-                                ],
-                              });
-                            }}
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Field
-                          </Button>
-                        </div>
-                      )}
+                           <Button
+                             variant="secondary"
+                             size="sm"
+                             onClick={() => {
+                               setCustomForm({
+                                 ...customForm,
+                                 fields: [
+                                   ...customForm.fields,
+                                   {
+                                     id: Date.now().toString(),
+                                     key: "new_field",
+                                     label: "New Field",
+                                     type: "text",
+                                     required: false,
+                                   },
+                                 ],
+                               });
+                             }}
+                           >
+                             <Plus className="mr-2 h-4 w-4" />
+                             Add Field
+                           </Button>
+                         </div>
+                       )}
+
+                       {/* Track Creation for Jobs/Gigs */}
+                       {customForm.isEnabled && categoryShowsJobEscrow(parsedData.basicInfo.category) && (
+                         <div className="mt-6 rounded-lg border border-purple-200 bg-purple-50 p-4">
+                           <h4 className="text-sm font-bold text-purple-900 mb-2">Create Application Tracks</h4>
+                           <p className="text-xs text-purple-700 mb-4">
+                             Tracks let applicants choose different roles or payment structures. Example: Track A (Content Posting, fixed) and Track B (WhatsApp Growth, milestone-based).
+                           </p>
+
+                           <div className="space-y-4">
+                             {customForm.tracks?.map((track, tIdx) => (
+                               <div key={track.id} className="rounded-lg border border-purple-200 bg-white p-4 space-y-3">
+                                 <div className="flex items-center justify-between">
+                                   <span className="text-sm font-semibold text-purple-800">Track {tIdx + 1}</span>
+                                   <Button
+                                     variant="ghost"
+                                     size="sm"
+                                     className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 h-auto"
+                                     onClick={() => {
+                                       const newTracks = customForm.tracks?.filter((_, i) => i !== tIdx) || [];
+                                       setCustomForm({ ...customForm, tracks: newTracks });
+                                     }}
+                                   >
+                                     <Trash2 className="h-3 w-3" />
+                                   </Button>
+                                 </div>
+
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                   <Input
+                                     value={track.label}
+                                     onChange={(e) => {
+                                       const newTracks = [...(customForm.tracks || [])];
+                                       newTracks[tIdx].label = e.target.value;
+                                       setCustomForm({ ...customForm, tracks: newTracks });
+                                     }}
+                                     placeholder="Track Label (e.g. Track A: Content Posting)"
+                                     className="px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                   />
+                                   <select
+                                     value={track.type}
+                                     onChange={(e) => {
+                                       const newTracks = [...(customForm.tracks || [])];
+                                       newTracks[tIdx].type = e.target.value as 'fixed' | 'milestone';
+                                       setCustomForm({ ...customForm, tracks: newTracks });
+                                     }}
+                                     className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white"
+                                   >
+                                     <option value="fixed">Fixed Payment</option>
+                                     <option value="milestone">Milestone-Based</option>
+                                   </select>
+                                 </div>
+
+                                 <Input
+                                   value={track.description}
+                                   onChange={(e) => {
+                                     const newTracks = [...(customForm.tracks || [])];
+                                     newTracks[tIdx].description = e.target.value;
+                                     setCustomForm({ ...customForm, tracks: newTracks });
+                                   }}
+                                   placeholder="Track description for applicants"
+                                   className="px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                 />
+
+                                  {/* Deliverable-Based Amount for Fixed Tracks */}
+                                  {track.type === 'fixed' && (
+                                    <div className="rounded border border-green-200 bg-green-50 p-3 space-y-2">
+                                      <p className="text-xs font-semibold text-green-800">Deliverables (Auto-calculates total)</p>
+                                      {track.deliverables?.map((del, dIdx) => (
+                                        <div key={del.id} className="flex items-center gap-2 flex-wrap">
+                                          <Input
+                                            value={del.title}
+                                            onChange={(e) => {
+                                              const newTracks = [...(customForm.tracks || [])];
+                                              const newDels = [...(newTracks[tIdx].deliverables || [])];
+                                              newDels[dIdx].title = e.target.value;
+                                              newTracks[tIdx].deliverables = newDels;
+                                              setCustomForm({ ...customForm, tracks: newTracks });
+                                            }}
+                                            placeholder="Deliverable title (e.g. Week 1: 3 posts)"
+                                            className="flex-1 min-w-[200px] px-2 py-1 rounded border border-gray-200 text-xs"
+                                          />
+                                          <Input
+                                            type="number"
+                                            value={del.amount || ''}
+                                            onChange={(e) => {
+                                              const newTracks = [...(customForm.tracks || [])];
+                                              const newDels = [...(newTracks[tIdx].deliverables || [])];
+                                              newDels[dIdx].amount = parseInt(e.target.value) || 0;
+                                              newTracks[tIdx].deliverables = newDels;
+                                              // Auto-calculate track amount
+                                              newTracks[tIdx].amount = newDels.reduce((sum, d) => sum + (d.amount || 0), 0);
+                                              setCustomForm({ ...customForm, tracks: newTracks });
+                                            }}
+                                            placeholder="KES"
+                                            className="w-24 px-2 py-1 rounded border border-gray-200 text-xs"
+                                          />
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-red-400 hover:text-red-600 px-1 py-0 h-auto"
+                                            onClick={() => {
+                                              const newTracks = [...(customForm.tracks || [])];
+                                              const newDels = newTracks[tIdx].deliverables?.filter((_, i) => i !== dIdx) || [];
+                                              newTracks[tIdx].deliverables = newDels;
+                                              newTracks[tIdx].amount = newDels.reduce((sum, d) => sum + (d.amount || 0), 0);
+                                              setCustomForm({ ...customForm, tracks: newTracks });
+                                            }}
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      ))}
+                                      <div className="flex items-center justify-between">
+                                        <Button
+                                          variant="secondary"
+                                          size="sm"
+                                          onClick={() => {
+                                            const newTracks = [...(customForm.tracks || [])];
+                                            const newDels = [...(newTracks[tIdx].deliverables || []), {
+                                              id: Date.now().toString(),
+                                              title: '',
+                                              amount: 0,
+                                              status: 'pending',
+                                            }];
+                                            newTracks[tIdx].deliverables = newDels;
+                                            setCustomForm({ ...customForm, tracks: newTracks });
+                                          }}
+                                        >
+                                          <Plus className="mr-1 h-3 w-3" /> Add Deliverable
+                                        </Button>
+                                        <span className="text-xs font-semibold text-green-700">
+                                          Total: KES {track.deliverables?.reduce((sum, d) => sum + (d.amount || 0), 0).toLocaleString()}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Milestone Configuration */}
+                                  {track.type === 'milestone' && (
+                                   <div className="rounded border border-amber-200 bg-amber-50 p-3 space-y-2">
+                                     <p className="text-xs font-semibold text-amber-800">Milestone Payouts</p>
+                                     {track.milestones?.map((ms, mIdx) => (
+                                       <div key={ms.id} className="flex items-center gap-2 flex-wrap">
+                                         <Input
+                                           type="number"
+                                           value={ms.targetValue || ''}
+                                           onChange={(e) => {
+                                             const newTracks = [...(customForm.tracks || [])];
+                                             const newMs = [...(newTracks[tIdx].milestones || [])];
+                                             newMs[mIdx].targetValue = parseInt(e.target.value) || 0;
+                                             newTracks[tIdx].milestones = newMs;
+                                             setCustomForm({ ...customForm, tracks: newTracks });
+                                           }}
+                                           placeholder="Target (e.g. 100)"
+                                           className="w-24 px-2 py-1 rounded border border-gray-200 text-xs"
+                                         />
+                                         <Input
+                                           value={ms.unit}
+                                           onChange={(e) => {
+                                             const newTracks = [...(customForm.tracks || [])];
+                                             const newMs = [...(newTracks[tIdx].milestones || [])];
+                                             newMs[mIdx].unit = e.target.value;
+                                             newTracks[tIdx].milestones = newMs;
+                                             setCustomForm({ ...customForm, tracks: newTracks });
+                                           }}
+                                           placeholder="Unit (e.g. members)"
+                                           className="w-24 px-2 py-1 rounded border border-gray-200 text-xs"
+                                         />
+                                         <span className="text-xs text-gray-500">→ KES</span>
+                                         <Input
+                                           type="number"
+                                           value={ms.amount || ''}
+                                           onChange={(e) => {
+                                             const newTracks = [...(customForm.tracks || [])];
+                                             const newMs = [...(newTracks[tIdx].milestones || [])];
+                                             newMs[mIdx].amount = parseInt(e.target.value) || 0;
+                                             newTracks[tIdx].milestones = newMs;
+                                             setCustomForm({ ...customForm, tracks: newTracks });
+                                           }}
+                                           placeholder="Payout"
+                                           className="w-24 px-2 py-1 rounded border border-gray-200 text-xs"
+                                         />
+                                         <Button
+                                           variant="ghost"
+                                           size="sm"
+                                           className="text-red-400 hover:text-red-600 px-1 py-0 h-auto"
+                                           onClick={() => {
+                                             const newTracks = [...(customForm.tracks || [])];
+                                             const newMs = newTracks[tIdx].milestones?.filter((_, i) => i !== mIdx) || [];
+                                             newTracks[tIdx].milestones = newMs;
+                                             setCustomForm({ ...customForm, tracks: newTracks });
+                                           }}
+                                         >
+                                           <Trash2 className="h-3 w-3" />
+                                         </Button>
+                                       </div>
+                                     ))}
+                                     <Button
+                                       variant="secondary"
+                                       size="sm"
+                                       onClick={() => {
+                                         const newTracks = [...(customForm.tracks || [])];
+                                         const newMs = [...(newTracks[tIdx].milestones || []), {
+                                           id: Date.now().toString(),
+                                           label: '',
+                                           targetValue: 0,
+                                           unit: '',
+                                           amount: 0,
+                                         }];
+                                         newTracks[tIdx].milestones = newMs;
+                                         setCustomForm({ ...customForm, tracks: newTracks });
+                                       }}
+                                     >
+                                       <Plus className="mr-1 h-3 w-3" /> Add Milestone
+                                     </Button>
+                                   </div>
+                                 )}
+
+                                 {/* Track-Specific Fields */}
+                                 <div className="rounded border border-blue-200 bg-blue-50 p-3 space-y-2">
+                                   <p className="text-xs font-semibold text-blue-800">Track-Specific Fields</p>
+                                   {track.fields.map((field, fIdx) => (
+                                     <div key={field.id} className="flex items-center gap-2 flex-wrap">
+                                       <Input
+                                         value={field.label}
+                                         onChange={(e) => {
+                                           const newTracks = [...(customForm.tracks || [])];
+                                           const newFields = [...newTracks[tIdx].fields];
+                                           newFields[fIdx].label = e.target.value;
+                                           newTracks[tIdx].fields = newFields;
+                                           setCustomForm({ ...customForm, tracks: newTracks });
+                                         }}
+                                         placeholder="Field label"
+                                         className="w-36 px-2 py-1 rounded border border-gray-200 text-xs"
+                                       />
+                                       <select
+                                         value={field.type}
+                                         onChange={(e) => {
+                                           const newTracks = [...(customForm.tracks || [])];
+                                           const newFields = [...newTracks[tIdx].fields];
+                                           newFields[fIdx].type = e.target.value as FormField["type"];
+                                           newTracks[tIdx].fields = newFields;
+                                           setCustomForm({ ...customForm, tracks: newTracks });
+                                         }}
+                                         className="px-2 py-1 rounded border border-gray-200 text-xs bg-white"
+                                       >
+                                         <option value="text">Short Text</option>
+                                         <option value="textarea">Paragraph</option>
+                                         <option value="email">Email</option>
+                                         <option value="url">URL</option>
+                                         <option value="number">Number</option>
+                                       </select>
+                                       <Button
+                                         variant="ghost"
+                                         size="sm"
+                                         className="text-red-400 hover:text-red-600 px-1 py-0 h-auto"
+                                         onClick={() => {
+                                           const newTracks = [...(customForm.tracks || [])];
+                                           newTracks[tIdx].fields = newTracks[tIdx].fields.filter((_, i) => i !== fIdx);
+                                           setCustomForm({ ...customForm, tracks: newTracks });
+                                         }}
+                                       >
+                                         <Trash2 className="h-3 w-3" />
+                                       </Button>
+                                     </div>
+                                   ))}
+                                   <Button
+                                     variant="secondary"
+                                     size="sm"
+                                     onClick={() => {
+                                       const newTracks = [...(customForm.tracks || [])];
+                                       newTracks[tIdx].fields = [
+                                         ...newTracks[tIdx].fields,
+                                         {
+                                           id: Date.now().toString(),
+                                           key: "new_field",
+                                           label: "New Field",
+                                           type: "text",
+                                           required: false,
+                                         },
+                                       ];
+                                       setCustomForm({ ...customForm, tracks: newTracks });
+                                     }}
+                                   >
+                                     <Plus className="mr-1 h-3 w-3" /> Add Field
+                                   </Button>
+                                 </div>
+                               </div>
+                             ))}
+                           </div>
+
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="mt-4"
+                              onClick={() => {
+                                const newTrack: TrackForm = {
+                                  id: Date.now().toString(),
+                                  label: `Track ${(customForm.tracks?.length || 0) + 1}`,
+                                  description: '',
+                                  amount: 0,
+                                  type: 'fixed',
+                                  fields: [],
+                                  deliverables: [],
+                                  milestones: [],
+                                  qualityRules: [],
+                                };
+                                setCustomForm({
+                                  ...customForm,
+                                  tracks: [...(customForm.tracks || []), newTrack],
+                                });
+                              }}
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add Track
+                            </Button>
+
+                            {/* Payment Conditions for Jobs */}
+                            {parsedData.basicInfo.category === 'Job' && (
+                              <div className="mt-6 rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+                                <h4 className="text-sm font-bold text-indigo-900 mb-2">Payment Conditions (Optional)</h4>
+                                <p className="text-xs text-indigo-700 mb-4">
+                                  Define key-value terms that applicants will see before applying. Example: "Payment Schedule": "Weekly", "Late Penalty": "10% deduction".
+                                </p>
+                                <div className="space-y-3">
+                                  {customForm.tracks?.map((track, tIdx) => (
+                                    <div key={track.id} className="rounded border border-indigo-100 bg-white p-3 space-y-2">
+                                      <p className="text-xs font-semibold text-indigo-800">{track.label || `Track ${tIdx + 1}`}</p>
+                                      {track.conditions?.map((cond, cIdx) => (
+                                        <div key={cIdx} className="flex items-center gap-2 flex-wrap">
+                                          <Input
+                                            value={cond.key}
+                                            onChange={(e) => {
+                                              const newTracks = [...(customForm.tracks || [])];
+                                              const newConds = [...(newTracks[tIdx].conditions || [])];
+                                              newConds[cIdx].key = e.target.value;
+                                              newTracks[tIdx].conditions = newConds;
+                                              setCustomForm({ ...customForm, tracks: newTracks });
+                                            }}
+                                            placeholder="Key (e.g. Payment Schedule)"
+                                            className="w-40 px-2 py-1 rounded border border-gray-200 text-xs"
+                                          />
+                                          <Input
+                                            value={cond.value}
+                                            onChange={(e) => {
+                                              const newTracks = [...(customForm.tracks || [])];
+                                              const newConds = [...(newTracks[tIdx].conditions || [])];
+                                              newConds[cIdx].value = e.target.value;
+                                              newTracks[tIdx].conditions = newConds;
+                                              setCustomForm({ ...customForm, tracks: newTracks });
+                                            }}
+                                            placeholder="Value (e.g. Weekly)"
+                                            className="w-40 px-2 py-1 rounded border border-gray-200 text-xs"
+                                          />
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-red-400 hover:text-red-600 px-1 py-0 h-auto"
+                                            onClick={() => {
+                                              const newTracks = [...(customForm.tracks || [])];
+                                              newTracks[tIdx].conditions = newTracks[tIdx].conditions?.filter((_, i) => i !== cIdx) || [];
+                                              setCustomForm({ ...customForm, tracks: newTracks });
+                                            }}
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      ))}
+                                      <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={() => {
+                                          const newTracks = [...(customForm.tracks || [])];
+                                          const newConds = [...(newTracks[tIdx].conditions || []), { key: '', value: '' }];
+                                          newTracks[tIdx].conditions = newConds;
+                                          setCustomForm({ ...customForm, tracks: newTracks });
+                                        }}
+                                      >
+                                         <Plus className="mr-1 h-3 w-3" /> Add Condition
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* Quality Rules for Jobs (partial payment) */}
+                                {parsedData.basicInfo.category === 'Job' && (
+                                  <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                                    <h4 className="text-sm font-bold text-amber-900 mb-2">Quality-Based Payment Rules</h4>
+                                    <p className="text-xs text-amber-700 mb-3">
+                                      Define payment percentages based on quality level. Used when marking deliverables complete.
+                                    </p>
+                                    {customForm.tracks?.map((track, tIdx) => (
+                                      <div key={track.id} className="space-y-2 mb-3">
+                                        <p className="text-xs font-semibold text-amber-800">{track.label || `Track ${tIdx + 1}`}</p>
+                                        {track.qualityRules?.map((rule, rIdx) => (
+                                          <div key={rIdx} className="flex items-center gap-2 flex-wrap">
+                                            <select
+                                              value={rule.level}
+                                              onChange={(e) => {
+                                                const newTracks = [...(customForm.tracks || [])];
+                                                const newRules = [...(newTracks[tIdx].qualityRules || [])];
+                                                newRules[rIdx].level = e.target.value as any;
+                                                newTracks[tIdx].qualityRules = newRules;
+                                                setCustomForm({ ...customForm, tracks: newTracks });
+                                              }}
+                                              className="px-2 py-1 rounded border border-gray-200 text-xs bg-white"
+                                            >
+                                              <option value="satisfactory">Satisfactory</option>
+                                              <option value="partial">Partial</option>
+                                              <option value="unsatisfactory">Unsatisfactory</option>
+                                            </select>
+                                            <Input
+                                              type="number"
+                                              value={rule.percentage || ''}
+                                              onChange={(e) => {
+                                                const newTracks = [...(customForm.tracks || [])];
+                                                const newRules = [...(newTracks[tIdx].qualityRules || [])];
+                                                newRules[rIdx].percentage = parseInt(e.target.value) || 0;
+                                                newTracks[tIdx].qualityRules = newRules;
+                                                setCustomForm({ ...customForm, tracks: newTracks });
+                                              }}
+                                              placeholder="%"
+                                              className="w-16 px-2 py-1 rounded border border-gray-200 text-xs"
+                                            />
+                                            <span className="text-xs text-amber-600">%</span>
+                                            <Input
+                                              value={rule.label}
+                                              onChange={(e) => {
+                                                const newTracks = [...(customForm.tracks || [])];
+                                                const newRules = [...(newTracks[tIdx].qualityRules || [])];
+                                                newRules[rIdx].label = e.target.value;
+                                                newTracks[tIdx].qualityRules = newRules;
+                                                setCustomForm({ ...customForm, tracks: newTracks });
+                                              }}
+                                              placeholder="Label (e.g. Full payment)"
+                                              className="w-32 px-2 py-1 rounded border border-gray-200 text-xs"
+                                            />
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="text-red-400 hover:text-red-600 px-1 py-0 h-auto"
+                                              onClick={() => {
+                                                const newTracks = [...(customForm.tracks || [])];
+                                                newTracks[tIdx].qualityRules = newTracks[tIdx].qualityRules?.filter((_, i) => i !== rIdx) || [];
+                                                setCustomForm({ ...customForm, tracks: newTracks });
+                                              }}
+                                            >
+                                              <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                          </div>
+                                        ))}
+                                        <Button
+                                          variant="secondary"
+                                          size="sm"
+                                          onClick={() => {
+                                            const newTracks = [...(customForm.tracks || [])];
+                                            const newRules = [...(newTracks[tIdx].qualityRules || []), {
+                                              level: 'satisfactory',
+                                              percentage: 100,
+                                              label: 'Full payment',
+                                            }];
+                                            newTracks[tIdx].qualityRules = newRules;
+                                            setCustomForm({ ...customForm, tracks: newTracks });
+                                          }}
+                                        >
+                                          <Plus className="mr-1 h-3 w-3" /> Add Quality Rule
+                                        </Button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                        )}
+                          </div>
+                        )}
                     </div>
 
                     {/* Optional Escrow Security Field */}

@@ -1976,4 +1976,169 @@ router.get('/interactions', verifyAdminKey, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Resolve a deliverable dispute (main admin)
+router.post('/resolve-dispute', verifyAdminKey, async (req, res) => {
+  try {
+    const { applicationId, trackId, deliverableId, resolution, amount } = req.body;
+    const db = getDB();
+    const { ObjectId } = await import('mongodb');
+
+    if (!applicationId || !trackId || !deliverableId || !resolution) {
+      return res.status(400).json({ error: 'applicationId, trackId, deliverableId, and resolution are required.' });
+    }
+
+    // Find the application
+    const application = await db.collection('applications').findOne({
+      _id: new ObjectId(applicationId),
+    });
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found.' });
+    }
+
+    // Find the deliverable
+    const track = application.tracks?.find(t => t.trackId === trackId);
+    const deliverable = track?.deliverables?.find(d => d.id === deliverableId);
+    if (!deliverable) {
+      return res.status(404).json({ error: 'Deliverable not found.' });
+    }
+
+    // Get applicant's M-PESA number
+    const mpesaNumber = application.applicantData?.mpesa_number;
+    if (!mpesaNumber || !/^2547\d{8}$/.test(mpesaNumber.toString())) {
+      return res.status(400).json({ error: 'Applicant does not have a valid M-PESA number on record.' });
+    }
+
+    let netPayable = 0;
+    let paidAmount = 0;
+
+    if (resolution === 'pay_full') {
+      // Pay full deliverable amount
+      const grossAmount = deliverable.amount || 0;
+      const platformFee = Math.ceil(grossAmount * 0.05);
+      const transactionFee = Math.ceil((grossAmount - platformFee) * 0.02);
+      netPayable = grossAmount - platformFee - transactionFee;
+      paidAmount = netPayable;
+    } else if (resolution === 'pay_partial') {
+      // Pay partial amount specified by admin
+      paidAmount = amount || 0;
+      const platformFee = Math.ceil(paidAmount * 0.05);
+      const transactionFee = Math.ceil((paidAmount - platformFee) * 0.02);
+      netPayable = paidAmount - platformFee - transactionFee;
+    } else if (resolution === 'reject') {
+      // Reject - no payment
+      await db.collection('applications').updateOne(
+        {
+          _id: new ObjectId(applicationId),
+          'tracks.trackId': trackId,
+          'tracks.deliverables.id': deliverableId,
+        },
+        {
+          $set: {
+            'tracks.$.deliverables.$[d].status': 'rejected',
+            updatedAt: new Date(),
+          },
+        },
+        { arrayFilters: [{ 'd.id': deliverableId }] }
+      );
+      return res.json({ message: 'Deliverable rejected. No payment released.' });
+    } else {
+      return res.status(400).json({ error: 'Invalid resolution. Use: pay_full, pay_partial, or reject.' });
+    }
+
+    // Trigger B2C payout for pay_full or pay_partial
+    const { initiateB2CPayout } = await import('../services/mpesaService.js');
+    const b2cResult = await initiateB2CPayout(mpesaNumber, netPayable, `Dispute resolution payout for ${deliverable.title || deliverableId}`);
+
+    if (!b2cResult.success) {
+      return res.status(500).json({ error: b2cResult.error || 'Failed to initiate Daraja B2C Payout' });
+    }
+
+    // Update deliverable status to paid
+    await db.collection('applications').updateOne(
+      {
+        _id: new ObjectId(applicationId),
+        'tracks.trackId': trackId,
+        'tracks.deliverables.id': deliverableId,
+      },
+      {
+        $set: {
+          'tracks.$.deliverables.$[d].status': 'paid',
+          'tracks.$.deliverables.$[d].paidAmount': netPayable,
+          'tracks.$.deliverables.$[d].completedAt': new Date().toISOString(),
+          updatedAt: new Date(),
+        },
+      },
+      { arrayFilters: [{ 'd.id': deliverableId }] }
+    );
+
+    // Log the transaction
+    await db.collection('transactions').insertOne({
+      opportunityId: application.opportunityId,
+      applicationId,
+      posterEmail: 'admin',
+      recipientEmail: application.applicantEmail,
+      phone: mpesaNumber,
+      amount: netPayable,
+      deliverableId,
+      deliverableTitle: deliverable.title || deliverableId,
+      resolution,
+      conversationId: b2cResult.data?.ConversationID,
+      status: 'pending',
+      type: 'payout',
+      createdAt: new Date(),
+    });
+
+    res.json({
+      message: `Dispute resolved. Payment of KES ${netPayable} released.`,
+      netPayable,
+      resolution,
+      applicantPhone: mpesaNumber,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET disputed deliverables (for admin dashboard)
+router.get('/disputed-deliverables', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+
+    // Find all applications with disputed deliverables
+    const applications = await db.collection('applications').find({
+      'tracks.deliverables.status': 'disputed'
+    }).toArray();
+
+    const disputed = [];
+    for (const app of applications) {
+      const opp = await db.collection('opportunities').findOne({ id: app.opportunityId });
+      for (const track of (app.tracks || [])) {
+        for (const del of (track.deliverables || [])) {
+          if (del.status === 'disputed') {
+            disputed.push({
+              applicationId: app._id,
+              opportunityId: app.opportunityId,
+              opportunityTitle: opp?.title || 'Unknown',
+              applicantEmail: app.applicantEmail,
+              trackId: track.trackId,
+              trackLabel: track.trackLabel,
+              deliverableId: del.id,
+              deliverableTitle: del.title,
+              amount: del.amount,
+              submittedUrl: del.submittedUrl,
+              disputeReason: del.disputeReason,
+              disputeInitiatedBy: del.disputeInitiatedBy,
+            });
+          }
+        }
+      }
+    }
+
+    res.json(disputed);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

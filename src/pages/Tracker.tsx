@@ -32,6 +32,11 @@ export function Tracker() {
   const [disputeReason, setDisputeReason] = useState('');
   const [submittingDispute, setSubmittingDispute] = useState(false);
 
+  // Deliverable Submission State
+  const [deliverableModal, setDeliverableModal] = useState<{ appId: string; trackId: string; deliverableId: string; title: string } | null>(null);
+  const [deliverableUrl, setDeliverableUrl] = useState('');
+  const [submittingDeliverable, setSubmittingDeliverable] = useState(false);
+
   const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
 
   const handleRaiseDispute = async () => {
@@ -49,16 +54,100 @@ export function Tracker() {
 
       if (!res.ok) throw new Error('Failed to raise dispute');
 
-      setApplications(apps => apps.map(app => 
+      setApplications(apps => apps.map(app =>
         app._id === disputeAppId ? { ...app, status: 'disputed' } : app
       ));
-      
+
       setDisputeAppId(null);
       setDisputeReason('');
     } catch (err: any) {
       showAlert({ title: 'Communication Error', message: err.message || 'Error communicating with server', type: 'error' });
     } finally {
       setSubmittingDispute(false);
+    }
+  };
+
+  const handleSubmitDeliverable = async () => {
+    if (!deliverableModal || !deliverableUrl) return;
+    setSubmittingDeliverable(true);
+    try {
+      const res = await fetch(`${API_BASE}/public/me/applications/${deliverableModal.appId}/submit-deliverable`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          trackId: deliverableModal.trackId,
+          deliverableId: deliverableModal.deliverableId,
+          submittedUrl: deliverableUrl
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit deliverable');
+
+      // Update local state
+      setApplications(apps => apps.map(app => {
+        if (app._id !== deliverableModal.appId) return app;
+        return {
+          ...app,
+          tracks: app.tracks?.map((t: any) => {
+            if (t.trackId !== deliverableModal.trackId) return t;
+            return {
+              ...t,
+              deliverables: t.deliverables?.map((d: any) => {
+                if (d.id !== deliverableModal.deliverableId) return d;
+                return { ...d, status: 'submitted', submittedUrl: deliverableUrl };
+              })
+            };
+          })
+        };
+      }));
+
+      setDeliverableModal(null);
+      setDeliverableUrl('');
+    } catch (err: any) {
+      showAlert({ title: 'Error', message: err.message || 'Failed to submit deliverable', type: 'error' });
+    } finally {
+      setSubmittingDeliverable(false);
+    }
+  };
+
+  const handleDisputeDeliverable = async (applicationId: string, trackId: string, deliverableId: string, initiatedBy: 'freelancer') => {
+    const reason = window.prompt('Reason for dispute:');
+    if (!reason) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/public/me/applications/${applicationId}/dispute-deliverable`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ trackId, deliverableId, reason })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to dispute deliverable');
+
+      // Update local state
+      setApplications(apps => apps.map(app => {
+        if (app._id !== applicationId) return app;
+        return {
+          ...app,
+          tracks: app.tracks?.map((t: any) => {
+            if (t.trackId !== trackId) return t;
+            return {
+              ...t,
+              deliverables: t.deliverables?.map((d: any) => {
+                if (d.id !== deliverableId) return d;
+                return { ...d, status: 'disputed', disputeReason: reason, disputeInitiatedBy: initiatedBy };
+              })
+            };
+          })
+        };
+      }));
+
+      alert('Dispute raised. Main admin notified.');
+    } catch (err: any) {
+      alert(`❌ ${err.message}`);
     }
   };
 
@@ -272,7 +361,7 @@ export function Tracker() {
                         </div>
                       )}
 
-                      {app.status.startsWith('resolved_') && (
+                       {app.status.startsWith('resolved_') && (
                         <div className="p-4 bg-slate-50 text-slate-800 border border-slate-200 rounded-lg flex items-start gap-3">
                           <CheckCircle className="w-5 h-5 mt-0.5 text-slate-500" />
                           <div>
@@ -281,6 +370,82 @@ export function Tracker() {
                           </div>
                         </div>
                       )}
+
+                       {/* Deliverable Submission */}
+                       {(app.status === 'approved' || app.status === 'shortlisted') && app.tracks && app.tracks.some((t: any) => t.deliverables && t.deliverables.length > 0) && (
+                         <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4">
+                           <h4 className="text-sm font-bold text-green-800 mb-3">Deliverables</h4>
+                           {app.tracks.filter((t: any) => t.deliverables && t.deliverables.length > 0).map((track: any) => (
+                             <div key={track.trackId} className="mb-3">
+                               <p className="text-xs font-semibold text-green-700 mb-2">{track.trackLabel}</p>
+                               <div className="space-y-2">
+                                 {track.deliverables.map((del: any) => (
+                                   <div key={del.id} className="rounded border border-green-100 bg-white p-2 space-y-1">
+                                     <div className="flex items-center justify-between gap-2">
+                                       <div className="flex-1 min-w-0">
+                                         <p className="text-xs font-medium text-gray-700 truncate">{del.title}</p>
+                                         <p className="text-xs text-gray-500">KES {del.amount?.toLocaleString()}</p>
+                                         {del.submittedUrl && (
+                                           <a href={del.submittedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline truncate block">
+                                             View Submission
+                                           </a>
+                                         )}
+                                       </div>
+                                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                                         del.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                         del.status === 'submitted' ? 'bg-blue-100 text-blue-700' :
+                                         del.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                         del.status === 'disputed' ? 'bg-amber-100 text-amber-700' :
+                                         'bg-gray-100 text-gray-600'
+                                       }`}>
+                                         {del.status}
+                                       </span>
+                                     </div>
+
+                                     {/* Action buttons */}
+                                     <div className="flex items-center gap-1 pt-1">
+                                       {(del.status === 'pending' || del.status === 'rejected') && (
+                                         <Button
+                                           size="sm"
+                                           className="h-6 px-2 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                                           onClick={() => setDeliverableModal({ appId: app._id, trackId: track.trackId, deliverableId: del.id, title: del.title })}
+                                         >
+                                           {del.status === 'rejected' ? 'Resubmit Link' : 'Submit Link'}
+                                         </Button>
+                                       )}
+                                       {del.status === 'submitted' && (
+                                         <Button
+                                           size="sm"
+                                           variant="ghost"
+                                           className="h-6 px-2 text-xs text-amber-600"
+                                           onClick={() => handleDisputeDeliverable(app._id, track.trackId, del.id, 'freelancer')}
+                                         >
+                                           Dispute
+                                         </Button>
+                                       )}
+                                     </div>
+
+                                     {/* Rejection reason */}
+                                     {del.status === 'rejected' && del.adminNote && (
+                                       <p className="text-xs text-red-600 mt-1">Reason: {del.adminNote}</p>
+                                     )}
+
+                                     {/* Dispute info */}
+                                     {del.status === 'disputed' && del.disputeReason && (
+                                       <div className="text-xs text-amber-700 mt-1 bg-amber-50 rounded p-1">
+                                         Dispute: {del.disputeReason}
+                                       </div>
+                                     )}
+                                   </div>
+                                 ))}
+                               </div>
+                               <div className="mt-1 text-xs text-green-600">
+                                 {track.deliverables.filter((d: any) => d.status === 'paid').length}/{track.deliverables.length} paid
+                               </div>
+                             </div>
+                           ))}
+                         </div>
+                       )}
                     </div>
                   </div>
                 </div>
@@ -349,6 +514,33 @@ export function Tracker() {
               </Button>
               <Button variant="destructive" onClick={handleRaiseDispute} disabled={submittingDispute || !disputeReason.trim()}>
                 {submittingDispute ? 'Submitting...' : 'Submit Dispute'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELIVERABLE SUBMISSION MODAL */}
+      {deliverableModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Submit Deliverable</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Paste a link to your work (Google Drive, GitHub, etc.) for: <strong>{deliverableModal.title}</strong>
+            </p>
+            <Input
+              type="url"
+              className="w-full border border-slate-200 rounded-lg p-3 text-sm mb-4"
+              placeholder="https://drive.google.com/..."
+              value={deliverableUrl}
+              onChange={(e) => setDeliverableUrl(e.target.value)}
+            />
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => { setDeliverableModal(null); setDeliverableUrl(''); }} disabled={submittingDeliverable}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitDeliverable} disabled={submittingDeliverable || !deliverableUrl.trim()}>
+                {submittingDeliverable ? 'Submitting...' : 'Submit'}
               </Button>
             </div>
           </div>

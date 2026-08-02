@@ -394,6 +394,121 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
     }
   };
 
+  const handleReleaseDeliverable = async (applicationId: string, trackId: string, deliverableId: string, qualityLevel?: string) => {
+    const application = applicants.find(a => a._id === applicationId);
+    const track = application?.tracks?.find((t: any) => t.trackId === trackId);
+    const deliverable = track?.deliverables?.find((d: any) => d.id === deliverableId);
+    if (!deliverable) return;
+
+    if (!window.confirm(`Release payment for "${deliverable.title}" (${qualityLevel || 'satisfactory'}) to ${application?.applicantEmail}?`)) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/public/me/posts/${urlPostId || application?.opportunityId}/release-deliverable`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ applicationId, trackId, deliverableId, qualityLevel: qualityLevel || 'satisfactory' })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to release payment');
+
+      // Update local state
+      setApplicants(prev => prev.map(a => {
+        if (a._id !== applicationId) return a;
+        return {
+          ...a,
+          tracks: a.tracks?.map((t: any) => {
+            if (t.trackId !== trackId) return t;
+            return {
+              ...t,
+              deliverables: t.deliverables?.map((d: any) => {
+                if (d.id !== deliverableId) return d;
+                return { ...d, status: 'paid', qualityLevel: qualityLevel || 'satisfactory', paidAmount: data.netPayable };
+              })
+            };
+          })
+        };
+      }));
+
+      alert(`✅ Payment released! Net payout: KES ${data.netPayable} (${data.percentage}% of KES ${deliverable.amount})`);
+    } catch (err: any) {
+      alert(`❌ ${err.message}`);
+    }
+  };
+
+  const handleRejectDeliverable = async (applicationId: string, trackId: string, deliverableId: string) => {
+    const reason = window.prompt('Reason for rejection (freelancer can resubmit):');
+    if (!reason) return;
+
+    const application = applicants.find(a => a._id === applicationId);
+    try {
+      const res = await fetch(`${API_BASE}/public/me/posts/${urlPostId || application?.opportunityId}/reject-deliverable`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ applicationId, trackId, deliverableId, reason })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to reject deliverable');
+
+      // Update local state
+      setApplicants(prev => prev.map(a => {
+        if (a._id !== applicationId) return a;
+        return {
+          ...a,
+          tracks: a.tracks?.map((t: any) => {
+            if (t.trackId !== trackId) return t;
+            return {
+              ...t,
+              deliverables: t.deliverables?.map((d: any) => {
+                if (d.id !== deliverableId) return d;
+                return { ...d, status: 'rejected', adminNote: reason };
+              })
+            };
+          })
+        };
+      }));
+    } catch (err: any) {
+      alert(`❌ ${err.message}`);
+    }
+  };
+
+  const handleDisputeDeliverable = async (applicationId: string, trackId: string, deliverableId: string, initiatedBy: 'poster' | 'freelancer') => {
+    const reason = window.prompt('Reason for dispute:');
+    if (!reason) return;
+
+    const application = applicants.find(a => a._id === applicationId);
+    try {
+      const res = await fetch(`${API_BASE}/public/me/applications/${applicationId}/dispute-deliverable`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ trackId, deliverableId, reason })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to dispute deliverable');
+
+      // Update local state
+      setApplicants(prev => prev.map(a => {
+        if (a._id !== applicationId) return a;
+        return {
+          ...a,
+          tracks: a.tracks?.map((t: any) => {
+            if (t.trackId !== trackId) return t;
+            return {
+              ...t,
+              deliverables: t.deliverables?.map((d: any) => {
+                if (d.id !== deliverableId) return d;
+                return { ...d, status: 'disputed', disputeReason: reason, disputeInitiatedBy: initiatedBy };
+              })
+            };
+          })
+        };
+      }));
+
+      alert('Dispute raised. Main admin notified.');
+    } catch (err: any) {
+      alert(`❌ ${err.message}`);
+    }
+  };
+
   const handlePayoutRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!payoutJob) return;
@@ -942,8 +1057,8 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
             </div>
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto bg-slate-50 relative">
-              <ProfileView 
-                emailProp={slidingApplicant.email} 
+              <ProfileView
+                emailProp={slidingApplicant.email}
                 isSlider={true}
                 bottomActions={
                   (slidingApplicant.app.status === 'pending' || !slidingApplicant.app.status || slidingApplicant.app.status === 'shortlisted') ? (
@@ -958,6 +1073,116 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
                   ) : null
                 }
               />
+
+               {/* Deliverable Tracking Panel */}
+               {slidingApplicant.app.tracks && slidingApplicant.app.tracks.length > 0 && slidingApplicant.app.tracks.some((t: any) => t.deliverables && t.deliverables.length > 0) && (
+                 <div className="border-t border-slate-200 bg-white p-4">
+                   <h4 className="text-sm font-bold text-slate-800 mb-3">Deliverables</h4>
+                   {slidingApplicant.app.tracks.filter((t: any) => t.deliverables && t.deliverables.length > 0).map((track: any) => {
+                     // Get quality rules from the opportunity's track definition
+                     const oppTrack = slidingApplicant.post?.opportunity?.applicationForm?.tracks?.find((t: any) => t.id === track.trackId)
+                                     || slidingOpplicant.post?.applicationForm?.tracks?.find((t: any) => t.id === track.trackId);
+                     const qualityRules = oppTrack?.qualityRules || [];
+
+                     return (
+                       <div key={track.trackId} className="mb-4">
+                         <p className="text-xs font-semibold text-slate-600 mb-2">{track.trackLabel}</p>
+                         <div className="space-y-2">
+                           {track.deliverables.map((del: any) => (
+                             <div key={del.id} className="rounded border border-slate-100 p-2 bg-slate-50 space-y-1">
+                               <div className="flex items-center justify-between gap-2">
+                                 <div className="flex-1 min-w-0">
+                                   <p className="text-xs font-medium text-slate-700 truncate">{del.title}</p>
+                                   <p className="text-xs text-slate-500">KES {del.amount?.toLocaleString()}</p>
+                                   {del.submittedUrl && (
+                                     <a href={del.submittedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline truncate block">
+                                       View Submission
+                                     </a>
+                                   )}
+                                 </div>
+                                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                                   del.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                   del.status === 'submitted' ? 'bg-blue-100 text-blue-700' :
+                                   del.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                   del.status === 'disputed' ? 'bg-amber-100 text-amber-700' :
+                                   'bg-gray-100 text-gray-600'
+                                 }`}>
+                                   {del.status}
+                                 </span>
+                               </div>
+
+                               {/* Action buttons for submitted deliverables */}
+                               {del.status === 'submitted' && (
+                                 <div className="flex items-center gap-1 pt-1">
+                                   {qualityRules.length > 0 ? (
+                                     <select
+                                       onChange={(e) => {
+                                         if (e.target.value) {
+                                           handleReleaseDeliverable(slidingApplicant.app._id, track.trackId, del.id, e.target.value);
+                                           e.target.value = '';
+                                         }
+                                       }}
+                                       className="text-xs px-2 py-1 rounded border border-gray-200 bg-white"
+                                       defaultValue=""
+                                     >
+                                       <option value="" disabled>Mark Complete...</option>
+                                       {qualityRules.map((rule: any, ri: number) => (
+                                         <option key={ri} value={rule.level}>
+                                           {rule.label || rule.level} ({rule.percentage}%)
+                                         </option>
+                                       ))}
+                                     </select>
+                                   ) : (
+                                     <Button
+                                       size="sm"
+                                       className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700 text-white"
+                                       onClick={() => handleReleaseDeliverable(slidingApplicant.app._id, track.trackId, del.id, 'satisfactory')}
+                                     >
+                                       Pay Full
+                                     </Button>
+                                   )}
+                                   <Button
+                                     size="sm"
+                                     variant="outline"
+                                     className="h-6 px-2 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                     onClick={() => handleRejectDeliverable(slidingApplicant.app._id, track.trackId, del.id)}
+                                   >
+                                     Reject
+                                   </Button>
+                                   <Button
+                                     size="sm"
+                                     variant="ghost"
+                                     className="h-6 px-2 text-xs text-amber-600"
+                                     onClick={() => handleDisputeDeliverable(slidingApplicant.app._id, track.trackId, del.id, 'poster')}
+                                   >
+                                     Dispute
+                                   </Button>
+                                 </div>
+                               )}
+
+                               {/* Resubmit button for rejected deliverables */}
+                               {del.status === 'rejected' && del.adminNote && (
+                                 <p className="text-xs text-red-600 mt-1">Reason: {del.adminNote}</p>
+                               )}
+
+                               {/* Dispute info */}
+                               {del.status === 'disputed' && del.disputeReason && (
+                                 <div className="text-xs text-amber-700 mt-1 bg-amber-50 rounded p-1">
+                                   Dispute: {del.disputeReason}
+                                 </div>
+                               )}
+                             </div>
+                           ))}
+                         </div>
+                         <div className="mt-2 text-xs text-slate-500">
+                           {track.deliverables.filter((d: any) => d.status === 'paid').length}/{track.deliverables.length} complete
+                           {' '}(KES {track.deliverables.filter((d: any) => d.status === 'paid').reduce((s: number, d: any) => s + (d.paidAmount || d.amount || 0), 0).toLocaleString()} paid of {track.deliverables.reduce((s: number, d: any) => s + (d.amount || 0), 0).toLocaleString()})
+                         </div>
+                       </div>
+                     );
+                   })}
+                 </div>
+               )}
             </div>
           </div>
         </div>

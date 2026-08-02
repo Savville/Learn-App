@@ -21,6 +21,7 @@ export default function AdminDashboard() {
   const [allOpps, setAllOpps] = useState<any[]>([]);
   const [escrowReleases, setEscrowReleases] = useState<any[]>([]);
   const [disputes, setDisputes] = useState<any[]>([]);
+  const [deliverableDisputes, setDeliverableDisputes] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [chatOversight, setChatOversight] = useState<any>(null);
   const [payDoerLoading, setPayDoerLoading] = useState<string | null>(null);
@@ -33,7 +34,7 @@ export default function AdminDashboard() {
   const [txCallbackDiag, setTxCallbackDiag] = useState<any>(null);
   const [txFilter, setTxFilter] = useState<{ type: string; status: string }>({ type: '', status: '' });
   const [txLoading, setTxLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'my-posts' | 'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'comms' | 'chats' | 'ledger' | 'transactions' | 'broadcasts' | 'master-sheet' | 'interactions'>('my-posts');
+  const [activeTab, setActiveTab] = useState<'my-posts' | 'opps' | 'reports' | 'userReports' | 'orgs' | 'manage' | 'escrow' | 'disputes' | 'deliverable-disputes' | 'comms' | 'chats' | 'ledger' | 'transactions' | 'broadcasts' | 'master-sheet' | 'interactions'>('my-posts');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [reviewFormById, setReviewFormById] = useState<Record<string, { reviewerName: string; proofLinksText: string }>>({});
@@ -117,30 +118,32 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('adminToken');
       if (!token) return;
 
-      const [oppsRes, reportsRes, userReportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes, categoriesRes, ledgerRes, txRes] = await Promise.all([
-        fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/user-reports`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/opportunities`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/escrow-releases`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/disputes`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/chat-oversight`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/subscriber-categories`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/crowdfund/ledger`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/transactions?type=all&status=all&limit=0`, { headers: { Authorization: `Bearer ${token}` } }),
-      ]);
+      const [oppsRes, reportsRes, userReportsRes, orgsRes, allOppsRes, escrowRes, statsRes, disputesRes, oversightRes, categoriesRes, ledgerRes, txRes, delDisputesRes] = await Promise.all([
+         fetch(`${API_BASE}/admin/pending`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/reports`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/user-reports`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/organization-requests`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/opportunities`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/escrow-releases`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/disputes`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/chat-oversight`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/subscriber-categories`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/crowdfund/ledger`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/transactions?type=all&status=all&limit=0`, { headers: { Authorization: `Bearer ${token}` } }),
+         fetch(`${API_BASE}/admin/disputed-deliverables`, { headers: { Authorization: `Bearer ${token}` } }),
+       ]);
 
-      if (oppsRes.ok) setPending(await oppsRes.json());
-      if (reportsRes.ok) setReports(await reportsRes.json());
-      if (userReportsRes.ok) setUserReports(await userReportsRes.json());
-      if (orgsRes.ok) setOrgRequests(await orgsRes.json());
-      if (allOppsRes.ok) setAllOpps(await allOppsRes.json());
-      if (escrowRes.ok) setEscrowReleases(await escrowRes.json());
-      if (statsRes.ok) setStats(await statsRes.json());
-      if (disputesRes.ok) setDisputes(await disputesRes.json());
-      if (oversightRes.ok) setChatOversight(await oversightRes.json());
+       if (oppsRes.ok) setPending(await oppsRes.json());
+       if (reportsRes.ok) setReports(await reportsRes.json());
+       if (userReportsRes.ok) setUserReports(await userReportsRes.json());
+       if (orgsRes.ok) setOrgRequests(await orgsRes.json());
+       if (allOppsRes.ok) setAllOpps(await allOppsRes.json());
+       if (escrowRes.ok) setEscrowReleases(await escrowRes.json());
+       if (statsRes.ok) setStats(await statsRes.json());
+       if (disputesRes.ok) setDisputes(await disputesRes.json());
+       if (delDisputesRes.ok) setDeliverableDisputes(await delDisputesRes.json());
+       if (oversightRes.ok) setChatOversight(await oversightRes.json());
       if (ledgerRes.ok) setLedgerItems(await ledgerRes.json());
       if (categoriesRes.ok) {
         const catData = await categoriesRes.json();
@@ -633,13 +636,20 @@ export default function AdminDashboard() {
             <DollarSign className="w-4 h-4" />
             Escrow Payouts {escrowReleases.length > 0 && <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{escrowReleases.length}</span>}
           </button>
-          <button
-            onClick={() => setActiveTab('disputes')}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'disputes' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-          >
-            <Gavel className="w-4 h-4" />
-            Disputes {disputes.length > 0 && <span className="bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">{disputes.length}</span>}
-          </button>
+           <button
+             onClick={() => setActiveTab('disputes')}
+             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'disputes' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+           >
+             <Gavel className="w-4 h-4" />
+             Disputes {disputes.length > 0 && <span className="bg-red-600 text-white text-xs rounded-full px-1.5 py-0.5">{disputes.length}</span>}
+           </button>
+           <button
+             onClick={() => setActiveTab('deliverable-disputes')}
+             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'deliverable-disputes' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+           >
+             <FileText className="w-4 h-4" />
+             Deliverable Disputes {deliverableDisputes.length > 0 && <span className="bg-amber-600 text-white text-xs rounded-full px-1.5 py-0.5">{deliverableDisputes.length}</span>}
+           </button>
           <button
             onClick={() => setActiveTab('reports')}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'reports' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
@@ -1636,9 +1646,128 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
-          )
-        ) : activeTab === 'comms' ? (
+             </div>
+           )
+         ) : activeTab === 'deliverable-disputes' ? (
+           /* ── Deliverable Disputes Tab ───────────────────────────────────────────── */
+           deliverableDisputes.length === 0 ? (
+             <Card className="border-slate-200 shadow-sm">
+               <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                 <FileText className="h-12 w-12 text-slate-300 mb-4" />
+                 <h3 className="text-lg font-medium text-slate-900">No deliverable disputes</h3>
+                 <p className="text-sm text-slate-500 max-w-sm mt-1">Disputed deliverables will appear here for your arbitration.</p>
+               </CardContent>
+             </Card>
+           ) : (
+             <div className="space-y-4">
+               {deliverableDisputes.map((dd: any) => (
+                 <Card key={`${dd.applicationId}-${dd.deliverableId}`} className="border-amber-200 shadow-sm overflow-hidden">
+                   <CardContent className="p-5">
+                     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2">
+                           <Badge className="bg-amber-100 text-amber-700 border-amber-200">Deliverable Dispute</Badge>
+                           <Badge variant="outline" className="text-xs">{dd.trackLabel}</Badge>
+                         </div>
+                         <h3 className="text-lg font-bold text-slate-900">{dd.opportunityTitle}</h3>
+                         <p className="text-sm text-slate-600">Applicant: <span className="font-medium">{dd.applicantEmail}</span></p>
+                         <p className="text-sm text-slate-600">Deliverable: <span className="font-medium">{dd.deliverableTitle}</span></p>
+                         <p className="text-sm text-slate-600">Amount: <span className="font-mono font-bold">KES {dd.amount?.toLocaleString()}</span></p>
+                         {dd.submittedUrl && (
+                           <p className="text-sm text-blue-600">
+                             <a href={dd.submittedUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                               View Submission ↗
+                             </a>
+                           </p>
+                         )}
+                         {dd.disputeReason && (
+                           <div className="bg-amber-50 border border-amber-100 rounded p-3 text-sm text-amber-800">
+                             <span className="font-semibold">Dispute Reason ({dd.disputeInitiatedBy}): </span>{dd.disputeReason}
+                           </div>
+                         )}
+                       </div>
+                       <div className="flex flex-col gap-2 shrink-0">
+                         <Button
+                           className="bg-green-600 hover:bg-green-700 text-white"
+                           onClick={async () => {
+                             if (!window.confirm(`Pay FULL KES ${dd.amount} to ${dd.applicantEmail}?`)) return;
+                             const token = localStorage.getItem('adminToken');
+                             const res = await fetch(`${API_BASE}/admin/resolve-dispute`, {
+                               method: 'POST',
+                               headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                               body: JSON.stringify({
+                                 applicationId: dd.applicationId,
+                                 trackId: dd.trackId,
+                                 deliverableId: dd.deliverableId,
+                                 resolution: 'pay_full'
+                               })
+                             });
+                             const data = await res.json();
+                             if (!res.ok) throw new Error(data.error || 'Failed');
+                             alert(`✅ ${data.message}`);
+                             setDeliverableDisputes(prev => prev.filter(d => d.deliverableId !== dd.deliverableId || d.applicationId !== dd.applicationId));
+                           }}
+                         >
+                           <ShieldCheck className="w-4 h-4 mr-2" /> Pay Full
+                         </Button>
+                         <Button
+                           variant="outline"
+                           className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                           onClick={async () => {
+                             const amount = window.prompt('Partial amount to pay (KES):', String(Math.round(dd.amount * 0.7)));
+                             if (!amount) return;
+                             const token = localStorage.getItem('adminToken');
+                             const res = await fetch(`${API_BASE}/admin/resolve-dispute`, {
+                               method: 'POST',
+                               headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                               body: JSON.stringify({
+                                 applicationId: dd.applicationId,
+                                 trackId: dd.trackId,
+                                 deliverableId: dd.deliverableId,
+                                 resolution: 'pay_partial',
+                                 amount: parseInt(amount)
+                               })
+                             });
+                             const data = await res.json();
+                             if (!res.ok) throw new Error(data.error || 'Failed');
+                             alert(`✅ ${data.message}`);
+                             setDeliverableDisputes(prev => prev.filter(d => d.deliverableId !== dd.deliverableId || d.applicationId !== dd.applicationId));
+                           }}
+                         >
+                           <DollarSign className="w-4 h-4 mr-2" /> Pay Partial
+                         </Button>
+                         <Button
+                           variant="outline"
+                           className="border-red-300 text-red-700 hover:bg-red-50"
+                           onClick={async () => {
+                             if (!window.confirm(`Reject deliverable? No payment will be made.`)) return;
+                             const token = localStorage.getItem('adminToken');
+                             const res = await fetch(`${API_BASE}/admin/resolve-dispute`, {
+                               method: 'POST',
+                               headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                               body: JSON.stringify({
+                                 applicationId: dd.applicationId,
+                                 trackId: dd.trackId,
+                                 deliverableId: dd.deliverableId,
+                                 resolution: 'reject'
+                               })
+                             });
+                             const data = await res.json();
+                             if (!res.ok) throw new Error(data.error || 'Failed');
+                             alert(`✅ ${data.message}`);
+                             setDeliverableDisputes(prev => prev.filter(d => d.deliverableId !== dd.deliverableId || d.applicationId !== dd.applicationId));
+                           }}
+                         >
+                           <XCircle className="w-4 h-4 mr-2" /> Reject
+                         </Button>
+                       </div>
+                     </div>
+                   </CardContent>
+                 </Card>
+               ))}
+             </div>
+           )
+         ) : activeTab === 'comms' ? (
           /* Comms Tab */
           <div className="space-y-6 max-w-4xl">
             <Card className="border-slate-200 shadow-sm">

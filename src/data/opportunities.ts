@@ -10,9 +10,58 @@ export interface FormField {
   };
 }
 
+export interface Milestone {
+  id: string;
+  label: string;
+  targetValue: number;
+  unit: string;
+  amount: number;
+}
+
+export interface Deliverable {
+  id: string;
+  title: string;
+  description?: string;
+  amount: number;
+  paidAmount?: number;
+  status: 'pending' | 'submitted' | 'approved' | 'rejected' | 'disputed' | 'paid';
+  submittedUrl?: string;
+  submittedAt?: string;
+  completedAt?: string;
+  adminNote?: string;
+  disputeReason?: string;
+  disputeInitiatedBy?: 'poster' | 'freelancer';
+  qualityLevel?: 'satisfactory' | 'partial' | 'unsatisfactory';
+}
+
+export interface QualityRule {
+  level: 'satisfactory' | 'partial' | 'unsatisfactory';
+  percentage: number;
+  label: string;
+}
+
+export interface PaymentCondition {
+  key: string;
+  value: string;
+}
+
+export interface TrackForm {
+  id: string;
+  label: string;
+  description: string;
+  amount: number;
+  type: 'fixed' | 'milestone';
+  fields: FormField[];
+  deliverables: Deliverable[];
+  milestones?: Milestone[];
+  qualityRules?: QualityRule[];
+  conditions?: PaymentCondition[];
+}
+
 export interface ApplicationForm {
   isEnabled: boolean;
   fields: FormField[];
+  tracks?: TrackForm[];
 }
 
 export interface VerificationAudit {
@@ -74,9 +123,179 @@ export interface Opportunity {
   institutionalEndorsement?: InstitutionalEndorsement;
   funderRecognition?: string;
   thematicAreas?: { heading: string; topics: string[] }[];
+  tracks?: TrackForm[];
+  totalRemitted?: number;
+  remainingEscrow?: number;
+}
+
+export interface TrackApplication {
+  trackId: string;
+  trackLabel: string;
+  data: Record<string, string>;
+  status: 'pending' | 'approved' | 'rejected' | 'paid';
+  milestones?: {
+    id: string;
+    label: string;
+    targetValue: number;
+    achievedValue: number;
+    unit: string;
+    amount: number;
+    status: 'pending' | 'submitted' | 'verified' | 'paid';
+    evidenceUrl?: string;
+  }[];
 }
 
 export const opportunities: Opportunity[] = [
+  {
+    "id": "social-media-marketing-kenya",
+    "title": "Social Media Marketing — Opportunities Kenya",
+    "provider": "Opportunities Kenya",
+    "category": "Job",
+    "description": "Help us grow the Opportunities Kenya platform! We need a creative social media marketer to source opportunities, create content, and grow our WhatsApp community. Choose Track A (content & posting), Track B (WhatsApp growth), or both.",
+    "fullDescription": "### Social Media Marketing — Opportunities Kenya\n\nWe are hiring a creative, self-driven Social Media Marketer to join the Opportunities Kenya team remotely.\n\nThis role has TWO independent tracks. Apply for one or both.\n\n---\n\n## Track A: Content & Social Media Posting\n\nPayment: KES 1,000/month (fixed)\n\nYou will create and post content across our platforms:\n\n- Substack — 3 stories per week\n- WhatsApp Channel — 5 updates per week (hackathons, expos, events for students)\n- Facebook — 5 posts per week (same opportunities)\n- LinkedIn — 5 posts per week (our pages)\n\nYou will also source new opportunities from the web and update existing website posts.\n\nThis is purely output-based. No interaction metrics. Just consistent posting.\n\n---\n\n## Track B: WhatsApp Community Growth\n\nPayment: Up to KES 1,000/month (milestone-based)\n\nGrow our WhatsApp channel to 500 members.\n\n- 100 members → KES 200\n- 250 members → KES 500\n- 400 members → KES 800\n- 500 members → KES 1,000\n\nVerification: Manual (admin checks member count). Payout is proportional to achievement.\n\n---\n\n## What You Need\n\n- Track A: Strong writing skills, ability to source opportunities, consistent output\n- Track B: Experience growing communities, understanding of WhatsApp engagement\n- Both tracks: Self-motivated, reliable, communicates weekly",
+    "deadline": "Rolling",
+    "location": "Remote",
+    "eligibility": {
+      "educationLevel": "All",
+      "requirements": [
+        "Track A: Strong writing skills, social media experience",
+        "Track B: Community growth experience, WhatsApp savvy",
+        "Reliable internet connection",
+        "Self-motivated and able to work independently"
+      ]
+    },
+    "benefits": [
+      "Flexible remote work",
+      "Work directly with platform founders",
+      "Build your portfolio with real content",
+      "Escrow-protected payments"
+    ],
+    "applicationType": "Online Form",
+    "fundingType": "N/A",
+    "compensationType": "Paid",
+    "upfrontCost": "No Upfront Cost",
+    "duration": "Monthly (renewable)",
+    "featured": true,
+    "views": 0,
+    "isVerified": true,
+    "status": "Verified",
+    "dateAdded": "2026-08-02T12:00:00.000Z",
+    "postedBy": "Opportunities Kenya Admin",
+    "contactEmail": "admin@opportunities.ke",
+    "logoUrl": "/Opportunities Kenya Banner.png",
+    "isEscrow": true,
+    "escrowAmount": 2000,
+    "isEscrowFunded": false,
+    "applicationForm": {
+      "isEnabled": true,
+      "fields": [
+        {
+          "id": "common-email",
+          "key": "email",
+          "label": "Email Address",
+          "type": "email",
+          "required": true
+        },
+        {
+          "id": "common-name",
+          "key": "full_name",
+          "label": "Full Name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "common-mpesa",
+          "key": "mpesa_number",
+          "label": "M-PESA Number (2547XXXXXXXX)",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "tracks": [
+        {
+          "id": "track-a-content",
+          "label": "Track A: Content & Social Media Posting",
+          "description": "Create and post content across Substack, WhatsApp, Facebook, and LinkedIn. Fixed KES 1,000/month for consistent output.",
+          "amount": 1000,
+          "type": "fixed",
+          "deliverables": [
+            { "id": "d1", "title": "Week 1: 3 Substack stories + 5 WhatsApp updates + 5 Facebook posts + 5 LinkedIn posts", "amount": 250, "status": "pending" },
+            { "id": "d2", "title": "Week 2: 3 Substack stories + 5 WhatsApp updates + 5 Facebook posts + 5 LinkedIn posts", "amount": 250, "status": "pending" },
+            { "id": "d3", "title": "Week 3: 3 Substack stories + 5 WhatsApp updates + 5 Facebook posts + 5 LinkedIn posts", "amount": 250, "status": "pending" },
+            { "id": "d4", "title": "Week 4: 3 Substack stories + 5 WhatsApp updates + 5 Facebook posts + 5 LinkedIn posts", "amount": 250, "status": "pending" }
+          ],
+          "fields": [
+            {
+              "id": "ta-experience",
+              "key": "experience",
+              "label": "Social Media Experience",
+              "type": "textarea",
+              "required": true,
+              "validation": { "maxLength": 500 }
+            },
+            {
+              "id": "ta-sample",
+              "key": "sample_post",
+              "label": "Sample Post or Portfolio Link",
+              "type": "url",
+              "required": false
+            },
+            {
+              "id": "ta-availability",
+              "key": "availability",
+              "label": "Hours per Week Available",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "id": "track-b-growth",
+          "label": "Track B: WhatsApp Community Growth",
+          "description": "Grow our WhatsApp channel to 500 members. Proportional payout based on milestone achievement.",
+          "amount": 1000,
+          "type": "milestone",
+          "deliverables": [
+            { "id": "m1", "label": "100 members", "title": "Reach 100 WhatsApp members", "targetValue": 100, "unit": "members", "amount": 200, "status": "pending" },
+            { "id": "m2", "label": "250 members", "title": "Reach 250 WhatsApp members", "targetValue": 250, "unit": "members", "amount": 500, "status": "pending" },
+            { "id": "m3", "label": "400 members", "title": "Reach 400 WhatsApp members", "targetValue": 400, "unit": "members", "amount": 800, "status": "pending" },
+            { "id": "m4", "label": "500 members", "title": "Reach 500 WhatsApp members", "targetValue": 500, "unit": "members", "amount": 1000, "status": "pending" }
+          ],
+          "milestones": [
+            { "id": "m1", "label": "100 members", "targetValue": 100, "unit": "members", "amount": 200 },
+            { "id": "m2", "label": "250 members", "targetValue": 250, "unit": "members", "amount": 500 },
+            { "id": "m3", "label": "400 members", "targetValue": 400, "unit": "members", "amount": 800 },
+            { "id": "m4", "label": "500 members", "targetValue": 500, "unit": "members", "amount": 1000 }
+          ],
+          "fields": [
+            {
+              "id": "tb-experience",
+              "key": "growth_experience",
+              "label": "Community Growth Experience",
+              "type": "textarea",
+              "required": true,
+              "validation": { "maxLength": 500 }
+            },
+            {
+              "id": "tb-strategy",
+              "key": "growth_strategy",
+              "label": "Your Growth Strategy",
+              "type": "textarea",
+              "required": true,
+              "validation": { "maxLength": 500 }
+            },
+            {
+              "id": "tb-current-groups",
+              "key": "current_groups",
+              "label": "Current Groups You Admin",
+              "type": "text",
+              "required": false
+            }
+          ]
+        }
+      ]
+    }
+  },
   {
     "title": "Zindi Hackathons & Competitions",
     "provider": "Zindi Africa",

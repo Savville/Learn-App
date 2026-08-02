@@ -21,58 +21,6 @@ import { useSEO } from '../hooks/useSEO';
 import { isChallengeCategory, isProjectCategory } from '@/constants/categories';
 import { getDynamicImageUrl } from '../components/OpportunityCard';
 
-function renderDescription(text: string): JSX.Element {
-  const lines = text.split('\n');
-  const elements: JSX.Element[] = [];
-  let key = 0;
-
-  for (const raw of lines) {
-    // Strip all asterisks EXCEPT a leading bullet asterisk
-    const line = raw.trim().replace(/(?!^\*)\*/g, '');
-
-    // Skip separator lines
-    if (!line || /^[─\-\u2014]{3,}$/.test(line)) continue;
-
-    // ALL-CAPS heading (min 4 chars, has letters)
-    const isHeading = line === line.toUpperCase() && line.length > 4 && /[A-Z]/.test(line);
-
-    // Emoji-led line — bold label
-    const isEmojiLabel = /^[\u{1F300}-\u{1FFFF}\u{2600}-\u{27FF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FEFF}]/u.test(line);
-
-    // Bullet point
-    const isBullet = /^[•\-\*]/.test(line);
-
-    if (isHeading) {
-      elements.push(
-        <h3 key={key++} className="text-base font-bold text-gray-900 mt-6 mb-2 pb-1 border-b border-blue-100">
-          {line}
-        </h3>
-      );
-    } else if (isEmojiLabel) {
-      elements.push(
-        <p key={key++} className="font-semibold text-gray-800 mt-4 mb-1">
-          {line}
-        </p>
-      );
-    } else if (isBullet) {
-      elements.push(
-        <li key={key++} className="flex gap-2 text-gray-700 list-none">
-          <span className="text-blue-500 mt-1 flex-shrink-0">•</span>
-          <span>{line.replace(/^[•\-\*]\s*/, '')}</span>
-        </li>
-      );
-    } else {
-      elements.push(
-        <p key={key++} className="text-gray-700 leading-relaxed">
-          {line}
-        </p>
-      );
-    }
-  }
-
-  return <div className="space-y-2">{elements}</div>;
-}
-
 // ── Share Dialog Row Item ──────────────────────────────────────────────────────
 function ShareItem({
   icon,
@@ -301,6 +249,26 @@ export function OpportunityDetails() {
     }
   };
 
+  const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
+  const [expandedTracks, setExpandedTracks] = useState<string[]>([]);
+  const [trackData, setTrackData] = useState<Record<string, Record<string, string>>>({});
+
+  const handleToggleTrack = (trackId: string) => {
+    setSelectedTracks(prev =>
+      prev.includes(trackId) ? prev.filter(t => t !== trackId) : [...prev, trackId]
+    );
+    setExpandedTracks(prev =>
+      prev.includes(trackId) ? prev.filter(t => t !== trackId) : [...prev, trackId]
+    );
+  };
+
+  const handleTrackDataChange = (trackId: string, key: string, value: string) => {
+    setTrackData(prev => ({
+      ...prev,
+      [trackId]: { ...(prev[trackId] || {}), [key]: value },
+    }));
+  };
+
   const handleApplySubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!opportunity || !opportunity.applicationForm) return;
@@ -308,11 +276,52 @@ export function OpportunityDetails() {
     setIsSubmittingApp(true);
     setAppSubmitError(null);
 
-    // The backend expects `email` at the root, and the rest in `data`
-    // Find the field that was marked as 'email' type, or default to checking 'email' key
     const emailField = opportunity.applicationForm.fields.find(f => f.type === 'email' || f.key === 'email');
     const emailValue = emailField ? applicationData[emailField.key] : applicationData['email'];
 
+    if (!emailValue) {
+      setAppSubmitError('Email is required.');
+      setIsSubmittingApp(false);
+      return;
+    }
+
+    // Track-based submission
+    if (opportunity.applicationForm?.tracks && opportunity.applicationForm.tracks.length > 0) {
+      if (selectedTracks.length === 0) {
+        setAppSubmitError('Please select at least one track to apply for.');
+        setIsSubmittingApp(false);
+        return;
+      }
+
+      const tracks = selectedTracks.map(trackId => {
+        const track = opportunity.applicationForm!.tracks!.find(t => t.id === trackId);
+        return {
+          trackId,
+          trackLabel: track?.label || trackId,
+          data: trackData[trackId] || {},
+        };
+      });
+
+      try {
+        const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailValue, data: applicationData, tracks }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Failed to submit application');
+
+        setAppSubmitSuccess(true);
+      } catch (err: any) {
+        setAppSubmitError(err.message);
+      } finally {
+        setIsSubmittingApp(false);
+      }
+      return;
+    }
+
+    // Legacy flat form submission
     try {
       const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
         method: 'POST',
@@ -338,21 +347,42 @@ export function OpportunityDetails() {
     setIsSubmittingPitch(true);
     setPitchError(null);
 
+    // Validate email
+    if (!pitchEmail) {
+      setPitchError('Email is required.');
+      setIsSubmittingPitch(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
+      // Build track data if tracks are selected
+      const trackSelections = selectedTracks.length > 0 ? selectedTracks.map(trackId => {
+        const track = opportunity.applicationForm?.tracks?.find(t => t.id === trackId);
+        return {
+          trackId,
+          trackLabel: track?.label || trackId,
+          data: trackData[trackId] || {},
+        };
+      }) : [];
+
+      // Build submission data including pitch message
+      const submissionData = {
+        ...applicationData,
+        pitch_message: pitchMessage,
+      };
+
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          gigId: opportunity.id,
-          senderEmail: pitchEmail,
-          receiverEmail: opportunity.contactEmail || 'admin@l-earn.co',
-          content: pitchMessage,
-          isPartnership: opportunity.category === 'Partnership'
+          email: pitchEmail,
+          data: submissionData,
+          tracks: trackSelections,
         })
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Failed to send pitch');
+      if (!response.ok) throw new Error(result.error || 'Failed to submit application');
 
       setPitchSuccess(true);
     } catch (err: any) {
@@ -410,8 +440,8 @@ export function OpportunityDetails() {
 
         const response = await opportunitiesAPI.getOne(id || slug!);
         const local = localOpportunities.find(l => l.id === id);
-        // Merge: keep local logoUrl (served from Vercel), upgrade everything else from DB
-        setOpportunity(local ? { ...response.data, logoUrl: local.logoUrl } : response.data);
+        // Merge: keep local logoUrl + applicationForm.tracks (served from Vite), upgrade everything else from DB
+        setOpportunity(local ? { ...response.data, logoUrl: local.logoUrl, applicationForm: { ...response.data.applicationForm, tracks: local.applicationForm?.tracks || response.data.applicationForm?.tracks } } : response.data);
         setError(null);
 
         // Track the view event (fire-and-forget)
@@ -1057,7 +1087,32 @@ export function OpportunityDetails() {
             {/* Description */}
             <div className="mb-8">
               <h2 className="text-gray-900 mb-4 text-xl font-bold">About This Opportunity</h2>
-              {renderDescription(opportunity.fullDescription || opportunity.description)}
+               <div className="text-gray-700 leading-relaxed space-y-3">
+                 {(opportunity.fullDescription || opportunity.description).split('\n').map((line, i) => {
+                   const trimmed = line.trim();
+                   if (!trimmed) return null;
+                   if (/^---+$/.test(trimmed)) return <hr key={i} className="border-gray-200 my-4" />;
+                   const hMatch = trimmed.match(/^#{1,6}\s+(.+)$/);
+                   if (hMatch) {
+                     const level = hMatch[0].match(/^#+/)!.length;
+                     const text = hMatch[1];
+                     const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+                     return <Tag key={i} className={`text-gray-900 font-bold ${level === 3 ? 'text-base mt-6 mb-2 pb-1 border-b border-blue-100' : level === 2 ? 'text-lg mt-5 mb-2' : 'text-xl mt-6 mb-2'}`}>{text}</Tag>;
+                   }
+                   if (/^[\-\*]\s/.test(trimmed)) return <p key={i} className="ml-4 text-gray-700 list-none">{trimmed.slice(2)}</p>;
+                   const parts = trimmed.split(/(\*\*[^*]+\*\*)/g);
+                   return (
+                     <p key={i} className="text-gray-700">
+                       {parts.map((part, pi) => {
+                         if (part.startsWith('**') && part.endsWith('**')) {
+                           return <strong key={pi}>{part.slice(2, -2)}</strong>;
+                         }
+                         return part;
+                       })}
+                     </p>
+                   );
+                 })}
+               </div>
 
               {/* Provider Items (Aggregated Listings) */}
               {opportunity.providerItems && opportunity.providerItems.length > 0 && (
@@ -1235,13 +1290,190 @@ export function OpportunityDetails() {
                 </>
               ) : (opportunity.category === 'Gig' || opportunity.category === 'Job' || opportunity.category === 'Partnership') && !opportunity.applicationLink ? (
                 <>
-                  <h3 className="text-gray-900 mb-6 text-xl font-bold">Pitch for this {opportunity.category}</h3>
+                  <h3 className="text-gray-900 mb-6 text-xl font-bold">Apply for this {opportunity.category}</h3>
                   {!pitchSuccess ? (
                     <form onSubmit={handlePitchSubmit} className="text-left max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-sm border border-blue-100">
                       <p className="text-sm text-gray-500 mb-6 border-b border-gray-100 pb-4">
-                        Send a message directly to the poster. This will open a secure inbox where you can negotiate.
+                        Fill in your details below. Your email will be used to track your application.
                       </p>
 
+                      {/* Track Selection Accordion */}
+                      {opportunity.applicationForm?.tracks && opportunity.applicationForm.tracks.length > 0 && (
+                        <div className="mb-6">
+                          <h4 className="text-base font-bold text-gray-900 mb-2">Choose Track(s) to Apply</h4>
+                          <p className="text-sm text-gray-500 mb-4">Select one or more tracks. Each track has its own requirements.</p>
+                          <div className="space-y-3">
+                            {opportunity.applicationForm.tracks.map(track => (
+                              <div
+                                key={track.id}
+                                className={`border rounded-xl overflow-hidden transition-all ${
+                                  selectedTracks.includes(track.id) ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200'
+                                }`}
+                              >
+                                <div
+                                  className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50"
+                                  onClick={() => handleToggleTrack(track.id)}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedTracks.includes(track.id)}
+                                    onChange={() => {}}
+                                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <div className="flex-1">
+                                    <span className="font-semibold text-gray-900">{track.label}</span>
+                                    <span className="ml-2 text-sm text-gray-500">
+                                      {track.type === 'fixed' ? `— Fixed KES ${track.amount}/month` : `— Up to KES ${track.amount}/month`}
+                                    </span>
+                                  </div>
+                                  {expandedTracks.includes(track.id) ? (
+                                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                                  ) : (
+                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                  )}
+                                </div>
+                                {expandedTracks.includes(track.id) && (
+                                  <div className="border-t border-gray-100 bg-white p-4 space-y-4">
+                                    <p className="text-sm text-gray-600">{track.description}</p>
+
+                                     {/* Payment Conditions (for Jobs) */}
+                                     {track.conditions && track.conditions.length > 0 && (
+                                       <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3">
+                                         <p className="text-xs font-semibold text-indigo-800 mb-2">PAYMENT CONDITIONS</p>
+                                         <div className="space-y-1">
+                                           {track.conditions.map((cond, ci) => (
+                                             <div key={ci} className="flex justify-between text-xs">
+                                               <span className="text-indigo-700 font-medium">{cond.key}</span>
+                                               <span className="text-indigo-600">{cond.value}</span>
+                                             </div>
+                                           ))}
+                                         </div>
+                                       </div>
+                                     )}
+
+                                     {/* Quality Rules (for Jobs) */}
+                                     {track.qualityRules && track.qualityRules.length > 0 && (
+                                       <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                                         <p className="text-xs font-semibold text-amber-800 mb-2">QUALITY-BASED PAYMENT</p>
+                                         <div className="space-y-1">
+                                           {track.qualityRules.map((rule, ri) => (
+                                             <div key={ri} className="flex justify-between text-xs">
+                                               <span className="text-amber-700 font-medium">{rule.label || rule.level}</span>
+                                               <span className="text-amber-600">{rule.percentage}%</span>
+                                             </div>
+                                           ))}
+                                         </div>
+                                       </div>
+                                     )}
+
+                                    {/* Deliverable List (for Fixed tracks) */}
+                                    {track.type === 'fixed' && track.deliverables && track.deliverables.length > 0 && (
+                                      <div className="bg-green-50 border border-green-100 rounded-lg p-3">
+                                        <p className="text-xs font-semibold text-green-800 mb-2">DELIVERABLES</p>
+                                        <div className="space-y-1">
+                                          {track.deliverables.map((del, di) => (
+                                            <div key={di} className="flex justify-between text-xs">
+                                              <span className="text-green-700">{del.title}</span>
+                                              <span className="text-green-600 font-medium">KES {del.amount.toLocaleString()}</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <div className="border-t border-green-200 mt-2 pt-1 flex justify-between text-xs font-semibold">
+                                          <span className="text-green-800">Total</span>
+                                          <span className="text-green-700">KES {track.deliverables.reduce((s, d) => s + (d.amount || 0), 0).toLocaleString()}</span>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Milestone Payouts (for Milestone tracks) */}
+                                    {track.type === 'milestone' && track.milestones && track.milestones.length > 0 && (
+                                      <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                                        <p className="text-xs font-semibold text-amber-800 mb-2">MILESTONE PAYOUTS</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          {track.milestones.map(m => (
+                                            <div key={m.id} className="text-xs text-amber-700">
+                                              <span className="font-medium">{m.targetValue} {m.unit}</span> → KES {m.amount}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    <div className="space-y-3">
+                                      {track.fields.map(field => (
+                                        <div key={field.id}>
+                                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {field.label} {field.required && <span className="text-red-500">*</span>}
+                                          </label>
+                                          {field.type === 'textarea' ? (
+                                            <Textarea
+                                              required={field.required && selectedTracks.includes(track.id)}
+                                              placeholder={`Enter your ${field.label.toLowerCase()}`}
+                                              className="w-full rounded-lg border-gray-300"
+                                              rows={3}
+                                              maxLength={field.validation?.maxLength}
+                                              value={trackData[track.id]?.[field.key] || ''}
+                                              onChange={(e) => handleTrackDataChange(track.id, field.key, e.target.value)}
+                                            />
+                                          ) : (
+                                            <Input
+                                              type={field.type}
+                                              required={field.required && selectedTracks.includes(track.id)}
+                                              placeholder={field.type === 'url' ? 'https://...' : `Enter your ${field.label.toLowerCase()}`}
+                                              className="w-full rounded-lg border-gray-300"
+                                              value={trackData[track.id]?.[field.key] || ''}
+                                              onChange={(e) => handleTrackDataChange(track.id, field.key, e.target.value)}
+                                            />
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Common Fields (from admin) */}
+                      {opportunity.applicationForm?.fields && opportunity.applicationForm.fields.length > 0 && (
+                        <div className="space-y-4 mb-6">
+                          {opportunity.applicationForm.fields.map(field => (
+                            <div key={field.id}>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                {field.label} {field.required && <span className="text-red-500">*</span>}
+                              </label>
+                              {field.type === 'textarea' ? (
+                                <Textarea
+                                  required={field.required}
+                                  placeholder={`Enter your ${field.label.toLowerCase()}`}
+                                  className="w-full rounded-lg border-gray-300"
+                                  rows={4}
+                                  maxLength={field.validation?.maxLength}
+                                  value={applicationData[field.key] || ''}
+                                  onChange={(e) => setApplicationData({ ...applicationData, [field.key]: e.target.value })}
+                                />
+                              ) : (
+                                <Input
+                                  type={field.type}
+                                  required={field.required}
+                                  placeholder={field.type === 'url' ? 'https://...' : `Enter your ${field.label.toLowerCase()}`}
+                                  className="w-full rounded-lg border-gray-300"
+                                  value={applicationData[field.key] || ''}
+                                  onChange={(e) => setApplicationData({ ...applicationData, [field.key]: e.target.value })}
+                                />
+                              )}
+                              {field.type === 'textarea' && field.validation?.maxLength && (
+                                <p className="text-xs text-gray-400 mt-1 text-right">
+                                  Max {field.validation.maxLength} characters
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Pitch Message */}
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Your Email</label>
@@ -1254,7 +1486,7 @@ export function OpportunityDetails() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Your Pitch Message</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Your Message</label>
                           <Textarea
                             required
                             rows={5}
@@ -1277,16 +1509,16 @@ export function OpportunityDetails() {
                           className="w-full bg-[#131ADF]"
                           disabled={isSubmittingPitch}
                         >
-                          {isSubmittingPitch ? 'Sending Pitch...' : 'Send Pitch'}
+                          {isSubmittingPitch ? 'Applying...' : 'Apply for this Job'}
                         </Button>
                       </div>
                     </form>
                   ) : (
                     <div className="max-w-md mx-auto bg-green-50 rounded-xl p-8 border border-green-100 shadow-sm animate-in fade-in zoom-in duration-300">
                       <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                      <h4 className="text-xl font-bold text-gray-900 mb-2">Pitch Sent Successfully!</h4>
+                      <h4 className="text-xl font-bold text-gray-900 mb-2">Application Sent!</h4>
                       <p className="text-gray-600 text-sm mb-6">
-                        Your message has been delivered to the employer.
+                        Your application has been delivered to the employer.
                       </p>
                       <Link to="/inbox">
                         <Button className="w-full shadow-sm">
@@ -1352,6 +1584,96 @@ export function OpportunityDetails() {
                           </div>
                         ))}
                       </div>
+
+                      {opportunity.applicationForm?.tracks && opportunity.applicationForm.tracks.length > 0 && (
+                        <div className="mt-8 border-t border-gray-100 pt-6">
+                          <h4 className="text-base font-bold text-gray-900 mb-2">Choose Track(s) to Apply</h4>
+                          <p className="text-sm text-gray-500 mb-4">Select one or more tracks. Each track has its own requirements.</p>
+
+                          <div className="space-y-3">
+                            {opportunity.applicationForm.tracks.map(track => (
+                              <div
+                                key={track.id}
+                                className={`border rounded-xl overflow-hidden transition-all ${
+                                  selectedTracks.includes(track.id) ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200'
+                                }`}
+                              >
+                                <div
+                                  className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50"
+                                  onClick={() => handleToggleTrack(track.id)}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedTracks.includes(track.id)}
+                                    onChange={() => {}}
+                                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <div className="flex-1">
+                                    <span className="font-semibold text-gray-900">{track.label}</span>
+                                    <span className="ml-2 text-sm text-gray-500">
+                                      {track.type === 'fixed' ? `— Fixed KES ${track.amount}/month` : `— Up to KES ${track.amount}/month`}
+                                    </span>
+                                  </div>
+                                  {expandedTracks.includes(track.id) ? (
+                                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                                  ) : (
+                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                  )}
+                                </div>
+
+                                {expandedTracks.includes(track.id) && (
+                                  <div className="border-t border-gray-100 bg-white p-4 space-y-4">
+                                    <p className="text-sm text-gray-600">{track.description}</p>
+
+                                    {track.type === 'milestone' && track.milestones && (
+                                      <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                                        <p className="text-xs font-semibold text-amber-800 mb-2">MILESTONE PAYOUTS</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          {track.milestones.map(m => (
+                                            <div key={m.id} className="text-xs text-amber-700">
+                                              <span className="font-medium">{m.targetValue} {m.unit}</span> → KES {m.amount}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    <div className="space-y-3">
+                                      {track.fields.map(field => (
+                                        <div key={field.id}>
+                                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {field.label} {field.required && <span className="text-red-500">*</span>}
+                                          </label>
+                                          {field.type === 'textarea' ? (
+                                            <Textarea
+                                              required={field.required && selectedTracks.includes(track.id)}
+                                              placeholder={`Enter your ${field.label.toLowerCase()}`}
+                                              className="w-full rounded-lg border-gray-300"
+                                              rows={3}
+                                              maxLength={field.validation?.maxLength}
+                                              value={trackData[track.id]?.[field.key] || ''}
+                                              onChange={(e) => handleTrackDataChange(track.id, field.key, e.target.value)}
+                                            />
+                                          ) : (
+                                            <Input
+                                              type={field.type}
+                                              required={field.required && selectedTracks.includes(track.id)}
+                                              placeholder={field.type === 'url' ? 'https://...' : `Enter your ${field.label.toLowerCase()}`}
+                                              className="w-full rounded-lg border-gray-300"
+                                              value={trackData[track.id]?.[field.key] || ''}
+                                              onChange={(e) => handleTrackDataChange(track.id, field.key, e.target.value)}
+                                            />
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {appSubmitError && (
                         <div className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">

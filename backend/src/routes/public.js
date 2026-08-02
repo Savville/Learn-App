@@ -1013,7 +1013,7 @@ router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
 router.post('/opportunities/:id/apply', async (req, res) => {
   try {
     const { id } = req.params;
-    const { email, data } = req.body; // 'data' is the JSON object mapped to the form keys
+    const { email, data, tracks } = req.body; // 'data' is common fields, 'tracks' is array of track-specific data
 
     if (!email || !data || typeof data !== 'object') {
       return res.status(400).json({ error: "Applicant email and application data are required." });
@@ -1031,9 +1031,9 @@ router.post('/opportunities/:id/apply', async (req, res) => {
       return res.status(400).json({ error: "This opportunity does not accept internal applications." });
     }
 
-    // Check for double applying
+    // Check for double applying (by email + opportunity)
     const existing = await db.collection('applications').findOne({ opportunityId: id, applicantEmail: normalizedEmail });
-    if (existing) {
+    if (existing && (!tracks || tracks.length === 0)) {
       return res.status(400).json({ error: "You have already applied to this opportunity." });
     }
 
@@ -1048,7 +1048,66 @@ router.post('/opportunities/:id/apply', async (req, res) => {
       }
     }
 
-    // Insert the new application
+    // Track-based application
+    if (tracks && Array.isArray(tracks) && tracks.length >0) {
+      // Check if applicant already applied to specific tracks
+      for (const track of tracks) {
+        const existingTrack = await db.collection('applications').findOne({
+          opportunityId: id,
+          applicantEmail: normalizedEmail,
+          'tracks.trackId': track.trackId
+        });
+        if (existingTrack) {
+          return res.status(400).json({ error: `You have already applied to track "${track.trackLabel}".` });
+        }
+      }
+
+      // Get deliverables from opportunity's track definition
+      const opportunityTrackDefs = opportunity.applicationForm?.tracks || [];
+
+      // Insert track-based application(s)
+      const trackDocs = tracks.map(track => {
+        // Find the matching track definition to get deliverables
+        const trackDef = opportunityTrackDefs.find(t => t.id === track.trackId);
+        const deliverables = trackDef?.deliverables || track.deliverables || [];
+
+        return {
+          opportunityId: id,
+          opportunityTitle: opportunity.title,
+          posterContactEmail: opportunity.contactEmail || opportunity.reporter?.email || null,
+          applicantEmail: normalizedEmail,
+          applicantData: data,
+          tracks: [{
+            trackId: track.trackId,
+            trackLabel: track.trackLabel,
+            data: track.data || {},
+            deliverables: deliverables.map(d => ({
+              id: d.id,
+              title: d.title,
+              description: d.description,
+              amount: d.amount,
+              status: 'pending',
+              submittedUrl: null,
+              submittedAt: null,
+              completedAt: null,
+            })),
+            status: 'pending',
+          }],
+          status: 'pending',
+          appliedAt: new Date(),
+        };
+      });
+
+      await db.collection('applications').insertMany(trackDocs);
+
+      res.status(201).json({
+        message: `Application submitted successfully for ${tracks.length} track(s).`,
+        tracks: tracks.map(t => t.trackId),
+      });
+      return;
+    }
+
+    // Legacy flat form submission
     await db.collection('applications').insertOne({
       opportunityId: id,
       opportunityTitle: opportunity.title,
@@ -1399,6 +1458,307 @@ router.post('/me/posts/:opportunityId/release-escrow', verifyUserToken, async (r
       message: '✅ Payment release successfully requested via Daraja B2C.',
       netPayable,
       applicantPhone: mpesaNumber
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Deliverable-Based Escrow Release (with quality-based partial payment)
+router.post('/me/posts/:opportunityId/release-deliverable', verifyUserToken, async (req, res) => {
+  try {
+    const { opportunityId } = req.params;
+    const { applicationId, trackId, deliverableId, qualityLevel } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+    const { ObjectId } = await import('mongodb');
+
+    if (!applicationId || !trackId || !deliverableId || !qualityLevel) {
+      return res.status(400).json({ error: 'applicationId, trackId, deliverableId, and qualityLevel are required.' });
+    }
+
+    // Verify poster owns the job
+    const opp = await db.collection('opportunities').findOne({ id: opportunityId });
+    const pendingOpp = await db.collection('pending_opportunities').findOne({ 'opportunity.id': opportunityId });
+    const posterEmail = opp?.reporter?.email || pendingOpp?.reporter?.email;
+    if (!opp || posterEmail !== email) {
+      return res.status(403).json({ error: 'You do not own this job post.' });
+    }
+
+    // Verify escrow is funded
+    if (!opp.isEscrowFunded) {
+      return res.status(400).json({ error: 'Escrow has not been funded yet for this job.' });
+    }
+
+    // Find the application
+    const application = await db.collection('applications').findOne({
+      _id: new ObjectId(applicationId),
+      opportunityId,
+    });
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found.' });
+    }
+
+    // Find the track and deliverable
+    const track = application.tracks?.find(t => t.trackId === trackId);
+    if (!track) {
+      return res.status(404).json({ error: 'Track not found in application.' });
+    }
+    const deliverable = track.deliverables?.find(d => d.id === deliverableId);
+    if (!deliverable) {
+      return res.status(404).json({ error: 'Deliverable not found in track.' });
+    }
+    if (deliverable.status === 'paid') {
+      return res.status(400).json({ error: 'Deliverable has already been paid.' });
+    }
+
+    // Get applicant's M-PESA number
+    const mpesaNumber = application.applicantData?.mpesa_number;
+    if (!mpesaNumber || !/^2547\d{8}$/.test(mpesaNumber.toString())) {
+      return res.status(400).json({ error: 'Applicant does not have a valid M-PESA number on record.' });
+    }
+
+    // Get qualityRules from opportunity's track definition
+    const oppTrack = opp.applicationForm?.tracks?.find(t => t.id === trackId);
+    const qualityRules = oppTrack?.qualityRules || [];
+
+    // Calculate payout based on quality level
+    let percentage = 100;
+    if (qualityRules.length > 0) {
+      const rule = qualityRules.find(r => r.level === qualityLevel);
+      percentage = rule ? rule.percentage : 100;
+    }
+
+    const grossAmount = Math.round((deliverable.amount || 0) * (percentage / 100));
+    const platformFee = Math.ceil(grossAmount * 0.05);
+    const transactionFee = Math.ceil((grossAmount - platformFee) * 0.02);
+    const netPayable = grossAmount - platformFee - transactionFee;
+
+    // Call Daraja B2C API
+    const { initiateB2CPayout } = await import('../services/mpesaService.js');
+    const b2cResult = await initiateB2CPayout(mpesaNumber, netPayable, `Deliverable payout for ${deliverable.title || deliverableId}`);
+
+    if (!b2cResult.success) {
+      return res.status(500).json({ error: b2cResult.error || 'Failed to initiate Daraja B2C Payout' });
+    }
+
+    // Update deliverable status to paid
+    await db.collection('applications').updateOne(
+      {
+        _id: new ObjectId(applicationId),
+        'tracks.trackId': trackId,
+        'tracks.deliverables.id': deliverableId,
+      },
+      {
+        $set: {
+          'tracks.$.deliverables.$[d].status': 'paid',
+          'tracks.$.deliverables.$[d].paidAmount': netPayable,
+          'tracks.$.deliverables.$[d].qualityLevel': qualityLevel,
+          'tracks.$.deliverables.$[d].completedAt': new Date().toISOString(),
+          updatedAt: new Date(),
+        },
+      },
+      {
+        arrayFilters: [{ 'd.id': deliverableId }],
+      }
+    );
+
+    // Log the transaction
+    await db.collection('transactions').insertOne({
+      opportunityId,
+      applicationId,
+      posterEmail: email,
+      recipientEmail: application.applicantEmail,
+      phone: mpesaNumber,
+      amount: netPayable,
+      deliverableId,
+      deliverableTitle: deliverable.title || deliverableId,
+      qualityLevel,
+      conversationId: b2cResult.data?.ConversationID,
+      status: 'pending',
+      type: 'payout',
+      createdAt: new Date(),
+    });
+
+    res.json({
+      message: `Payment of KES ${netPayable} released for deliverable: ${deliverable.title || deliverableId}`,
+      netPayable,
+      platformFee,
+      transactionFee,
+      grossAmount,
+      qualityLevel,
+      percentage,
+      applicantPhone: mpesaNumber,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Reject a deliverable (with reason)
+router.post('/me/posts/:opportunityId/reject-deliverable', verifyUserToken, async (req, res) => {
+  try {
+    const { opportunityId } = req.params;
+    const { applicationId, trackId, deliverableId, reason } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+    const { ObjectId } = await import('mongodb');
+
+    if (!applicationId || !trackId || !deliverableId) {
+      return res.status(400).json({ error: 'applicationId, trackId, and deliverableId are required.' });
+    }
+
+    // Verify poster owns the job
+    const opp = await db.collection('opportunities').findOne({ id: opportunityId });
+    const pendingOpp = await db.collection('pending_opportunities').findOne({ 'opportunity.id': opportunityId });
+    const posterEmail = opp?.reporter?.email || pendingOpp?.reporter?.email;
+    if (!opp || posterEmail !== email) {
+      return res.status(403).json({ error: 'You do not own this job post.' });
+    }
+
+    // Update deliverable status to rejected
+    const result = await db.collection('applications').updateOne(
+      {
+        _id: new ObjectId(applicationId),
+        'tracks.trackId': trackId,
+        'tracks.deliverables.id': deliverableId,
+      },
+      {
+        $set: {
+          'tracks.$.deliverables.$[d].status': 'rejected',
+          'tracks.$.deliverables.$[d].adminNote': reason || '',
+          updatedAt: new Date(),
+        },
+      },
+      {
+        arrayFilters: [{ 'd.id': deliverableId }],
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Deliverable not found.' });
+    }
+
+    res.json({ message: 'Deliverable rejected. Freelancer can resubmit.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Dispute a deliverable (either party)
+router.put('/me/applications/:applicationId/dispute-deliverable', verifyUserToken, async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const { trackId, deliverableId, reason } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+    const { ObjectId } = await import('mongodb');
+
+    if (!trackId || !deliverableId || !reason) {
+      return res.status(400).json({ error: 'trackId, deliverableId, and reason are required.' });
+    }
+
+    // Find the application
+    const application = await db.collection('applications').findOne({
+      _id: new ObjectId(applicationId),
+    });
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found.' });
+    }
+
+    // Verify caller is either the applicant or the poster
+    const opp = await db.collection('opportunities').findOne({ id: application.opportunityId });
+    const isApplicant = application.applicantEmail === email;
+    const isPoster = opp?.reporter?.email === email;
+    if (!isApplicant && !isPoster) {
+      return res.status(403).json({ error: 'Unauthorized.' });
+    }
+
+    // Update deliverable status to disputed
+    const result = await db.collection('applications').updateOne(
+      {
+        _id: new ObjectId(applicationId),
+        'tracks.trackId': trackId,
+        'tracks.deliverables.id': deliverableId,
+      },
+      {
+        $set: {
+          'tracks.$.deliverables.$[d].status': 'disputed',
+          'tracks.$.deliverables.$[d].disputeReason': reason,
+          'tracks.$.deliverables.$[d].disputeInitiatedBy': isApplicant ? 'freelancer' : 'poster',
+          updatedAt: new Date(),
+        },
+      },
+      {
+        arrayFilters: [{ 'd.id': deliverableId }],
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Deliverable not found.' });
+    }
+
+    res.json({
+      message: 'Deliverable disputed. Main admin notified.',
+      deliverableId,
+      reason,
+      initiatedBy: isApplicant ? 'freelancer' : 'poster',
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Freelancer submits deliverable evidence (link)
+router.put('/me/applications/:applicationId/submit-deliverable', verifyUserToken, async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const { trackId, deliverableId, submittedUrl } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+    const { ObjectId } = await import('mongodb');
+
+    if (!trackId || !deliverableId || !submittedUrl) {
+      return res.status(400).json({ error: 'trackId, deliverableId, and submittedUrl are required.' });
+    }
+
+    // Verify applicant owns the application
+    const application = await db.collection('applications').findOne({
+      _id: new ObjectId(applicationId),
+      applicantEmail: email,
+    });
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found or unauthorized.' });
+    }
+
+    // Update the deliverable with submitted link
+    const result = await db.collection('applications').updateOne(
+      {
+        _id: new ObjectId(applicationId),
+        'tracks.trackId': trackId,
+        'tracks.deliverables.id': deliverableId,
+      },
+      {
+        $set: {
+          'tracks.$.deliverables.$[d].status': 'submitted',
+          'tracks.$.deliverables.$[d].submittedUrl': submittedUrl,
+          'tracks.$.deliverables.$[d].submittedAt': new Date().toISOString(),
+          updatedAt: new Date(),
+        },
+      },
+      {
+        arrayFilters: [{ 'd.id': deliverableId }],
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Deliverable not found.' });
+    }
+
+    res.json({
+      message: 'Deliverable submitted successfully. Waiting for admin review.',
+      deliverableId,
+      submittedUrl,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
