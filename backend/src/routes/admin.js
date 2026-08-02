@@ -1893,6 +1893,17 @@ router.get('/master-sheet', verifyAdminKey, async (req, res) => {
         }
       }
       
+      // Analytics
+      const views = await db.collection('analytics').countDocuments({ opportunityId: opp.id, action: 'view' });
+      const clicks = await db.collection('analytics').countDocuments({ opportunityId: opp.id, action: 'click' });
+      const ctr = views > 0 ? parseFloat(((clicks / views) * 100).toFixed(2)) : 0;
+
+      // Check for pending edit request
+      const hasEditRequest = await db.collection('pending_opportunities').countDocuments({
+        'opportunity.editOf': opp.id,
+        status: 'Unverified'
+      }) > 0;
+
       sheetData.push({
         gigId: opp.id || opp._id?.toString(),
         title: opp.title,
@@ -1900,13 +1911,17 @@ router.get('/master-sheet', verifyAdminKey, async (req, res) => {
         escrowAmount: opp.escrowAmount || 0,
         totalApps: apps.length,
         counts,
-        lists
+        lists,
+        views,
+        clicks,
+        ctr,
+        hasEditRequest,
       });
     }
-    
+
     // Sort by total applications descending
     sheetData.sort((a, b) => b.totalApps - a.totalApps);
-    
+
     res.json(sheetData);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -2136,6 +2151,156 @@ router.get('/disputed-deliverables', verifyAdminKey, async (req, res) => {
     }
 
     res.json(disputed);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==========================================
+// Edit Requests (from posters requesting changes to live posts)
+// ==========================================
+
+// GET /api/admin/edit-requests
+router.get('/edit-requests', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const pendingEdits = await db.collection('pending_opportunities')
+      .find({ 'opportunity.editOf': { $exists: true, $ne: null } })
+      .sort({ submittedAt: -1 })
+      .toArray();
+
+    const enriched = [];
+    for (const edit of pendingEdits) {
+      const originalId = edit.opportunity.editOf;
+      const original = await db.collection('pending_opportunities').findOne({ 'opportunity.id': originalId })
+        || await db.collection('opportunities').findOne({ id: originalId });
+
+      const diff = {};
+      if (original) {
+        const origOpp = original.opportunity || original;
+        const editOpp = edit.opportunity;
+        const fields = ['title', 'description', 'fullDescription', 'deadline', 'location', 'applicationLink', 'fundingType', 'compensationType', 'upfrontCost'];
+        for (const f of fields) {
+          if (origOpp[f] !== editOpp[f] && editOpp[f] !== undefined) {
+            diff[f] = { old: origOpp[f] || '', new: editOpp[f] };
+          }
+        }
+      }
+
+      enriched.push({
+        _id: edit._id,
+        opportunityId: originalId,
+        title: edit.opportunity.title,
+        posterEmail: edit.reporter?.email || 'Unknown',
+        changeReason: edit.changeReason || edit.opportunity?.changeReason || 'No reason provided',
+        submittedAt: edit.submittedAt,
+        diff,
+        proposed: edit.opportunity,
+      });
+    }
+
+    res.json(enriched);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/edit-requests/:id/approve
+router.post('/edit-requests/:id/approve', verifyAdminKey, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ObjectId } = await import('mongodb');
+    const db = getDB();
+
+    const editDoc = await db.collection('pending_opportunities').findOne({ _id: new ObjectId(id) });
+    if (!editDoc) return res.status(404).json({ error: 'Edit request not found.' });
+
+    const originalId = editDoc.opportunity.editOf;
+    const editOpp = editDoc.opportunity;
+
+    // Build update object with only changed fields
+    const updateFields = {};
+    const fields = ['title', 'description', 'fullDescription', 'deadline', 'location', 'applicationLink', 'fundingType', 'compensationType', 'upfrontCost'];
+    for (const f of fields) {
+      if (editOpp[f] !== undefined) {
+        updateFields[f] = editOpp[f];
+      }
+    }
+    updateFields.updatedAt = new Date();
+
+    // Update the original opportunity
+    await db.collection('opportunities').updateOne(
+      { id: originalId },
+      { $set: updateFields }
+    );
+
+    // Mark edit request as verified
+    await db.collection('pending_opportunities').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status: 'Verified', reviewedAt: new Date(), reviewedBy: 'Admin' } }
+    );
+
+    cacheInvalidatePrefix(CACHE_PREFIX);
+    res.json({ message: 'Edit approved and applied to original post.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/edit-requests/:id/reject
+router.post('/edit-requests/:id/reject', verifyAdminKey, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ObjectId } = await import('mongodb');
+    const db = getDB();
+
+    await db.collection('pending_opportunities').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status: 'Rejected', reviewedAt: new Date(), reviewedBy: 'Admin' } }
+    );
+
+    res.json({ message: 'Edit request rejected.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/opportunities/:id/detail — full detail with analytics + applicants
+router.get('/opportunities/:id/detail', verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
+
+    const opp = await db.collection('opportunities').findOne({ id });
+    if (!opp) return res.status(404).json({ error: 'Opportunity not found.' });
+
+    // Analytics
+    const views = await db.collection('analytics').countDocuments({ opportunityId: id, action: 'view' });
+    const clicks = await db.collection('analytics').countDocuments({ opportunityId: id, action: 'click' });
+    const ctr = views > 0 ? parseFloat(((clicks / views) * 100).toFixed(2)) : 0;
+
+    // Applicants grouped by status
+    const applicants = await db.collection('applications').find({ opportunityId: id }).toArray();
+    const grouped = { pending: [], shortlisted: [], approved: [], hired: [], rejected: [] };
+    for (const app of applicants) {
+      const status = app.status === 'paid' ? 'hired' : (app.status || 'pending');
+      if (grouped[status]) grouped[status].push(app.applicantEmail);
+    }
+
+    // Check for pending edit request
+    const hasEditRequest = await db.collection('pending_opportunities').countDocuments({
+      'opportunity.editOf': id,
+      status: 'Unverified'
+    }) > 0;
+
+    res.json({
+      ...opp,
+      views,
+      clicks,
+      ctr,
+      applicantGroups: grouped,
+      hasEditRequest,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

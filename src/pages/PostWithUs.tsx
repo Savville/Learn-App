@@ -682,6 +682,7 @@ export function PostWithUs({
             opportunity: finalOpportunity,
             reporter,
             isAdminPost,
+            autoApprove: isAdminPost,
           }),
         },
       );
@@ -1862,7 +1863,7 @@ export function PostWithUs({
                                               title: '',
                                               amount: 0,
                                               status: 'pending',
-                                            }];
+                                            } as const];
                                             newTracks[tIdx].deliverables = newDels;
                                             setCustomForm({ ...customForm, tracks: newTracks });
                                           }}
@@ -2199,7 +2200,7 @@ export function PostWithUs({
                                               level: 'satisfactory',
                                               percentage: 100,
                                               label: 'Full payment',
-                                            }];
+                                            } as const];
                                             newTracks[tIdx].qualityRules = newRules;
                                             setCustomForm({ ...customForm, tracks: newTracks });
                                           }}

@@ -37,12 +37,13 @@ interface Applicant {
   status: string;
 }
 
-export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
+export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMode?: boolean; adminDashboardMode?: boolean }) {
   const navigate = useNavigate();
   const { id: urlPostId } = useParams<{ id: string }>();
   const { showAlert } = useAlert();
-  const [token, setToken] = useState(isAdminMode ? localStorage.getItem('adminToken') : localStorage.getItem('user_token'));
-  const [email, setEmail] = useState(isAdminMode ? 'ochiwilliamotieno@gmail.com' : localStorage.getItem('user_email'));
+  const isPlatformAdmin = isAdminMode || adminDashboardMode;
+  const [token, setToken] = useState(isPlatformAdmin ? localStorage.getItem('adminToken') : localStorage.getItem('user_token'));
+  const [email, setEmail] = useState(isPlatformAdmin ? 'ochiwilliamotieno@gmail.com' : localStorage.getItem('user_email'));
 
   const [livePosts, setLivePosts] = useState<Post[]>([]);
   const [pendingPosts, setPendingPosts] = useState<Post[]>([]);
@@ -93,6 +94,21 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
   const [releaseLoading, setReleaseLoading] = useState(false);
   const [releaseMessage, setReleaseMessage] = useState<string | null>(null);
 
+  // Edit Request State
+  const [editRequestPost, setEditRequestPost] = useState<Post | null>(null);
+  const [editRequestForm, setEditRequestForm] = useState<{
+    title: string;
+    description: string;
+    fullDescription: string;
+    deadline: string;
+    location: string;
+    applicationLink: string;
+    changeReason: string;
+  }>({ title: '', description: '', fullDescription: '', deadline: '', location: '', applicationLink: '', changeReason: '' });
+  const [editRequestLoading, setEditRequestLoading] = useState(false);
+  const [editRequestError, setEditRequestError] = useState<string | null>(null);
+  const [editRequestSuccess, setEditRequestSuccess] = useState(false);
+
   // Delete State
   const [postToDelete, setPostToDelete] = useState<Post | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -119,7 +135,7 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
     setLoading(true);
     setError(null);
     try {
-      const endpoint = isAdminMode ? `${API_BASE}/public/me/posts?filterMode=admin` : `${API_BASE}/public/me/posts?filterMode=normal`;
+      const endpoint = isAdminMode && !adminDashboardMode ? `${API_BASE}/public/me/posts?filterMode=admin` : `${API_BASE}/public/me/posts?filterMode=normal`;
       const res = await fetch(endpoint, {
         headers: { Authorization: `Bearer ${currentToken}` },
       });
@@ -186,6 +202,22 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
       fetchPosts(token);
     }
   }, [token]);
+
+  useEffect(() => {
+    if (editRequestPost) {
+      setEditRequestForm({
+        title: editRequestPost.title || '',
+        description: editRequestPost.description || '',
+        fullDescription: editRequestPost.fullDescription || editRequestPost.opportunity?.fullDescription || '',
+        deadline: editRequestPost.deadline || '',
+        location: editRequestPost.location || '',
+        applicationLink: editRequestPost.applicationLink || '',
+        changeReason: '',
+      });
+      setEditRequestError(null);
+      setEditRequestSuccess(false);
+    }
+  }, [editRequestPost]);
 
   const handleSuccess = (newToken: string, newEmail: string) => {
     setToken(newToken);
@@ -557,6 +589,52 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
     }
   };
 
+  const handleSubmitEditRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editRequestPost || !editRequestForm.changeReason.trim()) return;
+
+    setEditRequestLoading(true);
+    setEditRequestError(null);
+
+    try {
+      const original = editRequestPost;
+      const res = await fetch(`${API_BASE}/public/submit-opportunity`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          opportunity: {
+            ...original,
+            ...(editRequestForm.title && { title: editRequestForm.title }),
+            ...(editRequestForm.description && { description: editRequestForm.description }),
+            ...(editRequestForm.fullDescription && { fullDescription: editRequestForm.fullDescription }),
+            ...(editRequestForm.deadline && { deadline: editRequestForm.deadline }),
+            ...(editRequestForm.location && { location: editRequestForm.location }),
+            ...(editRequestForm.applicationLink && { applicationLink: editRequestForm.applicationLink }),
+            editOf: original.id,
+          },
+          reporter: {
+            name: 'System',
+            organization: 'Opportunities Kenya',
+            role: 'Poster Edit Request',
+            telephone: '',
+            email: original.contactEmail || original.reporter?.email || '',
+            websiteOrSocial: '',
+          },
+          changeReason: editRequestForm.changeReason,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit edit request');
+
+      setEditRequestSuccess(true);
+    } catch (err: any) {
+      setEditRequestError(err.message);
+    } finally {
+      setEditRequestLoading(false);
+    }
+  };
+
   if (!token) {
     return (
       <OTPLoginForm
@@ -590,7 +668,7 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900 truncate pr-4">
-                {isAdminMode ? 'All Platform Posts' : 'My Posts Dashboard'}
+                {adminDashboardMode ? 'Opportunities Kenya Admin' : isAdminMode ? 'All Platform Posts' : 'My Posts Dashboard'}
               </h2>
             </div>
             
@@ -684,14 +762,25 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
                             </Button>
                           )}
 
-                          <Button
-                            onClick={() => navigate('/post-with-us', { state: { editPost: post.isLive ? post : post.opportunity || post.originalOpportunity || post } })}
-                            variant="outline"
-                            className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-blue-200 text-blue-700 hover:bg-blue-50"
-                          >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                            Edit
-                          </Button>
+                          {post.isLive || post.status === 'Verified' ? (
+                            <Button
+                              onClick={() => setEditRequestPost(post)}
+                              variant="outline"
+                              className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-amber-200 text-amber-700 hover:bg-amber-50"
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                              Request Edit
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => navigate('/post-with-us', { state: { editPost: post.isLive ? post : post.opportunity || post.originalOpportunity || post } })}
+                              variant="outline"
+                              className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-blue-200 text-blue-700 hover:bg-blue-50"
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                              Edit
+                            </Button>
+                          )}
 
                           {!post.isLive && post.status !== 'Verified' && (
                             <Button
@@ -1183,6 +1272,87 @@ export function PosterDashboard({ isAdminMode }: { isAdminMode?: boolean }) {
                    })}
                  </div>
                )}
+             </div>
+           </div>
+         </div>
+       )}
+
+      {/* Edit Request Modal */}
+      {editRequestPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-amber-500 p-4 text-white">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                Request Edit
+              </h3>
+              <p className="text-amber-100 text-sm mt-1">
+                Submit changes for "{editRequestPost.title}" — admin will review.
+              </p>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1">
+              {editRequestSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-900 mb-2">Edit Request Submitted!</h4>
+                  <p className="text-slate-600 mb-6">Our admins will review your changes and approve or request adjustments.</p>
+                  <Button onClick={() => { setEditRequestPost(null); setEditRequestSuccess(false); setEditRequestForm({ title: '', description: '', fullDescription: '', deadline: '', location: '', applicationLink: '', changeReason: '' }); }} className="w-full font-bold bg-green-600 hover:bg-green-700 text-white">Done</Button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitEditRequest} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Title</label>
+                    <Input value={editRequestForm.title} onChange={e => setEditRequestForm({ ...editRequestForm, title: e.target.value })} placeholder={editRequestPost.title} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Short Description</label>
+                    <textarea value={editRequestForm.description} onChange={e => setEditRequestForm({ ...editRequestForm, description: e.target.value })} placeholder={editRequestPost.description} rows={2} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 outline-none focus:border-blue-500 bg-slate-50" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Full Description</label>
+                    <textarea value={editRequestForm.fullDescription} onChange={e => setEditRequestForm({ ...editRequestForm, fullDescription: e.target.value })} placeholder={editRequestPost.fullDescription || editRequestPost.opportunity?.fullDescription || ''} rows={4} className="w-full px-4 py-2.5 rounded-lg border border-slate-200 outline-none focus:border-blue-500 bg-slate-50" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Deadline</label>
+                      <Input value={editRequestForm.deadline} onChange={e => setEditRequestForm({ ...editRequestForm, deadline: e.target.value })} placeholder={editRequestPost.deadline || 'Rolling'} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Location</label>
+                      <Input value={editRequestForm.location} onChange={e => setEditRequestForm({ ...editRequestForm, location: e.target.value })} placeholder={editRequestPost.location || 'N/A'} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Application Link</label>
+                    <Input value={editRequestForm.applicationLink} onChange={e => setEditRequestForm({ ...editRequestForm, applicationLink: e.target.value })} placeholder={editRequestPost.applicationLink || 'https://...'} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Reason for Changes <span className="text-red-500">*</span></label>
+                    <textarea
+                      required
+                      value={editRequestForm.changeReason}
+                      onChange={e => setEditRequestForm({ ...editRequestForm, changeReason: e.target.value })}
+                      placeholder="Explain why you need these changes..."
+                      rows={2}
+                      className="w-full px-4 py-2.5 rounded-lg border border-slate-200 outline-none focus:border-blue-500 bg-slate-50"
+                    />
+                  </div>
+
+                  {editRequestError && (
+                    <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm font-medium">{editRequestError}</div>
+                  )}
+
+                  <div className="flex gap-3 mt-6 pt-4 border-t border-slate-100">
+                    <Button type="button" variant="outline" className="flex-1 font-semibold" onClick={() => { setEditRequestPost(null); setEditRequestError(null); }} disabled={editRequestLoading}>Cancel</Button>
+                    <Button type="submit" className="flex-1 font-bold bg-amber-500 hover:bg-amber-600 text-white" disabled={editRequestLoading || !editRequestForm.changeReason.trim()}>
+                      {editRequestLoading ? 'Submitting...' : 'Submit Edit Request'}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>

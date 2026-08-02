@@ -5,7 +5,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getDB } from '../config/database.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { generateUserToken, verifyUserToken } from '../middleware/auth.js';
+import { generateUserToken, generateAdminToken, verifyUserToken } from '../middleware/auth.js';
 import { ObjectId } from 'mongodb';
 import {
   sendAdminSubmissionNotification,
@@ -597,6 +597,41 @@ router.post('/submit-opportunity', async (req, res) => {
     const isOrganizationPost = !!org;
     const orgName = org ? org.orgName : null;
 
+    // ── AUTO-APPROVE: Admin posts from the Admin Dashboard ──────────────────
+    const ADMIN_EMAIL = 'ochiwilliamotieno@gmail.com';
+    const isAdminAutoApprove = req.body.isAdminPost === true &&
+                               req.body.autoApprove === true &&
+                               normalizedReporter.email === ADMIN_EMAIL;
+
+    if (isAdminAutoApprove) {
+      const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+      const publishId = opportunity.id || `pub-${Date.now()}`;
+
+      await db.collection('opportunities').insertOne({
+        ...opportunity,
+        id: publishId,
+        slug: slugify(opportunity.title || ''),
+        status: 'Verified',
+        isVerified: true,
+        postedBy: 'Opportunities Kenya Admin',
+        dateAdded: new Date().toISOString().split('T')[0],
+        verificationAudit: {
+          reviewedAt: new Date().toISOString(),
+          reviewedBy: 'System (Admin Auto-Post)',
+          proofLinks: [],
+          riskFlags: [],
+        },
+        reporter: normalizedReporter,
+        isAdminPost: true,
+      });
+
+      // Notify admin (non-blocking)
+      sendAdminSubmissionNotification(normalizedReporter, opportunity).catch(() => {});
+      sendPosterAcknowledgementEmail(normalizedReporter.email, normalizedReporter.name, opportunity.title).catch(() => {});
+
+      return res.json({ message: 'Published as Admin.', url: `/opportunity/${publishId}` });
+    }
+
     // Save with status pending
     await db.collection('pending_opportunities').insertOne({
       reporter: normalizedReporter,
@@ -739,9 +774,11 @@ router.post('/auth/verify-otp', async (req, res) => {
     // Burn the code after successful use
     await db.collection('auth_otps').deleteOne({ _id: record._id });
 
-    // Issue JWT
-    const token = generateUserToken(normalizedEmail);
-    res.json({ token, email: normalizedEmail });
+    // Issue JWT — admin token for admin email, user token otherwise
+    const ADMIN_EMAIL = 'ochiwilliamotieno@gmail.com';
+    const isAdmin = normalizedEmail === ADMIN_EMAIL;
+    const token = isAdmin ? generateAdminToken() : generateUserToken(normalizedEmail);
+    res.json({ token, email: normalizedEmail, isAdmin });
   } catch (error) {
     console.error('OTP Verify Error:', error);
     res.status(500).json({ error: 'Verification failed' });
