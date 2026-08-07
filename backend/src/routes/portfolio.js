@@ -29,7 +29,12 @@ router.get('/:email', async (req, res) => {
       return sum + (Number(gig.escrowAmount || gig.amount || 0));
     }, 0);
 
-    // Let's actually fetch the exact escrowAmount from the opportunities collection for each paid gig.
+    // Fetch opportunities posted by the user
+    const postedOpportunities = await db.collection('opportunities')
+        .find({ userEmail: normalizedEmail, status: { $ne: 'Draft' } })
+        .sort({ dateAdded: -1 })
+        .toArray();
+
     let calculatedEarnings = 0;
     const gigsWithDetails = [];
 
@@ -38,17 +43,21 @@ router.get('/:email', async (req, res) => {
       const amount = opp?.escrowAmount ? Number(opp.escrowAmount) : 0;
       calculatedEarnings += amount;
       
-      gigsWithDetails.push({
-        _id: gig._id,
-        opportunityId: gig.opportunityId,
-        opportunityTitle: gig.opportunityTitle,
-        amount: amount,
-        completedAt: gig.updatedAt || gig.appliedAt
-      });
+      if (opp) {
+        gigsWithDetails.push({
+          applicationId: gig._id,
+          opportunityId: opp.id,
+          title: opp.title,
+          provider: opp.provider,
+          amount: amount,
+          category: opp.category,
+          completedAt: gig.updatedAt || gig.appliedAt,
+          logoUrl: opp.logoUrl
+        });
+      }
     }
-
-    // Fetch opportunities posted by the user
-    const postedGigsCount = await db.collection('opportunities').countDocuments({ userEmail: normalizedEmail });
+    
+    gigsWithDetails.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
 
     res.json({
       success: true,
@@ -57,7 +66,8 @@ router.get('/:email', async (req, res) => {
         totalEarnings: calculatedEarnings,
         completedGigsCount: gigsWithDetails.length,
         completedGigs: gigsWithDetails,
-        postedGigsCount: postedGigsCount
+        postedGigsCount: postedOpportunities.length,
+        postedOpportunities: postedOpportunities
       }
     });
   } catch (error) {

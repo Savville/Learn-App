@@ -33,7 +33,7 @@ export function Portfolio() {
   const [loading, setLoading] = useState(false);
   const [savingStatus, setSavingStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [error, setError] = useState<string | null>(null);
-  const { showAlert } = useAlert();
+  const { showAlert , showConfirm } = useAlert();
 
   const [profile, setProfile] = useState<Profile>({
     name: '',
@@ -45,11 +45,18 @@ export function Portfolio() {
     location: ''
   });
 
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalEarnings: number;
+    completedGigsCount: number;
+    postedGigsCount: number;
+    completedGigs: any[];
+    postedOpportunities: any[];
+  }>({
     totalEarnings: 0,
     completedGigsCount: 0,
     postedGigsCount: 0,
-    completedGigs: []
+    completedGigs: [],
+    postedOpportunities: []
   });
 
   // Projects UI State
@@ -107,8 +114,8 @@ export function Portfolio() {
     setEmail(newEmail);
   };
 
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
+  const handleLogout = async () => {
+    if (await showConfirm({ title: 'Confirm Action', message: "Are you sure you want to log out?" })) {
       localStorage.removeItem('user_token');
       localStorage.removeItem('user_email');
       setToken(null);
@@ -296,7 +303,7 @@ export function Portfolio() {
                 <div className="flex flex-col items-center gap-3 shrink-0">
                   <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden relative group">
                     {profile.avatar ? (
-                      <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                      <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" loading="eager" decoding="async" />
                     ) : (
                       <User className="w-10 h-10 text-slate-400" />
                     )}
@@ -544,30 +551,58 @@ export function Portfolio() {
                 </div>
               </div>
 
-              {/* History */}
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col overflow-hidden max-h-[350px]">
+              {/* Platform Activity */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col overflow-hidden max-h-[500px]">
                 <div className="p-5 border-b border-slate-100 shrink-0">
-                  <h3 className="font-bold text-slate-800">Job History</h3>
+                  <h3 className="font-bold text-slate-800">Platform Activity</h3>
                 </div>
                 <div className="p-5 flex-1 overflow-y-auto">
-                  {stats.completedGigs.length === 0 ? (
+                  {stats.completedGigs.length === 0 && (!stats.postedOpportunities || stats.postedOpportunities.length === 0) ? (
                     <div className="text-center py-6 text-slate-400 text-sm">
                       <CheckCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      No completed gigs yet.
+                      No platform activity yet.
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-4">
-                      {stats.completedGigs.map((gig: any, i: number) => (
-                        <div key={i} className="flex flex-col border border-slate-100 rounded-xl p-3 hover:border-blue-100 transition-colors">
-                          <span className="text-sm font-bold text-slate-800 mb-1">{gig.opportunityTitle}</span>
-                          <div className="flex items-center justify-between mt-auto">
-                            <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded">Paid KES {gig.amount}</span>
-                            <span className="text-[10px] text-slate-400">
-                              {new Date(gig.completedAt).toLocaleDateString()}
-                            </span>
+                    <div className="flex flex-col gap-6">
+                      {/* Completed Jobs */}
+                      {stats.completedGigs.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Completed Jobs</h4>
+                          <div className="flex flex-col gap-3">
+                            {stats.completedGigs.map((gig: any, i: number) => (
+                              <div key={`gig-${i}`} className="flex flex-col border border-slate-100 rounded-xl p-3 hover:border-green-200 transition-colors bg-green-50/30">
+                                <span className="text-sm font-bold text-slate-800 mb-1">{gig.title || gig.opportunityTitle}</span>
+                                <div className="flex items-center justify-between mt-auto">
+                                  <span className="text-xs text-green-700 font-bold">Paid KES {gig.amount}</span>
+                                  <span className="text-[10px] text-slate-400">
+                                    {new Date(gig.completedAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                      ))}
+                      )}
+
+                      {/* Posted Opportunities */}
+                      {stats.postedOpportunities && stats.postedOpportunities.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Posted Opportunities</h4>
+                          <div className="flex flex-col gap-3">
+                            {stats.postedOpportunities.map((opp: any, i: number) => (
+                              <div key={`opp-${i}`} className="flex flex-col border border-slate-100 rounded-xl p-3 hover:border-blue-200 transition-colors bg-blue-50/30">
+                                <span className="text-sm font-bold text-slate-800 mb-1">{opp.title}</span>
+                                <div className="flex items-center justify-between mt-auto">
+                                  <span className="text-xs text-blue-700 font-semibold">{opp.category}</span>
+                                  <span className="text-[10px] text-slate-400">
+                                    {new Date(opp.dateAdded).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

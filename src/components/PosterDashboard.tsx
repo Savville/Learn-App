@@ -50,7 +50,7 @@ interface Applicant {
 export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMode?: boolean; adminDashboardMode?: boolean }) {
   const navigate = useNavigate();
   const { id: urlPostId } = useParams<{ id: string }>();
-  const { showAlert } = useAlert();
+  const { showAlert, showConfirm , showPrompt } = useAlert();
   const isPlatformAdmin = isAdminMode || adminDashboardMode;
   const [token, setToken] = useState(isPlatformAdmin ? localStorage.getItem('adminToken') : localStorage.getItem('user_token'));
   const [email, setEmail] = useState(isPlatformAdmin ? 'ochiwilliamotieno@gmail.com' : localStorage.getItem('user_email'));
@@ -126,8 +126,6 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
   // Unpublish State
-  const [postToUnpublish, setPostToUnpublish] = useState<Post | null>(null);
-  const [unpublishError, setUnpublishError] = useState<string | null>(null);
   const [showUnpublishSuccess, setShowUnpublishSuccess] = useState(false);
   const [unpublishingId, setUnpublishingId] = useState<string | null>(null);
   const [republishingId, setRepublishingId] = useState<string | null>(null);
@@ -241,9 +239,9 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
     setEmail(newEmail);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (isAdminMode) return; // Admins cannot logout from here
-    if (window.confirm("Are you sure you want to log out?")) {
+    if (await showConfirm({ title: 'Confirm Logout', message: 'Are you sure you want to log out?' })) {
       localStorage.removeItem('user_token');
       localStorage.removeItem('user_email');
       setToken(null);
@@ -290,23 +288,28 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
     }
   };
 
-  const handleUnpublish = async () => {
-    if (!postToUnpublish) return;
+  const handleUnpublishPost = async (post: Post) => {
+    const confirmed = await showConfirm({
+      title: 'Unpublish Post',
+      message: `Are you sure you want to unpublish "${post.title}"? It will be moved to the Unpublished tab.`,
+      confirmText: 'Yes, unpublish'
+    });
+    
+    if (!confirmed) return;
 
-    setUnpublishingId(postToUnpublish.id);
-    setUnpublishError(null);
+    setUnpublishingId(post.id);
     try {
-      const res = await fetch(`${API_BASE}/public/me/posts/${postToUnpublish.id}/unpublish`, {
+      const res = await fetch(`${API_BASE}/public/me/posts/${post.id}/unpublish`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to unpublish');
 
-      setLivePosts(prev => prev.map(p => p.id === postToUnpublish.id ? { ...p, status: 'Unpublished' } : p));
-      setShowUnpublishSuccess(true);
+      setLivePosts(prev => prev.map(p => p.id === post.id ? { ...p, status: 'Unpublished', isLive: false } : p));
+      showAlert({ title: 'Unpublished', message: 'Post successfully unpublished.', type: 'success' });
     } catch (err: any) {
-      setUnpublishError(err.message);
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
     } finally {
       setUnpublishingId(null);
     }
@@ -329,6 +332,37 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
       showAlert({ title: 'Error', message: err.message, type: 'error' });
     } finally {
       setRepublishingId(null);
+    }
+  };
+
+  const handleReplenishPost = async (postId: string, currentDeadline?: string) => {
+    const newDeadline = await showPrompt({
+      title: 'Replenish Post',
+      message: 'Extend the deadline to reactivate this post. (e.g. YYYY-MM-DD)',
+      defaultValue: currentDeadline ? currentDeadline.split('T')[0] : '',
+      inputType: 'date',
+      confirmText: 'Replenish'
+    });
+
+    if (!newDeadline) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/public/me/posts/${postId}/replenish`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ deadline: newDeadline })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to replenish');
+
+      // Update local state to move it to Live
+      setLivePosts(prev => prev.map(p => p.id === postId ? { ...p, deadline: newDeadline, status: 'Verified', isLive: true } : p));
+      showAlert({ title: 'Replenished', message: data.message, type: 'success' });
+    } catch (err: any) {
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
     }
   };
 
@@ -465,7 +499,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
 
 
   const handleReleaseEscrow = async (post: Post, app: Applicant) => {
-    if (!window.confirm(`Release KES ${post.escrowAmount} escrow to ${app.applicantEmail}? This cannot be undone.`)) return;
+    if (!await showConfirm({ title: 'Release Escrow', message: `Release KES ${post.escrowAmount} escrow to ${app.applicantEmail}? This cannot be undone.` })) return;
     setReleaseLoading(true);
     setReleaseMessage(null);
     try {
@@ -492,7 +526,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
     const deliverable = track?.deliverables?.find((d: any) => d.id === deliverableId);
     if (!deliverable) return;
 
-    if (!window.confirm(`Release payment for "${deliverable.title}" (${qualityLevel || 'satisfactory'}) to ${application?.applicantEmail}?`)) return;
+    if (!await showConfirm({ title: 'Release Payment', message: `Release payment for "${deliverable.title}" (${qualityLevel || 'satisfactory'}) to ${application?.applicantEmail}?` })) return;
 
     try {
       const res = await fetch(`${API_BASE}/public/me/posts/${urlPostId || application?.opportunityId}/release-deliverable`, {
@@ -528,7 +562,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
   };
 
   const handleRejectDeliverable = async (applicationId: string, trackId: string, deliverableId: string) => {
-    const reason = window.prompt('Reason for rejection (freelancer can resubmit):');
+    const reason = await showPrompt({ title: 'Provide Reason', message: 'Reason for rejection (freelancer can resubmit):' });
     if (!reason) return;
 
     const application = applicants.find(a => a._id === applicationId);
@@ -564,7 +598,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
   };
 
   const handleDisputeDeliverable = async (applicationId: string, trackId: string, deliverableId: string, initiatedBy: 'poster' | 'freelancer') => {
-    const reason = window.prompt('Reason for dispute:');
+    const reason = await showPrompt({ title: 'Provide Reason', message: 'Reason for dispute:' });
     if (!reason) return;
 
     const application = applicants.find(a => a._id === applicationId);
@@ -845,7 +879,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
                                  Applications ({post.applicantCount || 0})
                                </Link>
                                <Button
-                                 onClick={() => { setPostToUnpublish(post); setUnpublishError(null); }}
+                                 onClick={() => handleUnpublishPost(post)}
                                  variant="outline"
                                  className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
                                >
@@ -864,21 +898,23 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                  Edit
                                </Button>
-                               <Button
-                                 onClick={() => {
-                                   setPostToDelete(post);
-                                   setDeleteError(null);
-                                   setTimeout(() => {
-                                     document.getElementById('delete-modal-dialog')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                   }, 50);
-                                 }}
-                                 variant="outline"
-                                 className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
-                               >
-                                 <Trash2 className="w-3.5 h-3.5" /> Delete Draft
-                               </Button>
-                             </>
-                           )}
+                                {(isAdminMode || adminDashboardMode) && (
+                                  <Button
+                                    onClick={() => {
+                                      setPostToDelete(post);
+                                      setDeleteError(null);
+                                      setTimeout(() => {
+                                        document.getElementById('delete-modal-dialog')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                      }, 50);
+                                    }}
+                                    variant="outline"
+                                    className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" /> Delete Draft
+                                  </Button>
+                                )}
+                              </>
+                            )}
                          </div>
 
                          {/* Escrow Row */}
@@ -965,13 +1001,15 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
                           {republishingId === post.id ? 'Publishing...' : 'Republish'}
                         </Button>
                       )}
-                      <Button
-                        variant="outline"
-                        className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
-                        onClick={() => { setPostToDelete(post); setDeleteError(null); }}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" /> Delete
-                      </Button>
+                      {(isAdminMode || adminDashboardMode) && (
+                        <Button
+                          variant="outline"
+                          className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
+                          onClick={() => { setPostToDelete(post); setDeleteError(null); }}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );
@@ -1010,11 +1048,27 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
                     </Link>
                     <Button
                       variant="outline"
-                      className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
-                      onClick={() => { setPostToDelete(post); setDeleteError(null); }}
+                      className="h-9 rounded-lg px-4 text-sm font-medium border-amber-200 text-amber-700 hover:bg-amber-50 hover:border-amber-300 flex items-center gap-1.5"
+                      onClick={() => handleReplenishPost(post.id, post.deadline)}
                     >
-                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                      <RefreshCcw className="w-3.5 h-3.5" /> Replenish
                     </Button>
+                    <Button
+                      onClick={() => handleUnpublishPost(post)}
+                      variant="outline"
+                      className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
+                    >
+                      <EyeOff className="w-3.5 h-3.5" /> Unpublish
+                    </Button>
+                    {(isAdminMode || adminDashboardMode) && (
+                      <Button
+                        variant="outline"
+                        className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
+                        onClick={() => { setPostToDelete(post); setDeleteError(null); }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}

@@ -1042,6 +1042,36 @@ router.post('/me/posts/:id/republish', verifyUserToken, async (req, res) => {
   }
 });
 
+// 9. SECURE ENDPOINT: Replenish expired post (Extend Deadline)
+router.post('/me/posts/:id/replenish', verifyUserToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { deadline } = req.body;
+    const email = req.user.email;
+    const db = getDB();
+
+    if (!deadline) {
+      return res.status(400).json({ error: 'New deadline is required.' });
+    }
+
+    const opp = await db.collection('opportunities').findOne({ id });
+    if (!opp) return res.status(404).json({ error: 'Post not found.' });
+
+    // Verify ownership
+    const isOwner = opp.reporter?.email === email || opp.contactEmail === email;
+    if (!isOwner) return res.status(403).json({ error: 'You do not own this post.' });
+
+    await db.collection('opportunities').updateOne(
+      { id },
+      { $set: { deadline, status: 'Verified', updatedAt: new Date(), unpublishedBy: null } }
+    );
+
+    res.json({ success: true, message: 'Post replenished successfully.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
 
   try {

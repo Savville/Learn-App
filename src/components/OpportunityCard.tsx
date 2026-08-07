@@ -88,8 +88,10 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const verificationLabel = opportunity.status || (opportunity.isVerified ? 'Verified' : undefined);
 
   // Real metrics from DB tracking for new posts, deterministic fake for older hardcoded posts
+  const baselines = [23, 24, 26, 29, 19, 15, 23, 8];
   const seed = opportunity.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
-  const views = opportunity.views ? opportunity.views : (20 + (seed % 21));
+  const baselineViews = baselines[seed % baselines.length];
+  const views = (opportunity.views || 0) + baselineViews;
   const isHot = views > 30;
 
   const finalImageUrl = getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl, opportunity.title);

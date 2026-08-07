@@ -530,8 +530,10 @@ export function OpportunityDetails() {
   }
 
   // Real metrics from DB tracking for new posts, deterministic fake for older hardcoded posts
-  const seed = opportunity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const views = opportunity.views ? opportunity.views : (20 + (seed % 21));
+  const baselines = [23, 24, 26, 29, 19, 15, 23, 8];
+  const seed = opportunity.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+  const baselineViews = baselines[seed % baselines.length];
+  const views = (opportunity.views || 0) + baselineViews;
 
   return (
     <div className="min-h-screen bg-gray-50">

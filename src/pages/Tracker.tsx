@@ -25,7 +25,7 @@ export function Tracker() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'applied' | 'saved'>('applied');
-  const { showAlert } = useAlert();
+  const { showAlert , showConfirm , showPrompt } = useAlert();
 
   // Dispute Modal State
   const [disputeAppId, setDisputeAppId] = useState<string | null>(null);
@@ -115,7 +115,7 @@ export function Tracker() {
   };
 
   const handleDisputeDeliverable = async (applicationId: string, trackId: string, deliverableId: string, initiatedBy: 'freelancer') => {
-    const reason = window.prompt('Reason for dispute:');
+    const reason = await showPrompt({ title: 'Provide Reason', message: 'Reason for dispute:' });
     if (!reason) return;
 
     try {
@@ -202,8 +202,8 @@ export function Tracker() {
     setEmail(newEmail);
   };
 
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
+  const handleLogout = async () => {
+    if (await showConfirm({ title: 'Confirm Action', message: "Are you sure you want to log out?" })) {
       localStorage.removeItem('user_token');
       localStorage.removeItem('user_email');
       setToken(null);

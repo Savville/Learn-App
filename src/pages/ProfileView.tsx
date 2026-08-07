@@ -163,6 +163,8 @@ export function ProfileView({ emailProp, isSlider = false, bottomActions, fallba
                             src={BANNER_IMAGES[bannerIdx]}
                             alt={`${profile.name} banner`}
                             className="w-full h-full object-cover"
+                            loading="eager"
+                            decoding="async"
                         />
                     </div>
 
@@ -177,6 +179,8 @@ export function ProfileView({ emailProp, isSlider = false, bottomActions, fallba
                                 src={profile.avatar}
                                 alt={profile.name}
                                 className="w-24 h-24 rounded-full border-3 border-white shadow-lg object-cover block"
+                                loading="eager"
+                                decoding="async"
                             />
                         ) : (
                             <div className="w-24 h-24 rounded-full border-3 border-white bg-blue-900 flex items-center justify-center shadow-lg">
@@ -305,6 +309,58 @@ export function ProfileView({ emailProp, isSlider = false, bottomActions, fallba
                                                 )}
                                             </div>
                                         ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Platform Activity */}
+                            {((profile.completedJobs && profile.completedJobs.length > 0) || (profile.postedOpportunities && profile.postedOpportunities.length > 0)) && (
+                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                                    <h2 className="font-bold text-slate-800 text-lg mb-4">Platform Activity</h2>
+                                    <div className="space-y-6">
+                                        
+                                        {profile.completedJobs && profile.completedJobs.length > 0 && (
+                                            <div>
+                                                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Completed Jobs</h3>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {profile.completedJobs.map((gig: any, idx: number) => (
+                                                        <div key={`gig-${idx}`} className="border border-slate-100 rounded-xl p-4 bg-green-50/30 flex flex-col">
+                                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                                <h4 className="font-bold text-slate-800 text-sm line-clamp-2">{gig.title || gig.opportunityTitle}</h4>
+                                                            </div>
+                                                            <div className="mt-auto flex items-center justify-between">
+                                                                <span className="text-xs font-bold text-green-700">Paid KES {gig.amount}</span>
+                                                                <span className="text-[10px] text-slate-400 font-medium">
+                                                                    {new Date(gig.completedAt).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {profile.postedOpportunities && profile.postedOpportunities.length > 0 && (
+                                            <div>
+                                                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Posted Opportunities</h3>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {profile.postedOpportunities.map((opp: any, idx: number) => (
+                                                        <div key={`opp-${idx}`} className="border border-slate-100 rounded-xl p-4 bg-blue-50/30 flex flex-col">
+                                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                                <h4 className="font-bold text-slate-800 text-sm line-clamp-2">{opp.title}</h4>
+                                                            </div>
+                                                            <div className="mt-auto flex items-center justify-between">
+                                                                <span className="text-xs font-semibold text-blue-700">{opp.category}</span>
+                                                                <span className="text-[10px] text-slate-400 font-medium">
+                                                                    {new Date(opp.dateAdded).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
                                     </div>
                                 </div>
                             )}

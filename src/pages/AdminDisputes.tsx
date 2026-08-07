@@ -21,7 +21,7 @@ export function AdminDisputes() {
   const [isAuthorized, setIsAuthorized] = useState(!!adminKey);
   const [disputes, setDisputes] = useState<DisputedApplication[]>([]);
   const [loading, setLoading] = useState(false);
-  const { showAlert } = useAlert();
+  const { showAlert , showConfirm } = useAlert();
   const [chatModal, setChatModal] = useState<{isOpen: boolean, disputeId: string | null, messages: any[]}>({isOpen: false, disputeId: null, messages: []});
 
   const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
@@ -47,7 +47,7 @@ export function AdminDisputes() {
   };
 
   const handleResolve = async (appId: string, resolution: 'resolved_paid' | 'resolved_refunded') => {
-    if (!window.confirm(`Are you sure you want to resolve this as ${resolution}?`)) return;
+    if (!await showConfirm({ title: 'Confirm Action', message: `Are you sure you want to resolve this as ${resolution}?` })) return;
     try {
       const res = await fetch(`${API_BASE}/admin/applications/${appId}/resolve`, {
         method: 'PUT',

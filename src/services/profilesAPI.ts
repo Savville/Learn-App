@@ -33,6 +33,8 @@ export interface Profile {
     interestAreas?: string[];
     links?: ProfileLinks;
     projects?: ProfileProject[];
+    postedOpportunities?: any[]; // Using any[] for now to avoid circular dependency with Opportunity type, or define basic structure
+    completedJobs?: any[];
     createdAt?: string;
     updatedAt?: string;
 }

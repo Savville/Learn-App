@@ -333,8 +333,39 @@ router.get('/profiles/:email', async (req, res) => {
             return res.status(404).json({ error: 'Profile not found' });
         }
 
+        // Fetch Posted Opportunities
+        const postedOpportunities = await db.collection('opportunities')
+            .find({ userEmail: email, status: { $ne: 'Draft' } })
+            .sort({ dateAdded: -1 })
+            .toArray();
+
+        // Fetch Completed Jobs
+        const completedApplications = await db.collection('applications')
+            .find({ applicantEmail: email, status: 'paid' })
+            .toArray();
+
+        const completedJobs = [];
+        for (const app of completedApplications) {
+            const opp = await db.collection('opportunities').findOne({ id: app.opportunityId });
+            if (opp) {
+                completedJobs.push({
+                    applicationId: app._id,
+                    opportunityId: opp.id,
+                    title: opp.title,
+                    provider: opp.provider,
+                    amount: opp.escrowAmount || opp.amount || 0,
+                    category: opp.category,
+                    completedAt: app.updatedAt || app.appliedAt,
+                    logoUrl: opp.logoUrl
+                });
+            }
+        }
+
         // Remove internal fields from response
         const { _id, __v, ...publicProfile } = profile;
+        publicProfile.postedOpportunities = postedOpportunities;
+        publicProfile.completedJobs = completedJobs.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+        
         res.json({ success: true, profile: publicProfile });
     } catch (error) {
         console.error('[PROFILES] Get error:', error);

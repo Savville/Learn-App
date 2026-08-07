@@ -43,7 +43,7 @@ export function Inbox() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const cachedSenderName = useRef<string>('');
-  const { showAlert } = useAlert();
+  const { showAlert , showConfirm } = useAlert();
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent, msg: any) => {
@@ -233,8 +233,8 @@ export function Inbox() {
     setEmail(newEmail);
   };
 
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
+  const handleLogout = async () => {
+    if (await showConfirm({ title: 'Confirm Action', message: "Are you sure you want to log out?" })) {
       localStorage.removeItem('user_token');
       localStorage.removeItem('user_email');
       setToken(null);
@@ -507,7 +507,7 @@ export function Inbox() {
   );
 
   return (
-    <div className="w-full min-h-screen p-4 md:p-8 relative" style={{ background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }} onClick={() => setContextMenu(null)}>
+    <div className="w-full min-h-screen p-4 md:p-8 relative pb-[80px] md:pb-8" style={{ background: BG, fontFamily: "'Plus Jakarta Sans', sans-serif" }} onClick={() => setContextMenu(null)}>
       {contextMenu && createPortal(
         <div
           className="fixed z-50 bg-[#131ADF] text-white rounded-lg shadow-2xl border border-blue-400 py-1.5 min-w-[140px] overflow-hidden"
@@ -555,7 +555,7 @@ export function Inbox() {
         document.body
       )}
 
-      <div className="max-w-6xl mx-auto h-[85vh] min-h-[600px] flex gap-5 md:gap-8">
+        <div className="max-w-6xl mx-auto h-full min-h-[600px] flex gap-5 md:gap-8">
 
         {/* Left Panel: Contacts List */}
         <div className={`flex-col h-full bg-white rounded-xl w-full md:w-80 shrink-0 overflow-hidden shadow-sm ${activeConv ? 'hidden md:flex' : 'flex'}`}>
@@ -1052,7 +1052,7 @@ export function Inbox() {
                 <div className="p-6 flex flex-col items-center border-b border-slate-100">
                   <div className="w-24 h-24 rounded-full bg-slate-100 mb-4 overflow-hidden shadow-sm border border-slate-200">
                     {partnerProfile.profile?.avatar ? (
-                      <img src={partnerProfile.profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                      <img src={partnerProfile.profile.avatar} alt="Avatar" className="w-full h-full object-cover" loading="eager" decoding="async" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-300">
                         <User className="w-10 h-10" />

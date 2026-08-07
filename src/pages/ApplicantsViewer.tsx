@@ -1,3 +1,4 @@
+import { useAlert } from '@/contexts/AlertContext';
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -145,7 +146,7 @@ export function ApplicantsViewer() {
   const handleReleaseEscrow = async (app: any) => {
     if (!post) return;
     const escrowAmount = post.escrowAmount || post.opportunity?.escrowAmount;
-    if (!window.confirm(`Release KES ${escrowAmount} escrow to ${app.applicantEmail}? This cannot be undone.`)) return;
+    if (!await showConfirm({ title: 'Confirm Action', message: `Release KES ${escrowAmount} escrow to ${app.applicantEmail}? This cannot be undone.` })) return;
     setReleaseLoading(true);
     setReleaseMessage(null);
     try {
