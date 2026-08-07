@@ -32,8 +32,10 @@ router.get('/', cacheMiddleware(300), async (req, res) => {
     // ── Build filter using $and so status check is never overwritten ──────────
     // The $or for status verification is anchored in an $and clause, ensuring
     // that search text filters cannot accidentally replace it (old bug).
+    const now = new Date().toISOString();
     const must = [
-      { $or: [{ status: { $exists: false } }, { status: 'Verified' }] },
+      { $or: [{ status: { $exists: false } }, { status: "Verified" }] },
+      { $or: [{ deadline: { $exists: false } }, { deadline: null }, { deadline: "" }, { deadline: { $gte: now } }] },
     ];
 
     // Tab → category bucket

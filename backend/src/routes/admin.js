@@ -2164,40 +2164,22 @@ router.get('/disputed-deliverables', verifyAdminKey, async (req, res) => {
 router.get('/edit-requests', verifyAdminKey, async (req, res) => {
   try {
     const db = getDB();
-    const pendingEdits = await db.collection('pending_opportunities')
-      .find({ 'opportunity.editOf': { $exists: true, $ne: null } })
+    const edits = await db.collection('edit_requests')
+      .find({ status: 'Pending' })
       .sort({ submittedAt: -1 })
       .toArray();
 
-    const enriched = [];
-    for (const edit of pendingEdits) {
-      const originalId = edit.opportunity.editOf;
-      const original = await db.collection('pending_opportunities').findOne({ 'opportunity.id': originalId })
-        || await db.collection('opportunities').findOne({ id: originalId });
-
-      const diff = {};
-      if (original) {
-        const origOpp = original.opportunity || original;
-        const editOpp = edit.opportunity;
-        const fields = ['title', 'description', 'fullDescription', 'deadline', 'location', 'applicationLink', 'fundingType', 'compensationType', 'upfrontCost'];
-        for (const f of fields) {
-          if (origOpp[f] !== editOpp[f] && editOpp[f] !== undefined) {
-            diff[f] = { old: origOpp[f] || '', new: editOpp[f] };
-          }
-        }
-      }
-
-      enriched.push({
-        _id: edit._id,
-        opportunityId: originalId,
-        title: edit.opportunity.title,
-        posterEmail: edit.reporter?.email || 'Unknown',
-        changeReason: edit.changeReason || edit.opportunity?.changeReason || 'No reason provided',
-        submittedAt: edit.submittedAt,
-        diff,
-        proposed: edit.opportunity,
-      });
-    }
+    const enriched = edits.map(edit => ({
+      _id: edit._id,
+      opportunityId: edit.originalId,
+      title: edit.opportunity?.title || 'Untitled',
+      posterEmail: edit.reporter?.email || 'Unknown',
+      changeReason: edit.changeReason || 'No reason provided',
+      submittedAt: edit.submittedAt,
+      diff: edit.diff || {},
+      proposed: edit.opportunity,
+      reporter: edit.reporter,
+    }));
 
     res.json(enriched);
   } catch (error) {
@@ -2212,10 +2194,10 @@ router.post('/edit-requests/:id/approve', verifyAdminKey, async (req, res) => {
     const { ObjectId } = await import('mongodb');
     const db = getDB();
 
-    const editDoc = await db.collection('pending_opportunities').findOne({ _id: new ObjectId(id) });
+    const editDoc = await db.collection('edit_requests').findOne({ _id: new ObjectId(id) });
     if (!editDoc) return res.status(404).json({ error: 'Edit request not found.' });
 
-    const originalId = editDoc.opportunity.editOf;
+    const originalId = editDoc.originalId;
     const editOpp = editDoc.opportunity;
 
     // Build update object with only changed fields
@@ -2234,10 +2216,10 @@ router.post('/edit-requests/:id/approve', verifyAdminKey, async (req, res) => {
       { $set: updateFields }
     );
 
-    // Mark edit request as verified
-    await db.collection('pending_opportunities').updateOne(
+    // Mark edit request as approved
+    await db.collection('edit_requests').updateOne(
       { _id: new ObjectId(id) },
-      { $set: { status: 'Verified', reviewedAt: new Date(), reviewedBy: 'Admin' } }
+      { $set: { status: 'Approved', reviewedAt: new Date(), reviewedBy: 'Admin' } }
     );
 
     cacheInvalidatePrefix(CACHE_PREFIX);
@@ -2254,7 +2236,7 @@ router.post('/edit-requests/:id/reject', verifyAdminKey, async (req, res) => {
     const { ObjectId } = await import('mongodb');
     const db = getDB();
 
-    await db.collection('pending_opportunities').updateOne(
+    await db.collection('edit_requests').updateOne(
       { _id: new ObjectId(id) },
       { $set: { status: 'Rejected', reviewedAt: new Date(), reviewedBy: 'Admin' } }
     );
@@ -2288,9 +2270,9 @@ router.get('/opportunities/:id/detail', verifyAdminKey, async (req, res) => {
     }
 
     // Check for pending edit request
-    const hasEditRequest = await db.collection('pending_opportunities').countDocuments({
-      'opportunity.editOf': id,
-      status: 'Unverified'
+    const hasEditRequest = await db.collection('edit_requests').countDocuments({
+      originalId: id,
+      status: 'Pending'
     }) > 0;
 
     res.json({
@@ -2301,6 +2283,87 @@ router.get('/opportunities/:id/detail', verifyAdminKey, async (req, res) => {
       applicantGroups: grouped,
       hasEditRequest,
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+// GET /api/admin/opportunities/expired
+router.get("/opportunities/expired", verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const now = new Date().toISOString();
+    const expired = await db.collection("opportunities")
+      .find({ deadline: { $exists: true, $ne: null, $ne: "", $lt: now } })
+      .sort({ deadline: -1 })
+      .toArray();
+    res.json(expired);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/opportunities/expired
+router.get("/opportunities/expired", verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const expired = await db.collection("opportunities")
+      .find({ status: "Verified", deadline: { $lt: new Date() } })
+      .sort({ deadline: -1 })
+      .toArray();
+    res.json(expired);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/admin/opportunities/unpublished
+
+router.get("/opportunities/unpublished", verifyAdminKey, async (req, res) => {
+  try {
+    const db = getDB();
+    const unpublished = await db.collection("opportunities")
+      .find({ status: "Unpublished" })
+      .sort({ updatedAt: -1 })
+      .toArray();
+    res.json(unpublished);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/opportunities/:id/unpublish
+router.post("/opportunities/:id/unpublish", verifyAdminKey, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDB();
+    const opp = await db.collection("opportunities").findOne({ id });
+    if (!opp) return res.status(404).json({ error: "Opportunity not found." });
+    await db.collection("opportunities").updateOne(
+      { id },
+      { $set: { status: "Unpublished", updatedAt: new Date(), unpublishedBy: "Admin" } }
+    );
+    cacheInvalidatePrefix(CACHE_PREFIX);
+    res.json({ message: "Opportunity unpublished." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/admin/opportunities/:id/republish
+router.post("/opportunities/:id/republish", verifyAdminKey, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDB();
+    const opp = await db.collection("opportunities").findOne({ id });
+    if (!opp) return res.status(404).json({ error: "Opportunity not found." });
+    await db.collection("opportunities").updateOne(
+      { id },
+      { $set: { status: "Verified", updatedAt: new Date() } }
+    );
+    cacheInvalidatePrefix(CACHE_PREFIX);
+    res.json({ message: "Opportunity republished." });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

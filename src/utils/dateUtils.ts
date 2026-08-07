@@ -28,7 +28,7 @@ export function calculateUrgency(deadline?: string): UrgencyLevel {
       daysLeft: 9999,
       bgColor: 'bg-green-100',
       textColor: 'text-green-700',
-      label: deadline
+      label: 'Open / Ongoing'
     };
   }
 
@@ -42,7 +42,7 @@ export function calculateUrgency(deadline?: string): UrgencyLevel {
       daysLeft: 0,
       bgColor: 'bg-gray-100',
       textColor: 'text-gray-500',
-      label: 'Depleted'
+      label: 'Expired'
     };
   } else if (daysLeft <= 7) {
     return {

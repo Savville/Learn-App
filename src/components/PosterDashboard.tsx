@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { OTPLoginForm } from './OTPLoginForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock, Clock, CheckCircle, X } from 'lucide-react';
+import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock, Clock, CheckCircle, X, EyeOff, RefreshCcw, History } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ProfileView } from '../pages/ProfileView';
 import { toSlug } from '@/utils/dateUtils';
@@ -14,6 +14,13 @@ interface Post {
   title: string;
   status: string;
   category: string;
+  description?: string;
+  fullDescription?: string;
+  deadline?: string;
+  location?: string;
+  applicationLink?: string;
+  contactEmail?: string;
+  reporter?: { name?: string; email?: string; organization?: string; role?: string; telephone?: string; websiteOrSocial?: string };
   views?: number;
   clicks?: number;
   applicantCount?: number;
@@ -27,6 +34,7 @@ interface Post {
   escrowAmount?: number;
   isEscrowFunded?: boolean;
   payoutRequests?: any[];
+  unpublishedBy?: string | null;
 }
 
 interface Applicant {
@@ -35,6 +43,8 @@ interface Applicant {
   applicantData: Record<string, any>;
   appliedAt: string;
   status: string;
+  opportunityId?: string;
+  tracks?: any[];
 }
 
 export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMode?: boolean; adminDashboardMode?: boolean }) {
@@ -114,6 +124,13 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+
+  // Unpublish State
+  const [postToUnpublish, setPostToUnpublish] = useState<Post | null>(null);
+  const [unpublishError, setUnpublishError] = useState<string | null>(null);
+  const [showUnpublishSuccess, setShowUnpublishSuccess] = useState(false);
+  const [unpublishingId, setUnpublishingId] = useState<string | null>(null);
+  const [republishingId, setRepublishingId] = useState<string | null>(null);
 
   // Payout Request State
   const [payoutJob, setPayoutJob] = useState<Post | null>(null);
@@ -272,6 +289,49 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
       setDeleteLoading(false);
     }
   };
+
+  const handleUnpublish = async () => {
+    if (!postToUnpublish) return;
+
+    setUnpublishingId(postToUnpublish.id);
+    setUnpublishError(null);
+    try {
+      const res = await fetch(`${API_BASE}/public/me/posts/${postToUnpublish.id}/unpublish`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to unpublish');
+
+      setLivePosts(prev => prev.map(p => p.id === postToUnpublish.id ? { ...p, status: 'Unpublished' } : p));
+      setShowUnpublishSuccess(true);
+    } catch (err: any) {
+      setUnpublishError(err.message);
+    } finally {
+      setUnpublishingId(null);
+    }
+  };
+
+  const handleRepublishPost = async (postId: string) => {
+    setRepublishingId(postId);
+    try {
+      const res = await fetch(`${API_BASE}/public/me/posts/${postId}/republish`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to republish');
+
+      // Move back to live
+      setLivePosts(prev => prev.map(p => p.id === postId ? { ...p, status: 'Verified', isLive: true } : p));
+      showAlert({ title: 'Republished', message: data.message, type: 'success' });
+    } catch (err: any) {
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
+    } finally {
+      setRepublishingId(null);
+    }
+  };
+
 
   const handleEscrowDeposit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -616,9 +676,9 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
             name: 'System',
             organization: 'Opportunities Kenya',
             role: 'Poster Edit Request',
-            telephone: '',
+            telephone: '+254700000000',
             email: original.contactEmail || original.reporter?.email || '',
-            websiteOrSocial: '',
+            websiteOrSocial: 'https://opportunities.ke',
           },
           changeReason: editRequestForm.changeReason,
         }),
@@ -645,8 +705,14 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
     );
   }
 
+  // Separate unpublished and expired posts for their own sections
+  const unpublishedPosts = livePosts.filter(p => p.status === 'Unpublished');
+  const expiredPosts = livePosts.filter(p => p.status === 'Verified' && p.deadline && new Date(p.deadline) < new Date());
+
   const allPosts = [
-    ...livePosts.map(p => ({ ...p, isLive: true })),
+    ...livePosts
+      .filter(p => p.status !== 'Unpublished' && !(p.status === 'Verified' && p.deadline && new Date(p.deadline) < new Date()))
+      .map(p => ({ ...p, isLive: true })),
     ...pendingPosts
       .filter(p => !livePosts.some(live => live.id === (p.opportunity?.id || p.id)))
       .map(p => ({
@@ -662,17 +728,18 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
     <>
       <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm relative">
         <div className="flex items-center justify-between flex-wrap gap-4 border-b border-gray-100 pb-6 mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner flex-shrink-0">
-              <Briefcase className="w-7 h-7" />
+          <div className="flex flex-col gap-1 w-full md:w-auto">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner flex-shrink-0">
+                <Briefcase className="w-7 h-7" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 truncate pr-4">
+                  {adminDashboardMode ? 'Opportunities Kenya Admin' : isAdminMode ? 'All Platform Posts' : 'My Posts Dashboard'}
+                </h2>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 truncate pr-4">
-                {adminDashboardMode ? 'Opportunities Kenya Admin' : isAdminMode ? 'All Platform Posts' : 'My Posts Dashboard'}
-              </h2>
-            </div>
-            
-            <div className="flex items-center gap-4 w-full md:w-auto mt-4 md:mt-0 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+            <div className="flex items-center gap-4 w-full md:w-auto mt-2 md:mt-0 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
               <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl shrink-0 border border-gray-200">
                 <Mail className="w-4 h-4 text-gray-500" />
                 <span className="text-sm font-medium text-gray-700 truncate max-w-[150px] md:max-w-xs" title={email || ''}>{email}</span>
@@ -751,95 +818,97 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
                         </p>
                       </div>
 
-                      <div className="flex flex-col gap-3 shrink-0 items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                        {/* Top Row: Core Actions */}
-                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-start md:justify-end">
-                          {(post.isLive || post.status === 'Verified') && (
-                            <Button asChild variant="outline" className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center">
-                              <Link to={`/opportunity/${toSlug(post.title)}`} target="_blank">
-                                View Live <ExternalLink className="w-4 h-4 ml-2 text-gray-400" />
-                              </Link>
-                            </Button>
-                          )}
+                      <div className="flex flex-col gap-2 shrink-0 items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
+                         {/* Single Row: Core Actions */}
+                         <div className="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
+                           {(post.isLive || post.status === 'Verified') && (
+                             <>
+                               <Button asChild variant="outline" className="h-9 rounded-lg px-4 text-sm font-medium border-gray-200 text-gray-700 hover:bg-gray-50">
+                                 <Link to={`/opportunity/${toSlug(post.title)}`} target="_blank" className="flex items-center gap-1.5">
+                                   <ExternalLink className="w-3.5 h-3.5" /> View Live
+                                 </Link>
+                               </Button>
+                               <Button
+                                 onClick={() => setEditRequestPost(post)}
+                                 variant="outline"
+                                 className="h-9 rounded-lg px-4 text-sm font-medium border-amber-200 text-amber-700 hover:bg-amber-50 flex items-center gap-1.5"
+                               >
+                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                 Request Edit
+                               </Button>
+                               <Link
+                                 to={`/manage/applicants/${post.id || post.opportunity?.id}`}
+                                 state={{ post }}
+                                 className="h-9 rounded-lg px-4 text-sm font-medium bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center gap-1.5"
+                               >
+                                 <Users className="w-3.5 h-3.5 text-slate-500" />
+                                 Applications ({post.applicantCount || 0})
+                               </Link>
+                               <Button
+                                 onClick={() => { setPostToUnpublish(post); setUnpublishError(null); }}
+                                 variant="outline"
+                                 className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
+                               >
+                                 <EyeOff className="w-3.5 h-3.5" />
+                                 Unpublish
+                               </Button>
+                             </>
+                           )}
+                           {!post.isLive && post.status !== 'Verified' && (
+                             <>
+                               <Button
+                                 onClick={() => navigate('/post-with-us', { state: { editPost: post.isLive ? post : post.opportunity || post.originalOpportunity || post } })}
+                                 variant="outline"
+                                 className="h-9 rounded-lg px-4 text-sm font-medium border-blue-200 text-blue-700 hover:bg-blue-50 flex items-center gap-1.5"
+                               >
+                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                 Edit
+                               </Button>
+                               <Button
+                                 onClick={() => {
+                                   setPostToDelete(post);
+                                   setDeleteError(null);
+                                   setTimeout(() => {
+                                     document.getElementById('delete-modal-dialog')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                   }, 50);
+                                 }}
+                                 variant="outline"
+                                 className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
+                               >
+                                 <Trash2 className="w-3.5 h-3.5" /> Delete Draft
+                               </Button>
+                             </>
+                           )}
+                         </div>
 
-                          {post.isLive || post.status === 'Verified' ? (
-                            <Button
-                              onClick={() => setEditRequestPost(post)}
-                              variant="outline"
-                              className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-amber-200 text-amber-700 hover:bg-amber-50"
-                            >
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                              Request Edit
-                            </Button>
-                          ) : (
-                            <Button
-                              onClick={() => navigate('/post-with-us', { state: { editPost: post.isLive ? post : post.opportunity || post.originalOpportunity || post } })}
-                              variant="outline"
-                              className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-blue-200 text-blue-700 hover:bg-blue-50"
-                            >
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                              Edit
-                            </Button>
-                          )}
-
-                          {!post.isLive && post.status !== 'Verified' && (
-                            <Button
-                              onClick={() => {
-                                setPostToDelete(post);
-                                setDeleteError(null);
-                                setTimeout(() => {
-                                  document.getElementById('delete-modal-dialog')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                }, 50);
-                              }}
-                              variant="outline"
-                              className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" /> Delete
-                            </Button>
-                          )}
-                        </div>
-
-                        {/* Bottom Row: Applications & Escrow */}
-                        {( ((post.applicationForm?.isEnabled || post.opportunity?.applicationForm?.isEnabled || true) && (post.isLive || post.status === 'Verified')) || (post.isEscrow || post.opportunity?.isEscrow) ) && (
-                          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-start md:justify-end">
-                            {(post.applicationForm?.isEnabled || post.opportunity?.applicationForm?.isEnabled || true) && (post.isLive || post.status === 'Verified') && (
-                              <Link
-                                to={`/manage/applicants/${post.id || post.opportunity?.id}`}
-                                state={{ post }}
-                                className="w-full sm:w-auto rounded-xl px-5 h-11 font-semibold transition-all bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center"
-                              >
-                                <Users className="w-4 h-4 mr-2 text-slate-500" />
-                                <span>View Applications: {post.applicantCount || 0}</span>
-                              </Link>
-                            )}
-
-                            {(post.isEscrow || post.opportunity?.isEscrow) && (
-                              (post.isEscrowFunded || post.opportunity?.isEscrowFunded) ? (
-                                <>
-                                  <span className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-50 text-green-700 border border-green-200 flex items-center justify-center gap-1.5 text-sm">
-                                    <Lock className="w-4 h-4" /> Escrow Active
-                                  </span>
-                                  <Button
-                                    onClick={() => setPayoutJob(post)}
-                                    variant="outline"
-                                    className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold border-purple-200 text-purple-700 hover:bg-purple-50 flex items-center justify-center gap-1.5"
-                                  >
-                                    <DollarSign className="w-4 h-4" /> Request Payout
-                                  </Button>
-                                </>
-                              ) : (
-                                <Button
-                                  onClick={() => setEscrowJob(post)}
-                                  variant="default"
-                                  className="w-full sm:w-auto rounded-xl px-5 h-11 font-bold bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow"
-                                >
-                                  Deposit KES {post.escrowAmount || post.opportunity?.escrowAmount || 0}
-                                </Button>
-                              )
-                            )}
-                          </div>
-                        )}
-                      </div>
+                         {/* Escrow Row */}
+                         {(post.isEscrow || post.opportunity?.isEscrow) && (
+                           <div className="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
+                             {(post.isEscrowFunded || post.opportunity?.isEscrowFunded) ? (
+                               <>
+                                 <span className="h-9 rounded-lg px-4 text-sm font-bold bg-green-50 text-green-700 border border-green-200 flex items-center gap-1.5">
+                                   <Lock className="w-3.5 h-3.5" /> Escrow Active
+                                 </span>
+                                 <Button
+                                   onClick={() => setPayoutJob(post)}
+                                   variant="outline"
+                                   className="h-9 rounded-lg px-4 text-sm font-bold border-purple-200 text-purple-700 hover:bg-purple-50 flex items-center gap-1.5"
+                                 >
+                                   <DollarSign className="w-3.5 h-3.5" /> Request Payout
+                                 </Button>
+                               </>
+                             ) : (
+                               <Button
+                                 onClick={() => setEscrowJob(post)}
+                                 variant="default"
+                                 className="h-9 rounded-lg px-4 text-sm font-bold bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow"
+                               >
+                                 Deposit KES {post.escrowAmount || post.opportunity?.escrowAmount || 0}
+                               </Button>
+                             )}
+                           </div>
+                         )}
+                       </div>
                     </div>
 
 
@@ -852,6 +921,106 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
             </div>
           )}
         </div>
+
+        {/* ── Unpublished Posts Section ─────────────────────────── */}
+        {unpublishedPosts.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2 mb-4">
+              <EyeOff className="w-4 h-4 text-slate-400" />
+              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Unpublished Posts ({unpublishedPosts.length})</h3>
+            </div>
+            <div className="space-y-3">
+              {unpublishedPosts.map(post => {
+                const adminTookDown = post.unpublishedBy && post.unpublishedBy !== email;
+                return (
+                  <div key={post.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-slate-200 text-slate-600 rounded-full px-2 py-0.5">
+                          <EyeOff className="w-3 h-3" /> Unpublished
+                        </span>
+                        {adminTookDown && (
+                          <span className="text-xs text-red-500 font-medium">Taken down by admin</span>
+                        )}
+                      </div>
+                      <p className="font-semibold text-slate-800 truncate">{post.title}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{post.category}</p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      {adminTookDown ? (
+                        <span
+                          title="This post was taken down by an admin. Contact support to republish."
+                          className="h-9 rounded-lg px-4 text-sm font-medium border border-slate-200 text-slate-400 flex items-center gap-1.5 cursor-not-allowed select-none"
+                        >
+                          <RefreshCcw className="w-3.5 h-3.5" /> Republish
+                        </span>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="h-9 rounded-lg px-4 text-sm font-medium border-green-200 text-green-700 hover:bg-green-50 flex items-center gap-1.5"
+                          disabled={republishingId === post.id}
+                          onClick={() => handleRepublishPost(post.id)}
+                        >
+                          <RefreshCcw className="w-3.5 h-3.5" />
+                          {republishingId === post.id ? 'Publishing...' : 'Republish'}
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
+                        onClick={() => { setPostToDelete(post); setDeleteError(null); }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── Expired Posts Section ─────────────────────────── */}
+        {expiredPosts.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center gap-2 mb-4">
+              <History className="w-4 h-4 text-slate-400" />
+              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Expired Posts ({expiredPosts.length})</h3>
+            </div>
+            <div className="space-y-3">
+              {expiredPosts.map(post => (
+                <div key={post.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-amber-50/50 border border-amber-200 rounded-xl p-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-full px-2 py-0.5">
+                        <Clock className="w-3 h-3" /> Expired
+                      </span>
+                    </div>
+                    <p className="font-semibold text-slate-800 truncate">{post.title}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{post.category}</p>
+                  </div>
+                  <div className="flex gap-2 shrink-0 flex-wrap">
+                    <Link
+                      to={`/manage/applicants/${post.id || post.opportunity?.id}`}
+                      state={{ post }}
+                      className="h-9 rounded-lg px-4 text-sm font-medium bg-white text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center gap-1.5"
+                    >
+                      <Users className="w-3.5 h-3.5 text-slate-500" />
+                      Applications ({post.applicantCount || 0})
+                    </Link>
+                    <Button
+                      variant="outline"
+                      className="h-9 rounded-lg px-4 text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 flex items-center gap-1.5"
+                      onClick={() => { setPostToDelete(post); setDeleteError(null); }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Escrow Deposit Modal Component */}
         {escrowJob && (
@@ -1170,7 +1339,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
                    {slidingApplicant.app.tracks.filter((t: any) => t.deliverables && t.deliverables.length > 0).map((track: any) => {
                      // Get quality rules from the opportunity's track definition
                      const oppTrack = slidingApplicant.post?.opportunity?.applicationForm?.tracks?.find((t: any) => t.id === track.trackId)
-                                     || slidingOpplicant.post?.applicationForm?.tracks?.find((t: any) => t.id === track.trackId);
+                                     || slidingApplicant.post?.applicationForm?.tracks?.find((t: any) => t.id === track.trackId);
                      const qualityRules = oppTrack?.qualityRules || [];
 
                      return (

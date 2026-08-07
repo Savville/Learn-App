@@ -632,6 +632,41 @@ router.post('/submit-opportunity', async (req, res) => {
       return res.json({ message: 'Published as Admin.', url: `/opportunity/${publishId}` });
     }
 
+    // ── Route edit requests to separate collection ──────────────────────
+    if (opportunity.editOf) {
+      const originalId = opportunity.editOf;
+      const original = await db.collection('opportunities').findOne({ id: originalId });
+
+      // Compute diff between original and proposed
+      const fields = ['title', 'description', 'fullDescription', 'deadline', 'location', 'applicationLink', 'fundingType', 'compensationType', 'upfrontCost'];
+      const diff = {};
+      if (original) {
+        const origOpp = original;
+        for (const f of fields) {
+          if (origOpp[f] !== opportunity[f] && opportunity[f] !== undefined) {
+            diff[f] = { old: origOpp[f] || '', new: opportunity[f] };
+          }
+        }
+      }
+
+      const editRequestDoc = {
+        originalId,
+        opportunity,
+        reporter: normalizedReporter,
+        changeReason: req.body.changeReason || '',
+        status: 'Pending',
+        diff,
+        submittedAt: new Date(),
+        reviewedAt: null,
+        reviewedBy: null,
+      };
+
+      const result = await db.collection('edit_requests').insertOne(editRequestDoc);
+
+      res.json({ message: 'Edit request submitted for review.', editRequestId: result.insertedId.toString() });
+      return;
+    }
+
     // Save with status pending
     await db.collection('pending_opportunities').insertOne({
       reporter: normalizedReporter,
@@ -922,8 +957,7 @@ router.delete('/me/posts/:id', verifyUserToken, async (req, res) => {
     const email = req.user.email;
     const db = getDB();
 
-    // Only allow deletion of pending_opportunities. 
-    // First, verify if it is in pending_opportunities and matches the email
+    // Only allow deletion of pending_opportunities.
     const pendingPost = await db.collection('pending_opportunities').findOne({
       'opportunity.id': id,
       'reporter.email': email
@@ -931,12 +965,6 @@ router.delete('/me/posts/:id', verifyUserToken, async (req, res) => {
 
     if (!pendingPost) {
       return res.status(404).json({ error: 'Pending post not found or you do not have permission to delete it.' });
-    }
-
-    // Ensure it's not actually live
-    const livePost = await db.collection('opportunities').findOne({ id });
-    if (livePost) {
-      return res.status(403).json({ error: 'Cannot delete a live post.' });
     }
 
     await db.collection('pending_opportunities').deleteOne({ _id: pendingPost._id });
@@ -947,7 +975,75 @@ router.delete('/me/posts/:id', verifyUserToken, async (req, res) => {
   }
 });
 
+// 7. SECURE ENDPOINT: Unpublish a live post (move to archived)
+router.post('/me/posts/:id/unpublish', verifyUserToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const email = req.user.email;
+    const db = getDB();
+
+    // Verify the post exists in opportunities (live post)
+    const livePost = await db.collection('opportunities').findOne({ id });
+    if (!livePost) {
+      return res.status(404).json({ error: 'Live post not found.' });
+    }
+
+    // Verify ownership
+    const originalPending = await db.collection('pending_opportunities').findOne({ 'opportunity.id': id });
+    const isOwner = originalPending?.reporter?.email === email || livePost.reporter?.email === email || livePost.contactEmail === email;
+    if (!isOwner) {
+      return res.status(403).json({ error: 'You do not own this post.' });
+    }
+
+    // Set status to Unpublished (keeps in collection for admin management)
+    await db.collection("opportunities").updateOne(
+      { id },
+      { $set: { status: "Unpublished", updatedAt: new Date(), unpublishedBy: email } }
+    );
+
+    res.json({ success: true, message: 'Post unpublished.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 8. SECURE ENDPOINT: User self-republish (Option C: only if user was the one who unpublished)
+router.post('/me/posts/:id/republish', verifyUserToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const email = req.user.email;
+    const db = getDB();
+
+    // Find the post (must be unpublished)
+    const opp = await db.collection('opportunities').findOne({ id });
+    if (!opp) return res.status(404).json({ error: 'Post not found.' });
+    if (opp.status !== 'Unpublished') return res.status(400).json({ error: 'Post is not unpublished.' });
+
+    // Verify ownership
+    const isOwner = opp.reporter?.email === email || opp.contactEmail === email;
+    if (!isOwner) return res.status(403).json({ error: 'You do not own this post.' });
+
+    // Option C: if admin unpublished it, block self-republish
+    if (opp.unpublishedBy && opp.unpublishedBy !== email) {
+      return res.status(403).json({
+        error: 'This post was taken down by an admin and cannot be self-republished. Please contact support.',
+        adminUnpublished: true
+      });
+    }
+
+    await db.collection('opportunities').updateOne(
+      { id },
+      { $set: { status: 'Verified', updatedAt: new Date(), unpublishedBy: null } }
+    );
+
+    res.json({ success: true, message: 'Post republished successfully.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.put('/applications/:appId/status', verifyUserToken, async (req, res) => {
+
   try {
     const { appId } = req.params;
     const { status, reason } = req.body;
