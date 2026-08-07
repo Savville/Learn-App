@@ -58,6 +58,7 @@ export function Header() {
               // WEB APP NAVBAR
               <>
                 <Link to="/opportunities" className={`transition-colors font-medium ${isActive('/opportunities') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Opportunities</Link>
+                <Link to="/projects" className={`transition-colors font-medium ${isActive('/projects') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Projects</Link>
                 <Link to="/inbox" className={`transition-colors font-medium ${isActive('/inbox') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Inbox</Link>
                 <Link to="/manage" className={`transition-colors font-medium ${isActive('/manage') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Manage</Link>
                 <Link to="/portfolio" className={`transition-colors font-medium ${isActive('/portfolio') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Portfolio</Link>
@@ -72,6 +73,7 @@ export function Header() {
               <>
                 <Link to="/" className={`transition-colors font-medium ${isActive('/') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Home</Link>
                 <Link to="/opportunities" className={`transition-colors font-medium ${isActive('/opportunities') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Opportunities</Link>
+                <Link to="/projects" className={`transition-colors font-medium ${isActive('/projects') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Projects</Link>
                 <Link to="/about" className={`transition-colors font-medium ${isActive('/about') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>About & Services</Link>
                 <Link to="/contact" className={`transition-colors font-medium ${isActive('/contact') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Contact Us</Link>
                 
@@ -102,6 +104,7 @@ export function Header() {
               {isLoggedIn ? (
                 <>
                   <Link to="/opportunities" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/opportunities') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Opportunities</Link>
+                  <Link to="/projects" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/projects') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Projects</Link>
                   <Link to="/inbox" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/inbox') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Inbox</Link>
                   <Link to="/manage" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/manage') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Manage</Link>
                   <Link to="/portfolio" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/portfolio') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Portfolio</Link>
@@ -112,6 +115,7 @@ export function Header() {
                 <>
                   <Link to="/" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Home</Link>
                   <Link to="/opportunities" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/opportunities') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Opportunities</Link>
+                  <Link to="/projects" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/projects') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Projects</Link>
                   <Link to="/about" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/about') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>About & Services</Link>
                   <Link to="/contact" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/contact') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Contact Us</Link>
                   <div className="border-t mt-2 pt-4 flex flex-col gap-3">

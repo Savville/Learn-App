@@ -1,12 +1,27 @@
 const API_BASE = (import.meta as any)?.env?.VITE_API_URL || 'http://localhost:5000/api';
 
+export interface ResourceLink {
+    label: string;
+    url: string;
+}
+
 export interface ProfileProject {
+    _id?: string;
+    id?: string;
     title: string;
     description: string;
-    images?: string[];
+    category?: string;
+    tags?: string[];
+    startDate?: string;
+    endDate?: string;
+    status: 'Showcase' | 'Active' | 'Recruiting' | 'Seeking Funding' | 'Archived' | 'completed';
+    resourceLinks?: ResourceLink[];
     proofLink?: string;
-    status: 'completed' | 'in-progress';
+    bannerImage?: string;
+    authorName?: string;
+    userEmail?: string;
     createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface ProfileLinks {
@@ -128,5 +143,25 @@ export async function deleteProject(email: string, projectId: string): Promise<{
 export async function seedFakeProfiles(): Promise<{ message: string; count: number }> {
     const res = await fetch(`${API_BASE}/profiles/seed-fake`, { method: 'POST' });
     if (!res.ok) throw new Error('Failed to seed fake profiles');
+    return res.json();
+}
+
+/** Get all projects (global feed) */
+export async function getGlobalProjects(params?: { status?: string; category?: string; tag?: string }): Promise<{ projects: ProfileProject[] }> {
+    const query = new URLSearchParams();
+    if (params?.status) query.append('status', params.status);
+    if (params?.category) query.append('category', params.category);
+    if (params?.tag) query.append('tag', params.tag);
+
+    const res = await fetch(`${API_BASE}/public/projects?${query.toString()}`);
+    if (!res.ok) throw new Error('Failed to fetch projects');
+    const data = await res.json();
+    return { projects: Array.isArray(data) ? data : [] };
+}
+
+/** Get a single project by ID */
+export async function getProjectById(projectId: string): Promise<ProfileProject> {
+    const res = await fetch(`${API_BASE}/public/projects/${projectId}`);
+    if (!res.ok) throw new Error('Failed to fetch project');
     return res.json();
 }

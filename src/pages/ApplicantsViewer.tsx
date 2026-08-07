@@ -37,6 +37,7 @@ export function ApplicantsViewer() {
 
   const [bulkMessageModal, setBulkMessageModal] = useState<{ isOpen: boolean, appIds: string[], message: string }>({ isOpen: false, appIds: [], message: '' });
   const [isSendingBulk, setIsSendingBulk] = useState(false);
+  const { showConfirm, showAlert } = useAlert();
 
   const handleSelectApplicant = (id: string) => {
     const newSet = new Set(selectedAppIds);

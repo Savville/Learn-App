@@ -59,14 +59,30 @@ router.get('/:email', async (req, res) => {
     
     gigsWithDetails.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
 
-    res.json({
-      success: true,
-      profile: profile || { email: normalizedEmail, name: '', bio: '', avatar: '', location: '', links: {} },
+    // Fetch projects from the new global projects collection
+    const userProjects = await db.collection('projects')
+        .find({ userEmail: normalizedEmail })
+        .sort({ createdAt: -1 })
+        .toArray();
+
+    // Ensure profile exists, otherwise return a default empty profile
+    const profileData = profile || {
+      name: '', bio: '', avatar: '', location: '',
+      links: { github: '', linkedin: '', website: '', other1: '', other2: '' },
+      skills: []
+    };
+
+    // Attach the globally fetched projects to the profile response
+    profileData.projects = userProjects;
+
+    res.json({ 
+      success: true, 
+      profile: profileData,
       stats: {
         totalEarnings: calculatedEarnings,
         completedGigsCount: gigsWithDetails.length,
-        completedGigs: gigsWithDetails,
         postedGigsCount: postedOpportunities.length,
+        completedGigs: gigsWithDetails,
         postedOpportunities: postedOpportunities
       }
     });

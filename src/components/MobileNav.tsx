@@ -1,15 +1,17 @@
 import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { Home, Briefcase, Users, PlusCircle, Inbox, ClipboardList } from 'lucide-react';
+import { Home, Briefcase, Users, PlusCircle, Inbox, ClipboardList, Folder } from 'lucide-react';
 
 const publicLinks = [
   { name: 'Home', path: '/', icon: Home, exact: true },
-  { name: 'Browse', path: '/opportunities', icon: Briefcase, exact: false },
+  { name: 'Opportunities', path: '/opportunities', icon: Briefcase, exact: false },
+  { name: 'Projects', path: '/projects', icon: Folder, exact: false },
   { name: 'Post', path: '/post-with-us', icon: PlusCircle, exact: false },
 ];
 
 const privateLinks = [
-  { name: 'Browse', path: '/opportunities', icon: Briefcase, exact: false },
+  { name: 'Opportunities', path: '/opportunities', icon: Briefcase, exact: false },
+  { name: 'Projects', path: '/projects', icon: Folder, exact: false },
   { name: 'Inbox', path: '/inbox', icon: Inbox, exact: false },
   { name: 'Manage', path: '/manage', icon: ClipboardList, exact: false },
   { name: 'Profile', path: '/portfolio', icon: Users, exact: false },

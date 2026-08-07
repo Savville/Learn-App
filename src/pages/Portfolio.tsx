@@ -6,23 +6,14 @@ import { LogOut, UploadCloud, Github, Linkedin, Globe, Link as LinkIcon, DollarS
 import { useAlert } from '../contexts/AlertContext';
 import ReactMarkdown from 'react-markdown';
 import { Tracker } from './Tracker';
-
-interface Project {
-  _id?: string;
-  title: string;
-  description: string;
-  images?: string[];
-  proofLink?: string;
-  status?: string;
-  createdAt?: string;
-}
+import { ProfileProject, ResourceLink } from '../services/profilesAPI';
 
 interface Profile {
   name: string;
   bio: string;
   avatar: string;
   links: { github: string; linkedin: string; website: string; other1: string; other2: string; };
-  projects: Project[];
+  projects: ProfileProject[];
   skills: string[];
   location?: string;
 }
@@ -61,7 +52,15 @@ export function Portfolio() {
 
   // Projects UI State
   const [isAddingProject, setIsAddingProject] = useState(false);
-  const [newProject, setNewProject] = useState<Project>({ title: '', description: '', proofLink: '' });
+  const [newProject, setNewProject] = useState<ProfileProject>({ 
+    title: '', 
+    description: '', 
+    status: 'Showcase', 
+    category: '', 
+    tags: [], 
+    resourceLinks: [], 
+    bannerImage: '' 
+  });
   const [expandedProjects, setExpandedProjects] = useState<Record<number, boolean>>({});
 
   // Skills UI State
@@ -189,33 +188,127 @@ export function Portfolio() {
     }
   };
 
+  const handleProjectBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert({ title: 'File Too Large', message: 'Banner image is too large. Max size is 5MB.', type: 'warning' });
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('coverImage', file);
+      
+      const res = await fetch(`${API_BASE}/public/upload-image`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      setNewProject(prev => ({ ...prev, bannerImage: data.imageUrl }));
+      showAlert({ title: 'Upload Success', message: 'Project banner uploaded successfully.', type: 'success' });
+    } catch (err: any) {
+      showAlert({ title: 'Upload Failed', message: "Failed to upload banner: " + err.message, type: 'error' });
+    }
+  };
+
   // --- Projects Handlers ---
-  const handleSaveProject = () => {
+  const handleSaveProject = async () => {
     if (!newProject.title.trim() || !newProject.description.trim()) {
       showAlert({ title: 'Validation', message: 'Title and description are required', type: 'warning' });
       return;
     }
-    const updatedProfile = { 
-      ...profile, 
-      projects: [...profile.projects, { ...newProject, createdAt: new Date().toISOString() }] 
-    };
-    setProfile(updatedProfile);
-    saveProfileToBackend(updatedProfile); // Save immediately for projects
-    setIsAddingProject(false);
-    setNewProject({ title: '', description: '', proofLink: '' });
+    
+    setSavingStatus('saving');
+    try {
+      const res = await fetch(`${API_BASE}/public/projects`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-email': email || ''
+        },
+        body: JSON.stringify(newProject)
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create project');
+      
+      setProfile(prev => ({
+        ...prev,
+        projects: [data.project, ...prev.projects]
+      }));
+      
+      setIsAddingProject(false);
+      setNewProject({ 
+        title: '', description: '', status: 'Showcase', 
+        category: '', tags: [], resourceLinks: [], bannerImage: '' 
+      });
+      setSavingStatus('saved');
+      setTimeout(() => setSavingStatus('idle'), 2000);
+      showAlert({ title: 'Success', message: 'Project created successfully', type: 'success' });
+    } catch (err: any) {
+      showAlert({ title: 'Error', message: err.message, type: 'error' });
+      setSavingStatus('idle');
+    }
   };
 
-  const handleRemoveProject = (index: number) => {
-    const updatedProfile = {
-      ...profile,
-      projects: profile.projects.filter((_, i) => i !== index)
-    };
-    setProfile(updatedProfile);
-    saveProfileToBackend(updatedProfile);
+  const handleRemoveProject = async (index: number) => {
+    const project = profile.projects[index];
+    if (!project.id) {
+      // If it doesn't have an ID, it's an old embedded project
+      const updatedProfile = {
+        ...profile,
+        projects: profile.projects.filter((_, i) => i !== index)
+      };
+      setProfile(updatedProfile);
+      saveProfileToBackend(updatedProfile);
+      return;
+    }
+
+    if (await showConfirm({ title: 'Delete Project', message: 'Are you sure you want to delete this project?' })) {
+      try {
+        const res = await fetch(`${API_BASE}/public/projects/${project.id}`, {
+          method: 'DELETE',
+          headers: { 'x-user-email': email || '' }
+        });
+        if (!res.ok) throw new Error('Failed to delete project');
+        
+        setProfile(prev => ({
+          ...prev,
+          projects: prev.projects.filter((_, i) => i !== index)
+        }));
+        showAlert({ title: 'Deleted', message: 'Project removed successfully', type: 'success' });
+      } catch (err: any) {
+        showAlert({ title: 'Error', message: err.message, type: 'error' });
+      }
+    }
   };
 
   const toggleProjectExpand = (index: number) => {
     setExpandedProjects(prev => ({ ...prev, [index]: !prev[index] }));
+  };
+
+  const handleAddResourceLink = () => {
+    setNewProject(prev => ({
+      ...prev,
+      resourceLinks: [...(prev.resourceLinks || []), { label: 'GitHub', url: '' }]
+    }));
+  };
+
+  const handleUpdateResourceLink = (index: number, field: 'label' | 'url', value: string) => {
+    const updatedLinks = [...(newProject.resourceLinks || [])];
+    updatedLinks[index] = { ...updatedLinks[index], [field]: value };
+    setNewProject(prev => ({ ...prev, resourceLinks: updatedLinks }));
+  };
+
+  const handleRemoveResourceLink = (index: number) => {
+    setNewProject(prev => ({
+      ...prev,
+      resourceLinks: (prev.resourceLinks || []).filter((_, i) => i !== index)
+    }));
   };
 
   // --- Skills Handlers ---
@@ -434,30 +527,111 @@ export function Portfolio() {
                 </div>
 
                 {isAddingProject && (
-                  <div className="mb-6 p-4 border border-[#131ADF]/20 bg-blue-50/50 rounded-xl flex flex-col gap-4">
-                    <input 
-                      type="text" 
-                      placeholder="Project Title" 
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm"
-                      value={newProject.title}
-                      onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                    />
+                  <div className="mb-6 p-5 border border-[#131ADF]/20 bg-blue-50/50 rounded-xl flex flex-col gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input 
+                        type="text" 
+                        placeholder="Project Title" 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm"
+                        value={newProject.title}
+                        onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+                      />
+                      <select 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm bg-white"
+                        value={newProject.status || 'Showcase'}
+                        onChange={(e) => setNewProject({ ...newProject, status: e.target.value as any })}
+                      >
+                        <option value="Showcase">Showcase (Finished)</option>
+                        <option value="Active">Active (Development)</option>
+                        <option value="Recruiting">Recruiting / Hiring</option>
+                        <option value="Seeking Funding">Seeking Funding</option>
+                        <option value="Archived">Archived / Inactive</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-semibold text-slate-700">Project Banner Image</label>
+                      <div className="flex items-center gap-4">
+                        {newProject.bannerImage && (
+                          <img src={newProject.bannerImage} alt="Banner Preview" className="w-24 h-16 object-cover rounded-lg border border-slate-200" />
+                        )}
+                        <input 
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProjectBannerUpload}
+                          className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-500">Max size 5MB (JPG, PNG, WEBP)</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input 
+                        type="text" 
+                        placeholder="Category (e.g., Tech Startup, Research)" 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm"
+                        value={newProject.category || ''}
+                        onChange={(e) => setNewProject({ ...newProject, category: e.target.value })}
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Tags (comma separated)" 
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm"
+                        value={newProject.tags?.join(', ') || ''}
+                        onChange={(e) => setNewProject({ ...newProject, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t) })}
+                      />
+                    </div>
+
                     <textarea 
-                      placeholder="Description (Markdown supported, ~200 words max)" 
+                      placeholder="Description (Markdown supported). Explain the problem, your solution, and impact." 
                       className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm h-32 resize-none"
                       value={newProject.description}
                       onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                     />
-                    <input 
-                      type="url" 
-                      placeholder="Proof Link (GitHub, DOI, Google Drive, etc.)" 
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm"
-                      value={newProject.proofLink}
-                      onChange={(e) => setNewProject({ ...newProject, proofLink: e.target.value })}
-                    />
-                    <div className="flex justify-end gap-2 mt-2">
+
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-semibold text-slate-700">Resource Links</span>
+                        <Button variant="outline" size="sm" onClick={handleAddResourceLink} className="h-7 text-xs px-2 py-1">
+                          <Plus className="w-3 h-3 mr-1" /> Add Link
+                        </Button>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {newProject.resourceLinks?.map((link, index) => (
+                          <div key={index} className="flex gap-2 items-center">
+                            <select 
+                              className="w-32 px-2 py-1.5 rounded border border-slate-200 text-xs bg-white outline-none"
+                              value={link.label}
+                              onChange={(e) => handleUpdateResourceLink(index, 'label', e.target.value)}
+                            >
+                              <option value="GitHub">GitHub</option>
+                              <option value="Demo">Demo</option>
+                              <option value="Paper">Paper</option>
+                              <option value="Figma">Figma</option>
+                              <option value="Google Drive">Google Drive</option>
+                              <option value="Other">Other</option>
+                            </select>
+                            <input 
+                              type="url" 
+                              placeholder="URL" 
+                              className="flex-1 px-3 py-1.5 rounded border border-slate-200 text-xs outline-none focus:border-[#131ADF]"
+                              value={link.url}
+                              onChange={(e) => handleUpdateResourceLink(index, 'url', e.target.value)}
+                            />
+                            <button onClick={() => handleRemoveResourceLink(index)} className="text-slate-400 hover:text-red-500">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 mt-2 pt-4 border-t border-[#131ADF]/10">
                       <Button variant="ghost" size="sm" onClick={() => setIsAddingProject(false)}>Cancel</Button>
-                      <Button size="sm" onClick={handleSaveProject} className="bg-[#131ADF] hover:bg-blue-800 text-white rounded-lg">Save Project</Button>
+                      <Button size="sm" onClick={handleSaveProject} disabled={savingStatus === 'saving'} className="bg-[#131ADF] hover:bg-blue-800 text-white rounded-lg">
+                        {savingStatus === 'saving' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Save Project
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -481,18 +655,51 @@ export function Portfolio() {
                           </button>
                           
                           <div className="flex justify-between items-start mb-2 pr-6">
-                            <h4 className="font-bold text-slate-800">{project.title}</h4>
+                            <div>
+                              <h4 className="font-bold text-slate-800 flex items-center gap-2">
+                                {project.title}
+                                {project.status && (
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#131ADF]/10 text-[#131ADF] font-semibold">
+                                    {project.status}
+                                  </span>
+                                )}
+                              </h4>
+                              {project.category && (
+                                <p className="text-xs text-slate-500 mt-1">{project.category}</p>
+                              )}
+                            </div>
                           </div>
 
                           <div className={`text-sm text-slate-600 prose prose-sm max-w-none ${!isExpanded ? 'line-clamp-3' : ''}`}>
                             <ReactMarkdown>{project.description}</ReactMarkdown>
                           </div>
 
-                          {isExpanded && project.proofLink && (
-                            <div className="mt-4 pt-4 border-t border-slate-200">
-                              <a href={project.proofLink} target="_blank" rel="noopener noreferrer" className="text-[#131ADF] text-sm hover:underline inline-flex items-center break-all">
-                                <LinkIcon className="w-3 h-3 mr-1 shrink-0" /> {project.proofLink}
-                              </a>
+                          {project.tags && project.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-3">
+                              {project.tags.map((tag, i) => (
+                                <span key={i} className="text-[10px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {isExpanded && (
+                            <div className="mt-4 pt-4 border-t border-slate-200 flex flex-wrap gap-3">
+                              {/* Fallback for legacy proofLink */}
+                              {/* @ts-ignore */}
+                              {project.proofLink && (
+                                <a href={(project as any).proofLink} target="_blank" rel="noopener noreferrer" className="text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs hover:border-[#131ADF] hover:text-[#131ADF] transition-colors flex items-center">
+                                  <LinkIcon className="w-3 h-3 mr-1" /> Original Link
+                                </a>
+                              )}
+                              
+                              {/* New resourceLinks array */}
+                              {project.resourceLinks?.map((link, idx) => (
+                                <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs hover:border-[#131ADF] hover:text-[#131ADF] transition-colors flex items-center shadow-sm">
+                                  <LinkIcon className="w-3 h-3 mr-1.5" /> {link.label}
+                                </a>
+                              ))}
                             </div>
                           )}
 

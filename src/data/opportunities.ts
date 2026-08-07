@@ -256,10 +256,10 @@ export const opportunities: Opportunity[] = [
           "amount": 1000,
           "type": "milestone",
           "deliverables": [
-            { "id": "m1", "label": "100 members", "title": "Reach 100 WhatsApp members", "targetValue": 100, "unit": "members", "amount": 200, "status": "pending" },
-            { "id": "m2", "label": "250 members", "title": "Reach 250 WhatsApp members", "targetValue": 250, "unit": "members", "amount": 500, "status": "pending" },
-            { "id": "m3", "label": "400 members", "title": "Reach 400 WhatsApp members", "targetValue": 400, "unit": "members", "amount": 800, "status": "pending" },
-            { "id": "m4", "label": "500 members", "title": "Reach 500 WhatsApp members", "targetValue": 500, "unit": "members", "amount": 1000, "status": "pending" }
+            { "id": "m1", "title": "Reach 100 WhatsApp members", "amount": 200, "status": "pending" },
+            { "id": "m2", "title": "Reach 250 WhatsApp members", "amount": 500, "status": "pending" },
+            { "id": "m3", "title": "Reach 400 WhatsApp members", "amount": 800, "status": "pending" },
+            { "id": "m4", "title": "Reach 500 WhatsApp members", "amount": 1000, "status": "pending" }
           ],
           "milestones": [
             { "id": "m1", "label": "100 members", "targetValue": 100, "unit": "members", "amount": 200 },

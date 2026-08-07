@@ -12,7 +12,7 @@ import {
   GIG_CATEGORIES,
   ACADEMIC_CAREER_CATEGORIES,
   INNOVATION_CATEGORIES,
-  PROJECT_CATEGORIES,
+  HACKATHON_CATEGORIES,
   ALL_CATEGORY_OPTIONS,
   BROWSE_TABS,
   categoryMatchesTab,
@@ -242,7 +242,7 @@ export function Opportunities() {
     activeTab === 'jobs' ? JOBS_FUNDING_OPTIONS :
       activeTab === 'academic_career' ? ACADEMIC_CAREER_FUNDING_OPTIONS :
         activeTab === 'innovation' ? INNOVATION_FUNDING_OPTIONS :
-          activeTab === 'projects' ? PROJECTS_FUNDING_OPTIONS :
+          activeTab === 'hackathons' ? PROJECTS_FUNDING_OPTIONS :
             ALL_FUNDING_OPTIONS;
 
   // Count local opportunities per category, scoped to the current tab
@@ -252,7 +252,7 @@ export function Opportunities() {
         activeTab === 'jobs' ? GIG_CATEGORIES.includes(o.category as any) :
           activeTab === 'academic_career' ? ACADEMIC_CAREER_CATEGORIES.includes(o.category as any) :
             activeTab === 'innovation' ? INNOVATION_CATEGORIES.includes(o.category as any) :
-              activeTab === 'projects' ? PROJECT_CATEGORIES.includes(o.category as any) :
+              activeTab === 'hackathons' ? HACKATHON_CATEGORIES.includes(o.category as any) :
                 true;
       return inTab && o.category === categoryValue;
     }).length;
@@ -261,7 +261,7 @@ export function Opportunities() {
     activeTab === 'jobs' ? localOpportunities.filter(o => GIG_CATEGORIES.includes(o.category as any)).length :
       activeTab === 'academic_career' ? localOpportunities.filter(o => ACADEMIC_CAREER_CATEGORIES.includes(o.category as any)).length :
         activeTab === 'innovation' ? localOpportunities.filter(o => INNOVATION_CATEGORIES.includes(o.category as any)).length :
-          activeTab === 'projects' ? localOpportunities.filter(o => PROJECT_CATEGORIES.includes(o.category as any)).length :
+          activeTab === 'hackathons' ? localOpportunities.filter(o => HACKATHON_CATEGORIES.includes(o.category as any)).length :
             localOpportunities.length;
 
   const filteredOpportunities = opportunities;
@@ -288,8 +288,8 @@ export function Opportunities() {
   const searchPlaceholder =
     activeTab === 'jobs' ? 'Search microgigs, jobs...' :
       activeTab === 'academic_career' ? 'Search scholarships, internships, fellowships...' :
-        activeTab === 'innovation' ? 'Search hackathons, challenges, startup funding...' :
-          activeTab === 'projects' ? 'Search student and community projects...' :
+        activeTab === 'innovation' ? 'Search startup funding, grants...' :
+          activeTab === 'hackathons' ? 'Search hackathons and challenges...' :
             'Search by title, organization, or keyword...';
 
   return (
@@ -364,9 +364,9 @@ export function Opportunities() {
                     {activeTab === 'jobs' ? `All Types (${totalForTab})` :
                       activeTab === 'academic_career' ? `All Academic & Career Types (${totalForTab})` :
                         activeTab === 'innovation' ? `All Innovation Types (${totalForTab})` :
-                          activeTab === 'projects' ? `All Project Types (${totalForTab})` :
-                            `All Types (${totalForTab})`}
-                  </option>
+                          activeTab === 'hackathons' ? `All Hackathons (${totalForTab})` :
+                            `All Opportunities (${totalForTab})`
+                        }</option>
                   {visibleCategoryOptions.map(opt => (
                     <option key={opt.value} value={opt.value} className="text-gray-900 bg-white">
                       {opt.label} ({countFor(opt.value)})

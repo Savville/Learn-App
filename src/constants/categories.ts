@@ -1,6 +1,6 @@
 /** Canonical category taxonomy — single source of truth for browse + post flows */
 
-export type TabId = 'all' | 'providers' | 'jobs' | 'academic_career' | 'innovation' | 'projects';
+export type TabId = 'all' | 'providers' | 'jobs' | 'academic_career' | 'innovation' | 'hackathons';
 
 export type OpportunityCategory =
   | 'CallForPapers' | 'Internship' | 'Grant' | 'Conference' | 'Scholarship' | 'Fellowship'
@@ -16,12 +16,13 @@ export const ACADEMIC_CAREER_CATEGORIES: OpportunityCategory[] = [
 
 export const INNOVATION_CATEGORIES: OpportunityCategory[] = ['Grant', 'StartupFunding'];
 
-export const PROJECT_CATEGORIES: OpportunityCategory[] = ['StudentProject', 'Project', 'ResearchCollaboration', 'Hackathon', 'Challenge'];
+export const PROJECT_CATEGORIES: OpportunityCategory[] = ['StudentProject', 'Project', 'ResearchCollaboration'];
+export const HACKATHON_CATEGORIES: OpportunityCategory[] = ['Hackathon', 'Challenge'];
 
 export const PARSER_CATEGORY_LIST =
   'CallForPapers, Internship, Grant, Conference, Scholarship, Fellowship, Attachment, Hackathon, Event, Volunteer, Challenge, Project, StudentProject, ResearchCollaboration, Gig, Job, Partnership, StartupFunding, Other';
 
-export const ALL_CATEGORY_OPTIONS: { value: OpportunityCategory | 'Other'; label: string; tab: TabId }[] = [
+export const ALL_CATEGORY_OPTIONS: { value: OpportunityCategory | 'Other'; label: string; tab: TabId | 'projects_page' }[] = [
   { value: 'Gig', label: 'Microgigs', tab: 'jobs' },
   { value: 'Job', label: 'Jobs', tab: 'jobs' },
   { value: 'Internship', label: 'Internships', tab: 'academic_career' },
@@ -33,12 +34,12 @@ export const ALL_CATEGORY_OPTIONS: { value: OpportunityCategory | 'Other'; label
   { value: 'Scholarship', label: 'Scholarships', tab: 'academic_career' },
   { value: 'Fellowship', label: 'Fellowships', tab: 'academic_career' },
   { value: 'Grant', label: 'Grants', tab: 'innovation' },
-  { value: 'Hackathon', label: 'Hackathons', tab: 'projects' },
-  { value: 'Challenge', label: 'Industry Challenges', tab: 'projects' },
+  { value: 'Hackathon', label: 'Hackathons', tab: 'hackathons' },
+  { value: 'Challenge', label: 'Industry Challenges', tab: 'hackathons' },
   { value: 'StartupFunding', label: 'Startup Funding', tab: 'innovation' },
-  { value: 'Project', label: 'Community Projects', tab: 'projects' },
-  { value: 'StudentProject', label: 'Student Projects', tab: 'projects' },
-  { value: 'ResearchCollaboration', label: 'Research Collaborations', tab: 'projects' },
+  { value: 'Project', label: 'Community Projects', tab: 'projects_page' },
+  { value: 'StudentProject', label: 'Student Projects', tab: 'projects_page' },
+  { value: 'ResearchCollaboration', label: 'Research Collaborations', tab: 'projects_page' },
   { value: 'Partnership', label: 'Partnerships', tab: 'all' },
   { value: 'Provider', label: 'Platforms', tab: 'providers' },
   { value: 'Other', label: 'Others', tab: 'all' },
@@ -156,7 +157,18 @@ export const BROWSE_TABS: { id: TabId; label: string; description: string }[] = 
   { id: 'jobs', label: 'Jobs', description: 'Jobs & Microgigs' },
   { id: 'academic_career', label: 'Academic & Career', description: 'Academic & Career' },
   { id: 'innovation', label: 'Grants', description: 'Grants & Funding' },
-  { id: 'projects', label: 'Projects/Hackathons', description: 'Projects & Hackathons' },
+  { id: 'hackathons', label: 'Hackathons', description: 'Hackathons & Challenges' },
+];
+
+export type ProjectTabId = 'all' | 'active' | 'finished' | 'require_funding' | 'require_labour' | 'archived';
+
+export const PROJECT_TABS: { id: ProjectTabId; label: string; description: string }[] = [
+  { id: 'all', label: 'All Projects', description: 'All Projects' },
+  { id: 'active', label: 'Active', description: 'Active Projects' },
+  { id: 'finished', label: 'Finished', description: 'Showcase Projects' },
+  { id: 'require_funding', label: 'Seeking Funding', description: 'Projects Seeking Funding' },
+  { id: 'require_labour', label: 'Recruiting', description: 'Projects Recruiting' },
+  { id: 'archived', label: 'Archived', description: 'Archived Projects' },
 ];
 
 export function categoryMatchesTab(category: string, tab: TabId): boolean {
@@ -167,7 +179,7 @@ export function categoryMatchesTab(category: string, tab: TabId): boolean {
   if (tab === 'jobs') return GIG_CATEGORIES.includes(cat as OpportunityCategory);
   if (tab === 'academic_career') return ACADEMIC_CAREER_CATEGORIES.includes(cat as OpportunityCategory);
   if (tab === 'innovation') return INNOVATION_CATEGORIES.includes(cat as OpportunityCategory);
-  if (tab === 'projects') return PROJECT_CATEGORIES.includes(cat as OpportunityCategory);
+  if (tab === 'hackathons') return HACKATHON_CATEGORIES.includes(cat as OpportunityCategory);
   if (tab === 'providers') return cat === 'Provider';
   return false;
 }

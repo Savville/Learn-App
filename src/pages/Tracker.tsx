@@ -15,6 +15,7 @@ interface Application {
   applicantData: Record<string, string>;
   posterContactEmail?: string;
   isEscrowFunded?: boolean;
+  tracks?: any[];
 }
 
 export function Tracker() {
@@ -528,12 +529,12 @@ export function Tracker() {
             <p className="text-sm text-slate-600 mb-4">
               Paste a link to your work (Google Drive, GitHub, etc.) for: <strong>{deliverableModal.title}</strong>
             </p>
-            <Input
+            <input
               type="url"
               className="w-full border border-slate-200 rounded-lg p-3 text-sm mb-4"
               placeholder="https://drive.google.com/..."
               value={deliverableUrl}
-              onChange={(e) => setDeliverableUrl(e.target.value)}
+              onChange={(e: any) => setDeliverableUrl(e.target.value)}
             />
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => { setDeliverableModal(null); setDeliverableUrl(''); }} disabled={submittingDeliverable}>

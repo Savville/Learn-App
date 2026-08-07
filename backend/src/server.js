@@ -23,6 +23,7 @@ import testEmailRoutes from './routes/test-email.js';
 import parseAgnesRoutes from './routes/parse-agnes.js';
 import healthRoutes from './routes/health.js';
 import profilesRoutes from './routes/profiles.js';
+import projectsRoutes from './routes/projects.js';
 import { auditLog } from './middleware/auditLog.js';
 
 dotenv.config();
@@ -177,6 +178,7 @@ app.use('/api/sitemap', sitemapRoutes);
 app.use('/api/test-email', testEmailRoutes);
 app.use('/admin/parse-agnes', parseAgnesRoutes);
 app.use('/api', profilesRoutes); // Profiles routes
+app.use('/api/public/projects', projectsRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

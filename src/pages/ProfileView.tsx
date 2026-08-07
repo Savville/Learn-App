@@ -285,28 +285,63 @@ export function ProfileView({ emailProp, isSlider = false, bottomActions, fallba
                                         {profile.projects.map((project: ProfileProject, idx: number) => (
                                             <div key={idx} className="border border-slate-100 rounded-xl p-4 hover:border-blue-100 transition-colors">
                                                 <div className="flex items-start justify-between gap-3 mb-2">
-                                                    <h3 className="font-bold text-slate-800">{project.title}</h3>
-                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 ${project.status === 'completed'
-                                                        ? 'bg-green-50 text-green-700'
-                                                        : 'bg-blue-50 text-blue-700'
-                                                        }`}>
-                                                        {project.status === 'completed' ? 'Completed' : 'In Progress'}
-                                                    </span>
+                                                    <div className="flex-1">
+                                                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                                                            {project.title}
+                                                            {project.status && (
+                                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold uppercase tracking-wider">
+                                                                    {project.status}
+                                                                </span>
+                                                            )}
+                                                        </h3>
+                                                        {project.category && (
+                                                            <p className="text-xs text-slate-500 mt-1">{project.category}</p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div className="text-sm text-slate-600 mb-3 leading-relaxed prose prose-sm max-w-none">
                                                     <ReactMarkdown>{project.description}</ReactMarkdown>
                                                 </div>
-                                                {project.proofLink && (
-                                                    <a
-                                                        href={project.proofLink}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium"
-                                                    >
-                                                        <ExternalLink className="w-3.5 h-3.5" />
-                                                        View Proof
-                                                    </a>
+                                                
+                                                {project.tags && project.tags.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mb-4">
+                                                        {project.tags.map((tag, i) => (
+                                                            <span key={i} className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">
+                                                                #{tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
                                                 )}
+
+                                                <div className="flex flex-wrap gap-3">
+                                                    {/* Fallback for legacy proofLink */}
+                                                    {/* @ts-ignore */}
+                                                    {project.proofLink && (
+                                                        <a
+                                                            href={(project as any).proofLink}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-medium transition-colors"
+                                                        >
+                                                            <ExternalLink className="w-3.5 h-3.5" />
+                                                            Original Link
+                                                        </a>
+                                                    )}
+
+                                                    {/* New resourceLinks array */}
+                                                    {project.resourceLinks?.map((link, idx) => (
+                                                        <a
+                                                            key={idx}
+                                                            href={link.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 px-3 py-1.5 rounded-lg font-medium transition-colors shadow-sm"
+                                                        >
+                                                            <ExternalLink className="w-3 h-3" />
+                                                            {link.label}
+                                                        </a>
+                                                    ))}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
