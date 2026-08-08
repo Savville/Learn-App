@@ -139,6 +139,7 @@ export function Portfolio() {
   };
 
   const handleLogout = async () => {
+    if (!window.confirm("Are you sure you want to log out?")) return;
     if (await showConfirm({ title: 'Confirm Action', message: "Are you sure you want to log out?" })) {
       localStorage.removeItem('user_token');
       localStorage.removeItem('user_email');

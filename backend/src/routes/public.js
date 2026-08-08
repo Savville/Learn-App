@@ -779,99 +779,83 @@ router.post('/organizations/request', async (req, res) => {
 // Phase 4: Secure Data Access for Posters & Applicants
 // ==========================================
 
-// 1. Register Account
-router.post('/auth/register', async (req, res) => {
+// 1. Send OTP
+router.post('/auth/send-otp', async (req, res) => {
   try {
-    const { username, email, password, mpesaPhone } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
-
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
     const normalizedEmail = email.trim().toLowerCase();
+    
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    
     const db = getDB();
-
-    // Check if user already exists
-    const existing = await db.collection('portfolios').findOne({ email: normalizedEmail });
-    if (existing && existing.passwordHash) {
-      return res.status(400).json({ error: 'Account already exists. Please log in.' });
-    }
-
-    // Hash password
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-
-    // Create or update portfolio with password and new fields
-    await db.collection('portfolios').updateOne(
+    await db.collection('otps').updateOne(
       { email: normalizedEmail },
-      { 
-        $setOnInsert: { 
-          name: username || '', 
-          bio: '', 
-          avatar: '', 
-          location: '', 
-          skills: [], 
-          links: {}, 
-          createdAt: new Date() 
-        },
-        $set: { 
-          username: username || '',
-          passwordHash,
-          mpesaPhone: mpesaPhone ? mpesaPhone.trim() : '',
-          lastLogin: new Date()
-        }
-      },
+      { $set: { otp, expiresAt } },
       { upsert: true }
     );
-
-    // Issue JWT
-    const ADMIN_EMAIL = 'ochiwilliamotieno@gmail.com';
-    const isAdmin = normalizedEmail === ADMIN_EMAIL;
-    const token = isAdmin ? generateAdminToken() : generateUserToken(normalizedEmail);
-
-    res.json({ token, email: normalizedEmail, isAdmin });
-  } catch (error) {
-    console.error('Registration Error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    
+    const { sendOTPEmail } = await import('../services/emailService.js');
+    await sendOTPEmail(normalizedEmail, otp);
+    res.json({ success: true, message: 'OTP sent' });
+  } catch (err) {
+    console.error('Send OTP error:', err);
+    res.status(500).json({ error: 'Failed to send OTP' });
   }
 });
 
-// 2. Login
-router.post('/auth/login', async (req, res) => {
+// 2. Verify OTP & Authenticate
+router.post('/auth/verify-otp', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
-
+    const { email, otp, username, mpesaPhone } = req.body;
+    if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' });
     const normalizedEmail = email.trim().toLowerCase();
+    
     const db = getDB();
-
-    const user = await db.collection('portfolios').findOne({ email: normalizedEmail });
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+    const record = await db.collection('otps').findOne({ email: normalizedEmail });
+    
+    if (!record) return res.status(400).json({ error: 'OTP not requested' });
+    if (record.otp !== otp) return res.status(400).json({ error: 'Invalid OTP' });
+    if (record.expiresAt < new Date()) return res.status(400).json({ error: 'OTP expired' });
+    
+    // Valid OTP!
+    await db.collection('otps').deleteOne({ _id: record._id });
+    
+    // Check if user exists, if not, create them
+    const existing = await db.collection('portfolios').findOne({ email: normalizedEmail });
+    if (!existing) {
+      await db.collection('portfolios').insertOne({
+        email: normalizedEmail,
+        name: username || '',
+        username: username || '',
+        mpesaPhone: mpesaPhone ? mpesaPhone.trim() : '',
+        bio: '', 
+        avatar: '', 
+        location: '', 
+        skills: [], 
+        links: {}, 
+        createdAt: new Date(),
+        lastLogin: new Date()
+      });
+    } else {
+      await db.collection('portfolios').updateOne(
+        { email: normalizedEmail },
+        { $set: { lastLogin: new Date() } }
+      );
     }
-
-    if (!user.passwordHash) {
-      return res.status(401).json({ error: 'Account was created with magic links. Please sign up again to set a password.' });
-    }
-
-    // Verify password
-    const match = await bcrypt.compare(password, user.passwordHash);
-    if (!match) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    // Update lastLogin
-    await db.collection('portfolios').updateOne(
-      { email: normalizedEmail },
-      { $set: { lastLogin: new Date() } }
-    );
-
-    // Issue JWT
+    
     const ADMIN_EMAIL = 'ochiwilliamotieno@gmail.com';
     const isAdmin = normalizedEmail === ADMIN_EMAIL;
+    
+    // we already imported generateAdminToken, generateUserToken at the top of public.js
     const token = isAdmin ? generateAdminToken() : generateUserToken(normalizedEmail);
 
-    res.json({ token, email: normalizedEmail, isAdmin });
-  } catch (error) {
-    console.error('Login Error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    res.json({ success: true, token, email: normalizedEmail, isAdmin });
+  } catch (err) {
+    console.error('Verify OTP error:', err);
+    res.status(500).json({ error: 'Failed to verify OTP' });
   }
 });
 
@@ -2451,57 +2435,6 @@ router.get('/seed-opportunities', async (req, res) => {
 });
 
 
-
-// --- OTP AUTH ---
-
-router.post('/auth/send-otp', async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email is required' });
-    const normalizedEmail = email.trim().toLowerCase();
-    
-    // Generate 6 digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
-    
-    const db = getDB();
-    await db.collection('otps').updateOne(
-      { email: normalizedEmail },
-      { $set: { otp, expiresAt } },
-      { upsert: true }
-    );
-    
-    await sendOTPEmail(normalizedEmail, otp);
-    res.json({ success: true, message: 'OTP sent' });
-  } catch (err) {
-    console.error('Send OTP error:', err);
-    res.status(500).json({ error: 'Failed to send OTP' });
-  }
-});
-
-router.post('/auth/verify-otp', async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' });
-    const normalizedEmail = email.trim().toLowerCase();
-    
-    const db = getDB();
-    const record = await db.collection('otps').findOne({ email: normalizedEmail });
-    
-    if (!record) return res.status(400).json({ error: 'OTP not requested' });
-    if (record.otp !== otp) return res.status(400).json({ error: 'Invalid OTP' });
-    if (record.expiresAt < new Date()) return res.status(400).json({ error: 'OTP expired' });
-    
-    // Valid OTP! Log them in (or return token so register can proceed)
-    await db.collection('otps').deleteOne({ _id: record._id });
-    
-    const token = jwt.sign({ email: normalizedEmail }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
-    res.json({ success: true, token, email: normalizedEmail });
-  } catch (err) {
-    console.error('Verify OTP error:', err);
-    res.status(500).json({ error: 'Failed to verify OTP' });
-  }
-});
 
 export default router;
 

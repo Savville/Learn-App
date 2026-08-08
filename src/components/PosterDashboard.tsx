@@ -240,6 +240,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
   };
 
   const handleLogout = async () => {
+    if (!window.confirm("Are you sure you want to log out?")) return;
     if (isAdminMode) return; // Admins cannot logout from here
     if (await showConfirm({ title: 'Confirm Logout', message: 'Are you sure you want to log out?' })) {
       localStorage.removeItem('user_token');

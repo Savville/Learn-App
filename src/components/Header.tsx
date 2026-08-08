@@ -15,6 +15,7 @@ export function Header() {
   }, []);
 
   const handleLogoutClick = (e?: React.MouseEvent) => {
+    if (!window.confirm("Are you sure you want to log out?")) return;
     if (e) e.preventDefault();
     localStorage.removeItem('user_token');
     localStorage.removeItem('user_email');
