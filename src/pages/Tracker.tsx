@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { OTPLoginForm } from '../components/OTPLoginForm';
+import { AuthForm } from '../components/AuthForm';
 import { Button } from '@/components/ui/button';
 import { LogOut, FolderHeart, Calendar, ChevronRight, CheckCircle, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';

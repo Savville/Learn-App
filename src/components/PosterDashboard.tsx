@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { OTPLoginForm } from './OTPLoginForm';
+import { AuthForm } from './AuthForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LogOut, Briefcase, Users, ChevronDown, ChevronUp, Calendar, ExternalLink, ShieldCheck, Trash2, Mail, AlertCircle, DollarSign, Lock, Clock, CheckCircle, X, EyeOff, RefreshCcw, History } from 'lucide-react';
@@ -731,7 +731,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
 
   if (!token) {
     return (
-      <OTPLoginForm
+      <AuthForm
         onSuccess={handleSuccess}
         title="Manage Your Postings"
         subtitle="Enter your email to view your posts and review applicants."

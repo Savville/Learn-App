@@ -5,6 +5,13 @@ export interface ResourceLink {
     url: string;
 }
 
+export interface ProjectUpdate {
+    id: string;
+    title: string;
+    description: string;
+    date: string;
+}
+
 export interface ProfileProject {
     _id?: string;
     id?: string;
@@ -17,11 +24,20 @@ export interface ProfileProject {
     status: 'Showcase' | 'Active' | 'Recruiting' | 'Seeking Funding' | 'Archived' | 'completed';
     resourceLinks?: ResourceLink[];
     proofLink?: string;
-    bannerImage?: string;
+    projectProposalUrl?: string;
+    institutionalEndorsement?: {
+        evidenceUrl: string;
+    };
+    images?: string[];
+    currentLevel?: string;
+    updates?: ProjectUpdate[];
     authorName?: string;
     userEmail?: string;
     createdAt?: string;
     updatedAt?: string;
+    escrowAmount?: number;
+    fundedAmount?: number;
+    fundingGoal?: number;
 }
 
 export interface ProfileLinks {
@@ -33,15 +49,18 @@ export interface ProfileLinks {
 }
 
 export interface Profile {
-    _id?: string;
-    email: string;
-    name: string;
-    title?: string;
-    bio?: string;
-    avatar?: string;
-    location?: string;
-    skills?: string[];
-    rate?: number;
+  _id?: string;
+  email: string;
+  name: string;
+  title?: string;
+  bio?: string;
+  avatar?: string;
+  location?: string;
+  institution?: string;
+  institutionalEmail?: string;
+  mpesaPhone?: string;
+  skills?: string[];
+  rate?: number;
     rating?: number;
     totalClients?: number;
     isFeatured?: boolean;
@@ -137,6 +156,20 @@ export async function deleteProject(email: string, projectId: string): Promise<{
     });
     if (!res.ok) throw new Error('Failed to delete project');
     return res.json();
+}
+
+export async function addProjectUpdate(projectId: string, updateData: { title: string, description: string }): Promise<{ message: string, update: ProjectUpdate }> {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE}/public/projects/${projectId}/updates`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+    });
+    if (!response.ok) throw new Error('Failed to add project update');
+    return response.json();
 }
 
 /** Seed fake profiles (dev/test only) */

@@ -275,7 +275,7 @@ export function ApplicantsViewer() {
               <Mail className="w-4 h-4 mr-1.5" /> Chat
             </Button>
             <Button variant="outline" size="sm" className="w-full text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200 shadow-sm" onClick={() => setSlidingApplicant({ email: app.applicantEmail, app, post })}>
-              View
+              View Profile
             </Button>
           </div>
           

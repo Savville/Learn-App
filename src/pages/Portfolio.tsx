@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { OTPLoginForm } from '../components/OTPLoginForm';
+import { AuthForm } from '../components/AuthForm';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { LogOut, UploadCloud, Github, Linkedin, Globe, Link as LinkIcon, DollarSign, CheckCircle, Save, Loader2, User, Plus, X, ChevronDown, ChevronUp, Check, FolderHeart, Briefcase, MapPin } from 'lucide-react';
+import { LogOut, UploadCloud, Github, Linkedin, Globe, Link as LinkIcon, DollarSign, CheckCircle, Save, Loader2, ExternalLink, User, Plus, X, ChevronDown, ChevronUp, Check, FolderHeart, Briefcase, MapPin, Copy, ShieldCheck, ArrowRight } from 'lucide-react';
+import { toSlug } from '../utils/dateUtils';
 import { useAlert } from '../contexts/AlertContext';
 import ReactMarkdown from 'react-markdown';
 import { Tracker } from './Tracker';
@@ -16,6 +17,28 @@ interface Profile {
   projects: ProfileProject[];
   skills: string[];
   location?: string;
+  institution?: string;
+  institutionalEmail?: string;
+  mpesaPhone?: string;
+}
+
+function EmailCopyButton({ email }: { email: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <span 
+      onClick={handleCopy}
+      className="inline-flex items-center gap-1 mx-1 px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold cursor-pointer hover:bg-blue-200 transition-colors"
+      title="Click to copy"
+    >
+      {email}
+      {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3 text-blue-600" />}
+    </span>
+  );
 }
 
 export function Portfolio() {
@@ -52,15 +75,17 @@ export function Portfolio() {
 
   // Projects UI State
   const [isAddingProject, setIsAddingProject] = useState(false);
-  const [newProject, setNewProject] = useState<ProfileProject>({ 
+  const [newProject, setNewProject] = useState<Partial<ProfileProject>>({ 
     title: '', 
     description: '', 
     status: 'Showcase', 
     category: '', 
     tags: [], 
-    resourceLinks: [], 
-    bannerImage: '' 
+    resourceLinks: [] 
   });
+  const [initialUpdate, setInitialUpdate] = useState("");
+  const [endorsementFile, setEndorsementFile] = useState<File | null>(null);
+  const [projectProposalFile, setProjectProposalFile] = useState<File | null>(null);
   const [expandedProjects, setExpandedProjects] = useState<Record<number, boolean>>({});
 
   // Skills UI State
@@ -188,49 +213,114 @@ export function Portfolio() {
     }
   };
 
-  const handleProjectBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleAdditionalImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     
-    if (file.size > 5 * 1024 * 1024) {
-      showAlert({ title: 'File Too Large', message: 'Banner image is too large. Max size is 5MB.', type: 'warning' });
+    let newImages = [...(newProject.images || [])];
+    
+    if (newImages.length + files.length > 5) {
+      showAlert({ title: 'Upload Limit Reached', message: 'You can only upload up to 5 images for the slider.', type: 'warning' });
       return;
     }
-
-    try {
-      const formData = new FormData();
-      formData.append('coverImage', file);
-      
-      const res = await fetch(`${API_BASE}/public/upload-image`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      
-      setNewProject(prev => ({ ...prev, bannerImage: data.imageUrl }));
-      showAlert({ title: 'Upload Success', message: 'Project banner uploaded successfully.', type: 'success' });
-    } catch (err: any) {
-      showAlert({ title: 'Upload Failed', message: "Failed to upload banner: " + err.message, type: 'error' });
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.size > 5 * 1024 * 1024) {
+        showAlert({ title: 'File Too Large', message: `Image ${file.name} is too large. Max size is 5MB.`, type: 'warning' });
+        continue;
+      }
+      try {
+        const formData = new FormData();
+        formData.append('coverImage', file);
+        
+        const res = await fetch(`${API_BASE}/public/upload-image`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        
+        newImages.push(data.imageUrl);
+      } catch (err: any) {
+        showAlert({ title: 'Upload Failed', message: `Failed to upload ${file.name}: ` + err.message, type: 'error' });
+      }
     }
+    
+    setNewProject(prev => ({ ...prev, images: newImages }));
   };
 
   // --- Projects Handlers ---
   const handleSaveProject = async () => {
-    if (!newProject.title.trim() || !newProject.description.trim()) {
+    if (!newProject.title?.trim() || !newProject.description?.trim()) {
       showAlert({ title: 'Validation', message: 'Title and description are required', type: 'warning' });
       return;
     }
     
     setSavingStatus('saving');
     try {
+      let finalEndorsementUrl = newProject.institutionalEndorsement?.evidenceUrl || "";
+      let finalProposalUrl = newProject.projectProposalUrl || "";
+
+      const needsUpload = endorsementFile || projectProposalFile;
+      if (needsUpload) {
+        try {
+          const sigRes = await fetch(`${API_BASE}/messages/upload-signature`);
+          if (sigRes.ok) {
+            const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
+            
+            const uploadFileToCloudinary = async (file: File) => {
+              const formData = new FormData();
+              formData.append("file", file);
+              formData.append("api_key", apiKey);
+              formData.append("timestamp", timestamp.toString());
+              formData.append("signature", signature);
+              const uploadRes = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+                { method: "POST", body: formData }
+              );
+              if (uploadRes.ok) {
+                const data = await uploadRes.json();
+                return data.secure_url;
+              }
+              return null;
+            };
+
+            if (endorsementFile) {
+               finalEndorsementUrl = await uploadFileToCloudinary(endorsementFile) || finalEndorsementUrl;
+            }
+            if (projectProposalFile) {
+               finalProposalUrl = await uploadFileToCloudinary(projectProposalFile) || finalProposalUrl;
+            }
+          }
+        } catch (err) {
+          console.warn("Upload process failed:", err);
+          showAlert({ title: 'Upload Failed', message: 'Could not upload PDF files.', type: 'warning' });
+        }
+      }
+
+      const payload = {
+        ...newProject,
+        institutionalEndorsement: finalEndorsementUrl ? {
+          ...newProject.institutionalEndorsement,
+          evidenceUrl: finalEndorsementUrl
+        } : undefined,
+        projectProposalUrl: finalProposalUrl || undefined,
+        updates: initialUpdate.trim() ? [{
+          id: Math.random().toString(36).substr(2, 9),
+          title: "Project Launched",
+          description: initialUpdate.trim(),
+          date: new Date().toISOString()
+        }] : []
+      };
+
       const res = await fetch(`${API_BASE}/public/projects`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-user-email': email || ''
         },
-        body: JSON.stringify(newProject)
+        body: JSON.stringify(payload)
       });
       
       const data = await res.json();
@@ -244,8 +334,11 @@ export function Portfolio() {
       setIsAddingProject(false);
       setNewProject({ 
         title: '', description: '', status: 'Showcase', 
-        category: '', tags: [], resourceLinks: [], bannerImage: '' 
+        category: '', tags: [], resourceLinks: []
       });
+      setInitialUpdate("");
+      setEndorsementFile(null);
+      setProjectProposalFile(null);
       setSavingStatus('saved');
       setTimeout(() => setSavingStatus('idle'), 2000);
       showAlert({ title: 'Success', message: 'Project created successfully', type: 'success' });
@@ -298,7 +391,7 @@ export function Portfolio() {
     }));
   };
 
-  const handleUpdateResourceLink = (index: number, field: 'label' | 'url', value: string) => {
+  const handleResourceLinkChange = (index: number, field: 'label' | 'url', value: string) => {
     const updatedLinks = [...(newProject.resourceLinks || [])];
     updatedLinks[index] = { ...updatedLinks[index], [field]: value };
     setNewProject(prev => ({ ...prev, resourceLinks: updatedLinks }));
@@ -391,7 +484,7 @@ export function Portfolio() {
             {/* Left Column: Editor & Projects */}
             <div className="lg:col-span-2 flex flex-col gap-6">
               
-              {/* Basic Info */}
+              {/* Identity & Verification */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-6">
                 <div className="flex flex-col items-center gap-3 shrink-0">
                   <div className="w-24 h-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden relative group">
@@ -406,10 +499,9 @@ export function Portfolio() {
                       <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                     </label>
                   </div>
-                  <span className="text-xs text-slate-400 font-medium">{email}</span>
                 </div>
                 
-                <div className="flex-1 flex flex-col gap-4">
+                <div className="flex-1 flex flex-col gap-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Full Name</label>
@@ -419,6 +511,29 @@ export function Portfolio() {
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF] text-sm"
                         value={profile.name}
                         onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">Login Email <span title="Verified Email"><ShieldCheck className="w-3.5 h-3.5 text-green-500" /></span></label>
+                      <input 
+                        type="email" 
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm cursor-not-allowed"
+                        value={email || ''}
+                        disabled
+                        title="Verified login email cannot be changed here."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">MPESA Phone Number</label>
+                      <input 
+                        type="tel" 
+                        placeholder="e.g. 0712345678" 
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF] text-sm"
+                        value={profile.mpesaPhone || ''}
+                        onChange={(e) => setProfile({ ...profile, mpesaPhone: e.target.value })}
                       />
                     </div>
                     <div>
@@ -435,7 +550,7 @@ export function Portfolio() {
                             if (e.target.value !== 'Other') {
                               setProfile({ ...profile, location: e.target.value });
                             } else {
-                              setProfile({ ...profile, location: ' ' }); // Trigger 'Other' state
+                              setProfile({ ...profile, location: ' ' });
                             }
                           }}
                         >
@@ -460,7 +575,62 @@ export function Portfolio() {
                       </div>
                     </div>
                   </div>
-                  <div>
+                  
+                  <div className="border-t border-slate-100 pt-4 mt-2">
+                    <h4 className="text-sm font-semibold text-slate-800 mb-3">Academic Affiliation</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Institution</label>
+                        <select
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF] text-sm bg-white"
+                          value={
+                            ['University of Nairobi', 'Kenyatta University', 'JKUAT', 'Strathmore University', 'Moi University', 'Egerton University', 'Maseno University', 'Daystar University', ''].includes(profile.institution || '')
+                              ? (profile.institution || '')
+                              : 'Other'
+                          }
+                          onChange={(e) => {
+                            if (e.target.value !== 'Other') {
+                              setProfile({ ...profile, institution: e.target.value });
+                            } else {
+                              setProfile({ ...profile, institution: ' ' });
+                            }
+                          }}
+                        >
+                          <option value="">Select Institution</option>
+                          <option value="University of Nairobi">University of Nairobi</option>
+                          <option value="Kenyatta University">Kenyatta University</option>
+                          <option value="JKUAT">JKUAT</option>
+                          <option value="Strathmore University">Strathmore University</option>
+                          <option value="Moi University">Moi University</option>
+                          <option value="Egerton University">Egerton University</option>
+                          <option value="Maseno University">Maseno University</option>
+                          <option value="Daystar University">Daystar University</option>
+                          <option value="Other">Other (Specify)</option>
+                        </select>
+                        {profile.institution !== undefined && profile.institution !== '' && !['University of Nairobi', 'Kenyatta University', 'JKUAT', 'Strathmore University', 'Moi University', 'Egerton University', 'Maseno University', 'Daystar University'].includes(profile.institution) && (
+                          <input
+                            type="text"
+                            placeholder="Specify Institution"
+                            className="w-full px-3 py-2.5 mt-2 rounded-xl border border-slate-200 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF] text-sm"
+                            value={profile.institution.trim() === '' ? '' : profile.institution}
+                            onChange={(e) => setProfile({ ...profile, institution: e.target.value })}
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Institutional Email</label>
+                        <input 
+                          type="email" 
+                          placeholder="e.g. student@students.uonbi.ac.ke" 
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#131ADF] focus:ring-1 focus:ring-[#131ADF] text-sm"
+                          value={profile.institutionalEmail || ''}
+                          onChange={(e) => setProfile({ ...profile, institutionalEmail: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-100 pt-4 mt-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Professional Bio</label>
                     <textarea 
                       placeholder="I am a software engineer specializing in React and Node.js..." 
@@ -549,22 +719,6 @@ export function Portfolio() {
                       </select>
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-semibold text-slate-700">Project Banner Image</label>
-                      <div className="flex items-center gap-4">
-                        {newProject.bannerImage && (
-                          <img src={newProject.bannerImage} alt="Banner Preview" className="w-24 h-16 object-cover rounded-lg border border-slate-200" />
-                        )}
-                        <input 
-                          type="file"
-                          accept="image/*"
-                          onChange={handleProjectBannerUpload}
-                          className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        />
-                      </div>
-                      <p className="text-xs text-slate-500">Max size 5MB (JPG, PNG, WEBP)</p>
-                    </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <input 
                         type="text" 
@@ -573,6 +727,30 @@ export function Portfolio() {
                         value={newProject.category || ''}
                         onChange={(e) => setNewProject({ ...newProject, category: e.target.value })}
                       />
+                      <select
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm bg-white"
+                        value={newProject.currentLevel || 'Ideation'}
+                        onChange={(e) => setNewProject({ ...newProject, currentLevel: e.target.value })}
+                      >
+                        <option value="Ideation">Ideation / Brainstorming</option>
+                        <option value="Prototyping">Prototyping / Development</option>
+                        <option value="Live">Live / Launched</option>
+                        <option value="Scaling">Scaling / Growth</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 mt-2">
+                      <label className="text-sm font-semibold text-slate-700">Initial Project Report / Update (Optional)</label>
+                      <p className="text-xs text-slate-500 mb-1">Add an initial update so viewers can see where you're at right from the start. You can format it with Markdown.</p>
+                      <textarea 
+                        placeholder="e.g., We've just finished our MVP and are currently looking for initial user feedback! ..." 
+                        className="w-full px-4 py-3 rounded-lg border border-slate-200 outline-none focus:border-[#131ADF] text-sm h-24 resize-none"
+                        value={initialUpdate}
+                        onChange={(e) => setInitialUpdate(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <input 
                         type="text" 
                         placeholder="Tags (comma separated)" 
@@ -591,38 +769,78 @@ export function Portfolio() {
 
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-semibold text-slate-700">Resource Links</span>
+                        <span className="text-sm font-semibold text-slate-700">Project Links (GitHub, LinkedIn, etc.)</span>
                         <Button variant="outline" size="sm" onClick={handleAddResourceLink} className="h-7 text-xs px-2 py-1">
                           <Plus className="w-3 h-3 mr-1" /> Add Link
                         </Button>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        {newProject.resourceLinks?.map((link, index) => (
-                          <div key={index} className="flex gap-2 items-center">
-                            <select 
-                              className="w-32 px-2 py-1.5 rounded border border-slate-200 text-xs bg-white outline-none"
+                      <div className="space-y-2">
+                        {newProject.resourceLinks?.map((link, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Title (e.g. GitHub)"
+                              className="w-1/3 px-3 py-1.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-[#131ADF]"
                               value={link.label}
-                              onChange={(e) => handleUpdateResourceLink(index, 'label', e.target.value)}
-                            >
-                              <option value="GitHub">GitHub</option>
-                              <option value="Demo">Demo</option>
-                              <option value="Paper">Paper</option>
-                              <option value="Figma">Figma</option>
-                              <option value="Google Drive">Google Drive</option>
-                              <option value="Other">Other</option>
-                            </select>
-                            <input 
-                              type="url" 
-                              placeholder="URL" 
-                              className="flex-1 px-3 py-1.5 rounded border border-slate-200 text-xs outline-none focus:border-[#131ADF]"
-                              value={link.url}
-                              onChange={(e) => handleUpdateResourceLink(index, 'url', e.target.value)}
+                              onChange={(e) => handleResourceLinkChange(idx, 'label', e.target.value)}
                             />
-                            <button onClick={() => handleRemoveResourceLink(index)} className="text-slate-400 hover:text-red-500">
+                            <input
+                              type="url"
+                              placeholder="https://..."
+                              className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-[#131ADF]"
+                              value={link.url}
+                              onChange={(e) => handleResourceLinkChange(idx, 'url', e.target.value)}
+                            />
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-50" onClick={() => handleRemoveResourceLink(idx)}>
                               <X className="w-4 h-4" />
-                            </button>
+                            </Button>
                           </div>
                         ))}
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-4 mt-2">
+                      <h4 className="text-sm font-semibold text-slate-800 mb-4">Verification & Funding Documents</h4>
+                      <div className="space-y-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-sm font-semibold text-slate-700">Institutional Endorsement Letter (PDF)</label>
+                          <p className="text-xs text-slate-500 mb-2 leading-relaxed">
+                            Please forward the entire endorsement email thread from your institution to 
+                            <EmailCopyButton email="opportunitieskenyalive@gmail.com" /> 
+                            AND upload a printed PDF version of that forwarded thread here.
+                          </p>
+                          <input 
+                            type="file" 
+                            accept="application/pdf"
+                            className="w-full text-sm file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setEndorsementFile(e.target.files[0]);
+                              } else {
+                                setEndorsementFile(null);
+                              }
+                            }}
+                          />
+                          {endorsementFile && <p className="text-xs text-green-600">✓ {endorsementFile.name} selected</p>}
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-sm font-semibold text-slate-700">Proposal to Funders / Pitch Deck (PDF)</label>
+                          <p className="text-xs text-slate-500 mb-1">Upload a single PDF document containing both the project proposal and the funder benefits/recognitions.</p>
+                          <input 
+                            type="file" 
+                            accept="application/pdf"
+                            className="w-full text-sm file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                setProjectProposalFile(e.target.files[0]);
+                              } else {
+                                setProjectProposalFile(null);
+                              }
+                            }}
+                          />
+                          {projectProposalFile && <p className="text-xs text-green-600">✓ {projectProposalFile.name} selected</p>}
+                        </div>
                       </div>
                     </div>
 
@@ -703,16 +921,12 @@ export function Portfolio() {
                             </div>
                           )}
 
-                          <button 
-                            onClick={() => toggleProjectExpand(index)}
+                          <Link 
+                            to={`/projects/${project.id || (project as any)._id}`}
                             className="mt-3 text-xs font-semibold text-slate-500 hover:text-[#131ADF] flex items-center"
                           >
-                            {isExpanded ? (
-                              <><ChevronUp className="w-3 h-3 mr-1" /> Show Less</>
-                            ) : (
-                              <><ChevronDown className="w-3 h-3 mr-1" /> Read More</>
-                            )}
-                          </button>
+                            <ExternalLink className="w-3 h-3 mr-1" /> View Details
+                          </Link>
                         </div>
                       );
                     })
@@ -797,15 +1011,20 @@ export function Portfolio() {
                           <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Posted Opportunities</h4>
                           <div className="flex flex-col gap-3">
                             {stats.postedOpportunities.map((opp: any, i: number) => (
-                              <div key={`opp-${i}`} className="flex flex-col border border-slate-100 rounded-xl p-3 hover:border-blue-200 transition-colors bg-blue-50/30">
-                                <span className="text-sm font-bold text-slate-800 mb-1">{opp.title}</span>
+                              <Link 
+                                to={`/opportunity/${toSlug(opp.title)}`} 
+                                key={`opp-${i}`} 
+                                className="flex flex-col border border-slate-100 rounded-xl p-3 hover:border-[#131ADF] hover:shadow-sm transition-all bg-white relative group"
+                              >
+                                <span className="text-sm font-bold text-slate-800 mb-1 group-hover:text-[#131ADF] pr-4">{opp.title}</span>
+                                <ArrowRight className="w-3 h-3 text-[#131ADF] absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <div className="flex items-center justify-between mt-auto">
                                   <span className="text-xs text-blue-700 font-semibold">{opp.category}</span>
                                   <span className="text-[10px] text-slate-400">
                                     {new Date(opp.dateAdded).toLocaleDateString()}
                                   </span>
                                 </div>
-                              </div>
+                              </Link>
                             ))}
                           </div>
                         </div>

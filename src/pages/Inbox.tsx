@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Lock, Unlock, CheckCircle, Send, MessageCircle, AlertTriangle, UploadCloud, Handshake, CheckSquare, FileText, Paperclip, Loader2, LogOut, Search, Settings, MoreVertical, Smile, User, Github, Linkedin, Globe, ArrowLeft } from 'lucide-react';
-import { OTPLoginForm } from '../components/OTPLoginForm';
+import { AuthForm } from '../components/AuthForm';
 import { useAlert } from '../contexts/AlertContext';
 
 export function Inbox() {
@@ -450,7 +450,7 @@ export function Inbox() {
 
   if (!token) {
     return (
-      <OTPLoginForm
+      <AuthForm
         onSuccess={handleLoginSuccess}
         title="Inbox Login"
         subtitle="Enter your email to receive an access code and view your conversations."

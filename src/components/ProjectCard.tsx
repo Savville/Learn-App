@@ -17,10 +17,10 @@ export function ProjectCard({ project }: { project: ProfileProject }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full group overflow-hidden">
-      {project.bannerImage && (
+      {project.images && project.images.length > 0 && (
         <div className="w-full h-40 mb-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 relative">
           <img 
-            src={project.bannerImage} 
+            src={project.images[0]} 
             alt={project.title} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -35,7 +35,7 @@ export function ProjectCard({ project }: { project: ProfileProject }) {
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            {!project.bannerImage && (
+            {(!project.images || project.images.length === 0) && (
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${getStatusColor(project.status)}`}>
                 {project.status}
               </span>
@@ -71,7 +71,7 @@ export function ProjectCard({ project }: { project: ProfileProject }) {
       </div>
 
       <div className="text-sm text-gray-600 mb-4 line-clamp-3 prose prose-sm max-w-none flex-grow">
-        <ReactMarkdown>{project.description}</ReactMarkdown>
+        <ReactMarkdown>{project.description || ''}</ReactMarkdown>
       </div>
 
       {project.tags && project.tags.length > 0 && (

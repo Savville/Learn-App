@@ -56,7 +56,7 @@ const ALL_FUNDING_OPTIONS = [
 const TABS = BROWSE_TABS;
 
 const RIGHT_TABS: { id: string; label: string; href: string }[] = [
-  { id: 'post', label: 'Post With Us', href: '/post-with-us' },
+  { id: 'post', label: 'My Posts', href: '/manage' },
 ];
 
 const applyFilters = (
@@ -439,7 +439,7 @@ export function Opportunities() {
                 <Link
                   key={tab.id}
                   to={tab.href}
-                  className="px-6 py-2 rounded-md font-semibold transition-all border bg-transparent text-white border-white hover:bg-white hover:text-blue-900"
+                  className="px-6 py-2 rounded-md font-semibold transition-all border border-white bg-transparent text-white hover:bg-white hover:text-blue-900"
                 >
                   {tab.label}
                 </Link>

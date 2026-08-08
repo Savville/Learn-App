@@ -64,6 +64,29 @@ export const opportunitiesAPI = {
   getCrowdfundStatus: (checkoutRequestId: string) =>
     apiClient.get(`/public/payments/crowdfund/status/${checkoutRequestId}`),
 
+  initiateCrowdfundSTKPush: (data: {
+    opportunityId: string;
+    name?: string;
+    isAnonymous?: boolean;
+    email?: string;
+    phone: string;
+    amount: string;
+  }) => apiClient.post('/public/payments/crowdfund', data),
+
+  unpublishOpportunity: (id: string) => {
+    const token = localStorage.getItem('user_token');
+    return apiClient.post(`/public/me/posts/${id}/unpublish`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  getJobApplicants: (id: string) => {
+    const token = localStorage.getItem('user_token');
+    return apiClient.get(`/public/me/posts/${id}/applicants`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
   report: (id: string, data: { reason: string; details?: string; reporterName?: string; reporterEmail?: string }) =>
     apiClient.post(`/public/report-opportunity/${id}`, data),
 

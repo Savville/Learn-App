@@ -522,7 +522,7 @@ router.put('/profiles/:email/featured', verifyUserToken, async (req, res) => {
 router.post('/profiles/projects', verifyUserToken, async (req, res) => {
     try {
         const userEmail = req.user.email;
-        const { title, description, images = [], proofLink, status = 'in-progress' } = req.body;
+        const { title, description, images = [], proofLink, status = 'in-progress', resourceLinks = [], institutionalEndorsement = null, projectProposalUrl = '', currentLevel = 'Ideation', updates = [] } = req.body;
 
         if (!title || !description) {
             return res.status(400).json({ error: 'Title and description are required' });
@@ -536,6 +536,11 @@ router.post('/profiles/projects', verifyUserToken, async (req, res) => {
             images,
             proofLink: proofLink || '',
             status,
+            resourceLinks,
+            institutionalEndorsement,
+            projectProposalUrl,
+            currentLevel,
+            updates,
             createdAt: new Date()
         };
 

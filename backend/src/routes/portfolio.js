@@ -1,5 +1,6 @@
 import express from 'express';
 import { getDB } from '../config/database.js';
+import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
@@ -31,7 +32,13 @@ router.get('/:email', async (req, res) => {
 
     // Fetch opportunities posted by the user
     const postedOpportunities = await db.collection('opportunities')
-        .find({ userEmail: normalizedEmail, status: { $ne: 'Draft' } })
+        .find({ 
+          $or: [
+            { userEmail: normalizedEmail },
+            { 'reporter.email': normalizedEmail }
+          ],
+          status: { $ne: 'Draft' } 
+        })
         .sort({ dateAdded: -1 })
         .toArray();
 
@@ -102,24 +109,55 @@ router.put('/', async (req, res) => {
     if (!email) return res.status(401).json({ error: 'Unauthorized. Email required in x-user-email header.' });
 
     const normalizedEmail = email.trim().toLowerCase();
-    const { name, bio, avatar, location, links, projects, skills } = req.body;
+    const { name, bio, avatar, location, institution, institutionalEmail, mpesaPhone, links, projects, skills } = req.body;
 
     await db.collection('portfolios').updateOne(
       { email: normalizedEmail },
       { 
         $set: { 
-          name: name || '', 
-          bio: bio || '', 
-          avatar: avatar || '', 
-          location: location || '',
-          links: links || {},
-          projects: projects || [],
-          skills: skills || [],
-          updatedAt: new Date()
+          name, 
+          bio, 
+          avatar, 
+          location, 
+          institution,
+          institutionalEmail,
+          mpesaPhone,
+          links, 
+          skills,
+          updatedAt: new Date() 
         } 
       },
       { upsert: true }
     );
+
+    // Sync projects to global `projects` collection
+    if (Array.isArray(projects)) {
+      const currentProjectIds = [];
+      for (const p of projects) {
+        const pId = p._id || p.id;
+        const projectData = { ...p, userEmail: normalizedEmail, updatedAt: new Date() };
+        delete projectData._id; // Ensure we don't overwrite _id blindly
+        
+        let updateQuery = {};
+        if (pId && pId.length === 24) {
+          updateQuery = { _id: new ObjectId(pId) };
+        } else if (pId) {
+          updateQuery = { id: pId };
+        } else {
+          updateQuery = { _id: new ObjectId() }; // New project
+        }
+
+        const result = await db.collection('projects').findOneAndUpdate(
+          updateQuery,
+          { $set: projectData },
+          { upsert: true, returnDocument: 'after' }
+        );
+        if (result && result._id) currentProjectIds.push(result._id);
+      }
+      
+      // Optionally delete removed projects, but let's skip deletion to avoid accidental data loss 
+      // since the user might just be saving their profile partial state.
+    }
 
     res.json({ success: true, message: 'Portfolio updated successfully' });
   } catch (error) {

@@ -18,8 +18,10 @@ import { calculateUrgency, toSlug } from '../utils/dateUtils';
 import type { Opportunity } from '../data/opportunities';
 import { opportunities as localOpportunities } from '../data/opportunities';
 import { useSEO } from '../hooks/useSEO';
+import { useAlert } from '../contexts/AlertContext';
 import { isChallengeCategory, isProjectCategory } from '@/constants/categories';
 import { getDynamicImageUrl } from '../components/OpportunityCard';
+import { ApplicantsSidePanel } from '../components/ApplicantsSidePanel';
 
 // ── Share Dialog Row Item ──────────────────────────────────────────────────────
 function ShareItem({
@@ -147,6 +149,25 @@ export function OpportunityDetails() {
   const [localFundedAmount, setLocalFundedAmount] = useState<number>(0);
   const [contributors, setContributors] = useState<{ name: string, amount: number }[]>([]);
   const [showContributors, setShowContributors] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<'details' | 'manage'>('details');
+  const [isOwner, setIsOwner] = useState(false);
+  const [showApplicantsPanel, setShowApplicantsPanel] = useState(false);
+
+  useEffect(() => {
+    if (opportunity) {
+      const email = localStorage.getItem('user_email');
+      const isAdmin = !!localStorage.getItem('adminToken');
+      if (isAdmin || (email && (
+        opportunity.userEmail === email || 
+        opportunity.reporter?.email === email || 
+        opportunity.contactEmail === email ||
+        opportunity.postedBy === email
+      ))) {
+        setIsOwner(true);
+      }
+    }
+  }, [opportunity]);
 
   useEffect(() => {
     if (opportunity?.fundedAmount) setLocalFundedAmount(opportunity.fundedAmount);
@@ -669,7 +690,7 @@ export function OpportunityDetails() {
                   <p className="text-gray-500 text-sm">Deadline</p>
                   <p className={`font-semibold ${urgency?.textColor}`}>
                     {opportunity.deadline
-                      ? new Date(opportunity.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                      ? isNaN(new Date(opportunity.deadline).getTime()) ? opportunity.deadline : new Date(opportunity.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
                       : 'Open / Ongoing'}
                   </p>
                   <p className={`text-xs ${urgency?.textColor}`}>{urgency?.label}</p>
@@ -1807,7 +1828,7 @@ export function OpportunityDetails() {
               <Button
                 onClick={() => {
                   const deadline = opportunity?.deadline
-                    ? `📅 Deadline: ${new Date(opportunity.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                    ? (isNaN(new Date(opportunity.deadline).getTime()) ? `📅 Deadline: ${opportunity.deadline}` : `📅 Deadline: ${new Date(opportunity.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`)
                     : '📅 Deadline: Open / Ongoing';
                   const location = opportunity?.location ? `📍 Location: ${opportunity.location}` : '';
                   const compensation = opportunity?.compensationType && opportunity.compensationType !== 'N/A'
@@ -1908,7 +1929,7 @@ export function OpportunityDetails() {
               </form>
             )}
           </div>
-        </article>
+                </article>
 
         {/* Related Opportunities */}
         {relatedOpportunities.length > 0 && (
@@ -1933,6 +1954,12 @@ export function OpportunityDetails() {
           </section>
         )}
       </main>
+
+      <ApplicantsSidePanel 
+        opportunityId={opportunity.id} 
+        isOpen={showApplicantsPanel} 
+        onClose={() => setShowApplicantsPanel(false)} 
+      />
     </div>
   );
 }

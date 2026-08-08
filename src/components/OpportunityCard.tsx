@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowRight, Calendar, CheckCircle, Users, Flame, Bookmark } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { analyticsAPI } from '../services/api';
-import { OTPLoginForm } from './OTPLoginForm';
+import { AuthForm } from './AuthForm';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import type { Opportunity } from '../data/opportunities';
 import { useAlert } from '../contexts/AlertContext';
@@ -94,7 +94,12 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   const views = (opportunity.views || 0) + baselineViews;
   const isHot = views > 30;
 
-  const finalImageUrl = getDynamicImageUrl(opportunity.category, opportunity.id, opportunity.logoUrl, opportunity.title);
+  const finalImageUrl = getDynamicImageUrl(
+    opportunity.category, 
+    opportunity.id, 
+    (opportunity.images && opportunity.images.length > 0) ? opportunity.images[0] : opportunity.logoUrl, 
+    opportunity.title
+  );
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const fallback = getDynamicImageUrl(opportunity.category, opportunity.id, undefined, opportunity.title);
@@ -151,7 +156,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
   };
 
   const handleLoginSuccess = (newToken: string, newEmail: string) => {
-    // Note: handleSuccess on OTPLoginForm automatically sets localStorage.
+    // Note: handleSuccess on AuthForm automatically sets localStorage.
     setShowLogin(false);
     showAlert({ title: 'Logged In', message: 'You can now save this opportunity!', type: 'success' });
     // Optionally trigger bookmark automatically here
@@ -264,7 +269,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
         <DialogContent className="sm:max-w-[425px] p-0 border-0 overflow-hidden bg-transparent shadow-none">
           <div className="bg-white rounded-2xl overflow-hidden shadow-xl">
             <div className="p-6">
-              <OTPLoginForm
+              <AuthForm
                 onSuccess={handleLoginSuccess}
                 title="Sign in to Save"
                 subtitle="You need to sign in to save opportunities to your Tracker."

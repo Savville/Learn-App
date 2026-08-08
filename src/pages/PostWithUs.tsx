@@ -83,9 +83,27 @@ export function PostWithUs({
   const [isParsing, setIsParsing] = useState(false);
   const [parseProgress, setParseProgress] = useState(0);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [parsedData, setParsedData] = useState<ParsedOpportunityData | null>(
-    null,
-  );
+  const [parsedData, setParsedData] = useState<ParsedOpportunityData>({
+    basicInfo: {
+      title: "",
+      provider: "",
+      category: "",
+      description: "",
+      fullDescription: "",
+      fundingType: "",
+      compensationType: "N/A",
+      upfrontCost: "No Upfront Cost",
+    },
+    extractedFeatures: [
+      {
+        feature: "Application Link",
+        value: "",
+        importance: "High",
+        notes: "Critical for applying",
+      },
+      { feature: "Deadline", value: "", importance: "High", notes: "" },
+    ],
+  });
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [kycDocument, setKycDocument] = useState<File | null>(null);
   const [endorsementInstitution, setEndorsementInstitution] = useState("");
@@ -299,7 +317,7 @@ export function PostWithUs({
       .replace(/â€˜/g, "'") // left single quote
       .replace(/â€™/g, "'") // right single quote
       .replace(/â€œ/g, '"') // left double quote
-      .replace(/â€/g, '"') // right double quote
+      .replace(/â€ /g, '"') // right double quote
       .replace(/â€¦/g, "...") // ellipsis
       .replace(/â€"/g, "-") // em dash
       .replace(/â€“/g, "-") // en dash
@@ -317,10 +335,27 @@ export function PostWithUs({
       setError("Please provide your full identity details first.");
       return;
     }
+    if (!rawText.trim()) {
+      alert("Please paste the opportunity details first before parsing.");
+      return;
+    }
     setIsParsing(true);
     setParseProgress(0);
     setError(null);
-    setParsedData(null);
+    // Note: parsedData is reset to initial empty state structure
+    setParsedData({
+      basicInfo: {
+        title: "",
+        provider: "",
+        category: "",
+        description: "",
+        fullDescription: "",
+        fundingType: "",
+        compensationType: "N/A",
+        upfrontCost: "No Upfront Cost",
+      },
+      extractedFeatures: [],
+    });
     setPublishedSlug(null);
 
     // Simulate progress updates while waiting for AI
@@ -695,7 +730,19 @@ export function PostWithUs({
       // Success!
       setPublishedSlug("success");
       setRawText("");
-      setParsedData(null);
+      setParsedData({
+        basicInfo: {
+          title: "",
+          provider: "",
+          category: "",
+          description: "",
+          fullDescription: "",
+          fundingType: "",
+          compensationType: "N/A",
+          upfrontCost: "No Upfront Cost",
+        },
+        extractedFeatures: [],
+      });
       setCoverImage(null);
       setKycDocument(null);
       setEndorsementInstitution("");
@@ -785,7 +832,7 @@ export function PostWithUs({
               {!editingPostId && (
                 <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm relative overflow-hidden mt-8">
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    1. Provide the Details
+                    1. Provide Your details
                   </h2>
                   <p className="text-xs text-gray-500 mb-8">
                     <span className="text-red-500 font-bold">*</span> Indicates
@@ -1035,8 +1082,7 @@ export function PostWithUs({
               {!editingPostId && (
                 <div className="mt-16 mb-24">
                   <label className="text-lg font-extrabold text-gray-900 block mb-4 pl-1">
-                    Copy & Paste Opportunity Details Here or Type it in the box
-                    below
+                    Copy & Paste Opportunity or Project Details Here or type in the review section directly
                   </label>
                   <div className="flex flex-col gap-8">
                     <Textarea
@@ -1049,12 +1095,12 @@ export function PostWithUs({
                         setRawText(e.target.value)
                       }
                     />
-                    <div className="flex flex-col sm:flex-row gap-4 w-full mt-2 mb-12">
+                    <div className="flex justify-center w-full mt-2 mb-12">
                       <Button
                         onClick={handleParse}
-                        disabled={isParsing || !rawText}
+                        disabled={isParsing}
                         size="lg"
-                        className="flex-1 rounded-2xl h-14 text-lg font-bold shadow hover:shadow-md transition-shadow"
+                        className="w-full max-w-md rounded-2xl h-14 text-lg font-bold shadow hover:shadow-md transition-shadow"
                         style={{ backgroundColor: "#0933ed", color: "#ffffff" }}
                       >
                         {isParsing ? (
@@ -1065,20 +1111,6 @@ export function PostWithUs({
                         ) : (
                           "AI Extract Data"
                         )}
-                      </Button>
-                      <div className="hidden sm:flex items-center justify-center px-4 self-center">
-                        <span className="text-gray-400 text-sm font-bold uppercase tracking-widest leading-none">
-                          OR
-                        </span>
-                      </div>
-                      <Button
-                        onClick={handleManualEntry}
-                        disabled={isParsing}
-                        variant="outline"
-                        size="lg"
-                        className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-50 rounded-2xl h-14 text-lg font-bold"
-                      >
-                        Enter Manually
                       </Button>
                     </div>
                   </div>
@@ -1093,14 +1125,10 @@ export function PostWithUs({
               )}
 
               {/* STEP 2: Review Table & Dictionary */}
-              {parsedData && (
-                <div
-                  ref={reviewSectionRef}
+              <div ref={reviewSectionRef}
                   className="bg-white rounded-3xl p-8 lg:p-10 shadow-sm relative overflow-hidden mt-8"
                 >
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    2. Review & Submit
-                  </h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Enter Manually (Or Review AI Extraction)</h2>
 
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 gap-6 rounded-2xl bg-gray-50/50 p-6 md:grid-cols-2">
@@ -2471,7 +2499,6 @@ export function PostWithUs({
                     </div>
                   </div>
                 </div>
-              )}
             </>
           )}
         </div>

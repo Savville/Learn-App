@@ -1,14 +1,12 @@
 import { Menu, X, Bell } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogoutModal } from './LogoutModal';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('user_token'));
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const handleAuthChange = () => setIsLoggedIn(!!localStorage.getItem('user_token'));
@@ -16,16 +14,11 @@ export function Header() {
     return () => window.removeEventListener('auth-changed', handleAuthChange);
   }, []);
 
-  const handleLogoutClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowLogoutModal(true);
-  };
-
-  const handleLogoutConfirm = () => {
+  const handleLogoutClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     localStorage.removeItem('user_token');
     localStorage.removeItem('user_email');
     window.dispatchEvent(new Event('auth-changed'));
-    setShowLogoutModal(false);
     navigate('/');
   };
   const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
@@ -60,7 +53,6 @@ export function Header() {
                 <Link to="/opportunities" className={`transition-colors font-medium ${isActive('/opportunities') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Opportunities</Link>
                 <Link to="/projects" className={`transition-colors font-medium ${isActive('/projects') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Projects</Link>
                 <Link to="/inbox" className={`transition-colors font-medium ${isActive('/inbox') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Inbox</Link>
-                <Link to="/manage" className={`transition-colors font-medium ${isActive('/manage') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Manage</Link>
                 <Link to="/portfolio" className={`transition-colors font-medium ${isActive('/portfolio') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>Portfolio</Link>
                 
                 <div className="flex items-center gap-4 border-l pl-6 border-gray-200">
@@ -106,7 +98,6 @@ export function Header() {
                   <Link to="/opportunities" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/opportunities') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Opportunities</Link>
                   <Link to="/projects" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/projects') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Projects</Link>
                   <Link to="/inbox" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/inbox') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Inbox</Link>
-                  <Link to="/manage" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/manage') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Manage</Link>
                   <Link to="/portfolio" className={`px-4 py-2 rounded-lg font-medium transition-colors ${isActive('/portfolio') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setMobileMenuOpen(false)}>Portfolio</Link>
                   <Link to="/post-with-us" className="px-4 py-2 rounded-lg font-bold bg-blue-50 text-blue-700 mt-2" onClick={() => setMobileMenuOpen(false)}>Post New</Link>
                   <button onClick={() => { handleLogoutClick({} as any); setMobileMenuOpen(false); }} className="px-4 py-2 rounded-lg font-medium text-left text-gray-500 hover:bg-gray-50 mt-2">Log Out</button>
@@ -128,7 +119,6 @@ export function Header() {
           </div>
         )}
       </nav>
-      <LogoutModal isOpen={showLogoutModal} onClose={() => setShowLogoutModal(false)} onConfirm={handleLogoutConfirm} />
     </header>
   );
 }

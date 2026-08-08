@@ -1,6 +1,7 @@
 import express from 'express';
 import { getDB } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
+import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
@@ -47,7 +48,13 @@ router.get('/:id', async (req, res) => {
         const db = getDB();
         const { id } = req.params;
 
-        const project = await db.collection('projects').findOne({ id });
+        let query;
+        if (id.length === 24) {
+            query = { $or: [{ id: id }, { _id: new ObjectId(id) }] };
+        } else {
+            query = { id: id };
+        }
+        const project = await db.collection('projects').findOne(query);
         if (!project) return res.status(404).json({ error: 'Project not found' });
 
         res.json(project);
@@ -68,7 +75,7 @@ router.post('/', requireUser, async (req, res) => {
         
         const { 
             title, description, category, tags, startDate, endDate, 
-            status, resourceLinks, bannerImage, authorName 
+            status, resourceLinks, images, institutionalEndorsement, projectProposalUrl, authorName, currentLevel, updates
         } = req.body;
 
         if (!title || !description) {
@@ -87,7 +94,11 @@ router.post('/', requireUser, async (req, res) => {
             endDate: endDate || null,
             status: status || 'Showcase', // Showcase, Active, Recruiting, Seeking Funding, Archived
             resourceLinks: resourceLinks || [],
-            bannerImage: bannerImage || '',
+            images: images || [],
+            institutionalEndorsement: institutionalEndorsement || null,
+            projectProposalUrl: projectProposalUrl || '',
+            currentLevel: currentLevel || 'Ideation',
+            updates: updates || [],
             createdAt: new Date(),
             updatedAt: new Date()
         };
@@ -150,10 +161,51 @@ router.delete('/:id', requireUser, async (req, res) => {
         if (existing.userEmail !== userEmail) return res.status(403).json({ error: 'Unauthorized to delete this project' });
 
         await db.collection('projects').deleteOne({ id });
-        res.json({ message: 'Project deleted' });
+        res.json({ message: 'Project deleted successfully' });
     } catch (error) {
         console.error('[PROJECTS] Error deleting project:', error);
         res.status(500).json({ error: 'Failed to delete project' });
+    }
+});
+
+// ==========================================
+// POST /api/public/projects/:id/updates
+// Add a project update (Authenticated)
+// ==========================================
+router.post('/:id/updates', requireUser, async (req, res) => {
+    try {
+        const db = getDB();
+        const userEmail = req.userEmail;
+        const { id } = req.params;
+        const { title, description } = req.body;
+
+        if (!title || !description) {
+            return res.status(400).json({ error: 'Update title and description are required' });
+        }
+
+        const existing = await db.collection('projects').findOne({ id });
+        if (!existing) return res.status(404).json({ error: 'Project not found' });
+        if (existing.userEmail !== userEmail) return res.status(403).json({ error: 'Unauthorized to add updates to this project' });
+
+        const newUpdate = {
+            id: uuidv4(),
+            title,
+            description,
+            date: new Date().toISOString()
+        };
+
+        await db.collection('projects').updateOne(
+            { id }, 
+            { 
+                $push: { updates: newUpdate },
+                $set: { updatedAt: new Date() }
+            }
+        );
+
+        res.json({ message: 'Project update added', update: newUpdate });
+    } catch (error) {
+        console.error('[PROJECTS] Error adding project update:', error);
+        res.status(500).json({ error: 'Failed to add project update' });
     }
 });
 
