@@ -62,7 +62,7 @@ export function Inbox() {
   const fetchConversations = async (userEmail: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/user/${userEmail}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/user/${userEmail}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch conversations');
       setConversations(data.data || data || []);
@@ -76,7 +76,7 @@ export function Inbox() {
   const fetchNotifications = async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/me/notifications`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/me/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -91,7 +91,7 @@ export function Inbox() {
   const markNotificationAsRead = async (id: string, link?: string) => {
     if (!token) return;
     try {
-      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/me/notifications/${id}/read`, {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/me/notifications/${id}/read`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -116,7 +116,7 @@ export function Inbox() {
     setIsUploading(true);
     try {
       // 1. Get signature from backend
-      const sigRes = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/upload-signature`);
+      const sigRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/upload-signature`);
       if (!sigRes.ok) throw new Error("Could not get upload signature.");
       const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
 
@@ -148,7 +148,7 @@ export function Inbox() {
 
       // Resolve sender name from portfolio (fallback to email prefix)
       try {
-        const profileRes = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/portfolio/${email}`);
+        const profileRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/portfolio/${email}`);
         if (profileRes.ok) {
           const profileData = await profileRes.json();
           const name = profileData.profile?.name || email.split('@')[0];
@@ -163,7 +163,7 @@ export function Inbox() {
         messagePayload.senderName = cachedSenderName.current;
       }
 
-      const msgRes = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
+      const msgRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(messagePayload)
@@ -181,7 +181,7 @@ export function Inbox() {
 
   const fetchMessages = async (convId: string) => {
     try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${convId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${convId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setMessages(data.data || data || []);
@@ -209,7 +209,7 @@ export function Inbox() {
       const partnerEmail = activeConv.participants.find((p: string) => p !== email);
       if (partnerEmail) {
         setLoadingProfile(true);
-        fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/portfolio/${partnerEmail}`)
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/portfolio/${partnerEmail}`)
           .then(res => res.json())
           .then(data => {
             if (data.success) {
@@ -259,7 +259,7 @@ export function Inbox() {
     try {
       if (editingMessage) {
         // Handle Edit
-        const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${editingMessage._id}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${editingMessage._id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -277,7 +277,7 @@ export function Inbox() {
         // Use cached sender name or derive from email
         const senderName = cachedSenderName.current || email.split('@')[0];
 
-        const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -306,7 +306,7 @@ export function Inbox() {
   const handleDeleteMessage = async () => {
     if (!activeConv || !messageToDelete) return;
     try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${messageToDelete}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${messageToDelete}`, {
         method: 'DELETE',
         headers: {
           'x-user-email': email
@@ -327,7 +327,7 @@ export function Inbox() {
   const handleUnlock = async () => {
     if (!activeConv) return;
     try {
-      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/unlock`, { method: 'POST' });
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/unlock`, { method: 'POST' });
       activeConv.status = 'active';
       setActiveConv({ ...activeConv });
     } catch (err) {
@@ -338,7 +338,7 @@ export function Inbox() {
   const handleHire = async () => {
     if (!activeConv) return;
     try {
-      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/hire`, { method: 'POST' });
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/hire`, { method: 'POST' });
       activeConv.status = 'hired';
       setActiveConv({ ...activeConv });
     } catch (err) {
@@ -349,7 +349,7 @@ export function Inbox() {
   const handleDeliver = async () => {
     if (!activeConv) return;
     try {
-      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/deliver`, { method: 'POST' });
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/deliver`, { method: 'POST' });
       activeConv.status = 'completed';
       setActiveConv({ ...activeConv });
     } catch (err) {
@@ -360,7 +360,7 @@ export function Inbox() {
   const handleApprove = async () => {
     if (!activeConv) return;
     try {
-      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/approve`, { method: 'POST' });
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/approve`, { method: 'POST' });
       activeConv.status = 'approved';
       setActiveConv({ ...activeConv });
     } catch (err) {
@@ -377,7 +377,7 @@ export function Inbox() {
     }
 
     try {
-      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/dispute`, {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/dispute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reportModal.details, initiatorEmail: email })
@@ -401,7 +401,7 @@ export function Inbox() {
     }
 
     try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/report`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -424,7 +424,7 @@ export function Inbox() {
   const handleMute = async () => {
     if (!activeConv) return;
     try {
-      await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/mute`, {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/messages/${activeConv._id}/mute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

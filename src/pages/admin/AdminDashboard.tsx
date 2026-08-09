@@ -10,7 +10,7 @@ import { ExternalLink, CheckCircle, XCircle, Eye, Building2, User, Pencil, Trash
 import { useAlert } from '@/contexts/AlertContext';
 import { PosterDashboard } from '@/components/PosterDashboard';
 
-const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AdminDashboard() {
   const { showAlert , showConfirm , showPrompt } = useAlert();

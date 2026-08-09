@@ -17,7 +17,7 @@ export function OTPLoginForm({ onSuccess, title = "Secure Verification", subtitl
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();

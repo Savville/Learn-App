@@ -144,7 +144,7 @@ export function PosterDashboard({ isAdminMode, adminDashboardMode }: { isAdminMo
   const [payoutMessage, setPayoutMessage] = useState<string | null>(null);
   const [payoutSuccess, setPayoutSuccess] = useState(false);
 
-  const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const fetchPosts = async (currentToken: string) => {
     setLoading(true);

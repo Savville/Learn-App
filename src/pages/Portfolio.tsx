@@ -97,7 +97,7 @@ export function Portfolio() {
   const initialLoadRef = useRef(true);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const fetchPortfolio = async (userEmail: string) => {
     setLoading(true);

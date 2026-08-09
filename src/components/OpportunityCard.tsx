@@ -129,7 +129,7 @@ export function OpportunityCard({ opportunity }: OpportunityCardProps) {
     }
 
     try {
-      const res = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/bookmarks`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/bookmarks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

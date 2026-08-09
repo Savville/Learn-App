@@ -295,7 +295,7 @@ export function ProjectDetails() {
         isPartnership: true // We can treat all project messages as safe/partnership to bypass auto-censor
       };
       
-      const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${API_BASE}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

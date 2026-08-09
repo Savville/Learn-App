@@ -12,7 +12,7 @@ export function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   const ADMIN_EMAIL = 'ochiwilliamotieno@gmail.com';
 
   const handleSendCode = async (e: React.FormEvent) => {

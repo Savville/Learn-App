@@ -21,7 +21,7 @@ export function ChatDrawer({ applicantEmail, posterEmail, gigId, onClose }: Chat
   const bottomRef = useRef<HTMLDivElement>(null);
   const { showAlert } = useAlert();
 
-  const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   const token = localStorage.getItem('user_token');
 
   useEffect(() => {

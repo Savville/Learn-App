@@ -24,7 +24,7 @@ export function AdminDisputes() {
   const { showAlert , showConfirm } = useAlert();
   const [chatModal, setChatModal] = useState<{isOpen: boolean, disputeId: string | null, messages: any[]}>({isOpen: false, disputeId: null, messages: []});
 
-  const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     if (isAuthorized) fetchDisputes();

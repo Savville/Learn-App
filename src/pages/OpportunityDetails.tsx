@@ -246,7 +246,7 @@ export function OpportunityDetails() {
     setContributeError(null);
 
     try {
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/payments/crowdfund`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/payments/crowdfund`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -324,7 +324,7 @@ export function OpportunityDetails() {
       });
 
       try {
-        const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: emailValue, data: applicationData, tracks }),
@@ -344,7 +344,7 @@ export function OpportunityDetails() {
 
     // Legacy flat form submission
     try {
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailValue, data: applicationData }),
@@ -392,7 +392,7 @@ export function OpportunityDetails() {
         pitch_message: pitchMessage,
       };
 
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/opportunities/${opportunity.id}/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

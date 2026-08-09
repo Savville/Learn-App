@@ -67,7 +67,7 @@ interface ParsedOpportunityData {
 
 // Use the same API base URL as the rest of the app â€” reads from VITE_API_URL env var
 const API_BASE =
-  (import.meta as any).env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export function PostWithUs({
   defaultMode = "post",

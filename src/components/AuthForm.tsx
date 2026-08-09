@@ -20,7 +20,7 @@ export function AuthForm({ onSuccess, title, subtitle }: AuthFormProps) {
   const [otpStep, setOtpStep] = useState(false);
   const [otp, setOtp] = useState('');
 
-  const API_BASE = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
