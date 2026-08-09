@@ -5,6 +5,9 @@ import { sendNewMessageNotification } from '../services/emailService.js';
 import { initiateSTKPush } from '../services/mpesaService.js';
 import { v2 as cloudinary } from 'cloudinary';
 import { verifyUserToken } from '../middleware/auth.js';
+import multer from 'multer';
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -29,19 +32,38 @@ router.get('/upload-signature', async (req, res) => {
 
     const signature = cloudinary.utils.api_sign_request(
       { timestamp: timestamp },
-      process.env.CLOUDINARY_API_SECRET
+      process.env.CLOUDINARY_API_SECRET?.trim()
     );
 
     res.json({
       signature,
       timestamp,
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-      apiKey: process.env.CLOUDINARY_API_KEY
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME?.trim(),
+      apiKey: process.env.CLOUDINARY_API_KEY?.trim()
     });
   } catch (error) {
     console.error('Error generating signature:', error);
     res.status(500).json({ error: 'Failed to generate signature' });
   }
+});
+
+// POST /api/messages/direct-upload
+// Bypass frontend signing to avoid API key mismatch errors on client
+router.post('/direct-upload', upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  
+  const uploadStream = cloudinary.uploader.upload_stream(
+    { folder: 'learn_opportunities' },
+    (error, result) => {
+      if (error) {
+        console.error('Cloudinary Direct Upload Error:', error);
+        return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
+      }
+      res.json({ secure_url: result.secure_url });
+    }
+  );
+  
+  uploadStream.end(req.file.buffer);
 });
 
 // GET /api/messages/:conversationId

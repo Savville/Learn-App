@@ -7,6 +7,7 @@ import { Home } from './pages/Home';
 import { Opportunities } from './pages/Opportunities';
 import { Projects } from './pages/Projects';
 import { ProjectDetails } from './pages/ProjectDetails';
+import { ProjectUpdatePage } from './pages/ProjectUpdatePage';
 import { OpportunityDetails } from './pages/OpportunityDetails';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
@@ -78,6 +79,7 @@ function AppContent() {
           <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />
+          <Route path="/projects/:id/update" element={<AuthGuard><ProjectUpdatePage /></AuthGuard>} />
           <Route path="/opportunity/:slug" element={<OpportunityDetails />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

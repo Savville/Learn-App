@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Calendar, Tag, ChevronLeft, ChevronRight, MessageCircle, ShieldCheck, ImagePlus, Loader2 } from 'lucide-react';
 import { getProjectById, ProfileProject } from '../services/profilesAPI';
 import { opportunitiesAPI } from '../services/api';
@@ -18,6 +18,7 @@ import {
 
 export function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [project, setProject] = useState<ProfileProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,52 +50,10 @@ export function ProjectDetails() {
   // Updates State
   const [activeTab, setActiveTab] = useState<'details' | 'updates'>('details');
   const [isOwner, setIsOwner] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [updateTitle, setUpdateTitle] = useState('');
-  const [updateDescription, setUpdateDescription] = useState('');
-  const [isSubmittingUpdate, setIsSubmittingUpdate] = useState(false);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const lastContributionTime = useRef(0);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploadingImage(true);
-    try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      const sigRes = await fetch(`${API_BASE}/messages/upload-signature`);
-      if (!sigRes.ok) throw new Error("Failed to get signature");
-      
-      const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("api_key", apiKey);
-      formData.append("timestamp", timestamp.toString());
-      formData.append("signature", signature);
-
-      const uploadRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
-        { method: "POST", body: formData }
-      );
-
-      if (uploadRes.ok) {
-        const data = await uploadRes.json();
-        const imageUrl = data.secure_url;
-        setUpdateDescription(prev => prev + (prev ? '\n\n' : '') + `![Image description](${imageUrl})`);
-      } else {
-        alert("Failed to upload image.");
-      }
-    } catch (err) {
-      console.error("Image upload failed:", err);
-      alert("An error occurred during image upload.");
-    } finally {
-      setIsUploadingImage(false);
-    }
-    // reset input
-    e.target.value = '';
-  };
+  // image upload logic moved to ProjectUpdatePage.tsx
 
   useEffect(() => {
     if (project) {
@@ -235,36 +194,7 @@ export function ProjectDetails() {
     fetchProject();
   }, [id]);
 
-  const handleAddUpdate = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!project || !project.id) return;
-    
-    setIsSubmittingUpdate(true);
-    try {
-      // Use project._id if id is not available
-      const projectId = project._id || project.id;
-      const { addProjectUpdate } = await import('../services/profilesAPI');
-      const res = await addProjectUpdate(projectId as string, {
-        title: updateTitle,
-        description: updateDescription
-      });
-      
-      // Update local state
-      setProject({
-        ...project,
-        updates: [...(project.updates || []), res.update]
-      });
-      
-      setShowUpdateModal(false);
-      setUpdateTitle('');
-      setUpdateDescription('');
-    } catch (err: any) {
-      console.error('Failed to add update', err);
-      alert('Failed to add update. Please try again.');
-    } finally {
-      setIsSubmittingUpdate(false);
-    }
-  };
+  // handleAddUpdate was removed and migrated to ProjectUpdatePage.tsx
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -345,7 +275,7 @@ export function ProjectDetails() {
               <span className="font-semibold text-sm">You own this project.</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button onClick={() => setShowUpdateModal(true)} variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border-0">
+              <Button onClick={() => navigate(`/projects/${project.id || id}/update`)} variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border-0">
                 Post an Update
               </Button>
             </div>
@@ -484,8 +414,8 @@ export function ProjectDetails() {
                       <h3 className="text-xl font-bold text-slate-900">Project Updates</h3>
                       {isOwner && (
                         <Button 
-                          onClick={() => setShowUpdateModal(true)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={() => navigate(`/projects/${project?.id || id}/update`)}
+                          className="text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100"
                         >
                           Add Update
                         </Button>
@@ -830,81 +760,6 @@ export function ProjectDetails() {
           </div>
         </div>
       </div>
-
-      {/* Add Update Modal */}
-      <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
-        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Post Project Update</DialogTitle>
-            <DialogDescription>
-              Share your latest progress, milestones, or changes with your followers and funders. You can embed images using Markdown syntax: `![Alt Text](URL)`.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleAddUpdate} className="space-y-5 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Update Title</label>
-              <Input
-                required
-                placeholder="e.g. Reached MVP Stage! 🎉"
-                value={updateTitle}
-                onChange={(e) => setUpdateTitle(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-semibold text-gray-700 flex justify-between">
-                  <span>Update Content (Markdown)</span>
-                </label>
-                <div className="relative">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleImageUpload} 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                    title="Attach an image"
-                    disabled={isUploadingImage}
-                  />
-                  <Button type="button" variant="outline" size="sm" className="h-8 text-xs bg-slate-50" disabled={isUploadingImage}>
-                    {isUploadingImage ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5 mr-1.5" />}
-                    Attach Image
-                  </Button>
-                </div>
-              </div>
-              <Textarea
-                required
-                rows={10}
-                placeholder="Write your update here...
-
-Quick Markdown Guide:
-**Bold**  |  *Italics*  |  - Bullet List  |  # Heading"
-                className="font-mono text-sm"
-                value={updateDescription}
-                onChange={(e) => setUpdateDescription(e.target.value)}
-              />
-            </div>
-
-            <div className="flex gap-3 justify-end pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setShowUpdateModal(false)}
-                disabled={isSubmittingUpdate}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit"
-                disabled={isSubmittingUpdate}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {isSubmittingUpdate ? 'Posting...' : 'Post Update'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

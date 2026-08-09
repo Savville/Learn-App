@@ -2433,8 +2433,7 @@ export function PostWithUs({
                             Public Evidence: Endorsement Letter
                           </h5>
                           <label className="text-xs text-purple-800 font-medium">
-                            Provide a public Google Drive link to the
-                            endorsement letter, which will be visible on your
+                            Upload a PDF of the endorsement letter, which will be visible on your
                             project page.
                           </label>
                           <Input
@@ -2453,8 +2452,7 @@ export function PostWithUs({
                             (Recommended)
                           </h5>
                           <label className="text-xs text-purple-800 font-medium">
-                            Provide a public Google Drive link to a document
-                            demonstrating the need, impact, and phases of your
+                            Upload a PDF document demonstrating the need, impact, and phases of your
                             project.
                           </label>
                           <Input

@@ -2,8 +2,14 @@ import express from 'express';
 import { getDB } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
 import { ObjectId } from 'mongodb';
+import OpenAI from 'openai';
 
 const router = express.Router();
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || 'sk-test',
+    baseURL: process.env.OPENAI_BASE_URL || 'https://apihub.agnes-ai.com/v1'
+});
 
 // Middleware to extract user email from header (simulating auth token for this app's pattern)
 const requireUser = (req, res, next) => {
@@ -206,6 +212,66 @@ router.post('/:id/updates', requireUser, async (req, res) => {
     } catch (error) {
         console.error('[PROJECTS] Error adding project update:', error);
         res.status(500).json({ error: 'Failed to add project update' });
+    }
+});
+
+// ==========================================
+// POST /api/public/projects/:id/ai-assistant
+// AI Assistant for Project Updates (Authenticated)
+// ==========================================
+router.post('/:id/ai-assistant', requireUser, async (req, res) => {
+    try {
+        const db = getDB();
+        const userEmail = req.userEmail;
+        const { id } = req.params;
+        const { messages, currentContent } = req.body;
+
+        if (!messages || !Array.isArray(messages)) {
+            return res.status(400).json({ error: 'Messages array is required' });
+        }
+
+        const project = await db.collection('projects').findOne({
+            $or: [
+                { id: id },
+                { _id: ObjectId.isValid(id) ? new ObjectId(id) : null }
+            ]
+        });
+        if (!project) return res.status(404).json({ error: 'Project not found' });
+        if (project.userEmail !== userEmail) return res.status(403).json({ error: 'Unauthorized to use AI assistant for this project' });
+
+        const systemMessage = {
+            role: 'system',
+            content: `You are Agnes, an AI assistant helping a user write an update for their project on Learn Opportunities.
+The project is titled "${project.title}" and is currently in the "${project.status}" status.
+Project Description: ${project.description}
+
+Your goal is to help the user draft, refine, or format their project update. 
+You can generate Markdown formatting (Bold, Italic, Tables, Lists, Headings).
+CRITICAL RULES:
+1. NEVER use conversational filler (e.g., "Hello!", "Here is your draft:", "Sure, I can help").
+2. ONLY output the raw, professional text meant for the editor.
+3. Keep your responses highly relevant to this specific project.
+
+If the user provides the current editor content, here it is:
+---
+${currentContent || '(Empty)'}
+---
+`
+        };
+
+        const response = await openai.chat.completions.create({
+            model: 'agnes-2.0-flash', // Using Agnes AI model
+            messages: [systemMessage, ...messages],
+            temperature: 0.7,
+        });
+
+        res.json({ 
+            message: response.choices[0]?.message?.content || 'I could not generate a response.' 
+        });
+
+    } catch (error) {
+        console.error('[PROJECTS AI] Error in AI assistant:', error);
+        res.status(500).json({ error: 'AI Assistant failed to respond.' });
     }
 });
 
