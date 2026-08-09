@@ -79,7 +79,7 @@ export function ProjectDetails() {
     }
   };
 
-  const sliderImages = project && Array.isArray(project.images) ? project.images : [];
+  const sliderImages = project && Array.isArray(project.images) ? project.images.filter(img => typeof img === 'string' && img.trim() !== '') : [];
   const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % sliderImages.length);
   const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + sliderImages.length) % sliderImages.length);
 
