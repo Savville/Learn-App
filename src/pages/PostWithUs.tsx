@@ -112,8 +112,8 @@ export function PostWithUs({
   const [kycDocument, setKycDocument] = useState<File | null>(null);
   const [endorsementInstitution, setEndorsementInstitution] = useState("");
   const [endorsementContactTitle, setEndorsementContactTitle] = useState("");
-  const [endorsementLinkUrl, setEndorsementLinkUrl] = useState("");
-  const [projectProposalUrl, setProjectProposalUrl] = useState("");
+  const [publicEndorsementPdf, setPublicEndorsementPdf] = useState<File | null>(null);
+  const [projectProposalPdf, setProjectProposalPdf] = useState<File | null>(null);
   const [funderRecognition, setFunderRecognition] = useState("");
   const [seeksFunding, setSeeksFunding] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -468,7 +468,7 @@ export function PostWithUs({
         setSeeksFunding(false);
         setEndorsementInstitution("");
         setEndorsementContactTitle("");
-        setEndorsementLinkUrl("");
+        setPublicEndorsementPdf(null);
         setKycDocument(null);
       }
       return;
@@ -504,6 +504,34 @@ export function PostWithUs({
     }
   };
 
+  const uploadFileToCloudinary = async (file: File): Promise<string | null> => {
+    try {
+      const sigRes = await fetch(`${API_BASE}/messages/upload-signature`);
+      if (!sigRes.ok) return null;
+      
+      const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", apiKey);
+      formData.append("timestamp", timestamp.toString());
+      formData.append("signature", signature);
+
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+        { method: "POST", body: formData }
+      );
+
+      if (uploadRes.ok) {
+        const data = await uploadRes.json();
+        return data.secure_url;
+      }
+      return null;
+    } catch (err) {
+      console.warn("Cloudinary upload failed:", err);
+      return null;
+    }
+  };
+
   const executePublish = async () => {
     if (!parsedData) {
       setError("Cannot publish without parsed data.");
@@ -529,40 +557,20 @@ export function PostWithUs({
       let imageUrl = "/Opportunities Kenya Logo 2.png"; // default fallback
 
       if (coverImage) {
-        try {
-          // 1. Get upload signature from backend
-          const sigRes = await fetch(`${API_BASE}/messages/upload-signature`);
-          if (sigRes.ok) {
-            const { signature, timestamp, cloudName, apiKey } =
-              await sigRes.json();
+        const url = await uploadFileToCloudinary(coverImage);
+        if (url) imageUrl = url;
+      }
 
-            // 2. Upload to Cloudinary
-            const formData = new FormData();
-            formData.append("file", coverImage);
-            formData.append("api_key", apiKey);
-            formData.append("timestamp", timestamp.toString());
-            formData.append("signature", signature);
+      let finalEndorsementLink = "";
+      if (publicEndorsementPdf) {
+        const url = await uploadFileToCloudinary(publicEndorsementPdf);
+        if (url) finalEndorsementLink = url;
+      }
 
-            const uploadRes = await fetch(
-              `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
-              {
-                method: "POST",
-                body: formData,
-              },
-            );
-
-            if (uploadRes.ok) {
-              const data = await uploadRes.json();
-              imageUrl = data.secure_url;
-            } else {
-              console.warn(
-                "Cloudinary upload failed, falling back to default.",
-              );
-            }
-          }
-        } catch (err) {
-          console.warn("Upload process failed:", err);
-        }
+      let finalProjectProposalUrl = "";
+      if (projectProposalPdf) {
+        const url = await uploadFileToCloudinary(projectProposalPdf);
+        if (url) finalProjectProposalUrl = url;
       }
 
       // Step 1.5: Upload KYC Document if it's a Project
@@ -576,17 +584,9 @@ export function PostWithUs({
             "Institution name and endorser role are required for project posts.",
           );
         }
-        if (!kycDocument && !endorsementLinkUrl.trim()) {
+        if (!kycDocument && !publicEndorsementPdf) {
           throw new Error(
-            "Upload endorsement evidence (email screenshot/PDF) or provide a Google Drive link.",
-          );
-        }
-        if (
-          endorsementLinkUrl.trim() &&
-          !/^https?:\/\//i.test(endorsementLinkUrl.trim())
-        ) {
-          throw new Error(
-            "Endorsement link must be a valid URL (e.g. Google Drive).",
+            "Upload endorsement evidence (email screenshot/PDF) or provide a public evidence PDF.",
           );
         }
 
@@ -612,10 +612,12 @@ export function PostWithUs({
         institutionalEndorsement = {
           institutionName: endorsementInstitution.trim(),
           contactTitle: endorsementContactTitle.trim(),
-          evidenceType: endorsementLinkUrl.trim()
+          evidenceType: kycDocument
+            ? ("upload" as const)
+            : publicEndorsementPdf
             ? ("link" as const)
             : ("upload" as const),
-          evidenceUrl: endorsementLinkUrl.trim() || "",
+          evidenceUrl: finalEndorsementLink || "",
           ...(kycProofFilename ? { adminEvidenceFile: kycProofFilename } : {}),
         };
 
@@ -707,7 +709,7 @@ export function PostWithUs({
         funderRecognition: funderRecognition.trim() || undefined,
         kycProofFilename: kycProofFilename,
         institutionalEndorsement,
-        projectProposalUrl: projectProposalUrl.trim() || undefined,
+        projectProposalUrl: finalProjectProposalUrl || undefined,
         slug,
       };
 
@@ -753,7 +755,8 @@ export function PostWithUs({
       setKycDocument(null);
       setEndorsementInstitution("");
       setEndorsementContactTitle("");
-      setEndorsementLinkUrl("");
+      setPublicEndorsementPdf(null);
+      setProjectProposalPdf(null);
       setSeeksFunding(false);
       setShowSuccessModal(true);
     } catch (error: any) {
@@ -2435,13 +2438,12 @@ export function PostWithUs({
                             project page.
                           </label>
                           <Input
-                            type="url"
-                            value={endorsementLinkUrl}
-                            onChange={(e) =>
-                              setEndorsementLinkUrl(e.target.value)
+                            type="file"
+                            accept=".pdf"
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                              setPublicEndorsementPdf(e.target.files?.[0] || null)
                             }
-                            placeholder="https://drive.google.com/..."
-                            className="bg-white"
+                            className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-purple-600 file:text-white file:px-4 file:py-2 file:text-sm file:font-semibold hover:file:bg-purple-700 bg-white"
                           />
                         </div>
 
@@ -2456,13 +2458,12 @@ export function PostWithUs({
                             project.
                           </label>
                           <Input
-                            type="url"
-                            value={projectProposalUrl}
-                            onChange={(e) =>
-                              setProjectProposalUrl(e.target.value)
+                            type="file"
+                            accept=".pdf"
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                              setProjectProposalPdf(e.target.files?.[0] || null)
                             }
-                            placeholder="https://drive.google.com/... (Project Proposal)"
-                            className="bg-white"
+                            className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-purple-600 file:text-white file:px-4 file:py-2 file:text-sm file:font-semibold hover:file:bg-purple-700 bg-white"
                           />
                         </div>
 

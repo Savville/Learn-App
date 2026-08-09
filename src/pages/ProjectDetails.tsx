@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, Calendar, Tag, ChevronLeft, ChevronRight, MessageCircle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Calendar, Tag, ChevronLeft, ChevronRight, MessageCircle, ShieldCheck, ImagePlus, Loader2 } from 'lucide-react';
 import { getProjectById, ProfileProject } from '../services/profilesAPI';
 import { opportunitiesAPI } from '../services/api';
 import ReactMarkdown from 'react-markdown';
@@ -53,8 +53,48 @@ export function ProjectDetails() {
   const [updateTitle, setUpdateTitle] = useState('');
   const [updateDescription, setUpdateDescription] = useState('');
   const [isSubmittingUpdate, setIsSubmittingUpdate] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const lastContributionTime = useRef(0);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const sigRes = await fetch(`${API_BASE}/messages/upload-signature`);
+      if (!sigRes.ok) throw new Error("Failed to get signature");
+      
+      const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", apiKey);
+      formData.append("timestamp", timestamp.toString());
+      formData.append("signature", signature);
+
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+        { method: "POST", body: formData }
+      );
+
+      if (uploadRes.ok) {
+        const data = await uploadRes.json();
+        const imageUrl = data.secure_url;
+        setUpdateDescription(prev => prev + (prev ? '\n\n' : '') + `![Image description](${imageUrl})`);
+      } else {
+        alert("Failed to upload image.");
+      }
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      alert("An error occurred during image upload.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+    // reset input
+    e.target.value = '';
+  };
 
   useEffect(() => {
     if (project) {
@@ -813,23 +853,36 @@ export function ProjectDetails() {
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 flex justify-between">
-                <span>Update Content (Markdown)</span>
-              </label>
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-semibold text-gray-700 flex justify-between">
+                  <span>Update Content (Markdown)</span>
+                </label>
+                <div className="relative">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                    title="Attach an image"
+                    disabled={isUploadingImage}
+                  />
+                  <Button type="button" variant="outline" size="sm" className="h-8 text-xs bg-slate-50" disabled={isUploadingImage}>
+                    {isUploadingImage ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5 mr-1.5" />}
+                    Attach Image
+                  </Button>
+                </div>
+              </div>
               <Textarea
                 required
                 rows={10}
-                placeholder="Write your update here. Use markdown for styling and images:
-# Heading
-- Bullet points
-![Image Description](https://your-image-url.com/img.jpg)"
+                placeholder="Write your update here...
+
+Quick Markdown Guide:
+**Bold**  |  *Italics*  |  - Bullet List  |  # Heading"
                 className="font-mono text-sm"
                 value={updateDescription}
                 onChange={(e) => setUpdateDescription(e.target.value)}
               />
-              <p className="text-xs text-slate-500 mt-2">
-                Tip: If you need to host an image, you can upload it to any free image hosting service (like Imgur) and paste the Direct Link here using Markdown.
-              </p>
             </div>
 
             <div className="flex gap-3 justify-end pt-4">
