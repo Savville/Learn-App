@@ -94,7 +94,10 @@ export const POST_WITH_US_CATEGORY_GROUPS: { label: string; options: { value: Op
 ];
 
 const JOB_CATS = new Set(GIG_CATEGORIES);
-const HIDE_FUNDING_CATS = new Set<OpportunityCategory | string>([...GIG_CATEGORIES, 'Internship', 'Attachment', 'Volunteer']);
+const HIDE_FUNDING_CATS = new Set<OpportunityCategory | string>([
+  ...GIG_CATEGORIES, 'Internship', 'Attachment', 'Volunteer',
+  ...PROJECT_CATEGORIES
+]);
 const HIDE_COMPENSATION_CATS = new Set<OpportunityCategory | string>([
   ...ACADEMIC_CAREER_CATEGORIES.filter(c => ['Scholarship', 'Grant', 'CallForPapers', 'Conference', 'Fellowship'].includes(c)),
   ...INNOVATION_CATEGORIES,
@@ -136,6 +139,14 @@ export function categoryShowsProjectFunding(category: string) {
   return isProjectCategory(category);
 }
 
+export function categoryShowsPaymentTerms(category: string) {
+  return JOB_CATS.has(category as OpportunityCategory);
+}
+
+export function categoryShowsProjectStage(category: string) {
+  return isProjectCategory(category);
+}
+
 /** Apply defaults when user changes category in Post With Us */
 export function applyCategoryFieldDefaults<T extends Record<string, any>>(category: string, basicInfo: T): T {
   const next: any = { ...basicInfo, category };
@@ -147,6 +158,12 @@ export function applyCategoryFieldDefaults<T extends Record<string, any>>(catego
   }
   if (categoryHidesUpfrontCost(category)) {
     next.upfrontCost = 'No Upfront Cost';
+  }
+  if (!categoryShowsPaymentTerms(category)) {
+    next.paymentTerms = 'N/A';
+  }
+  if (!categoryShowsProjectStage(category)) {
+    next.projectStage = 'N/A';
   }
   return next;
 }

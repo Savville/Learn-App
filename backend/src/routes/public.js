@@ -328,7 +328,9 @@ router.post('/parse-opportunity', async (req, res) => {
           "fullDescription": "...",
           "fundingType": "Fully Funded | Partially Funded | Paid Internship | Unpaid Internship | N/A",
           "compensationType": "Paid | Stipend | Unpaid | N/A",
-          "upfrontCost": "No Upfront Cost | Has Upfront Cost"
+          "upfrontCost": "No Upfront Cost | Has Upfront Cost",
+          "paymentTerms": "Prepaid | Postpaid | Escrow | Milestone-based | N/A",
+          "projectStage": "Ideation | Prototype | Ongoing | Scaling | N/A"
         },
         "extractedFeatures": [
           {
@@ -365,6 +367,8 @@ router.post('/parse-opportunity', async (req, res) => {
       - compensationType: Use 'Paid' if a salary is mentioned, 'Stipend' for fixed pocket money/allowance, 'Unpaid' if zero payment, and 'N/A' for conferences/events.
       - upfrontCost: Set to 'No Upfront Cost' ONLY if the text explicitly says travel/visa are covered, if it's remote, or if it is local to Kenya with zero fees. 
       - If the opportunity is international and doesn't mention airfare/visa coverage, set upfrontCost to 'Has Upfront Cost'.
+      - paymentTerms: For jobs/gigs, predict the payment terms if mentioned.
+      - projectStage: For projects/startups, predict the stage if mentioned.
       - suggestCustomForm: Set to true ONLY IF category is 'Job' or 'Internship' AND there is NO clear external application URL detected in the text. This allows the poster to build an internal form.
 
       Raw Text to analyze:
@@ -442,7 +446,9 @@ Respond ONLY with a valid JSON object using the following structure. Do not incl
     "fullDescription": "...",
     "fundingType": "Fully Funded | Partially Funded | Paid Internship | Unpaid Internship | N/A",
     "compensationType": "Paid | Stipend | Unpaid | N/A",
-    "upfrontCost": "No Upfront Cost | Has Upfront Cost"
+    "upfrontCost": "No Upfront Cost | Has Upfront Cost",
+    "paymentTerms": "Prepaid | Postpaid | Escrow | Milestone-based | N/A",
+    "projectStage": "Ideation | Prototype | Ongoing | Scaling | N/A"
   },
   "extractedFeatures": [
     {
@@ -479,6 +485,8 @@ Intelligence Rules for New Fields:
 - compensationType: Use 'Paid' if a salary is mentioned, 'Stipend' for fixed pocket money/allowance, 'Unpaid' if zero payment, and 'N/A' for conferences/events.
 - upfrontCost: Set to 'No Upfront Cost' ONLY if the text explicitly says travel/visa are covered, if it's remote, or if it is local to Kenya with zero fees.
 - If the opportunity is international and doesn't mention airfare/visa coverage, set upfrontCost to 'Has Upfront Cost'.
+- paymentTerms: For jobs/gigs, predict the payment terms if mentioned.
+- projectStage: For projects/startups, predict the stage if mentioned.
 - suggestCustomForm: Set to true ONLY IF category is 'Job' or 'Internship' AND there is NO clear external application URL detected in the text. This allows the poster to build an internal form.
 
 Raw Text to analyze:

@@ -30,6 +30,8 @@ import {
   categoryShowsEndorsement,
   categoryShowsJobEscrow,
   categoryShowsProjectFunding,
+  categoryShowsPaymentTerms,
+  categoryShowsProjectStage,
   isChallengeCategory,
   isProjectCategory,
 } from "@/constants/categories";
@@ -46,6 +48,8 @@ interface ParsedOpportunityData {
     fundingType: string;
     compensationType?: string;
     upfrontCost?: string;
+    paymentTerms?: string;
+    projectStage?: string;
     providerMpesa?: string;
   };
   extractedFeatures: {
@@ -285,6 +289,8 @@ export function PostWithUs({
         fundingType: "",
         compensationType: "N/A",
         upfrontCost: "No Upfront Cost",
+        paymentTerms: "N/A",
+        projectStage: "N/A",
       },
       extractedFeatures: [
         {
@@ -1208,6 +1214,35 @@ export function PostWithUs({
                           </select>
                         </div>
                       )}
+                      {categoryShowsProjectStage(
+                        parsedData.basicInfo.category,
+                      ) && (
+                        <div className="space-y-1.5">
+                          <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
+                            Project Stage
+                          </span>
+                          <select
+                            className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
+                            value={
+                              parsedData.basicInfo.projectStage || "N/A"
+                            }
+                            onChange={(
+                              e: React.ChangeEvent<HTMLSelectElement>,
+                            ) =>
+                              handleBasicInfoEdit(
+                                "projectStage",
+                                e.target.value,
+                              )
+                            }
+                          >
+                            <option value="Ideation">Ideation / Conceptual</option>
+                            <option value="Prototype">Prototype / MVP</option>
+                            <option value="Ongoing">Ongoing / Active</option>
+                            <option value="Scaling">Scaling</option>
+                            <option value="N/A">Not Applicable</option>
+                          </select>
+                        </div>
+                      )}
                       {!categoryHidesCompensation(
                         parsedData.basicInfo.category,
                       ) && (
@@ -1235,6 +1270,35 @@ export function PostWithUs({
                             <option value="Equity">
                               Equity / Profit Sharing
                             </option>
+                            <option value="N/A">Not Applicable</option>
+                          </select>
+                        </div>
+                      )}
+                      {categoryShowsPaymentTerms(
+                        parsedData.basicInfo.category,
+                      ) && (
+                        <div className="space-y-1.5">
+                          <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
+                            Payment Terms
+                          </span>
+                          <select
+                            className="w-full px-5 py-3 text-sm bg-white border rounded-xl border-gray-200 focus:outline-none focus:border-blue-500 transition-colors h-auto"
+                            value={
+                              parsedData.basicInfo.paymentTerms || "N/A"
+                            }
+                            onChange={(
+                              e: React.ChangeEvent<HTMLSelectElement>,
+                            ) =>
+                              handleBasicInfoEdit(
+                                "paymentTerms",
+                                e.target.value,
+                              )
+                            }
+                          >
+                            <option value="Prepaid">Prepaid</option>
+                            <option value="Postpaid">Postpaid</option>
+                            <option value="Escrow">Escrow (Recommended)</option>
+                            <option value="Milestone-based">Milestone-based</option>
                             <option value="N/A">Not Applicable</option>
                           </select>
                         </div>
