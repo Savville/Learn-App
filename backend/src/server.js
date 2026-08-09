@@ -35,6 +35,7 @@ if (!process.env.ADMIN_PASSWORD) {
 }
 
 const app = express();
+app.set('trust proxy', 1); // Fixes rate limit crash on Render
 const PORT = process.env.PORT || 5000;
 
 // Security headers
