@@ -212,27 +212,25 @@ export function ProjectUpdatePage() {
                 addImageBlobHook: async (blob: File | Blob, callback: (url: string, altText: string) => void) => {
                   try {
                     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-                    const sigRes = await fetch(`${API_BASE}/messages/upload-signature`);
-                    if (!sigRes.ok) throw new Error("Failed to get signature");
+                    const email = localStorage.getItem('user_email');
                     
-                    const { signature, timestamp, cloudName, apiKey } = await sigRes.json();
                     const formData = new FormData();
-                    formData.append("file", blob);
-                    formData.append("api_key", apiKey);
-                    formData.append("timestamp", timestamp.toString());
-                    formData.append("signature", signature);
+                    formData.append('image', blob);
 
-                    const uploadRes = await fetch(
-                      `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
-                      { method: "POST", body: formData }
-                    );
+                    const uploadRes = await fetch(`${API_BASE}/messages/direct-upload`, {
+                      method: 'POST',
+                      headers: {
+                        'x-user-email': email || ''
+                      },
+                      body: formData
+                    });
 
                     if (uploadRes.ok) {
                       const data = await uploadRes.json();
-                      callback(data.secure_url, 'Image');
+                      callback(data.url, 'Image');
                     } else {
                       const errorData = await uploadRes.text();
-                      console.error("Cloudinary upload failed:", errorData);
+                      console.error("Backend upload failed:", errorData);
                       alert("Failed to upload image: " + errorData);
                     }
                   } catch (err) {
